@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/Documentation/">
+    <Project Path="Vestigium.Suite.Windows.Documentation/Vestigium.Suite.Windows.Documentation.csproj" />
+  </Folder>
+  <Folder Name="/Suite/" />
+  <Folder Name="/Suite/Windows/" />
+  <Folder Name="/Suite/Windows/WPF/">
+    <Project Path="src/Vestigium.Suite.Windows.AppMgmtIQ/Vestigium.Suite.Windows.AppMgmtIQ.csproj" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="tests/Vestigium.Suite.Windows.Tests/Vestigium.Suite.Windows.Tests.csproj" />
+  </Folder>
+</Solution>
