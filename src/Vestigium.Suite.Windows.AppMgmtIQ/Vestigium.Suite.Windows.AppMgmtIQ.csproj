@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>Vestigium.Suite.Windows.AppMgmtIQ</RootNamespace>
+    <AssemblyName>AppMgmtIQ</AssemblyName>
+    <ApplicationTitle>AppMgmtIQ</ApplicationTitle>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="$(MicrosoftExtensionsDiVersion)" />
+    <PackageReference Include="Vestigium.Logging" Version="$(VestigiumLoggingVersion)" />
+    <PackageReference Include="Vestigium.Themes" Version="$(VestigiumThemesVersion)" />
+    <PackageReference Include="Vestigium.Controls" Version="$(VestigiumControlsVersion)" />
+    <PackageReference Include="Vestigium.Controls.StatusBar" Version="$(VestigiumStatusBarVersion)" />
+    <PackageReference Include="Vestigium.Controls.NumericUpDown" Version="$(VestigiumNumericUpDownVersion)" />
+    <PackageReference Include="Vestigium.Controls.UnderConstruction" Version="$(VestigiumUnderConstructionVersion)" />
+    <PackageReference Include="Vestigium.Converters" Version="$(VestigiumConvertersVersion)" />
+    <PackageReference Include="Vestigium.Helpers.WinReg" Version="$(VestigiumWinRegVersion)" />
+  </ItemGroup>
+</Project>
