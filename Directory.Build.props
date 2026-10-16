@@ -1,0 +1,40 @@
+<Project>
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <Authors>Vestigium</Authors>
+    <Company>Wilkinson Business</Company>
+    <Copyright>Copyright (c) 2026 Nathaniel Wilkinson</Copyright>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <VestigiumLoggingVersion>1.7.1</VestigiumLoggingVersion>
+    <VestigiumThemesVersion>1.0.6</VestigiumThemesVersion>
+    <VestigiumControlsVersion>1.0.0</VestigiumControlsVersion>
+    <VestigiumStatusBarVersion>1.0.1</VestigiumStatusBarVersion>
+    <VestigiumNumericUpDownVersion>1.0.2</VestigiumNumericUpDownVersion>
+    <VestigiumUnderConstructionVersion>1.0.1</VestigiumUnderConstructionVersion>
+    <VestigiumConvertersVersion>1.0.0</VestigiumConvertersVersion>
+    <VestigiumWinRegVersion>0.1.0</VestigiumWinRegVersion>
+    <MicrosoftExtensionsDiVersion>10.0.12</MicrosoftExtensionsDiVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(MSBuildProjectName)' != 'Vestigium.Suite.Windows.Documentation'">
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'Vestigium.Suite.Windows.Documentation'">
+    <TargetFramework>net10.0</TargetFramework>
+    <UseWPF>false</UseWPF>
+    <UseWindowsForms>false</UseWindowsForms>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(MSBuildProjectName)' != 'Vestigium.Suite.Windows.Documentation'">
+    <None Include="$(MSBuildThisFileDirectory)LICENSE" Link="LICENSE" Pack="true" PackagePath="" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="$(MSBuildThisFileDirectory)README.md" Link="README.md" Pack="true" PackagePath="" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>
