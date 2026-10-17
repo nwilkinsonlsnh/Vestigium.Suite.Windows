@@ -68,14 +68,11 @@ public sealed partial class MainViewModel : ObservableObject
     {
         var keep = SelectedPackage;
         Packages.Clear();
-        foreach (var row in _all)
-        {
-            if (row.IsGlobal && !_showGlobal)
-                continue;
-            if (!row.IsGlobal && !_showPerUser)
-                continue;
+        var rows = _all
+            .Where(row => (row.IsGlobal && _showGlobal) || (!row.IsGlobal && _showPerUser))
+            .OrderBy(row => row.DisplayName, StringComparer.OrdinalIgnoreCase);
+        foreach (var row in rows)
             Packages.Add(row);
-        }
         SelectedPackage = Packages.Contains(keep!) ? keep : null;
         Status = $"{Packages.Count} packages";
     }
