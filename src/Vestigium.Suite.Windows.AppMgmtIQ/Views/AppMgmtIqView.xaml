@@ -10,7 +10,8 @@
               IsReadOnly="True"
               HeadersVisibility="Column"
               CanUserAddRows="False"
-              CanUserDeleteRows="False">
+              CanUserDeleteRows="False"
+              MouseDoubleClick="Grid_MouseDoubleClick">
       <DataGrid.Columns>
         <DataGridTextColumn Header="Display Name" Binding="{Binding DisplayName}" Width="*" />
         <DataGridTextColumn Header="Publisher" Binding="{Binding Publisher}" Width="180" />
