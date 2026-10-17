@@ -47,11 +47,17 @@
       <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
     </Grid.RowDefinitions>
-    <query:VestigiumQueryBar Margin="0,0,0,8"
-                             Text="{Binding Query, UpdateSourceTrigger=PropertyChanged}"
-                             Session="{Binding Session}"
-                             Queries="{Binding Queries}"
-                             FilterRequested="OnFilter" />
+    <DockPanel Margin="0,0,0,8">
+      <Button DockPanel.Dock="Right" Margin="8,0,0,0" Width="36" Height="32"
+              Style="{StaticResource Button.Standard}"
+              Command="{Binding RefreshCommand}" ToolTip="Refresh">
+        <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="16" Text="&#xE72C;" />
+      </Button>
+      <query:VestigiumQueryBar Text="{Binding Query, UpdateSourceTrigger=PropertyChanged}"
+                               Session="{Binding Session}"
+                               Queries="{Binding Queries}"
+                               FilterRequested="OnFilter" />
+    </DockPanel>
     <DataGrid Grid.Row="1"
               x:Name="PackageGrid"
               Style="{StaticResource DataGrid.Standard}"
