@@ -1,3 +1,5 @@
+using Vestigium.Helpers.WinReg;
+
 namespace Vestigium.Suite.Windows.AppMgmtIQ.ViewModels;
 
 /// <summary>
@@ -16,4 +18,5 @@ public sealed class PackageRow
     public required string UninstallString { get; init; }
     public required string KeyPath { get; init; }
     public required string Hive { get; init; }
+    public required IReadOnlyList<RegistryValueInfo> Values { get; init; }
 }
