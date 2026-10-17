@@ -116,7 +116,7 @@
           </MenuItem>
           <Separator />
           <MenuItem Header="Refresh" Command="{Binding PlacementTarget.DataContext.RefreshCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
-            <MenuItem.Icon><TextBlock Text="&#xE72C;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
+            <MenuItem.Icon><TextBlock FontFamily="Segoe UI Symbol" FontSize="14" Text="&#x267B;" Foreground="#3DDC84" /></MenuItem.Icon>
           </MenuItem>
         </ContextMenu>
       </TreeView.ContextMenu>
