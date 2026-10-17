@@ -24,16 +24,15 @@
                 Margin="8,0,0,0"
                 Visibility="{Binding AppMgmtPageOpen, Converter={StaticResource BoolToVis}}">
       <TextBlock Style="{StaticResource TextBlock.Caption}" Margin="0,0,0,16" TextWrapping="Wrap"
-                 Text="Defaults for the inventory grid." />
+                 Text="Defaults for the inventory grid. Same checks as the Filter menu." />
 
-      <CheckBox Style="{StaticResource CheckBox.Standard}"
-                Content="Show Global Packages"
-                IsChecked="{Binding ShowGlobal}"
-                Margin="0,0,0,10" />
-      <CheckBox Style="{StaticResource CheckBox.Standard}"
-                Content="Show Per User Packages"
-                IsChecked="{Binding ShowPerUser}"
-                Margin="0,0,0,16" />
+      <CheckBox Style="{StaticResource CheckBox.Standard}" Content="Global packages" IsChecked="{Binding ShowGlobal}" Margin="0,0,0,8" />
+      <CheckBox Style="{StaticResource CheckBox.Standard}" Content="Per-user packages" IsChecked="{Binding ShowPerUser}" Margin="0,0,0,12" />
+      <CheckBox Style="{StaticResource CheckBox.Standard}" Content="x64" IsChecked="{Binding ShowX64}" Margin="0,0,0,8" />
+      <CheckBox Style="{StaticResource CheckBox.Standard}" Content="x86" IsChecked="{Binding ShowX86}" Margin="0,0,0,12" />
+      <CheckBox Style="{StaticResource CheckBox.Standard}" Content="System components" IsChecked="{Binding ShowSystemComponents}" Margin="0,0,0,12" />
+      <CheckBox Style="{StaticResource CheckBox.Standard}" Content="Windows Installer" IsChecked="{Binding ShowWindowsInstaller}" Margin="0,0,0,8" />
+      <CheckBox Style="{StaticResource CheckBox.Standard}" Content="Other installers" IsChecked="{Binding ShowOtherInstallers}" Margin="0,0,0,16" />
 
       <Label Style="{StaticResource Label.Standard}" Content="Date format" />
       <ComboBox Style="{StaticResource ComboBox.Standard}"
