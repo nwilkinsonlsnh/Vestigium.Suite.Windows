@@ -1,4 +1,6 @@
 using System.IO;
+using Vestigium.Helpers.Analytics;
+using Vestigium.Helpers.Charts;
 using Vestigium.Helpers.ClosedXml;
 using Vestigium.Helpers.Kql;
 using Vestigium.Helpers.WinReg;
@@ -27,6 +29,8 @@ public static class HostLog
             WinRegCatalog.Register(cfg);
             KqlLoggingCatalog.Register(cfg);
             ClosedXmlCatalog.Register(cfg);
+            AnalyticsCatalog.Register(cfg);
+            ChartsCatalog.Register(cfg);
             AppMgmtCatalog.Register(cfg);
             extra?.Invoke(cfg);
         });
