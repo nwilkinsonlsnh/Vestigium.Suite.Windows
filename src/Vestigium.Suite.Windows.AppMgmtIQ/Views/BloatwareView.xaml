@@ -84,7 +84,7 @@
       <DataGrid.ContextMenu>
         <ContextMenu Grid.IsSharedSizeScope="True" Style="{StaticResource ContextMenu.Standard}">
           <MenuItem Header="Refresh" Style="{StaticResource MenuItem.Standard}" Command="{Binding RefreshCommand}">
-            <MenuItem.Icon><TextBlock FontFamily="Segoe MDL2 Assets" FontSize="16" Text="&#xE72C;" /></MenuItem.Icon>
+            <MenuItem.Icon><TextBlock FontFamily="Segoe UI Symbol" FontSize="14" Text="&#x267B;" Foreground="#3DDC84" /></MenuItem.Icon>
           </MenuItem>
         </ContextMenu>
       </DataGrid.ContextMenu>
