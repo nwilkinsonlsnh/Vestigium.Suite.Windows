@@ -16,6 +16,10 @@
                      GroupName="AppMgmtMainNav"
                      IsChecked="True"
                      Checked="MainNav_Checked" />
+        <RadioButton Content="Windows Features"
+                     Style="{StaticResource RadioButton.UnderlineTab}"
+                     GroupName="AppMgmtMainNav"
+                     Checked="MainNav_Checked" />
         <RadioButton Content="Export"
                      Style="{StaticResource RadioButton.UnderlineTab}"
                      GroupName="AppMgmtMainNav"
