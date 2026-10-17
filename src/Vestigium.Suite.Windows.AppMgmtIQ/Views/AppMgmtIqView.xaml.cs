@@ -52,11 +52,27 @@ public partial class AppMgmtIqView : UserControl
         row.Focus();
     }
 
-    private async void Uninstall_Click(object sender, RoutedEventArgs e)
+    private void Menu_Opened(object sender, RoutedEventArgs e)
+    {
+        var package = DataContext is MainViewModel host ? host.SelectedPackage : null;
+        var hasString = !string.IsNullOrWhiteSpace(package?.UninstallString);
+        UninstallItem.IsEnabled = hasString;
+        var force = package is not null && UninstallPlan.CanForce(package);
+        UninstallQuiet.Visibility = force ? Visibility.Visible : Visibility.Collapsed;
+        UninstallBasic.Visibility = force ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private void UninstallRegistered_Click(object sender, RoutedEventArgs e) => RunUninstall(UninstallMode.Registered);
+
+    private void UninstallQuiet_Click(object sender, RoutedEventArgs e) => RunUninstall(UninstallMode.QuietNone);
+
+    private void UninstallBasic_Click(object sender, RoutedEventArgs e) => RunUninstall(UninstallMode.QuietBasic);
+
+    private async void RunUninstall(UninstallMode mode)
     {
         if (DataContext is not MainViewModel host || host.SelectedPackage is not { } package)
             return;
-        await host.UninstallAsync(package, Window.GetWindow(this));
+        await host.UninstallAsync(package, Window.GetWindow(this), mode);
     }
 
     private void Grid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
