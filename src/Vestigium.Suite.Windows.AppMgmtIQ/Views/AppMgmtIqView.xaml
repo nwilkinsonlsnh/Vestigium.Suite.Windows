@@ -15,7 +15,8 @@
     <Grid.RowDefinitions>
       <RowDefinition Height="*" />
     </Grid.RowDefinitions>
-    <DataGrid Style="{StaticResource DataGrid.Standard}"
+    <DataGrid x:Name="PackageGrid"
+              Style="{StaticResource DataGrid.Standard}"
               ItemsSource="{Binding Packages}"
               SelectedItem="{Binding SelectedPackage, Mode=TwoWay}"
               SelectionMode="Single"
@@ -27,6 +28,7 @@
               CanUserDeleteRows="False"
               CanUserResizeColumns="True"
               CanUserReorderColumns="True"
+              CanUserSortColumns="True"
               ColumnWidth="*"
               VerticalAlignment="Stretch"
               HorizontalAlignment="Stretch"
@@ -37,14 +39,14 @@
               MouseDoubleClick="Grid_MouseDoubleClick"
               SelectionChanged="Grid_SelectionChanged">
       <DataGrid.Columns>
-        <DataGridTemplateColumn Header="" Width="36" MinWidth="36" CanUserResize="False">
+        <DataGridTemplateColumn Header="" Width="36" MinWidth="36" CanUserResize="False" CanUserSort="False">
           <DataGridTemplateColumn.CellTemplate>
             <DataTemplate>
               <Image Source="{Binding Icon}" Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center" />
             </DataTemplate>
           </DataGridTemplateColumn.CellTemplate>
         </DataGridTemplateColumn>
-        <DataGridTextColumn Header="Display Name" Binding="{Binding DisplayName}" Width="2*" MinWidth="140" ElementStyle="{StaticResource LeftCell}" />
+        <DataGridTextColumn x:Name="NameColumn" Header="Display Name" Binding="{Binding DisplayName}" Width="2*" MinWidth="140" ElementStyle="{StaticResource LeftCell}" SortDirection="Ascending" />
         <DataGridTextColumn Header="Publisher" Binding="{Binding Publisher}" Width="*" MinWidth="80" ElementStyle="{StaticResource LeftCell}" />
         <DataGridTextColumn Header="Version" Binding="{Binding DisplayVersion}" Width="*" MinWidth="70" ElementStyle="{StaticResource LeftCell}" />
         <DataGridTextColumn Header="Install Date" Binding="{Binding DisplayInstallDate}" Width="*" MinWidth="90" ElementStyle="{StaticResource LeftCell}" />
