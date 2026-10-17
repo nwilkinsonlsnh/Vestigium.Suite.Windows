@@ -86,9 +86,9 @@ public sealed partial class MainViewModel : ObservableObject
     [RelayCommand]
     private Task Refresh() => LoadAsync();
 
-    public async Task UninstallAsync(PackageRow package, Window owner)
+    public async Task UninstallAsync(PackageRow package, Window owner, UninstallMode mode)
     {
-        var plan = UninstallPlan.Build(package);
+        var plan = UninstallPlan.Build(package, mode);
         if (plan is null)
         {
             MessageBox.Show(owner, $"{package.DisplayName} has no UninstallString.", "Uninstall", MessageBoxButton.OK, MessageBoxImage.Information);
