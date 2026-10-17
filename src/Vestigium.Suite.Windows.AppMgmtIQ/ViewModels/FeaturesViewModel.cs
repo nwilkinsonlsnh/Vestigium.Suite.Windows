@@ -9,7 +9,7 @@ public sealed partial class FeaturesViewModel : ObservableObject
 {
     private readonly List<FeatureRow> _all = [];
     private Dictionary<string, string> _parents = new(StringComparer.OrdinalIgnoreCase);
-    private bool _fromDism;
+    private string _source = "flat";
     private bool _showEnabled = true;
     private bool _showDisabled = true;
     private bool _showAbsent;
@@ -44,14 +44,21 @@ public sealed partial class FeaturesViewModel : ObservableObject
         try
         {
             var rows = await Task.Run(ReadAll);
-            var parents = await Task.Run(() => DismParents.Read());
+            var dism = await Task.Run(() => DismParents.Read());
             _all.Clear();
             _all.AddRange(rows);
-            _parents = parents ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            _fromDism = parents is not null;
+            if (dism is { Count: > 0 })
+            {
+                _parents = dism;
+                _source = "DISM";
+            }
+            else
+            {
+                _parents = FallbackParents(rows);
+                _source = "dialog map";
+            }
             ApplyFilter();
-            var source = _fromDism ? "DISM parents" : "flat, DISM needs elevation";
-            HostLog.Information(AppMgmtCatalog.FeaturesLoaded, "Features", $"Windows features loaded. {_all.Count} features. Tree from {source}.");
+            HostLog.Information(AppMgmtCatalog.FeaturesLoaded, "Features", $"Windows features loaded. {_all.Count} features. Tree from {_source}.");
         }
         finally
         {
@@ -88,7 +95,7 @@ public sealed partial class FeaturesViewModel : ObservableObject
         var roots = new List<FeatureRow>();
         foreach (var row in _all)
         {
-            if (_fromDism && _parents.TryGetValue(row.Name, out var parent) && byName.ContainsKey(parent))
+            if (_parents.TryGetValue(row.Name, out var parent) && byName.ContainsKey(parent) && !string.Equals(parent, row.Name, StringComparison.OrdinalIgnoreCase))
             {
                 if (!children.TryGetValue(parent, out var list))
                     children[parent] = list = [];
@@ -106,19 +113,19 @@ public sealed partial class FeaturesViewModel : ObservableObject
             if (node is not null)
                 Roots.Add(node);
         }
-        Status = _fromDism
-            ? $"{Roots.Count} groups, {_all.Count} features"
-            : $"{Roots.Count} features. Run elevated for the dialog tree.";
+        Status = $"{Roots.Count} groups, {_all.Count} features ({_source})";
     }
 
     private FeatureNode? Build(FeatureRow row, Dictionary<string, List<FeatureRow>> children)
     {
+        var parent = _parents.TryGetValue(row.Name, out var name) ? name : "";
         var node = new FeatureNode
         {
             Name = row.Name,
             Caption = row.Caption,
             State = row.State,
             IsEnabled = row.IsEnabled,
+            Parent = parent,
             Feature = row
         };
         if (children.TryGetValue(row.Name, out var kids))
@@ -143,6 +150,75 @@ public sealed partial class FeaturesViewModel : ObservableObject
             _ => true
         };
     }
+
+    private static Dictionary<string, string> FallbackParents(List<FeatureRow> rows)
+    {
+        var names = rows.Select(row => row.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var parents = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var (child, parent) in DialogParents)
+        {
+            if (names.Contains(child) && names.Contains(parent))
+                parents[child] = parent;
+        }
+        foreach (var row in rows)
+        {
+            if (parents.ContainsKey(row.Name))
+                continue;
+            var parent = LongestPrefix(row.Name, names);
+            if (parent is not null)
+                parents[row.Name] = parent;
+        }
+        return parents;
+    }
+
+    private static string? LongestPrefix(string name, HashSet<string> names)
+    {
+        string? best = null;
+        foreach (var candidate in names)
+        {
+            if (candidate.Length >= name.Length || string.Equals(candidate, name, StringComparison.OrdinalIgnoreCase))
+                continue;
+            if (!name.StartsWith(candidate + "-", StringComparison.OrdinalIgnoreCase))
+                continue;
+            if (best is null || candidate.Length > best.Length)
+                best = candidate;
+        }
+        return best;
+    }
+
+    private static readonly (string Child, string Parent)[] DialogParents =
+    [
+        ("WCF-HTTP-Activation", "NetFx3"),
+        ("WCF-NonHTTP-Activation", "NetFx3"),
+        ("NetFx4Extended-ASPNET45", "NetFx4-AdvSrvs"),
+        ("WCF-Services45", "NetFx4-AdvSrvs"),
+        ("WCF-HTTP-Activation45", "WCF-Services45"),
+        ("WCF-MSMQ-Activation45", "WCF-Services45"),
+        ("WCF-Pipe-Activation45", "WCF-Services45"),
+        ("WCF-TCP-Activation45", "WCF-Services45"),
+        ("WCF-TCP-PortSharing45", "WCF-Services45"),
+        ("Microsoft-Hyper-V-Management-Clients", "Microsoft-Hyper-V-All"),
+        ("Microsoft-Hyper-V-Management-PowerShell", "Microsoft-Hyper-V-All"),
+        ("Microsoft-Hyper-V", "Microsoft-Hyper-V-All"),
+        ("Microsoft-Hyper-V-Hypervisor", "Microsoft-Hyper-V"),
+        ("Microsoft-Hyper-V-Services", "Microsoft-Hyper-V"),
+        ("IIS-WebServer", "IIS-WebServerRole"),
+        ("IIS-FTPServer", "IIS-WebServerRole"),
+        ("IIS-ManagementScriptingTools", "IIS-WebServerRole"),
+        ("IIS-ManagementService", "IIS-WebServerRole"),
+        ("IIS-IIS6ManagementCompatibility", "IIS-WebServerRole"),
+        ("WAS-WindowsActivationService", "WAS-ProcessModel"),
+        ("WAS-NetFxEnvironment", "WAS-WindowsActivationService"),
+        ("WAS-ConfigurationAPI", "WAS-WindowsActivationService"),
+        ("SMB1Protocol-Client", "SMB1Protocol"),
+        ("SMB1Protocol-Server", "SMB1Protocol"),
+        ("SMB1Protocol-Deprecation", "SMB1Protocol"),
+        ("Printing-InternetPrinting-Client", "Printing-Foundation-Features"),
+        ("Printing-LPDPrintService", "Printing-Foundation-Features"),
+        ("Printing-LPRPortMonitor", "Printing-Foundation-Features"),
+        ("FaxServicesClientPackage", "Printing-Foundation-Features"),
+        ("MediaPlayback", "MediaPlayback")
+    ];
 
     private static List<FeatureRow> ReadAll()
     {
