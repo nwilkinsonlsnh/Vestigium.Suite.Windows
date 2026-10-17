@@ -31,10 +31,10 @@ public partial class App : Application
         Services = services.BuildServiceProvider();
 
         ShutdownMode = ShutdownMode.OnMainWindowClose;
-        MainWindow = CreateMainWindow(out var inventory, out var features, out var chrome, out var dashboard);
+        MainWindow = CreateMainWindow(out var inventory, out var features, out var bloatware, out var chrome, out var dashboard);
         MainWindow.Show();
 
-        await Task.WhenAll(inventory.LoadAsync(), features.LoadAsync());
+        await Task.WhenAll(inventory.LoadAsync(), features.LoadAsync(), bloatware.LoadAsync());
         chrome.Status.Message = inventory.Status;
         dashboard.Bind(inventory, features);
 
@@ -44,6 +44,7 @@ public partial class App : Application
     private static Window CreateMainWindow(
         out MainViewModel inventory,
         out FeaturesViewModel featuresVm,
+        out BloatwareViewModel bloatware,
         out VestigiumDefaultWindowViewModel chrome,
         out DashboardView dashboard)
     {
@@ -66,6 +67,12 @@ public partial class App : Application
                     Title = "Windows Features",
                     Subject = "Optional features",
                     Description = "Tree of Win32_OptionalFeature."
+                },
+                new VestigiumNavItemSpec("Bloatware")
+                {
+                    Title = "Bloatware",
+                    Subject = "AppX catalog",
+                    Description = "Known consumer packages matched against what is installed."
                 },
                 new VestigiumNavItemSpec("Export")
                 {
@@ -96,6 +103,7 @@ public partial class App : Application
 
         inventory = new MainViewModel { IsLoading = true };
         featuresVm = new FeaturesViewModel { IsLoading = true };
+        bloatware = new BloatwareViewModel { IsLoading = true };
         var store = new AppMgmtSettingsStore(AppMgmtSettingsStore.DefaultRoot);
         var settings = new SettingsViewModel(Themes, inventory, store);
         settings.Load();
@@ -113,6 +121,10 @@ public partial class App : Application
         var features = window.HostShell["Windows Features"];
         if (features is not null)
             features.Content = new FeaturesView { DataContext = featuresVm };
+
+        var bloat = window.HostShell["Bloatware"];
+        if (bloat is not null)
+            bloat.Content = new BloatwareView { DataContext = bloatware };
 
         var export = window.HostShell["Export"];
         if (export is not null)
