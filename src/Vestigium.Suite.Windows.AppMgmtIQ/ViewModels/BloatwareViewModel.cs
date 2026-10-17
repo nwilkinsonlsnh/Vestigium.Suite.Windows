@@ -1,8 +1,8 @@
+using AppKql = Vestigium.Helpers.Kql.AppMgmt;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Vestigium.Helpers.Kql;
-using Vestigium.Helpers.Kql.AppMgmt;
 using Vestigium.Helpers.WinReg;
 
 namespace Vestigium.Suite.Windows.AppMgmtIQ.ViewModels;
@@ -14,7 +14,7 @@ public sealed partial class BloatwareViewModel : ObservableObject
     private const string UserPackages = @"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\Repository\Packages";
 
     private readonly List<BloatwareRow> _all = [];
-    private readonly KqlSession _session = AppMgmtKql.Bloatware();
+    private readonly KqlSession _session = AppKql.AppMgmtKql.Bloatware();
     private KqlBoundQuery? _bound;
 
     public ObservableCollection<BloatwareRow> Rows { get; } = [];
@@ -76,7 +76,7 @@ public sealed partial class BloatwareViewModel : ObservableObject
     {
         if (_bound is null)
             return true;
-        return _bound.Matches(BloatwareAdapter.ToRow(_session, new BloatwareFacts
+        return _bound.Matches(AppKql.BloatwareAdapter.ToRow(_session, new AppKql.BloatwareFacts
         {
             Name = row.Name,
             Family = row.Family,
