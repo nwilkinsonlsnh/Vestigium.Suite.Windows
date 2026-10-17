@@ -9,6 +9,7 @@ public sealed partial class FeaturesViewModel : ObservableObject
 {
     private readonly List<FeatureRow> _all = [];
     private Dictionary<string, string> _parents = new(StringComparer.OrdinalIgnoreCase);
+    private bool _fromDism;
     private bool _showEnabled = true;
     private bool _showDisabled = true;
     private bool _showAbsent;
@@ -46,9 +47,10 @@ public sealed partial class FeaturesViewModel : ObservableObject
             var parents = await Task.Run(() => DismParents.Read());
             _all.Clear();
             _all.AddRange(rows);
-            _parents = parents ?? FamilyParents(rows);
+            _parents = parents ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            _fromDism = parents is not null;
             ApplyFilter();
-            var source = parents is null ? "name family" : "DISM parents";
+            var source = _fromDism ? "DISM parents" : "flat, DISM needs elevation";
             HostLog.Information(AppMgmtCatalog.FeaturesLoaded, "Features", $"Windows features loaded. {_all.Count} features. Tree from {source}.");
         }
         finally
@@ -86,7 +88,7 @@ public sealed partial class FeaturesViewModel : ObservableObject
         var roots = new List<FeatureRow>();
         foreach (var row in _all)
         {
-            if (_parents.TryGetValue(row.Name, out var parent) && byName.ContainsKey(parent))
+            if (_fromDism && _parents.TryGetValue(row.Name, out var parent) && byName.ContainsKey(parent))
             {
                 if (!children.TryGetValue(parent, out var list))
                     children[parent] = list = [];
@@ -104,7 +106,9 @@ public sealed partial class FeaturesViewModel : ObservableObject
             if (node is not null)
                 Roots.Add(node);
         }
-        Status = $"{Roots.Count} groups";
+        Status = _fromDism
+            ? $"{Roots.Count} groups, {_all.Count} features"
+            : $"{Roots.Count} features. Run elevated for the dialog tree.";
     }
 
     private FeatureNode? Build(FeatureRow row, Dictionary<string, List<FeatureRow>> children)
@@ -138,22 +142,6 @@ public sealed partial class FeaturesViewModel : ObservableObject
             3 => _showAbsent,
             _ => true
         };
-    }
-
-    private static Dictionary<string, string> FamilyParents(List<FeatureRow> rows)
-    {
-        var names = rows.Select(row => row.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var parents = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var row in rows)
-        {
-            var dash = row.Name.LastIndexOf('-');
-            if (dash <= 0)
-                continue;
-            var family = row.Name[..dash];
-            if (names.Contains(family))
-                parents[row.Name] = family;
-        }
-        return parents;
     }
 
     private static List<FeatureRow> ReadAll()
