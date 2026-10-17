@@ -115,7 +115,7 @@ Details content: tabs that group the raw registry values (General, Uninstall, Li
 | 1 | PR01-01 | Chrome skeleton. `AppMgmtIqWindow`, ThemeManager, DI, HostLog, primary-monitor center. Icon and full theme menu deferred. | Done |
 | 2 | PR01-02 | Inventory grid. Bind to WinReg ListSubKeys/GetKey. Single selection. Model is temporary in host. | Done |
 | 3 | PR01-03 | Details window. Double-click. Title = DisplayName (DisplayVersion). Tabs: General, Uninstall, Links, Raw. | Done |
-| 4 | PR01-04 | Host tests. No registry. | Open |
+| 4 | PR01-04 | Host tests. No registry. HostIds + DetailsViewModel title/tabs. | Done |
 | 5 | PR01-05 | Owner runs the window against Requirements. | Owner |
 
 ---
@@ -128,6 +128,7 @@ src/Vestigium.Suite.Windows.AppMgmtIQ/App.xaml.cs
 src/Vestigium.Suite.Windows.AppMgmtIQ/AppMgmtIqWindow.xaml          [NEW]
 src/Vestigium.Suite.Windows.AppMgmtIQ/AppMgmtIqWindow.xaml.cs       [NEW]
 src/Vestigium.Suite.Windows.AppMgmtIQ/HostLog.cs                    [NEW]
+src/Vestigium.Suite.Windows.AppMgmtIQ/HostIds.cs                    [NEW]
 src/Vestigium.Suite.Windows.AppMgmtIQ/ThemeCatalog.cs               [deferred]
 src/Vestigium.Suite.Windows.AppMgmtIQ/ThemeChrome.cs                [deferred]
 src/Vestigium.Suite.Windows.AppMgmtIQ/Assets/AppMgmtIQ.ico          [deferred]
@@ -139,6 +140,7 @@ src/Vestigium.Suite.Windows.AppMgmtIQ/DetailsWindow.xaml            [NEW]
 src/Vestigium.Suite.Windows.AppMgmtIQ/DetailsWindow.xaml.cs         [NEW]
 src/Vestigium.Suite.Windows.AppMgmtIQ/ViewModels/DetailsViewModel.cs [NEW]
 tests/Vestigium.Suite.Windows.Tests/HostIdsTests.cs                [NEW]
+tests/Vestigium.Suite.Windows.Tests/DetailsViewModelTests.cs       [NEW]
 ```
 
 Do not add a project reference to Helpers. Package only.
@@ -159,4 +161,4 @@ When this plan finishes, move the whole `PR01/` folder to `Complete/PR01/`.
 
 ## Next action
 
-PR01-04. Host tests that do not open the registry. Then owner gate (PR01-05).
+PR01-05. Owner runs the window against Requirements. This agent does not mark first-and-ten closed.
