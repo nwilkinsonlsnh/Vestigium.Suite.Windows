@@ -56,6 +56,12 @@ public partial class App : Application
                     Subject = "Installed packages",
                     Description = "Grid of every package from the four ARP roots."
                 },
+                new VestigiumNavItemSpec("Windows Features")
+                {
+                    Title = "Windows Features",
+                    Subject = "Optional features",
+                    Description = "Flat grid of Win32_OptionalFeature."
+                },
                 new VestigiumNavItemSpec("Export")
                 {
                     Title = "Export",
@@ -97,6 +103,10 @@ public partial class App : Application
             item.Content = page;
             window.HostShell.SelectedItem = item;
         }
+
+        var features = window.HostShell["Windows Features"];
+        if (features is not null)
+            features.Content = new FeaturesView { DataContext = new FeaturesViewModel { IsLoading = true } };
 
         var export = window.HostShell["Export"];
         if (export is not null)
