@@ -8,6 +8,7 @@ public sealed class FeatureNode
     public required string Caption { get; init; }
     public required string State { get; init; }
     public required bool IsEnabled { get; init; }
+    public string Parent { get; init; } = "";
     public FeatureRow? Feature { get; init; }
     public ObservableCollection<FeatureNode> Children { get; } = [];
 }
