@@ -125,18 +125,31 @@ public sealed partial class MainViewModel : ObservableObject
             "Uninstall",
             $"Uninstall started. package={package.DisplayName} command={plan.Display} rewritten={plan.Rewritten} actor={actor}");
         Status = $"Uninstalling {package.DisplayName}\u2026";
+        int? code = null;
         try
         {
             var process = Process.Start(new ProcessStartInfo(plan.FileName, plan.Arguments) { UseShellExecute = true });
             if (process is not null)
+            {
                 await process.WaitForExitAsync();
+                code = process.ExitCode;
+            }
         }
         catch (Exception ex)
         {
             MessageBox.Show(owner, ex.Message, "Uninstall", MessageBoxButton.OK, MessageBoxImage.Error);
+            return;
         }
 
-        await LoadAsync();
+        if (code is 0 or 3010 or null)
+        {
+            Status = $"Uninstalled {package.DisplayName}. Refreshing\u2026";
+            await LoadAsync();
+        }
+        else
+        {
+            Status = $"Uninstall exited {code}.";
+        }
     }
 
     private static bool ClearNoRemove(PackageRow package, string actor)
