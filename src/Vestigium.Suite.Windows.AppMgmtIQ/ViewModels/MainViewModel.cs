@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Vestigium.Helpers.WinReg;
 
 namespace Vestigium.Suite.Windows.AppMgmtIQ.ViewModels;
@@ -21,6 +22,11 @@ public sealed partial class MainViewModel : ObservableObject
     private readonly List<PackageRow> _all = [];
     private bool _showGlobal = true;
     private bool _showPerUser = true;
+    private bool _showX64 = true;
+    private bool _showX86 = true;
+    private bool _showSystemComponents;
+    private bool _showWindowsInstaller = true;
+    private bool _showOtherInstallers = true;
     private string _datePattern = DisplayFormats.DefaultDateFormat.Pattern;
     private int _decimals = 4;
 
@@ -32,31 +38,51 @@ public sealed partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private string _status = "Idle";
 
-    public void Load()
+    [ObservableProperty]
+    private bool _isLoading;
+
+    [ObservableProperty]
+    private string _loadingMessage = "Reading installed packages\u2026";
+
+    public async Task LoadAsync()
     {
-        _all.Clear();
-        var client = RegistryHelper.Local;
-        foreach (var (hive, path, isX64, isGlobal) in Roots)
+        IsLoading = true;
+        Status = "Reading installed packages\u2026";
+        try
         {
-            var children = client.ListSubKeys(hive, path, RegistryViewKind.Default, RegistryDetailLevel.Identity);
-            foreach (var child in children)
-            {
-                var full = client.GetKey(hive, child.Path, RegistryViewKind.Default, RegistryDetailLevel.Full);
-                if (full is null)
-                    continue;
-                var row = Project(full, isX64, isGlobal);
-                row.ApplyDisplay(_datePattern, _decimals);
-                _all.Add(row);
-            }
+            var rows = await Task.Run(ReadAll);
+            _all.Clear();
+            _all.AddRange(rows);
+            ApplyFilter();
+            HostLog.Information(AppMgmtCatalog.InventoryLoaded, "Inventory", $"Inventory loaded. {_all.Count} packages.");
         }
-        ApplyFilter();
-        HostLog.Information(AppMgmtCatalog.InventoryLoaded, "Inventory", $"Inventory loaded. {_all.Count} packages.");
+        finally
+        {
+            IsLoading = false;
+        }
     }
 
-    public void ApplySettings(bool showGlobal, bool showPerUser, string datePattern, int decimals)
+    [RelayCommand]
+    private Task Refresh() => LoadAsync();
+
+    public void ApplySettings(
+        bool showGlobal,
+        bool showPerUser,
+        bool showX64,
+        bool showX86,
+        bool showSystemComponents,
+        bool showWindowsInstaller,
+        bool showOtherInstallers,
+        string datePattern,
+        int decimals)
     {
         _showGlobal = showGlobal;
         _showPerUser = showPerUser;
+        _showX64 = showX64;
+        _showX86 = showX86;
+        _showSystemComponents = showSystemComponents;
+        _showWindowsInstaller = showWindowsInstaller;
+        _showOtherInstallers = showOtherInstallers;
         _datePattern = string.IsNullOrWhiteSpace(datePattern) ? DisplayFormats.DefaultDateFormat.Pattern : datePattern;
         _decimals = Math.Clamp(decimals, 0, 8);
         foreach (var row in _all)
@@ -69,12 +95,51 @@ public sealed partial class MainViewModel : ObservableObject
         var keep = SelectedPackage;
         Packages.Clear();
         var rows = _all
-            .Where(row => (row.IsGlobal && _showGlobal) || (!row.IsGlobal && _showPerUser))
+            .Where(Passes)
             .OrderBy(row => row.DisplayName, StringComparer.OrdinalIgnoreCase);
         foreach (var row in rows)
             Packages.Add(row);
         SelectedPackage = Packages.Contains(keep!) ? keep : null;
         Status = $"{Packages.Count} packages";
+    }
+
+    private bool Passes(PackageRow row)
+    {
+        if (row.IsGlobal && !_showGlobal)
+            return false;
+        if (!row.IsGlobal && !_showPerUser)
+            return false;
+        if (row.IsX64 && !_showX64)
+            return false;
+        if (!row.IsX64 && !_showX86)
+            return false;
+        if (row.SystemComponent && !_showSystemComponents)
+            return false;
+        if (row.WindowsInstaller && !_showWindowsInstaller)
+            return false;
+        if (!row.WindowsInstaller && !_showOtherInstallers)
+            return false;
+        return true;
+    }
+
+    private List<PackageRow> ReadAll()
+    {
+        var rows = new List<PackageRow>();
+        var client = RegistryHelper.Local;
+        foreach (var (hive, path, isX64, isGlobal) in Roots)
+        {
+            var children = client.ListSubKeys(hive, path, RegistryViewKind.Default, RegistryDetailLevel.Identity);
+            foreach (var child in children)
+            {
+                var full = client.GetKey(hive, child.Path, RegistryViewKind.Default, RegistryDetailLevel.Full);
+                if (full is null)
+                    continue;
+                var row = Project(full, isX64, isGlobal);
+                row.ApplyDisplay(_datePattern, _decimals);
+                rows.Add(row);
+            }
+        }
+        return rows;
     }
 
     private static PackageRow Project(RegistryKeyInfo key, bool isX64, bool isGlobal)
