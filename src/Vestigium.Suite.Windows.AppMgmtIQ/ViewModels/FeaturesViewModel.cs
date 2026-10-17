@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Management;
+using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Vestigium.Helpers.Kql;
@@ -11,6 +12,7 @@ public sealed partial class FeaturesViewModel : ObservableObject
 {
     private readonly List<FeatureRow> _all = [];
     private readonly KqlSession _session = AppMgmtKql.Features();
+    private readonly DispatcherTimer _queryDelay = new() { Interval = TimeSpan.FromMilliseconds(180) };
     private KqlBoundQuery? _bound;
     private Dictionary<string, string> _parents = new(StringComparer.OrdinalIgnoreCase);
     private string _source = "flat";
@@ -46,9 +48,21 @@ public sealed partial class FeaturesViewModel : ObservableObject
     [ObservableProperty]
     private bool _showAbsentFlag;
 
+    public FeaturesViewModel()
+    {
+        _queryDelay.Tick += (_, _) => ApplyQuery();
+    }
+
     partial void OnQueryChanged(string value)
     {
-        _bound = KqlHost.Compile(value, _session, _bound, out var error);
+        _queryDelay.Stop();
+        _queryDelay.Start();
+    }
+
+    private void ApplyQuery()
+    {
+        _queryDelay.Stop();
+        _bound = KqlHost.Compile(Query, _session, _bound, out var error);
         ApplyFilter();
         if (!string.IsNullOrEmpty(error))
             Status = error;
