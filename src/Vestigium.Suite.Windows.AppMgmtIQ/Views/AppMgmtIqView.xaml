@@ -42,6 +42,7 @@
       <DataGrid.ContextMenu>
         <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
           <MenuItem Header="Open Details" Command="{Binding OpenDetailsCommand}" IsEnabled="{Binding HasSelection}" />
+          <MenuItem Header="Uninstall" IsEnabled="False" ToolTip="Placeholder. Uninstall is not wired in this release." />
           <Separator />
           <MenuItem Header="Filter">
             <MenuItem Header="Global packages" IsCheckable="True" IsChecked="{Binding ShowGlobal}" StaysOpenOnClick="True" />
