@@ -69,6 +69,7 @@ public partial class App : Application
 
         var vm = new MainViewModel();
         vm.Load();
+        var settings = new SettingsViewModel(Themes, vm);
 
         var inventory = window.HostShell["AppMgmtIQ"];
         if (inventory is not null)
@@ -77,9 +78,9 @@ public partial class App : Application
             window.HostShell.SelectedItem = inventory;
         }
 
-        var settings = window.HostShell["Settings"];
-        if (settings is not null)
-            settings.Content = new SettingsView();
+        var settingsItem = window.HostShell["Settings"];
+        if (settingsItem is not null)
+            settingsItem.Content = new SettingsView { DataContext = settings };
 
         var help = window.HostShell["Help"];
         if (help is not null)
