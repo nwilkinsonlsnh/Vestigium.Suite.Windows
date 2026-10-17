@@ -16,13 +16,16 @@
       <Setter Property="Foreground" Value="{DynamicResource Vestigium.Brushes.Text.Primary}" />
       <Setter Property="Background" Value="Transparent" />
       <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+      <Style.Resources>
+        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#334C8DFF" />
+        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#F4F7FB" />
+        <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="#334C8DFF" />
+        <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="#F4F7FB" />
+      </Style.Resources>
       <Style.Triggers>
         <Trigger Property="IsSelected" Value="True">
           <Setter Property="Background" Value="{DynamicResource Vestigium.Brushes.Accent.Softer}" />
           <Setter Property="Foreground" Value="{DynamicResource Vestigium.Brushes.Text.Primary}" />
-        </Trigger>
-        <Trigger Property="IsMouseOver" Value="True">
-          <Setter Property="Background" Value="{DynamicResource Vestigium.Brushes.Surface.Raised}" />
         </Trigger>
       </Style.Triggers>
     </Style>
@@ -36,10 +39,10 @@
           <ColumnDefinition Width="80" />
         </Grid.ColumnDefinitions>
         <CheckBox Grid.Column="0" IsChecked="{Binding IsEnabled, Mode=OneWay}" IsHitTestVisible="False" VerticalAlignment="Center" />
-        <TextBlock Grid.Column="1" Text="{Binding Caption}" VerticalAlignment="Center" Margin="4,0" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=TreeViewItem}}" />
-        <TextBlock Grid.Column="2" Text="{Binding Name}" VerticalAlignment="Center" Margin="4,0" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=TreeViewItem}}" />
-        <TextBlock Grid.Column="3" Text="{Binding Parent}" VerticalAlignment="Center" Margin="4,0" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=TreeViewItem}}" />
-        <TextBlock Grid.Column="4" Text="{Binding State}" VerticalAlignment="Center" Margin="4,0" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=TreeViewItem}}" />
+        <TextBlock Grid.Column="1" Text="{Binding Caption}" VerticalAlignment="Center" Margin="4,0" Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}" />
+        <TextBlock Grid.Column="2" Text="{Binding Name}" VerticalAlignment="Center" Margin="4,0" Foreground="{DynamicResource Vestigium.Brushes.Text.Secondary}" />
+        <TextBlock Grid.Column="3" Text="{Binding Parent}" VerticalAlignment="Center" Margin="4,0" Foreground="{DynamicResource Vestigium.Brushes.Text.Secondary}" />
+        <TextBlock Grid.Column="4" Text="{Binding State}" VerticalAlignment="Center" Margin="4,0" Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}" />
       </Grid>
     </HierarchicalDataTemplate>
   </UserControl.Resources>
