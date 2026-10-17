@@ -40,6 +40,7 @@
               HorizontalScrollBarVisibility="Disabled"
               ScrollViewer.VerticalScrollBarVisibility="Visible"
               ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+              PreviewMouseRightButtonDown="Grid_PreviewMouseRightButtonDown"
               MouseDoubleClick="Grid_MouseDoubleClick"
               SelectionChanged="Grid_SelectionChanged">
       <DataGrid.ContextMenu>
