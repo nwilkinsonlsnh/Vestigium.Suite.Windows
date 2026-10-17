@@ -11,17 +11,19 @@ public static class AppMgmtCatalog
     public const int InventoryLoaded = 17005;
     public const int SettingsChanged = 17010;
     public const int SettingsSaved = 17015;
+    public const int FeaturesLoaded = 17020;
 
     public static void Register(VestigiumLoggerOptions cfg)
     {
         ArgumentNullException.ThrowIfNull(cfg);
         var taxonomy = new VestigiumTaxonomy();
         taxonomy.Register(Category, HostIds.AppMgmtIQ);
-        taxonomy.Register(Category, "Lifecycle", "Inventory", "Settings");
+        taxonomy.Register(Category, "Lifecycle", "Inventory", "Settings", "Features");
         cfg.RegisterTaxonomy(taxonomy);
         cfg.RegisterEvent("AppStarted", "Vestigium.Suite.Windows.AppMgmtIQ.Events.AppStarted", Category, Subcategory, AppStarted, "Information", "host started");
         cfg.RegisterEvent("InventoryLoaded", "Vestigium.Suite.Windows.AppMgmtIQ.Events.InventoryLoaded", Category, Subcategory, InventoryLoaded, "Information", "inventory loaded");
         cfg.RegisterEvent("SettingsChanged", "Vestigium.Suite.Windows.AppMgmtIQ.Events.SettingsChanged", Category, Subcategory, SettingsChanged, "Information", "setting changed");
         cfg.RegisterEvent("SettingsSaved", "Vestigium.Suite.Windows.AppMgmtIQ.Events.SettingsSaved", Category, Subcategory, SettingsSaved, "Information", "settings saved");
+        cfg.RegisterEvent("FeaturesLoaded", "Vestigium.Suite.Windows.AppMgmtIQ.Events.FeaturesLoaded", Category, Subcategory, FeaturesLoaded, "Information", "windows features loaded");
     }
 }
