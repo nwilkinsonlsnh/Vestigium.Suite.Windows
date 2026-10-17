@@ -12,8 +12,22 @@
       <Setter Property="Foreground" Value="{DynamicResource Vestigium.Brushes.Text.Primary}" />
       <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
+    <Style x:Key="FeatureItem" TargetType="TreeViewItem">
+      <Setter Property="Foreground" Value="{DynamicResource Vestigium.Brushes.Text.Primary}" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+      <Style.Triggers>
+        <Trigger Property="IsSelected" Value="True">
+          <Setter Property="Background" Value="{DynamicResource Vestigium.Brushes.Accent.Softer}" />
+          <Setter Property="Foreground" Value="{DynamicResource Vestigium.Brushes.Text.Primary}" />
+        </Trigger>
+        <Trigger Property="IsMouseOver" Value="True">
+          <Setter Property="Background" Value="{DynamicResource Vestigium.Brushes.Surface.Raised}" />
+        </Trigger>
+      </Style.Triggers>
+    </Style>
     <HierarchicalDataTemplate x:Key="FeatureTemplate" ItemsSource="{Binding Children}">
-      <Grid>
+      <Grid Background="Transparent">
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="28" />
           <ColumnDefinition Width="320" />
@@ -22,10 +36,10 @@
           <ColumnDefinition Width="80" />
         </Grid.ColumnDefinitions>
         <CheckBox Grid.Column="0" IsChecked="{Binding IsEnabled, Mode=OneWay}" IsHitTestVisible="False" VerticalAlignment="Center" />
-        <TextBlock Grid.Column="1" Text="{Binding Caption}" VerticalAlignment="Center" Margin="4,0" Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}" />
-        <TextBlock Grid.Column="2" Text="{Binding Name}" VerticalAlignment="Center" Margin="4,0" Foreground="{DynamicResource Vestigium.Brushes.Text.Secondary}" />
-        <TextBlock Grid.Column="3" Text="{Binding Parent}" VerticalAlignment="Center" Margin="4,0" Foreground="{DynamicResource Vestigium.Brushes.Text.Secondary}" />
-        <TextBlock Grid.Column="4" Text="{Binding State}" VerticalAlignment="Center" Margin="4,0" Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}" />
+        <TextBlock Grid.Column="1" Text="{Binding Caption}" VerticalAlignment="Center" Margin="4,0" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=TreeViewItem}}" />
+        <TextBlock Grid.Column="2" Text="{Binding Name}" VerticalAlignment="Center" Margin="4,0" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=TreeViewItem}}" />
+        <TextBlock Grid.Column="3" Text="{Binding Parent}" VerticalAlignment="Center" Margin="4,0" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=TreeViewItem}}" />
+        <TextBlock Grid.Column="4" Text="{Binding State}" VerticalAlignment="Center" Margin="4,0" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=TreeViewItem}}" />
       </Grid>
     </HierarchicalDataTemplate>
   </UserControl.Resources>
@@ -51,6 +65,7 @@
               x:Name="FeatureTree"
               ItemsSource="{Binding Roots}"
               ItemTemplate="{StaticResource FeatureTemplate}"
+              ItemContainerStyle="{StaticResource FeatureItem}"
               Background="{DynamicResource Vestigium.Brushes.Surface.Window}"
               BorderBrush="{DynamicResource Vestigium.Brushes.Border.Subtle}"
               SelectedItemChanged="Tree_SelectedItemChanged"
