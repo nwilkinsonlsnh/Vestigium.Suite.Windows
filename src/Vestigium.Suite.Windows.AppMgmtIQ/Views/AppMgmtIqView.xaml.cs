@@ -26,6 +26,12 @@ public partial class AppMgmtIqView : UserControl
         settings.OpenDetailsRequested += (_, package) => ShowOrUpdateDetails(package);
     }
 
+    private void OnFilter(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is MainViewModel host)
+            host.ApplyQuery();
+    }
+
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
         var scroller = FindAncestor<ScrollViewer>(this);
