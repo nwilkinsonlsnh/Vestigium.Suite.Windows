@@ -31,16 +31,16 @@ public partial class App : Application
         Services = services.BuildServiceProvider();
 
         ShutdownMode = ShutdownMode.OnMainWindowClose;
-        MainWindow = CreateMainWindow(out var inventory, out var chrome);
+        MainWindow = CreateMainWindow(out var inventory, out var features, out var chrome);
         MainWindow.Show();
 
-        await inventory.LoadAsync();
+        await Task.WhenAll(inventory.LoadAsync(), features.LoadAsync());
         chrome.Status.Message = inventory.Status;
 
         base.OnStartup(e);
     }
 
-    private static Window CreateMainWindow(out MainViewModel inventory, out VestigiumDefaultWindowViewModel chrome)
+    private static Window CreateMainWindow(out MainViewModel inventory, out FeaturesViewModel featuresVm, out VestigiumDefaultWindowViewModel chrome)
     {
         chrome = Services.GetRequiredService<VestigiumDefaultWindowViewModel>();
         var window = new AppMgmtIqWindow(chrome);
@@ -60,7 +60,7 @@ public partial class App : Application
                 {
                     Title = "Windows Features",
                     Subject = "Optional features",
-                    Description = "Flat grid of Win32_OptionalFeature."
+                    Description = "Tree of Win32_OptionalFeature."
                 },
                 new VestigiumNavItemSpec("Export")
                 {
@@ -90,6 +90,7 @@ public partial class App : Application
         });
 
         inventory = new MainViewModel { IsLoading = true };
+        featuresVm = new FeaturesViewModel { IsLoading = true };
         var store = new AppMgmtSettingsStore(AppMgmtSettingsStore.DefaultRoot);
         var settings = new SettingsViewModel(Themes, inventory, store);
         settings.Load();
@@ -106,7 +107,7 @@ public partial class App : Application
 
         var features = window.HostShell["Windows Features"];
         if (features is not null)
-            features.Content = new FeaturesView { DataContext = new FeaturesViewModel { IsLoading = true } };
+            features.Content = new FeaturesView { DataContext = featuresVm };
 
         var export = window.HostShell["Export"];
         if (export is not null)
