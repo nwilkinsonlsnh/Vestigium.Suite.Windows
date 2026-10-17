@@ -16,6 +16,11 @@ public sealed partial class PackageRow : ObservableObject
     public required string EstimatedSize { get; init; }
     public required bool IsX64 { get; init; }
     public required bool IsGlobal { get; init; }
+    public required bool SystemComponent { get; init; }
+    public required bool WindowsInstaller { get; init; }
+    public required bool NoModify { get; init; }
+    public required bool NoRemove { get; init; }
+    public required bool NoRepair { get; init; }
     public required string UninstallString { get; init; }
     public required string KeyPath { get; init; }
     public required string Hive { get; init; }
