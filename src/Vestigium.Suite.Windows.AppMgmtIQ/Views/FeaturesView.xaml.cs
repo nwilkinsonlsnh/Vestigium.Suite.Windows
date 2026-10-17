@@ -23,6 +23,15 @@ public partial class FeaturesView : UserControl
             scroller.VerticalScrollBarVisibility = ScrollBarVisibility.Disabled;
     }
 
+    private void Tree_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        var item = FindAncestor<TreeViewItem>(e.OriginalSource as DependencyObject);
+        if (item is null)
+            return;
+        item.IsSelected = true;
+        item.Focus();
+    }
+
     private void Tree_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
     {
         if (DataContext is FeaturesViewModel vm)
@@ -111,7 +120,7 @@ public partial class FeaturesView : UserControl
 
     private static T? FindAncestor<T>(DependencyObject start) where T : DependencyObject
     {
-        var current = VisualTreeHelper.GetParent(start);
+        var current = start;
         while (current is not null)
         {
             if (current is T match)
