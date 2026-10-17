@@ -5,6 +5,7 @@
              VerticalAlignment="Stretch"
              HorizontalAlignment="Stretch">
   <UserControl.Resources>
+    <BooleanToVisibilityConverter x:Key="BoolToVis" />
     <Style x:Key="LeftCell" TargetType="TextBlock">
       <Setter Property="HorizontalAlignment" Value="Left" />
       <Setter Property="VerticalAlignment" Value="Center" />
@@ -38,6 +39,31 @@
               ScrollViewer.HorizontalScrollBarVisibility="Disabled"
               MouseDoubleClick="Grid_MouseDoubleClick"
               SelectionChanged="Grid_SelectionChanged">
+      <DataGrid.ContextMenu>
+        <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
+          <MenuItem Header="Open Details" Command="{Binding OpenDetailsCommand}" IsEnabled="{Binding HasSelection}" />
+          <Separator />
+          <MenuItem Header="Filter">
+            <MenuItem Header="Global packages" IsCheckable="True" IsChecked="{Binding ShowGlobal}" StaysOpenOnClick="True" />
+            <MenuItem Header="Per-user packages" IsCheckable="True" IsChecked="{Binding ShowPerUser}" StaysOpenOnClick="True" />
+            <Separator />
+            <MenuItem Header="x64" IsCheckable="True" IsChecked="{Binding ShowX64}" StaysOpenOnClick="True" />
+            <MenuItem Header="x86" IsCheckable="True" IsChecked="{Binding ShowX86}" StaysOpenOnClick="True" />
+            <Separator />
+            <MenuItem Header="System components" IsCheckable="True" IsChecked="{Binding ShowSystemComponents}" StaysOpenOnClick="True" />
+            <Separator />
+            <MenuItem Header="Windows Installer" IsCheckable="True" IsChecked="{Binding ShowWindowsInstaller}" StaysOpenOnClick="True" />
+            <MenuItem Header="Other installers" IsCheckable="True" IsChecked="{Binding ShowOtherInstallers}" StaysOpenOnClick="True" />
+          </MenuItem>
+          <Separator />
+          <MenuItem Header="Export">
+            <MenuItem Header="Export grid\u2026" IsEnabled="False" ToolTip="Vestigium.Helpers.ClosedXml is not published yet." />
+            <MenuItem Header="Export selected\u2026" IsEnabled="False" ToolTip="Vestigium.Helpers.ClosedXml is not published yet." />
+          </MenuItem>
+          <Separator />
+          <MenuItem Header="Refresh" Command="{Binding Host.RefreshCommand}" />
+        </ContextMenu>
+      </DataGrid.ContextMenu>
       <DataGrid.Columns>
         <DataGridTemplateColumn Header="" Width="36" MinWidth="36" CanUserResize="False" CanUserSort="False">
           <DataGridTemplateColumn.CellTemplate>
@@ -60,5 +86,16 @@
         <DataGridCheckBoxColumn Header="NoRepair" Binding="{Binding NoRepair}" Width="*" MinWidth="70" />
       </DataGrid.Columns>
     </DataGrid>
+
+    <Border Background="{DynamicResource Vestigium.Brushes.Surface.Window}"
+            Opacity="0.92"
+            Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
+      <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+        <ProgressBar IsIndeterminate="True" Width="240" Height="6" Margin="0,0,0,12" />
+        <TextBlock Style="{StaticResource TextBlock.Caption}"
+                   HorizontalAlignment="Center"
+                   Text="{Binding LoadingMessage}" />
+      </StackPanel>
+    </Border>
   </Grid>
 </UserControl>
