@@ -23,24 +23,21 @@
                 Width="420"
                 Margin="8,0,0,0"
                 Visibility="{Binding AppMgmtPageOpen, Converter={StaticResource BoolToVis}}">
-      <TextBlock Margin="0,0,0,16"
-                 TextWrapping="Wrap"
-                 Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}"
+      <TextBlock Style="{StaticResource TextBlock.Caption}" Margin="0,0,0,16" TextWrapping="Wrap"
                  Text="Defaults for the inventory grid." />
 
-      <CheckBox Content="Show Global Packages"
+      <CheckBox Style="{StaticResource CheckBox.Standard}"
+                Content="Show Global Packages"
                 IsChecked="{Binding ShowGlobal}"
-                Margin="0,0,0,10"
-                Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}" />
-      <CheckBox Content="Show Per User Packages"
+                Margin="0,0,0,10" />
+      <CheckBox Style="{StaticResource CheckBox.Standard}"
+                Content="Show Per User Packages"
                 IsChecked="{Binding ShowPerUser}"
-                Margin="0,0,0,16"
-                Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}" />
+                Margin="0,0,0,16" />
 
-      <TextBlock Margin="0,0,0,4"
-                 Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}"
-                 Text="Date format" />
-      <ComboBox ItemsSource="{Binding DateFormats}"
+      <Label Style="{StaticResource Label.Standard}" Content="Date format" />
+      <ComboBox Style="{StaticResource ComboBox.Standard}"
+                ItemsSource="{Binding DateFormats}"
                 DisplayMemberPath="Label"
                 SelectedItem="{Binding SelectedDateFormat, Mode=TwoWay}"
                 IsEditable="False"
@@ -49,9 +46,7 @@
                 HorizontalAlignment="Left"
                 Margin="0,0,0,16" />
 
-      <TextBlock Margin="0,0,0,4"
-                 Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}"
-                 Text="Decimal places" />
+      <Label Style="{StaticResource Label.Standard}" Content="Decimal places" />
       <nud:VestigiumNumericUpDown Value="{Binding DecimalPlaces, Mode=TwoWay}"
                                   SignMode="Unsigned"
                                   Minimum="0"
@@ -68,14 +63,11 @@
                 Width="420"
                 Margin="8,0,0,0"
                 Visibility="{Binding ThemesPageOpen, Converter={StaticResource BoolToVis}}">
-      <TextBlock Margin="0,0,0,16"
-                 TextWrapping="Wrap"
-                 Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}"
+      <TextBlock Style="{StaticResource TextBlock.Caption}" Margin="0,0,0,16" TextWrapping="Wrap"
                  Text="Palette for the application." />
-      <TextBlock Margin="0,0,0,4"
-                 Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}"
-                 Text="Theme" />
-      <ComboBox ItemsSource="{Binding Themes}"
+      <Label Style="{StaticResource Label.Standard}" Content="Theme" />
+      <ComboBox Style="{StaticResource ComboBox.Standard}"
+                ItemsSource="{Binding Themes}"
                 DisplayMemberPath="DisplayName"
                 SelectedValuePath="Id"
                 SelectedValue="{Binding SelectedThemeId, Mode=TwoWay}"
