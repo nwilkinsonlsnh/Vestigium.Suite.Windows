@@ -29,7 +29,8 @@
         </DataTemplate>
       </ItemsControl.ItemTemplate>
     </ItemsControl>
-    <DataGrid ItemsSource="{Binding SelectedTab.Rows}"
+    <DataGrid Style="{StaticResource DataGrid.Standard}"
+              ItemsSource="{Binding SelectedTab.Rows}"
               AutoGenerateColumns="False"
               IsReadOnly="True"
               HeadersVisibility="Column"
