@@ -32,11 +32,15 @@ public sealed partial class DetailsViewModel : ObservableObject
             Build("Links", package, LinkNames),
             Build("Raw", package, null)
         ];
+        SelectedTab = Tabs[0];
     }
 
     public string Title { get; }
 
     public ObservableCollection<DetailsTab> Tabs { get; }
+
+    [ObservableProperty]
+    private DetailsTab? _selectedTab;
 
     private static readonly string[] GeneralNames =
     [
