@@ -95,6 +95,8 @@ public sealed partial class MainViewModel : ObservableObject
         if (string.IsNullOrWhiteSpace(display))
             display = key.Name;
 
+        var product = key.Name.StartsWith('{') ? key.Name : Value("ProductCode");
+
         return new PackageRow
         {
             DisplayName = display,
@@ -113,7 +115,14 @@ public sealed partial class MainViewModel : ObservableObject
             KeyPath = key.Path,
             Hive = key.Hive.ToString(),
             Values = key.Values,
-            Icon = IconLoader.Load(Value("DisplayIcon"))
+            Icon = IconLoader.Load(
+                Value("DisplayIcon"),
+                Value("InstallLocation"),
+                Value("UninstallString"),
+                Value("QuietUninstallString"),
+                Value("ModifyPath"),
+                display,
+                product)
         };
     }
 }
