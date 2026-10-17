@@ -14,7 +14,7 @@
     </Style>
   </Window.Resources>
   <DockPanel Margin="12">
-    <ItemsControl DockPanel.Dock="Top" ItemsSource="{Binding Tabs}" Margin="0,0,0,8">
+    <ItemsControl x:Name="TabStrip" DockPanel.Dock="Top" ItemsSource="{Binding Tabs}" Margin="0,0,0,8">
       <ItemsControl.ItemsPanel>
         <ItemsPanelTemplate>
           <StackPanel Orientation="Horizontal" />
@@ -25,7 +25,6 @@
           <RadioButton Content="{Binding Header}"
                        Style="{StaticResource RadioButton.UnderlineTab}"
                        GroupName="DetailsTabs"
-                       IsChecked="{Binding IsSelected, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=Window}, Converter={x:Null}}"
                        Checked="Tab_Checked" />
         </DataTemplate>
       </ItemsControl.ItemTemplate>
