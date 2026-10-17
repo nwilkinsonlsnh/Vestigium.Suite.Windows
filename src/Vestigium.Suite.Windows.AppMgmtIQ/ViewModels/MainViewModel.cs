@@ -50,6 +50,7 @@ public sealed partial class MainViewModel : ObservableObject
             }
         }
         ApplyFilter();
+        HostLog.Information(AppMgmtCatalog.InventoryLoaded, "Inventory", $"Inventory loaded. {_all.Count} packages.");
     }
 
     public void ApplySettings(bool showGlobal, bool showPerUser, string datePattern, int decimals)
@@ -111,7 +112,8 @@ public sealed partial class MainViewModel : ObservableObject
             UninstallString = Value("UninstallString"),
             KeyPath = key.Path,
             Hive = key.Hive.ToString(),
-            Values = key.Values
+            Values = key.Values,
+            Icon = IconLoader.Load(Value("DisplayIcon"))
         };
     }
 }
