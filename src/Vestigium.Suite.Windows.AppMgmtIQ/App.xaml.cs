@@ -19,7 +19,7 @@ public partial class App : Application
 
     protected override void OnStartup(StartupEventArgs e)
     {
-        HostLog.Initialize("AppMgmtIQ");
+        HostLog.Initialize(HostIds.AppMgmtIQ);
 
         Themes.RegisterSuiteV1();
         Themes.Initialize(this, "LightBlue");
