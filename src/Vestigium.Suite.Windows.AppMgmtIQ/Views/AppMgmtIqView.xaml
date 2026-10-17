@@ -25,27 +25,30 @@
               HeadersVisibility="Column"
               CanUserAddRows="False"
               CanUserDeleteRows="False"
+              CanUserResizeColumns="True"
+              CanUserReorderColumns="True"
+              ColumnWidth="*"
               VerticalAlignment="Stretch"
               HorizontalAlignment="Stretch"
               VerticalScrollBarVisibility="Visible"
-              HorizontalScrollBarVisibility="Auto"
+              HorizontalScrollBarVisibility="Disabled"
               ScrollViewer.VerticalScrollBarVisibility="Visible"
-              ScrollViewer.HorizontalScrollBarVisibility="Auto"
+              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
               MouseDoubleClick="Grid_MouseDoubleClick"
               SelectionChanged="Grid_SelectionChanged">
       <DataGrid.Columns>
-        <DataGridTextColumn Header="Display Name" Binding="{Binding DisplayName}" Width="*" ElementStyle="{StaticResource LeftCell}" />
-        <DataGridTextColumn Header="Publisher" Binding="{Binding Publisher}" Width="180" ElementStyle="{StaticResource LeftCell}" />
-        <DataGridTextColumn Header="Version" Binding="{Binding DisplayVersion}" Width="130" ElementStyle="{StaticResource LeftCell}" />
-        <DataGridTextColumn Header="Install Date" Binding="{Binding DisplayInstallDate}" Width="120" ElementStyle="{StaticResource LeftCell}" />
-        <DataGridTextColumn Header="Size" Binding="{Binding DisplaySize}" Width="100" ElementStyle="{StaticResource LeftCell}" />
-        <DataGridCheckBoxColumn Header="x64" Binding="{Binding IsX64}" Width="46" />
-        <DataGridCheckBoxColumn Header="Global" Binding="{Binding IsGlobal}" Width="64" />
-        <DataGridCheckBoxColumn Header="SystemComponent" Binding="{Binding SystemComponent}" Width="130" />
-        <DataGridCheckBoxColumn Header="WindowsInstaller" Binding="{Binding WindowsInstaller}" Width="130" />
-        <DataGridCheckBoxColumn Header="NoModify" Binding="{Binding NoModify}" Width="80" />
-        <DataGridCheckBoxColumn Header="NoRemove" Binding="{Binding NoRemove}" Width="80" />
-        <DataGridCheckBoxColumn Header="NoRepair" Binding="{Binding NoRepair}" Width="80" />
+        <DataGridTextColumn Header="Display Name" Binding="{Binding DisplayName}" Width="2*" MinWidth="140" ElementStyle="{StaticResource LeftCell}" />
+        <DataGridTextColumn Header="Publisher" Binding="{Binding Publisher}" Width="*" MinWidth="80" ElementStyle="{StaticResource LeftCell}" />
+        <DataGridTextColumn Header="Version" Binding="{Binding DisplayVersion}" Width="*" MinWidth="70" ElementStyle="{StaticResource LeftCell}" />
+        <DataGridTextColumn Header="Install Date" Binding="{Binding DisplayInstallDate}" Width="*" MinWidth="90" ElementStyle="{StaticResource LeftCell}" />
+        <DataGridTextColumn Header="Size" Binding="{Binding DisplaySize}" Width="*" MinWidth="70" ElementStyle="{StaticResource LeftCell}" />
+        <DataGridCheckBoxColumn Header="x64" Binding="{Binding IsX64}" Width="*" MinWidth="46" />
+        <DataGridCheckBoxColumn Header="Global" Binding="{Binding IsGlobal}" Width="*" MinWidth="56" />
+        <DataGridCheckBoxColumn Header="SystemComponent" Binding="{Binding SystemComponent}" Width="*" MinWidth="90" />
+        <DataGridCheckBoxColumn Header="WindowsInstaller" Binding="{Binding WindowsInstaller}" Width="*" MinWidth="90" />
+        <DataGridCheckBoxColumn Header="NoModify" Binding="{Binding NoModify}" Width="*" MinWidth="70" />
+        <DataGridCheckBoxColumn Header="NoRemove" Binding="{Binding NoRemove}" Width="*" MinWidth="70" />
+        <DataGridCheckBoxColumn Header="NoRepair" Binding="{Binding NoRepair}" Width="*" MinWidth="70" />
       </DataGrid.Columns>
     </DataGrid>
   </Grid>
