@@ -20,6 +20,7 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         HostLog.Initialize(HostIds.AppMgmtIQ);
+        HostLog.Information(AppMgmtCatalog.AppStarted, "Lifecycle", "AppMgmtIQ started.");
 
         Themes.RegisterSuiteV1();
         Themes.Initialize(this, "LightBlue");
@@ -69,7 +70,9 @@ public partial class App : Application
 
         var vm = new MainViewModel();
         vm.Load();
-        var settings = new SettingsViewModel(Themes, vm);
+        var store = new AppMgmtSettingsStore(AppMgmtSettingsStore.DefaultRoot);
+        var settings = new SettingsViewModel(Themes, vm, store);
+        settings.Load();
 
         var inventory = window.HostShell["AppMgmtIQ"];
         if (inventory is not null)
