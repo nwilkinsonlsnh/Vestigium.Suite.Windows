@@ -46,7 +46,8 @@
     <query:VestigiumQueryBar Margin="0,0,0,8"
                              Text="{Binding Query, UpdateSourceTrigger=PropertyChanged}"
                              Session="{Binding Session}"
-                             Queries="{Binding Queries}" />
+                             Queries="{Binding Queries}"
+                             FilterRequested="OnFilter" />
     <DataGrid Grid.Row="1"
               x:Name="PackageGrid"
               Style="{StaticResource DataGrid.Standard}"
