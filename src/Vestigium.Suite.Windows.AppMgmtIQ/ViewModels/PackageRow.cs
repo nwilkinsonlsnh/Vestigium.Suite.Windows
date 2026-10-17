@@ -19,4 +19,7 @@ public sealed class PackageRow
     public required string KeyPath { get; init; }
     public required string Hive { get; init; }
     public required IReadOnlyList<RegistryValueInfo> Values { get; init; }
+
+    public string DisplayInstallDate => DisplayFormats.Date(InstallDate);
+    public string DisplaySize => DisplayFormats.Size(EstimatedSize);
 }
