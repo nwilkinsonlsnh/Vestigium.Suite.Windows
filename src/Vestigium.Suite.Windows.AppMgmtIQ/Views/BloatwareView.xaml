@@ -36,17 +36,25 @@
       <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
     </Grid.RowDefinitions>
-    <DockPanel Margin="0,0,0,8">
-      <Button DockPanel.Dock="Right" Margin="8,0,0,0" Width="36" Height="32"
-              Style="{StaticResource Button.Utility}"
-              Command="{Binding RefreshCommand}" ToolTip="Refresh">
-        <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="16" Text="&#xE72C;" />
-      </Button>
-      <query:VestigiumQueryBar Text="{Binding Query, UpdateSourceTrigger=PropertyChanged}"
+    <Grid Margin="0,0,0,8">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" MinWidth="0" />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+      <query:VestigiumQueryBar Grid.Column="0" MinWidth="0"
+                               Text="{Binding Query, UpdateSourceTrigger=PropertyChanged}"
                                Session="{Binding Session}"
                                Queries="{Binding Queries}"
                                FilterRequested="OnFilter" />
-    </DockPanel>
+      <Button Grid.Column="1" Margin="8,0,0,0" Width="36" Height="36" Padding="0"
+              VerticalAlignment="Center" HorizontalAlignment="Center"
+              Style="{StaticResource Button.Utility}"
+              Command="{Binding RefreshCommand}" ToolTip="Refresh">
+        <TextBlock FontFamily="Segoe UI Symbol" FontSize="18" Text="&#x267B;"
+                   Foreground="#3DDC84"
+                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+      </Button>
+    </Grid>
     <TextBlock Grid.Row="1" Style="{StaticResource TextBlock.Caption}" Margin="0,0,0,8" Text="{Binding Status}" />
     <DataGrid Grid.Row="2"
               Style="{StaticResource DataGrid.Standard}"
