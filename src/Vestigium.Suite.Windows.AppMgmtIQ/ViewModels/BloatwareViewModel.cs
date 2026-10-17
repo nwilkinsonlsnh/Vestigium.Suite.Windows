@@ -63,7 +63,7 @@ public sealed partial class BloatwareViewModel : ObservableObject
 
     private static List<BloatwareRow> ReadInstalled()
     {
-        var client = new RegistryClient(null);
+        var client = RegistryHelper.Local;
         var installed = Families(client, RegistryHiveKind.LocalMachine, Applications)
             .Concat(Families(client, RegistryHiveKind.CurrentUser, UserPackages))
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
