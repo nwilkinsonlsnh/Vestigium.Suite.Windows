@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Vestigium.Helpers.Kql;
@@ -24,6 +25,7 @@ public sealed partial class MainViewModel : ObservableObject
 
     private readonly List<PackageRow> _all = [];
     private readonly KqlSession _session = AppMgmtKql.Packages();
+    private readonly DispatcherTimer _queryDelay = new() { Interval = TimeSpan.FromMilliseconds(180) };
     private KqlBoundQuery? _bound;
     private bool _showGlobal = true;
     private bool _showPerUser = true;
@@ -54,9 +56,21 @@ public sealed partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private string _loadingMessage = "Reading installed packages\u2026";
 
+    public MainViewModel()
+    {
+        _queryDelay.Tick += (_, _) => ApplyQuery();
+    }
+
     partial void OnQueryChanged(string value)
     {
-        _bound = KqlHost.Compile(value, _session, _bound, out var error);
+        _queryDelay.Stop();
+        _queryDelay.Start();
+    }
+
+    private void ApplyQuery()
+    {
+        _queryDelay.Stop();
+        _bound = KqlHost.Compile(Query, _session, _bound, out var error);
         ApplyFilter();
         if (!string.IsNullOrEmpty(error))
             Status = error;
