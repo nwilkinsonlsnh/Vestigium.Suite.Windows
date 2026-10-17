@@ -55,9 +55,9 @@ One PR. Four build slices plus owner gate.
 
 Pin: `Vestigium.Helpers.WinReg` **1.0.0**.
 
-The host calls the public inventory surface that returns the package list and the full value set for a selected package. The host does not open `RegistryKey` itself.
+The host calls `RegistryHelper.Local.ListSubKeys` / `GetKey`. It does not open `RegistryKey` itself.
 
-Computed fields isX64 and isGlobal are supplied by the Helper.
+**Debt:** WinReg 1.0.0 has no ARP inventory door. The four-root list, DisplayName fallback, isX64, and isGlobal are computed in `MainViewModel` until a Helper door owns them. Move that model out of the host when the door exists.
 
 ---
 
@@ -113,7 +113,7 @@ Details content: tabs that group the raw registry values (General, Uninstall, Li
 | Order | ID | Do | State |
 | ---: | :--- | :--- | :--- |
 | 1 | PR01-01 | Chrome skeleton. `AppMgmtIqWindow`, ThemeManager, DI, HostLog, primary-monitor center. Icon and full theme menu deferred. | Done |
-| 2 | PR01-02 | Inventory grid. Bind to Helper. Single selection. | Open |
+| 2 | PR01-02 | Inventory grid. Bind to WinReg ListSubKeys/GetKey. Single selection. Model is temporary in host. | Done |
 | 3 | PR01-03 | Details window. Double-click. Title. Tabs for all values. | Open |
 | 4 | PR01-04 | Host tests. No registry. | Open |
 | 5 | PR01-05 | Owner runs the window against Requirements. | Owner |
@@ -133,6 +133,8 @@ src/Vestigium.Suite.Windows.AppMgmtIQ/ThemeChrome.cs                [deferred]
 src/Vestigium.Suite.Windows.AppMgmtIQ/Assets/AppMgmtIQ.ico          [deferred]
 src/Vestigium.Suite.Windows.AppMgmtIQ/ViewModels/MainViewModel.cs   [NEW]
 src/Vestigium.Suite.Windows.AppMgmtIQ/ViewModels/PackageRow.cs      [NEW]
+src/Vestigium.Suite.Windows.AppMgmtIQ/Views/AppMgmtIqView.xaml      [NEW]
+src/Vestigium.Suite.Windows.AppMgmtIQ/Views/AppMgmtIqView.xaml.cs   [NEW]
 src/Vestigium.Suite.Windows.AppMgmtIQ/DetailsWindow.xaml            [NEW]
 src/Vestigium.Suite.Windows.AppMgmtIQ/DetailsWindow.xaml.cs         [NEW]
 src/Vestigium.Suite.Windows.AppMgmtIQ/ViewModels/DetailsViewModel.cs [NEW]
@@ -157,4 +159,4 @@ When this plan finishes, move the whole `PR01/` folder to `Complete/PR01/`.
 
 ## Next action
 
-PR01-02. Inventory grid bound to the Helper. Single selection. Details stay stubbed.
+PR01-03. Details window on double-click. Title = DisplayName (DisplayVersion). Tabs for all registry values. Keep the model debt visible.
