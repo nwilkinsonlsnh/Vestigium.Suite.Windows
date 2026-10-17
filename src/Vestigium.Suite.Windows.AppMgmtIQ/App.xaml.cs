@@ -65,8 +65,8 @@ public partial class App : Application
                 new VestigiumNavItemSpec("Export")
                 {
                     Title = "Export",
-                    Subject = "ClosedXml",
-                    Description = "Export the visible grid or the selected package."
+                    Subject = "Workbook",
+                    Description = "Write packages and features to Excel."
                 },
                 new VestigiumNavItemSpec("Dashboard")
                 {
@@ -111,7 +111,7 @@ public partial class App : Application
 
         var export = window.HostShell["Export"];
         if (export is not null)
-            export.Content = new ExportView();
+            export.Content = new ExportView { DataContext = new ExportViewModel(inventory, featuresVm) };
 
         var dashboard = window.HostShell["Dashboard"];
         if (dashboard is not null)
