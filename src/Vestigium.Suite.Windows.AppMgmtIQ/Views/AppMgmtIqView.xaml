@@ -90,7 +90,7 @@
                      Style="{StaticResource ContextMenu.Standard}"
                      Opened="Menu_Opened"
                      DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
-          <MenuItem Header="Open Details" Style="{StaticResource MenuItem.Standard}" Command="{Binding OpenDetailsCommand}" IsEnabled="{Binding HasSelection}">
+          <MenuItem Style="{StaticResource MenuItem.Standard}" Header="Open Details" Style="{StaticResource MenuItem.Standard}" Command="{Binding OpenDetailsCommand}" IsEnabled="{Binding HasSelection}">
             <MenuItem.Icon><TextBlock Text="&#xE8A7;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
           </MenuItem>
           <MenuItem x:Name="UninstallItem" Header="Uninstall" Style="{StaticResource MenuItem.Standard}">
@@ -106,45 +106,45 @@
             </MenuItem>
           </MenuItem>
           <Separator />
-          <MenuItem Header="Filter" Style="{StaticResource MenuItem.Standard}">
+          <MenuItem Style="{StaticResource MenuItem.Standard}" Header="Filter" Style="{StaticResource MenuItem.Standard}">
             <MenuItem.Icon><TextBlock Text="&#xE71C;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
-            <MenuItem Header="Global packages" IsCheckable="True" IsChecked="{Binding ShowGlobal}" StaysOpenOnClick="True">
+            <MenuItem Style="{StaticResource MenuItem.Standard}" Header="Global packages" IsCheckable="True" IsChecked="{Binding ShowGlobal}" StaysOpenOnClick="True">
               <MenuItem.Icon><TextBlock Text="&#xE774;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
             </MenuItem>
-            <MenuItem Header="Per-user packages" IsCheckable="True" IsChecked="{Binding ShowPerUser}" StaysOpenOnClick="True">
+            <MenuItem Style="{StaticResource MenuItem.Standard}" Header="Per-user packages" IsCheckable="True" IsChecked="{Binding ShowPerUser}" StaysOpenOnClick="True">
               <MenuItem.Icon><TextBlock Text="&#xE77B;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
             </MenuItem>
             <Separator />
-            <MenuItem Header="x64" IsCheckable="True" IsChecked="{Binding ShowX64}" StaysOpenOnClick="True">
+            <MenuItem Style="{StaticResource MenuItem.Standard}" Header="x64" IsCheckable="True" IsChecked="{Binding ShowX64}" StaysOpenOnClick="True">
               <MenuItem.Icon><TextBlock Text="&#xE7F8;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
             </MenuItem>
-            <MenuItem Header="x86" IsCheckable="True" IsChecked="{Binding ShowX86}" StaysOpenOnClick="True">
+            <MenuItem Style="{StaticResource MenuItem.Standard}" Header="x86" IsCheckable="True" IsChecked="{Binding ShowX86}" StaysOpenOnClick="True">
               <MenuItem.Icon><TextBlock Text="&#xE7F4;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
             </MenuItem>
             <Separator />
-            <MenuItem Header="System components" IsCheckable="True" IsChecked="{Binding ShowSystemComponents}" StaysOpenOnClick="True">
+            <MenuItem Style="{StaticResource MenuItem.Standard}" Header="System components" IsCheckable="True" IsChecked="{Binding ShowSystemComponents}" StaysOpenOnClick="True">
               <MenuItem.Icon><TextBlock Text="&#xE713;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
             </MenuItem>
             <Separator />
-            <MenuItem Header="Windows Installer" IsCheckable="True" IsChecked="{Binding ShowWindowsInstaller}" StaysOpenOnClick="True">
+            <MenuItem Style="{StaticResource MenuItem.Standard}" Header="Windows Installer" IsCheckable="True" IsChecked="{Binding ShowWindowsInstaller}" StaysOpenOnClick="True">
               <MenuItem.Icon><TextBlock Text="&#xE7B8;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
             </MenuItem>
-            <MenuItem Header="Other installers" IsCheckable="True" IsChecked="{Binding ShowOtherInstallers}" StaysOpenOnClick="True">
+            <MenuItem Style="{StaticResource MenuItem.Standard}" Header="Other installers" IsCheckable="True" IsChecked="{Binding ShowOtherInstallers}" StaysOpenOnClick="True">
               <MenuItem.Icon><TextBlock Text="&#xE8B7;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
             </MenuItem>
           </MenuItem>
           <Separator />
-          <MenuItem Header="Export" Style="{StaticResource MenuItem.Standard}">
+          <MenuItem Style="{StaticResource MenuItem.Standard}" Header="Export" Style="{StaticResource MenuItem.Standard}">
             <MenuItem.Icon><TextBlock Text="&#xE898;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
-            <MenuItem Header="Export grid\u2026" IsEnabled="False" ToolTip="Vestigium.Helpers.ClosedXml is not published yet.">
+            <MenuItem Style="{StaticResource MenuItem.Standard}" Header="Export grid\u2026" IsEnabled="False" ToolTip="Vestigium.Helpers.ClosedXml is not published yet.">
               <MenuItem.Icon><TextBlock Text="&#xE8A5;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
             </MenuItem>
-            <MenuItem Header="Export selected\u2026" IsEnabled="False" ToolTip="Vestigium.Helpers.ClosedXml is not published yet.">
+            <MenuItem Style="{StaticResource MenuItem.Standard}" Header="Export selected\u2026" IsEnabled="False" ToolTip="Vestigium.Helpers.ClosedXml is not published yet.">
               <MenuItem.Icon><TextBlock Text="&#xE8A7;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
             </MenuItem>
           </MenuItem>
           <Separator />
-          <MenuItem Header="Refresh" Style="{StaticResource MenuItem.Standard}" Command="{Binding Host.RefreshCommand}">
+          <MenuItem Style="{StaticResource MenuItem.Standard}" Header="Refresh" Style="{StaticResource MenuItem.Standard}" Command="{Binding Host.RefreshCommand}">
             <MenuItem.Icon><TextBlock Text="&#xE72C;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
           </MenuItem>
         </ContextMenu>
