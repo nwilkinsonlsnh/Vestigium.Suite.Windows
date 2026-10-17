@@ -64,7 +64,8 @@ public sealed partial class MainViewModel : ObservableObject
             IsGlobal = isGlobal,
             UninstallString = Value("UninstallString"),
             KeyPath = key.Path,
-            Hive = key.Hive.ToString()
+            Hive = key.Hive.ToString(),
+            Values = key.Values
         };
     }
 }
