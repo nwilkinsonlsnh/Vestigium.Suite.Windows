@@ -41,6 +41,56 @@ public partial class FeaturesView : UserControl
             ShowDetails(feature);
     }
 
+    private void Menu_Opened(object sender, RoutedEventArgs e)
+    {
+        var node = FeatureTree.SelectedItem as FeatureNode;
+        var expandable = node is { Children.Count: > 0 };
+        ExpandItem.IsEnabled = expandable;
+        CollapseItem.IsEnabled = expandable;
+    }
+
+    private void Expand_Click(object sender, RoutedEventArgs e)
+    {
+        var container = ContainerFor(FeatureTree.SelectedItem);
+        if (container is null || !container.HasItems)
+            return;
+        container.IsExpanded = true;
+        container.BringIntoView();
+    }
+
+    private void Collapse_Click(object sender, RoutedEventArgs e)
+    {
+        var container = ContainerFor(FeatureTree.SelectedItem);
+        if (container is null || !container.HasItems)
+            return;
+        container.IsExpanded = false;
+        var root = container;
+        while (ItemsControl.ItemsControlFromItemContainer(root) is TreeViewItem parent)
+            root = parent;
+        root.IsSelected = true;
+        root.BringIntoView();
+    }
+
+    private TreeViewItem? ContainerFor(object? item)
+    {
+        return item is null ? null : FindContainer(FeatureTree, item);
+    }
+
+    private static TreeViewItem? FindContainer(ItemsControl parent, object item)
+    {
+        if (parent.ItemContainerGenerator.ContainerFromItem(item) is TreeViewItem direct)
+            return direct;
+        foreach (var child in parent.Items)
+        {
+            if (parent.ItemContainerGenerator.ContainerFromItem(child) is not TreeViewItem childContainer)
+                continue;
+            var found = FindContainer(childContainer, item);
+            if (found is not null)
+                return found;
+        }
+        return null;
+    }
+
     private void ShowDetails(FeatureRow feature)
     {
         if (_details is null || !_details.IsLoaded)
