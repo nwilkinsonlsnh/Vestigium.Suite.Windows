@@ -8,6 +8,11 @@ public sealed class AppMgmtSettings
     public string? ThemeId { get; set; }
     public bool ShowGlobal { get; set; } = true;
     public bool ShowPerUser { get; set; } = true;
+    public bool ShowX64 { get; set; } = true;
+    public bool ShowX86 { get; set; } = true;
+    public bool ShowSystemComponents { get; set; }
+    public bool ShowWindowsInstaller { get; set; } = true;
+    public bool ShowOtherInstallers { get; set; } = true;
     public string DateFormat { get; set; } = DisplayFormats.DefaultDateFormat.Label;
     public int DecimalPlaces { get; set; } = 4;
 }
