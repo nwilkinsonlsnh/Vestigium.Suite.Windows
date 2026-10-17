@@ -43,10 +43,11 @@ public partial class FeaturesView : UserControl
 
     private void Menu_Opened(object sender, RoutedEventArgs e)
     {
-        var node = FeatureTree.SelectedItem as FeatureNode;
-        var expandable = node is { Children.Count: > 0 };
+        var container = ContainerFor(FeatureTree.SelectedItem);
+        var expandable = container is { HasItems: true };
+        var inside = ParentContainer(container) is { HasItems: true };
         ExpandItem.IsEnabled = expandable;
-        CollapseItem.IsEnabled = expandable;
+        CollapseItem.IsEnabled = expandable || inside;
     }
 
     private void Expand_Click(object sender, RoutedEventArgs e)
@@ -61,19 +62,24 @@ public partial class FeaturesView : UserControl
     private void Collapse_Click(object sender, RoutedEventArgs e)
     {
         var container = ContainerFor(FeatureTree.SelectedItem);
-        if (container is null || !container.HasItems)
+        if (container is null)
             return;
-        container.IsExpanded = false;
-        var root = container;
-        while (ItemsControl.ItemsControlFromItemContainer(root) is TreeViewItem parent)
-            root = parent;
-        root.IsSelected = true;
-        root.BringIntoView();
+        var target = container.HasItems ? container : ParentContainer(container);
+        if (target is null)
+            return;
+        target.IsExpanded = false;
+        target.IsSelected = true;
+        target.BringIntoView();
     }
 
     private TreeViewItem? ContainerFor(object? item)
     {
         return item is null ? null : FindContainer(FeatureTree, item);
+    }
+
+    private static TreeViewItem? ParentContainer(TreeViewItem? item)
+    {
+        return item is null ? null : ItemsControl.ItemsControlFromItemContainer(item) as TreeViewItem;
     }
 
     private static TreeViewItem? FindContainer(ItemsControl parent, object item)
