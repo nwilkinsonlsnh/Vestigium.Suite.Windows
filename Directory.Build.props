@@ -16,7 +16,7 @@
     <VestigiumNumericUpDownVersion>1.0.2</VestigiumNumericUpDownVersion>
     <VestigiumUnderConstructionVersion>1.0.1</VestigiumUnderConstructionVersion>
     <VestigiumConvertersVersion>1.0.0</VestigiumConvertersVersion>
-    <VestigiumWinRegVersion>0.1.0</VestigiumWinRegVersion>
+    <VestigiumWinRegVersion>1.0.0</VestigiumWinRegVersion>
     <MicrosoftExtensionsDiVersion>10.0.12</MicrosoftExtensionsDiVersion>
   </PropertyGroup>
 
