@@ -3,30 +3,43 @@ using Vestigium.Suite.Windows.AppMgmtIQ.ViewModels;
 
 namespace Vestigium.Suite.Windows.AppMgmtIQ;
 
+public enum UninstallMode
+{
+    Registered,
+    QuietNone,
+    QuietBasic
+}
+
 public sealed record UninstallPlan(string FileName, string Arguments, string Display, bool Rewritten, string? Note)
 {
     private static readonly Regex GuidPattern = new(@"\{[0-9A-Fa-f\-]{36}\}", RegexOptions.Compiled);
 
-    public static UninstallPlan? Build(PackageRow row)
+    public static bool CanForce(PackageRow row)
+    {
+        var raw = row.UninstallString?.Trim();
+        return !string.IsNullOrWhiteSpace(raw) && ProductCode(row, raw) is not null && IsInstaller(row, raw);
+    }
+
+    public static UninstallPlan? Build(PackageRow row, UninstallMode mode)
     {
         var raw = row.UninstallString?.Trim();
         if (string.IsNullOrWhiteSpace(raw))
             return null;
 
-        var code = ProductCode(row, raw);
-        if (code is not null && IsInstaller(row, raw))
+        if (mode == UninstallMode.Registered)
         {
-            var display = $"msiexec.exe /x {code} /qb";
-            return new UninstallPlan(
-                "msiexec.exe",
-                $"/x {code} /qb",
-                display,
-                true,
-                "Rewritten from the maintenance string. /I opens the installer dialog. /x removes the package.");
+            var (file, args) = Split(raw);
+            return new UninstallPlan(file, args, raw, false, null);
         }
 
-        var (file, args) = Split(raw);
-        return new UninstallPlan(file, args, raw, false, null);
+        var code = ProductCode(row, raw);
+        if (code is null || !IsInstaller(row, raw))
+            return null;
+
+        var ui = mode == UninstallMode.QuietNone ? "/qn" : "/qb";
+        var label = mode == UninstallMode.QuietNone ? "no interface" : "basic interface";
+        var display = $"msiexec.exe /x {code} {ui} /norestart";
+        return new UninstallPlan("msiexec.exe", $"/x {code} {ui} /norestart", display, true, $"Forced uninstall, {label}.");
     }
 
     private static bool IsInstaller(PackageRow row, string raw)
