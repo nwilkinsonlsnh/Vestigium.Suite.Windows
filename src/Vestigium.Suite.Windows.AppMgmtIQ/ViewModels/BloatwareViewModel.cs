@@ -1,6 +1,8 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Vestigium.Helpers.Kql;
+using Vestigium.Helpers.Kql.AppMgmt;
 using Vestigium.Helpers.WinReg;
 
 namespace Vestigium.Suite.Windows.AppMgmtIQ.ViewModels;
@@ -12,8 +14,15 @@ public sealed partial class BloatwareViewModel : ObservableObject
     private const string UserPackages = @"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\Repository\Packages";
 
     private readonly List<BloatwareRow> _all = [];
+    private readonly KqlSession _session = AppMgmtKql.Bloatware();
+    private KqlBoundQuery? _bound;
 
     public ObservableCollection<BloatwareRow> Rows { get; } = [];
+    public ObservableCollection<string> Queries { get; } = [];
+    public KqlSession Session => _session;
+
+    [ObservableProperty]
+    private string _query = string.Empty;
 
     [ObservableProperty]
     private string _status = "Idle";
@@ -24,8 +33,13 @@ public sealed partial class BloatwareViewModel : ObservableObject
     [ObservableProperty]
     private string _loadingMessage = "Reading AppX packages\u2026";
 
-    [ObservableProperty]
-    private bool _installedOnly = true;
+    public void ApplyQuery()
+    {
+        _bound = KqlHost.Compile(Query, _session, _bound, out var error);
+        Apply();
+        if (!string.IsNullOrEmpty(error))
+            Status = error;
+    }
 
     public async Task LoadAsync()
     {
@@ -37,7 +51,7 @@ public sealed partial class BloatwareViewModel : ObservableObject
             _all.Clear();
             _all.AddRange(found);
             Apply();
-            HostLog.Information(AppMgmtCatalog.BloatwareLoaded, "Bloatware", $"Bloatware catalog matched. {Rows.Count} present of {_all.Count}.");
+            HostLog.Information(AppMgmtCatalog.BloatwareLoaded, "Bloatware", $"Bloatware catalog matched. {_all.Count(row => row.Installed)} present of {_all.Count}.");
         }
         finally
         {
@@ -48,18 +62,30 @@ public sealed partial class BloatwareViewModel : ObservableObject
     [RelayCommand]
     private Task Refresh() => LoadAsync();
 
-    partial void OnInstalledOnlyChanged(bool value) => Apply();
-
     private void Apply()
     {
         Rows.Clear();
-        foreach (var row in _all.Where(Visible).OrderBy(row => row.Name, StringComparer.OrdinalIgnoreCase))
+        foreach (var row in _all.Where(Matches).OrderBy(row => row.Name, StringComparer.OrdinalIgnoreCase))
             Rows.Add(row);
         var present = _all.Count(row => row.Installed);
-        Status = $"{present} present of {_all.Count} catalog entries";
+        if (string.IsNullOrWhiteSpace(Query) || _bound is not null)
+            Status = $"{Rows.Count} shown. {present} present of {_all.Count} catalog entries";
     }
 
-    private bool Visible(BloatwareRow row) => !InstalledOnly || row.Installed;
+    private bool Matches(BloatwareRow row)
+    {
+        if (_bound is null)
+            return true;
+        return _bound.Matches(BloatwareAdapter.ToRow(_session, new BloatwareFacts
+        {
+            Name = row.Name,
+            Family = row.Family,
+            Category = row.Category,
+            Installed = row.Installed,
+            Provisioned = row.Provisioned,
+            Package = row.Package
+        }));
+    }
 
     private static List<BloatwareRow> ReadInstalled()
     {
