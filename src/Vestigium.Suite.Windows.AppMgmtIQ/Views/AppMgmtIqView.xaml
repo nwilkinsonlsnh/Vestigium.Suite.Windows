@@ -86,7 +86,7 @@
           <MenuItem Header="Open Details" Command="{Binding OpenDetailsCommand}" IsEnabled="{Binding HasSelection}">
             <MenuItem.Icon><TextBlock Text="&#xE8A7;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
           </MenuItem>
-          <MenuItem Header="Uninstall" IsEnabled="False" ToolTip="Placeholder. Uninstall is not wired in this release.">
+          <MenuItem Header="Uninstall" Click="Uninstall_Click" ToolTip="Run the package uninstall string. A NoRemove package asks before the flag is cleared.">
             <MenuItem.Icon><TextBlock Text="&#xE74D;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
           </MenuItem>
           <Separator />
