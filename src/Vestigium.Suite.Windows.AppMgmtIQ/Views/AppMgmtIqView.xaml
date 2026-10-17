@@ -14,9 +14,14 @@
   </UserControl.Resources>
   <Grid Margin="12">
     <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
     </Grid.RowDefinitions>
-    <DataGrid x:Name="PackageGrid"
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,8">
+      <Button Content="Refresh" Command="{Binding RefreshCommand}" Padding="12,4" MinWidth="88" />
+    </StackPanel>
+    <DataGrid Grid.Row="1"
+              x:Name="PackageGrid"
               Style="{StaticResource DataGrid.Standard}"
               ItemsSource="{Binding Packages}"
               SelectedItem="{Binding SelectedPackage, Mode=TwoWay}"
@@ -88,7 +93,8 @@
       </DataGrid.Columns>
     </DataGrid>
 
-    <Border Background="{DynamicResource Vestigium.Brushes.Surface.Window}"
+    <Border Grid.RowSpan="2"
+            Background="{DynamicResource Vestigium.Brushes.Surface.Window}"
             Opacity="0.92"
             Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
       <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
