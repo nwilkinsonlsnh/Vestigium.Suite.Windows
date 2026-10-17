@@ -14,10 +14,13 @@
     <PackageReference Include="Vestigium.Logging" Version="$(VestigiumLoggingVersion)" />
     <PackageReference Include="Vestigium.Themes" Version="$(VestigiumThemesVersion)" />
     <PackageReference Include="Vestigium.Controls" Version="$(VestigiumControlsVersion)" />
+    <PackageReference Include="Vestigium.Controls.QueryBar" Version="$(VestigiumQueryBarVersion)" />
     <PackageReference Include="Vestigium.Controls.StatusBar" Version="$(VestigiumStatusBarVersion)" />
     <PackageReference Include="Vestigium.Controls.NumericUpDown" Version="$(VestigiumNumericUpDownVersion)" />
     <PackageReference Include="Vestigium.Controls.UnderConstruction" Version="$(VestigiumUnderConstructionVersion)" />
     <PackageReference Include="Vestigium.Converters" Version="$(VestigiumConvertersVersion)" />
+    <PackageReference Include="Vestigium.Helpers.Kql" Version="$(VestigiumKqlVersion)" />
+    <PackageReference Include="Vestigium.Helpers.Kql.AppMgmt" Version="$(VestigiumKqlAppMgmtVersion)" />
     <PackageReference Include="Vestigium.Helpers.WinReg" Version="$(VestigiumWinRegVersion)" />
   </ItemGroup>
 </Project>
