@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using Vestigium.Suite.Windows.AppMgmtIQ.ViewModels;
 
 namespace Vestigium.Suite.Windows.AppMgmtIQ;
@@ -15,7 +16,8 @@ public partial class DetailsWindow : Window
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
-        var first = FindFirstRadio(TabStrip);
+        UpdateLayout();
+        var first = FindRadio(TabStrip);
         if (first is not null)
             first.IsChecked = true;
     }
@@ -27,26 +29,12 @@ public partial class DetailsWindow : Window
         vm.SelectedTab = tab;
     }
 
-    private static RadioButton? FindFirstRadio(ItemsControl strip)
-    {
-        for (var i = 0; i < strip.Items.Count; i++)
-        {
-            if (strip.ItemContainerGenerator.ContainerFromIndex(i) is ContentPresenter presenter &&
-                presenter.ContentTemplate?.FindName("", presenter) is null)
-            {
-                // ItemTemplate radios are not named. Walk the visual tree.
-            }
-        }
-
-        return FindRadio(strip);
-    }
-
     private static RadioButton? FindRadio(DependencyObject start)
     {
-        var count = System.Windows.Media.VisualTreeHelper.GetChildrenCount(start);
+        var count = VisualTreeHelper.GetChildrenCount(start);
         for (var i = 0; i < count; i++)
         {
-            var child = System.Windows.Media.VisualTreeHelper.GetChild(start, i);
+            var child = VisualTreeHelper.GetChild(start, i);
             if (child is RadioButton radio)
                 return radio;
             var nested = FindRadio(child);
