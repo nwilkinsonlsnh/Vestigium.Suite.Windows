@@ -11,20 +11,25 @@
   <DockPanel>
     <Grid DockPanel.Dock="Top" Margin="12,8,12,0">
       <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-        <RadioButton x:Name="AppMgmtTab"
-                     Content="AppMgmtIQ"
+        <RadioButton Content="AppMgmtIQ"
                      Style="{StaticResource RadioButton.UnderlineTab}"
                      GroupName="AppMgmtMainNav"
                      IsChecked="True"
                      Checked="MainNav_Checked" />
-        <RadioButton x:Name="SettingsTab"
-                     Content="Settings"
+        <RadioButton Content="Export"
+                     Style="{StaticResource RadioButton.UnderlineTab}"
+                     GroupName="AppMgmtMainNav"
+                     Checked="MainNav_Checked" />
+        <RadioButton Content="Dashboard"
+                     Style="{StaticResource RadioButton.UnderlineTab}"
+                     GroupName="AppMgmtMainNav"
+                     Checked="MainNav_Checked" />
+        <RadioButton Content="Settings"
                      Style="{StaticResource RadioButton.UnderlineTab}"
                      GroupName="AppMgmtMainNav"
                      Checked="MainNav_Checked" />
       </StackPanel>
-      <RadioButton x:Name="HelpTab"
-                   Content="Help"
+      <RadioButton Content="Help"
                    Style="{StaticResource RadioButton.UnderlineTab}"
                    GroupName="AppMgmtMainNav"
                    HorizontalAlignment="Right"
