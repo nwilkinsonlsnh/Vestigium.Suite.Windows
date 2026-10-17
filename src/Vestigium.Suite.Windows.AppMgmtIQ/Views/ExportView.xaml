@@ -1,0 +1,10 @@
+<UserControl x:Class="Vestigium.Suite.Windows.AppMgmtIQ.Views.ExportView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{DynamicResource Vestigium.Brushes.Surface.Window}">
+  <TextBlock Margin="24"
+             FontSize="16"
+             TextWrapping="Wrap"
+             Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}"
+             Text="Export. Placeholder. Writes the visible grid or the selected package through Vestigium.Helpers.ClosedXml when that door is published." />
+</UserControl>
