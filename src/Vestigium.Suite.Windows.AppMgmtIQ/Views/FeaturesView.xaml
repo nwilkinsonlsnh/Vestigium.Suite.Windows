@@ -6,34 +6,22 @@
              HorizontalAlignment="Stretch">
   <UserControl.Resources>
     <BooleanToVisibilityConverter x:Key="BoolToVis" />
-    <Style x:Key="LeftCell" TargetType="TextBlock">
-      <Setter Property="HorizontalAlignment" Value="Left" />
-      <Setter Property="VerticalAlignment" Value="Center" />
-      <Setter Property="Margin" Value="4,0,4,0" />
-    </Style>
+    <HierarchicalDataTemplate x:Key="FeatureTemplate" ItemsSource="{Binding Children}">
+      <StackPanel Orientation="Horizontal">
+        <CheckBox IsChecked="{Binding IsEnabled, Mode=OneWay}" IsHitTestVisible="False" VerticalAlignment="Center" Margin="0,0,6,0" />
+        <TextBlock Text="{Binding Caption}" VerticalAlignment="Center" Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}" />
+      </StackPanel>
+    </HierarchicalDataTemplate>
   </UserControl.Resources>
   <Grid Margin="12">
-    <DataGrid x:Name="FeatureGrid"
-              Style="{StaticResource DataGrid.Standard}"
-              ItemsSource="{Binding Features}"
-              SelectedItem="{Binding SelectedFeature, Mode=TwoWay}"
-              SelectionMode="Single"
-              SelectionUnit="FullRow"
-              AutoGenerateColumns="False"
-              IsReadOnly="True"
-              HeadersVisibility="Column"
-              CanUserAddRows="False"
-              CanUserDeleteRows="False"
-              CanUserResizeColumns="True"
-              CanUserReorderColumns="True"
-              CanUserSortColumns="True"
-              ColumnWidth="*"
-              VerticalAlignment="Stretch"
-              HorizontalAlignment="Stretch"
-              VerticalScrollBarVisibility="Visible"
-              HorizontalScrollBarVisibility="Disabled"
-              MouseDoubleClick="Grid_MouseDoubleClick">
-      <DataGrid.ContextMenu>
+    <TreeView x:Name="FeatureTree"
+              ItemsSource="{Binding Roots}"
+              ItemTemplate="{StaticResource FeatureTemplate}"
+              Background="{DynamicResource Vestigium.Brushes.Surface.Window}"
+              BorderBrush="{DynamicResource Vestigium.Brushes.Border.Subtle}"
+              SelectedItemChanged="Tree_SelectedItemChanged"
+              MouseDoubleClick="Tree_MouseDoubleClick">
+      <TreeView.ContextMenu>
         <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
           <MenuItem Header="Open Details" Click="OpenDetails_Click" />
           <Separator />
@@ -45,14 +33,8 @@
           <Separator />
           <MenuItem Header="Refresh" Command="{Binding RefreshCommand}" />
         </ContextMenu>
-      </DataGrid.ContextMenu>
-      <DataGrid.Columns>
-        <DataGridTextColumn Header="Display Name" Binding="{Binding Caption}" Width="2*" MinWidth="180" ElementStyle="{StaticResource LeftCell}" SortDirection="Ascending" />
-        <DataGridTextColumn Header="Feature Name" Binding="{Binding Name}" Width="*" MinWidth="140" ElementStyle="{StaticResource LeftCell}" />
-        <DataGridTextColumn Header="State" Binding="{Binding State}" Width="*" MinWidth="90" ElementStyle="{StaticResource LeftCell}" />
-        <DataGridCheckBoxColumn Header="Enabled" Binding="{Binding IsEnabled, Mode=OneWay}" Width="*" MinWidth="70" IsReadOnly="True" />
-      </DataGrid.Columns>
-    </DataGrid>
+      </TreeView.ContextMenu>
+    </TreeView>
 
     <Border Background="{DynamicResource Vestigium.Brushes.Surface.Window}"
             Opacity="0.92"
