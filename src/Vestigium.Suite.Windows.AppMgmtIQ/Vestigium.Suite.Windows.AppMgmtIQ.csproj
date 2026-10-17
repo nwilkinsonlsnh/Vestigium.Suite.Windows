@@ -19,6 +19,8 @@
     <PackageReference Include="Vestigium.Controls.NumericUpDown" Version="$(VestigiumNumericUpDownVersion)" />
     <PackageReference Include="Vestigium.Controls.UnderConstruction" Version="$(VestigiumUnderConstructionVersion)" />
     <PackageReference Include="Vestigium.Converters" Version="$(VestigiumConvertersVersion)" />
+    <PackageReference Include="Vestigium.Helpers.Analytics" Version="$(VestigiumAnalyticsVersion)" />
+    <PackageReference Include="Vestigium.Helpers.Charts" Version="$(VestigiumChartsVersion)" />
     <PackageReference Include="Vestigium.Helpers.ClosedXml" Version="$(VestigiumClosedXmlVersion)" />
     <PackageReference Include="Vestigium.Helpers.Kql" Version="$(VestigiumKqlVersion)" />
     <PackageReference Include="Vestigium.Helpers.Kql.AppMgmt" Version="$(VestigiumKqlAppMgmtVersion)" />
