@@ -7,11 +7,14 @@ public sealed partial class SettingsViewModel : ObservableObject
 {
     private readonly ThemeManager _themes;
     private readonly MainViewModel _host;
+    private readonly AppMgmtSettingsStore _store;
+    private bool _loading;
 
-    public SettingsViewModel(ThemeManager themes, MainViewModel host)
+    public SettingsViewModel(ThemeManager themes, MainViewModel host, AppMgmtSettingsStore store)
     {
         _themes = themes;
         _host = host;
+        _store = store;
         _selectedThemeId = themes.Current?.Id ?? themes.AvailableThemes.FirstOrDefault()?.Id;
         _selectedDateFormat = DisplayFormats.DefaultDateFormat;
         themes.ThemeChanged += (_, _) =>
@@ -61,17 +64,33 @@ public sealed partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private decimal _decimalPlaces = 4;
 
+    public void Load()
+    {
+        _loading = true;
+        var data = _store.Load();
+        ShowGlobal = data.ShowGlobal;
+        ShowPerUser = data.ShowPerUser;
+        DecimalPlaces = Math.Clamp(data.DecimalPlaces, 0, 8);
+        SelectedDateFormat = DateFormats.FirstOrDefault(f => f.Label == data.DateFormat) ?? DisplayFormats.DefaultDateFormat;
+        if (!string.IsNullOrWhiteSpace(data.ThemeId))
+            SelectedThemeId = data.ThemeId;
+        _loading = false;
+        _host.ApplySettings(ShowGlobal, ShowPerUser, SelectedDateFormat.Pattern, (int)DecimalPlaces);
+    }
+
     partial void OnSelectedThemeIdChanged(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
             return;
-        if (_themes.Current?.Id != value)
+        var previous = _themes.Current?.Id;
+        if (previous != value)
             _themes.SwitchTheme(value);
+        Changed("Theme", previous, value);
     }
 
-    partial void OnShowGlobalChanged(bool value) => Push();
-    partial void OnShowPerUserChanged(bool value) => Push();
-    partial void OnSelectedDateFormatChanged(DateFormatOption value) => Push();
+    partial void OnShowGlobalChanged(bool value) => Changed("Show Global Packages", (!value).ToString(), value.ToString());
+    partial void OnShowPerUserChanged(bool value) => Changed("Show Per User Packages", (!value).ToString(), value.ToString());
+    partial void OnSelectedDateFormatChanged(DateFormatOption value) => Changed("Date format", null, value?.Label);
 
     partial void OnDecimalPlacesChanged(decimal value)
     {
@@ -81,15 +100,34 @@ public sealed partial class SettingsViewModel : ObservableObject
             DecimalPlaces = clamped;
             return;
         }
-        Push();
+        Changed("Decimal places", null, clamped.ToString());
     }
 
-    private void Push()
+    private void Changed(string name, string? previous, string? next)
     {
+        if (_loading)
+            return;
+
         _host.ApplySettings(
             ShowGlobal,
             ShowPerUser,
             SelectedDateFormat?.Pattern ?? DisplayFormats.DefaultDateFormat.Pattern,
             (int)DecimalPlaces);
+
+        HostLog.Information(
+            AppMgmtCatalog.SettingsChanged,
+            "Settings",
+            $"{name}: current '{previous ?? "(unset)"}' new '{next ?? "(unset)"}'");
+
+        _store.Save(new AppMgmtSettings
+        {
+            ThemeId = SelectedThemeId,
+            ShowGlobal = ShowGlobal,
+            ShowPerUser = ShowPerUser,
+            DateFormat = SelectedDateFormat?.Label ?? DisplayFormats.DefaultDateFormat.Label,
+            DecimalPlaces = (int)DecimalPlaces
+        });
+
+        HostLog.Information(AppMgmtCatalog.SettingsSaved, "Settings", $"Settings saved. {_store.FilePath}");
     }
 }
