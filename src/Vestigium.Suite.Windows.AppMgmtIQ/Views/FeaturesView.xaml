@@ -69,6 +69,7 @@
               Background="{DynamicResource Vestigium.Brushes.Surface.Window}"
               BorderBrush="{DynamicResource Vestigium.Brushes.Border.Subtle}"
               SelectedItemChanged="Tree_SelectedItemChanged"
+              PreviewMouseRightButtonDown="Tree_PreviewMouseRightButtonDown"
               MouseDoubleClick="Tree_MouseDoubleClick">
       <TreeView.ContextMenu>
         <ContextMenu Opened="Menu_Opened">
