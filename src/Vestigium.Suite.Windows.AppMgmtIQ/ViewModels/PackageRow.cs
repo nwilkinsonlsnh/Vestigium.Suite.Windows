@@ -1,3 +1,4 @@
+using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Vestigium.Helpers.WinReg;
 
@@ -25,6 +26,7 @@ public sealed partial class PackageRow : ObservableObject
     public required string KeyPath { get; init; }
     public required string Hive { get; init; }
     public required IReadOnlyList<RegistryValueInfo> Values { get; init; }
+    public ImageSource? Icon { get; init; }
 
     [ObservableProperty]
     private string _displayInstallDate = "";
