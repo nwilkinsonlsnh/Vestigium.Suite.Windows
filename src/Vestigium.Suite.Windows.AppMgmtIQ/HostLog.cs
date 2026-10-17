@@ -23,7 +23,11 @@ public static class HostLog
             cfg.AppId = appId;
             cfg.LogDirectory = root;
             WinRegCatalog.Register(cfg);
+            AppMgmtCatalog.Register(cfg);
             extra?.Invoke(cfg);
         });
     }
+
+    public static void Information(int eventId, string subcategory, string message)
+        => VestigiumLog.Information(eventId, VestigiumStatus.Success, AppMgmtCatalog.Category, subcategory, message, appId: HostIds.AppMgmtIQ);
 }
