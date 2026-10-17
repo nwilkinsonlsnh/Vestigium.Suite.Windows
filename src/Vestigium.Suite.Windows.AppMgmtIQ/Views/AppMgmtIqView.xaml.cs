@@ -8,6 +8,8 @@ namespace Vestigium.Suite.Windows.AppMgmtIQ.Views;
 
 public partial class AppMgmtIqView : UserControl
 {
+    private DetailsWindow? _details;
+
     public AppMgmtIqView()
     {
         InitializeComponent();
@@ -16,8 +18,6 @@ public partial class AppMgmtIqView : UserControl
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
-        // VestigiumShell wraps content in a ScrollViewer. That gives the DataGrid
-        // infinite height, so the window scrolls instead of the grid.
         var scroller = FindAncestor<ScrollViewer>(this);
         if (scroller is not null)
             scroller.VerticalScrollBarVisibility = ScrollBarVisibility.Disabled;
@@ -25,14 +25,32 @@ public partial class AppMgmtIqView : UserControl
 
     private void Grid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
+        ShowOrUpdateDetails();
+    }
+
+    private void Grid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_details is { IsVisible: true })
+            ShowOrUpdateDetails();
+    }
+
+    private void ShowOrUpdateDetails()
+    {
         if (DataContext is not MainViewModel vm || vm.SelectedPackage is null)
             return;
 
-        var window = new DetailsWindow(vm.SelectedPackage)
+        if (_details is null || !_details.IsLoaded)
         {
-            Owner = Window.GetWindow(this)
-        };
-        window.Show();
+            _details = new DetailsWindow
+            {
+                Owner = Window.GetWindow(this)
+            };
+            _details.Closed += (_, _) => _details = null;
+            _details.Show();
+        }
+
+        _details.SetPackage(vm.SelectedPackage);
+        _details.Activate();
     }
 
     private static T? FindAncestor<T>(DependencyObject start) where T : DependencyObject
