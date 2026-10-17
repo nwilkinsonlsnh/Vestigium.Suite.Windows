@@ -1,5 +1,8 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Globalization;
+using System.Security.Principal;
+using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Vestigium.Helpers.Kql;
@@ -82,6 +85,88 @@ public sealed partial class MainViewModel : ObservableObject
 
     [RelayCommand]
     private Task Refresh() => LoadAsync();
+
+    public async Task UninstallAsync(PackageRow package, Window owner)
+    {
+        var plan = UninstallPlan.Build(package);
+        if (plan is null)
+        {
+            MessageBox.Show(owner, $"{package.DisplayName} has no UninstallString.", "Uninstall", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        var actor = WindowsIdentity.GetCurrent().Name;
+        if (package.NoRemove)
+        {
+            var clear = MessageBox.Show(
+                owner,
+                $"{package.DisplayName} is marked NoRemove.\n\nClearing it writes NoRemove = 0 on\n{package.Hive}\\{package.KeyPath}\n\nThis is logged and attributed to {actor}.\n\nClear the flag and continue?",
+                "NoRemove",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+            if (clear != MessageBoxResult.Yes)
+                return;
+            if (!ClearNoRemove(package, actor))
+                return;
+        }
+
+        var note = plan.Rewritten ? $"\n\n{plan.Note}" : string.Empty;
+        var go = MessageBox.Show(
+            owner,
+            $"Uninstall {package.DisplayName}?\n\nCommand:\n{plan.Display}{note}\n\nActor: {actor}",
+            "Uninstall",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning);
+        if (go != MessageBoxResult.Yes)
+            return;
+
+        HostLog.Information(
+            AppMgmtCatalog.UninstallStarted,
+            "Uninstall",
+            $"Uninstall started. package={package.DisplayName} command={plan.Display} rewritten={plan.Rewritten} actor={actor}");
+        Status = $"Uninstalling {package.DisplayName}\u2026";
+        try
+        {
+            var process = Process.Start(new ProcessStartInfo(plan.FileName, plan.Arguments) { UseShellExecute = true });
+            if (process is not null)
+                await process.WaitForExitAsync();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(owner, ex.Message, "Uninstall", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+
+        await LoadAsync();
+    }
+
+    private static bool ClearNoRemove(PackageRow package, string actor)
+    {
+        if (!Enum.TryParse<RegistryHiveKind>(package.Hive, out var hive))
+        {
+            MessageBox.Show($"Unknown hive {package.Hive}.", "NoRemove", MessageBoxButton.OK, MessageBoxImage.Error);
+            return false;
+        }
+
+        var result = RegistryHelper.Local.SetValue(
+            hive,
+            package.KeyPath,
+            "NoRemove",
+            0,
+            RegistryValueKind.DWord,
+            RegistryViewKind.Default,
+            confirm: true);
+        if (result.Status != RegistryWriteStatus.Ok)
+        {
+            MessageBox.Show($"Could not clear NoRemove.\n{result.Status} {result.Message}", "NoRemove", MessageBoxButton.OK, MessageBoxImage.Error);
+            return false;
+        }
+
+        HostLog.Information(
+            AppMgmtCatalog.NoRemoveCleared,
+            "Uninstall",
+            $"NoRemove cleared. package={package.DisplayName} key={package.Hive}\\{package.KeyPath} old=1 new=0 actor={actor}");
+        return true;
+    }
 
     public void ApplySettings(
         bool showGlobal,
