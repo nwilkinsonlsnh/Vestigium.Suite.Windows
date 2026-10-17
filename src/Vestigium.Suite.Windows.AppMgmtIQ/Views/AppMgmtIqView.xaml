@@ -10,12 +10,31 @@
       <Setter Property="HorizontalAlignment" Value="Left" />
       <Setter Property="VerticalAlignment" Value="Center" />
       <Setter Property="Margin" Value="4,0,4,0" />
+      <Setter Property="Foreground" Value="{DynamicResource Vestigium.Brushes.Text.Primary}" />
     </Style>
     <Style x:Key="MenuIcon" TargetType="TextBlock">
       <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
       <Setter Property="FontSize" Value="14" />
       <Setter Property="Foreground" Value="{DynamicResource Vestigium.Brushes.Text.Primary}" />
       <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style x:Key="PackageRow" TargetType="DataGridRow" BasedOn="{StaticResource DataGridRow.Standard}">
+      <Style.Triggers>
+        <Trigger Property="IsSelected" Value="True">
+          <Setter Property="Background" Value="{DynamicResource Vestigium.Brushes.Accent.Softer}" />
+          <Setter Property="Foreground" Value="{DynamicResource Vestigium.Brushes.Text.Primary}" />
+        </Trigger>
+      </Style.Triggers>
+    </Style>
+    <Style x:Key="PackageCell" TargetType="DataGridCell" BasedOn="{StaticResource DataGridCell.Standard}">
+      <Setter Property="Foreground" Value="{DynamicResource Vestigium.Brushes.Text.Primary}" />
+      <Style.Triggers>
+        <Trigger Property="IsSelected" Value="True">
+          <Setter Property="Background" Value="Transparent" />
+          <Setter Property="Foreground" Value="{DynamicResource Vestigium.Brushes.Text.Primary}" />
+          <Setter Property="BorderBrush" Value="Transparent" />
+        </Trigger>
+      </Style.Triggers>
     </Style>
   </UserControl.Resources>
   <Grid Margin="12">
@@ -40,9 +59,17 @@
               HorizontalScrollBarVisibility="Disabled"
               ScrollViewer.VerticalScrollBarVisibility="Visible"
               ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+              RowStyle="{StaticResource PackageRow}"
+              CellStyle="{StaticResource PackageCell}"
               PreviewMouseRightButtonDown="Grid_PreviewMouseRightButtonDown"
               MouseDoubleClick="Grid_MouseDoubleClick"
               SelectionChanged="Grid_SelectionChanged">
+      <DataGrid.Resources>
+        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#334C8DFF" />
+        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#F4F7FB" />
+        <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="#334C8DFF" />
+        <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="#F4F7FB" />
+      </DataGrid.Resources>
       <DataGrid.ContextMenu>
         <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
           <MenuItem Header="Open Details" Command="{Binding OpenDetailsCommand}" IsEnabled="{Binding HasSelection}">
