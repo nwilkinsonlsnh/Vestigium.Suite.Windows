@@ -31,16 +31,21 @@ public partial class App : Application
         Services = services.BuildServiceProvider();
 
         ShutdownMode = ShutdownMode.OnMainWindowClose;
-        MainWindow = CreateMainWindow(out var inventory, out var features, out var chrome);
+        MainWindow = CreateMainWindow(out var inventory, out var features, out var chrome, out var dashboard);
         MainWindow.Show();
 
         await Task.WhenAll(inventory.LoadAsync(), features.LoadAsync());
         chrome.Status.Message = inventory.Status;
+        dashboard.Bind(inventory, features);
 
         base.OnStartup(e);
     }
 
-    private static Window CreateMainWindow(out MainViewModel inventory, out FeaturesViewModel featuresVm, out VestigiumDefaultWindowViewModel chrome)
+    private static Window CreateMainWindow(
+        out MainViewModel inventory,
+        out FeaturesViewModel featuresVm,
+        out VestigiumDefaultWindowViewModel chrome,
+        out DashboardView dashboard)
     {
         chrome = Services.GetRequiredService<VestigiumDefaultWindowViewModel>();
         var window = new AppMgmtIqWindow(chrome);
@@ -113,9 +118,10 @@ public partial class App : Application
         if (export is not null)
             export.Content = new ExportView { DataContext = new ExportViewModel(inventory, featuresVm) };
 
-        var dashboard = window.HostShell["Dashboard"];
-        if (dashboard is not null)
-            dashboard.Content = new DashboardView();
+        dashboard = new DashboardView();
+        var dashboardItem = window.HostShell["Dashboard"];
+        if (dashboardItem is not null)
+            dashboardItem.Content = dashboard;
 
         var settingsItem = window.HostShell["Settings"];
         if (settingsItem is not null)
