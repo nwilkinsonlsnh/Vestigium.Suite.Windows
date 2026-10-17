@@ -1,8 +1,16 @@
 <UserControl x:Class="Vestigium.Suite.Windows.AppMgmtIQ.Views.AppMgmtIqView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{DynamicResource Vestigium.Brushes.Surface.Window}"
              VerticalAlignment="Stretch"
              HorizontalAlignment="Stretch">
+  <UserControl.Resources>
+    <Style x:Key="LeftCell" TargetType="TextBlock">
+      <Setter Property="HorizontalAlignment" Value="Left" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+      <Setter Property="Margin" Value="4,0,4,0" />
+    </Style>
+  </UserControl.Resources>
   <Grid Margin="12">
     <Grid.RowDefinitions>
       <RowDefinition Height="*" />
@@ -24,14 +32,14 @@
               ScrollViewer.HorizontalScrollBarVisibility="Auto"
               MouseDoubleClick="Grid_MouseDoubleClick">
       <DataGrid.Columns>
-        <DataGridTextColumn Header="Display Name" Binding="{Binding DisplayName}" Width="*" />
-        <DataGridTextColumn Header="Publisher" Binding="{Binding Publisher}" Width="180" />
-        <DataGridTextColumn Header="Version" Binding="{Binding DisplayVersion}" Width="120" />
-        <DataGridTextColumn Header="Install Date" Binding="{Binding InstallDate}" Width="100" />
-        <DataGridTextColumn Header="Size" Binding="{Binding EstimatedSize}" Width="80" />
+        <DataGridTextColumn Header="Display Name" Binding="{Binding DisplayName}" Width="*" ElementStyle="{StaticResource LeftCell}" />
+        <DataGridTextColumn Header="Publisher" Binding="{Binding Publisher}" Width="200" ElementStyle="{StaticResource LeftCell}" />
+        <DataGridTextColumn Header="Version" Binding="{Binding DisplayVersion}" Width="140" ElementStyle="{StaticResource LeftCell}" />
+        <DataGridTextColumn Header="Install Date" Binding="{Binding DisplayInstallDate}" Width="120" ElementStyle="{StaticResource LeftCell}" />
+        <DataGridTextColumn Header="Size" Binding="{Binding DisplaySize}" Width="110" ElementStyle="{StaticResource LeftCell}" />
         <DataGridCheckBoxColumn Header="x64" Binding="{Binding IsX64}" Width="50" />
-        <DataGridCheckBoxColumn Header="Global" Binding="{Binding IsGlobal}" Width="60" />
-        <DataGridTextColumn Header="Uninstall" Binding="{Binding UninstallString}" Width="200" />
+        <DataGridCheckBoxColumn Header="Global" Binding="{Binding IsGlobal}" Width="70" />
+        <DataGridTextColumn Header="Uninstall" Binding="{Binding UninstallString}" Width="360" ElementStyle="{StaticResource LeftCell}" />
       </DataGrid.Columns>
     </DataGrid>
   </Grid>
