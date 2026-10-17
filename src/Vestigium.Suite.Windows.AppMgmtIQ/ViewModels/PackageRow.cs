@@ -1,3 +1,4 @@
+using CommunityToolkit.Mvvm.ComponentModel;
 using Vestigium.Helpers.WinReg;
 
 namespace Vestigium.Suite.Windows.AppMgmtIQ.ViewModels;
@@ -6,7 +7,7 @@ namespace Vestigium.Suite.Windows.AppMgmtIQ.ViewModels;
 /// Grid projection of one ARP package.
 /// Temporary: the four-root walk and computed fields live here until a Helper door owns them.
 /// </summary>
-public sealed class PackageRow
+public sealed partial class PackageRow : ObservableObject
 {
     public required string DisplayName { get; init; }
     public required string Publisher { get; init; }
@@ -20,6 +21,15 @@ public sealed class PackageRow
     public required string Hive { get; init; }
     public required IReadOnlyList<RegistryValueInfo> Values { get; init; }
 
-    public string DisplayInstallDate => DisplayFormats.Date(InstallDate);
-    public string DisplaySize => DisplayFormats.Size(EstimatedSize);
+    [ObservableProperty]
+    private string _displayInstallDate = "";
+
+    [ObservableProperty]
+    private string _displaySize = "";
+
+    public void ApplyDisplay(string datePattern, int decimals)
+    {
+        DisplayInstallDate = DisplayFormats.Date(InstallDate, datePattern);
+        DisplaySize = DisplayFormats.Size(EstimatedSize, decimals);
+    }
 }
