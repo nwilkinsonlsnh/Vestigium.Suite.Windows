@@ -16,6 +16,12 @@ public partial class FeaturesView : UserControl
         Loaded += OnLoaded;
     }
 
+    private void OnFilter(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is FeaturesViewModel host)
+            host.ApplyQuery();
+    }
+
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
         var scroller = FindAncestor<ScrollViewer>(this);
