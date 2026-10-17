@@ -51,6 +51,18 @@ public partial class App : Application
                     Title = "AppMgmtIQ",
                     Subject = "Installed packages",
                     Description = "Grid of every package from the four ARP roots."
+                },
+                new VestigiumNavItemSpec("Settings")
+                {
+                    Title = "Settings",
+                    Subject = "Display",
+                    Description = "Theme and display options."
+                },
+                new VestigiumNavItemSpec("Help")
+                {
+                    Title = "Help",
+                    Subject = "About",
+                    Description = "How this window works."
                 }
             }
         });
@@ -58,12 +70,20 @@ public partial class App : Application
         var vm = new MainViewModel();
         vm.Load();
 
-        var item = window.HostShell["AppMgmtIQ"];
-        if (item is not null)
+        var inventory = window.HostShell["AppMgmtIQ"];
+        if (inventory is not null)
         {
-            item.Content = new AppMgmtIqView { DataContext = vm };
-            window.HostShell.SelectedItem = item;
+            inventory.Content = new AppMgmtIqView { DataContext = vm };
+            window.HostShell.SelectedItem = inventory;
         }
+
+        var settings = window.HostShell["Settings"];
+        if (settings is not null)
+            settings.Content = new SettingsView();
+
+        var help = window.HostShell["Help"];
+        if (help is not null)
+            help.Content = new HelpView();
 
         chrome.Status.Message = vm.Status;
         return window;
