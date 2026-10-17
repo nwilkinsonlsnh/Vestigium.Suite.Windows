@@ -52,6 +52,13 @@ public partial class AppMgmtIqView : UserControl
         row.Focus();
     }
 
+    private async void Uninstall_Click(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is not MainViewModel host || host.SelectedPackage is not { } package)
+            return;
+        await host.UninstallAsync(package, Window.GetWindow(this));
+    }
+
     private void Grid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
         if (DataContext is MainViewModel { SelectedPackage: { } package })
