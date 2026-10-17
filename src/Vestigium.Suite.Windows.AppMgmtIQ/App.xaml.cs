@@ -56,6 +56,18 @@ public partial class App : Application
                     Subject = "Installed packages",
                     Description = "Grid of every package from the four ARP roots."
                 },
+                new VestigiumNavItemSpec("Export")
+                {
+                    Title = "Export",
+                    Subject = "ClosedXml",
+                    Description = "Export the visible grid or the selected package."
+                },
+                new VestigiumNavItemSpec("Dashboard")
+                {
+                    Title = "Dashboard",
+                    Subject = "Inventory",
+                    Description = "Counts and charts for the inventory."
+                },
                 new VestigiumNavItemSpec("Settings")
                 {
                     Title = "Settings",
@@ -85,6 +97,14 @@ public partial class App : Application
             item.Content = page;
             window.HostShell.SelectedItem = item;
         }
+
+        var export = window.HostShell["Export"];
+        if (export is not null)
+            export.Content = new ExportView();
+
+        var dashboard = window.HostShell["Dashboard"];
+        if (dashboard is not null)
+            dashboard.Content = new DashboardView();
 
         var settingsItem = window.HostShell["Settings"];
         if (settingsItem is not null)
