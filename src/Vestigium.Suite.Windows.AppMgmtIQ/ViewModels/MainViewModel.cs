@@ -1,6 +1,9 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Vestigium.Helpers.Kql;
+using Vestigium.Helpers.Kql.AppMgmt;
 using Vestigium.Helpers.WinReg;
 
 namespace Vestigium.Suite.Windows.AppMgmtIQ.ViewModels;
@@ -20,6 +23,8 @@ public sealed partial class MainViewModel : ObservableObject
     ];
 
     private readonly List<PackageRow> _all = [];
+    private readonly KqlSession _session = AppMgmtKql.Packages();
+    private KqlBoundQuery? _bound;
     private bool _showGlobal = true;
     private bool _showPerUser = true;
     private bool _showX64 = true;
@@ -31,6 +36,11 @@ public sealed partial class MainViewModel : ObservableObject
     private int _decimals = 4;
 
     public ObservableCollection<PackageRow> Packages { get; } = [];
+    public ObservableCollection<string> Queries { get; } = [];
+    public KqlSession Session => _session;
+
+    [ObservableProperty]
+    private string _query = string.Empty;
 
     [ObservableProperty]
     private PackageRow? _selectedPackage;
@@ -43,6 +53,14 @@ public sealed partial class MainViewModel : ObservableObject
 
     [ObservableProperty]
     private string _loadingMessage = "Reading installed packages\u2026";
+
+    partial void OnQueryChanged(string value)
+    {
+        _bound = KqlHost.Compile(value, _session, _bound, out var error);
+        ApplyFilter();
+        if (!string.IsNullOrEmpty(error))
+            Status = error;
+    }
 
     public async Task LoadAsync()
     {
@@ -100,7 +118,8 @@ public sealed partial class MainViewModel : ObservableObject
         foreach (var row in rows)
             Packages.Add(row);
         SelectedPackage = Packages.Contains(keep!) ? keep : null;
-        Status = $"{Packages.Count} packages";
+        if (string.IsNullOrWhiteSpace(Query) || _bound is not null)
+            Status = $"{Packages.Count} packages";
     }
 
     private bool Passes(PackageRow row)
@@ -119,7 +138,44 @@ public sealed partial class MainViewModel : ObservableObject
             return false;
         if (!row.WindowsInstaller && !_showOtherInstallers)
             return false;
-        return true;
+        if (_bound is null)
+            return true;
+        return _bound.Matches(PackageAdapter.ToRow(_session, Facts(row)));
+    }
+
+    private static PackageFacts Facts(PackageRow row)
+    {
+        double? size = double.TryParse(row.EstimatedSize, NumberStyles.Number, CultureInfo.InvariantCulture, out var kb) ? kb : null;
+        return new PackageFacts
+        {
+            DisplayName = row.DisplayName,
+            Publisher = row.Publisher,
+            Version = row.DisplayVersion,
+            MajorVersion = IntValue(row, "VersionMajor", "MajorVersion"),
+            MinorVersion = IntValue(row, "VersionMinor", "MinorVersion"),
+            InstallDate = row.DisplayInstallDate,
+            EstimatedSizeKb = size,
+            IsX64 = row.IsX64,
+            IsGlobal = row.IsGlobal,
+            IsSystemComponent = row.SystemComponent,
+            WindowsInstaller = row.WindowsInstaller,
+            NoModify = row.NoModify,
+            NoRemove = row.NoRemove,
+            NoRepair = row.NoRepair,
+            HasIcon = row.Icon is not null
+        };
+    }
+
+    private static int? IntValue(PackageRow row, params string[] names)
+    {
+        foreach (var name in names)
+        {
+            var text = row.Values.FirstOrDefault(v => string.Equals(v.Name, name, StringComparison.OrdinalIgnoreCase))?.DataText;
+            if (int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value))
+                return value;
+        }
+
+        return null;
     }
 
     private List<PackageRow> ReadAll()
