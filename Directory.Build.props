@@ -19,7 +19,7 @@
     <VestigiumWinRegVersion>1.0.0</VestigiumWinRegVersion>
     <VestigiumKqlVersion>2.0.0</VestigiumKqlVersion>
     <VestigiumKqlAppMgmtVersion>1.0.0</VestigiumKqlAppMgmtVersion>
-    <VestigiumQueryBarVersion>1.0.4</VestigiumQueryBarVersion>
+    <VestigiumQueryBarVersion>1.1.0</VestigiumQueryBarVersion>
     <MicrosoftExtensionsDiVersion>10.0.12</MicrosoftExtensionsDiVersion>
   </PropertyGroup>
 
