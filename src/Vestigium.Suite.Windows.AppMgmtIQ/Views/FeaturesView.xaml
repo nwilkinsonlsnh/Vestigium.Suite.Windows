@@ -6,6 +6,12 @@
              HorizontalAlignment="Stretch">
   <UserControl.Resources>
     <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    <Style x:Key="MenuIcon" TargetType="TextBlock">
+      <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
+      <Setter Property="FontSize" Value="14" />
+      <Setter Property="Foreground" Value="{DynamicResource Vestigium.Brushes.Text.Primary}" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
     <HierarchicalDataTemplate x:Key="FeatureTemplate" ItemsSource="{Binding Children}">
       <Grid>
         <Grid.ColumnDefinitions>
@@ -50,16 +56,28 @@
               SelectedItemChanged="Tree_SelectedItemChanged"
               MouseDoubleClick="Tree_MouseDoubleClick">
       <TreeView.ContextMenu>
-        <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
-          <MenuItem Header="Open Details" Click="OpenDetails_Click" />
-          <Separator />
-          <MenuItem Header="Filter">
-            <MenuItem Header="Enabled" IsCheckable="True" IsChecked="{Binding ShowEnabledFlag}" StaysOpenOnClick="True" />
-            <MenuItem Header="Disabled" IsCheckable="True" IsChecked="{Binding ShowDisabledFlag}" StaysOpenOnClick="True" />
-            <MenuItem Header="Absent" IsCheckable="True" IsChecked="{Binding ShowAbsentFlag}" StaysOpenOnClick="True" />
+        <ContextMenu Opened="Menu_Opened">
+          <MenuItem Header="Open Details" Click="OpenDetails_Click">
+            <MenuItem.Icon><TextBlock Text="&#xE8A7;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
           </MenuItem>
           <Separator />
-          <MenuItem Header="Refresh" Command="{Binding RefreshCommand}" />
+          <MenuItem x:Name="ExpandItem" Header="Expand" Click="Expand_Click" IsEnabled="False">
+            <MenuItem.Icon><TextBlock Text="&#xE70D;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
+          </MenuItem>
+          <MenuItem x:Name="CollapseItem" Header="Collapse" Click="Collapse_Click" IsEnabled="False">
+            <MenuItem.Icon><TextBlock Text="&#xE70E;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
+          </MenuItem>
+          <Separator />
+          <MenuItem Header="Filter">
+            <MenuItem.Icon><TextBlock Text="&#xE71C;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
+            <MenuItem Header="Enabled" IsCheckable="True" IsChecked="{Binding PlacementTarget.DataContext.ShowEnabledFlag, RelativeSource={RelativeSource AncestorType=ContextMenu}}" StaysOpenOnClick="True" />
+            <MenuItem Header="Disabled" IsCheckable="True" IsChecked="{Binding PlacementTarget.DataContext.ShowDisabledFlag, RelativeSource={RelativeSource AncestorType=ContextMenu}}" StaysOpenOnClick="True" />
+            <MenuItem Header="Absent" IsCheckable="True" IsChecked="{Binding PlacementTarget.DataContext.ShowAbsentFlag, RelativeSource={RelativeSource AncestorType=ContextMenu}}" StaysOpenOnClick="True" />
+          </MenuItem>
+          <Separator />
+          <MenuItem Header="Refresh" Command="{Binding PlacementTarget.DataContext.RefreshCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+            <MenuItem.Icon><TextBlock Text="&#xE72C;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
+          </MenuItem>
         </ContextMenu>
       </TreeView.ContextMenu>
     </TreeView>
