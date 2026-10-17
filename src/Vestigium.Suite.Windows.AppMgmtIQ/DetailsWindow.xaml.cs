@@ -14,15 +14,12 @@ public partial class DetailsWindow : Window
 
     public void SetPackage(PackageRow package)
     {
-        var previous = (DataContext as DetailsViewModel)?.SelectedTab?.Header;
+        var previous = (DataContext as DetailsViewModel)?.SelectedTab?.Header ?? "General";
         var vm = new DetailsViewModel(package);
-        if (previous is not null)
-            vm.SelectedTab = vm.Tabs.FirstOrDefault(t => t.Header == previous) ?? vm.Tabs[0];
+        vm.SelectedTab = vm.Tabs.FirstOrDefault(t => t.Header == previous) ?? vm.Tabs[0];
         DataContext = vm;
         UpdateLayout();
-        var first = FindRadio(TabStrip);
-        if (first is not null && first.IsChecked != true)
-            first.IsChecked = true;
+        CheckRadio(vm.SelectedTab?.Header);
     }
 
     private void Tab_Checked(object sender, RoutedEventArgs e)
@@ -32,15 +29,22 @@ public partial class DetailsWindow : Window
         vm.SelectedTab = tab;
     }
 
-    private static RadioButton? FindRadio(DependencyObject start)
+    private void CheckRadio(string? header)
+    {
+        var match = FindRadio(TabStrip, header) ?? FindRadio(TabStrip, null);
+        if (match is not null)
+            match.IsChecked = true;
+    }
+
+    private static RadioButton? FindRadio(DependencyObject start, string? header)
     {
         var count = VisualTreeHelper.GetChildrenCount(start);
         for (var i = 0; i < count; i++)
         {
             var child = VisualTreeHelper.GetChild(start, i);
-            if (child is RadioButton radio)
+            if (child is RadioButton radio && (header is null || Equals(radio.Content, header) || Equals(radio.DataContext is DetailsTab tab ? tab.Header : null, header)))
                 return radio;
-            var nested = FindRadio(child);
+            var nested = FindRadio(child, header);
             if (nested is not null)
                 return nested;
         }
