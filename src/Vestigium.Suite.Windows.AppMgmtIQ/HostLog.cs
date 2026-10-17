@@ -1,4 +1,5 @@
 using System.IO;
+using Vestigium.Helpers.WinReg;
 using Vestigium.Logging;
 
 namespace Vestigium.Suite.Windows.AppMgmtIQ;
@@ -21,6 +22,7 @@ public static class HostLog
         {
             cfg.AppId = appId;
             cfg.LogDirectory = root;
+            WinRegCatalog.Register(cfg);
             extra?.Invoke(cfg);
         });
     }
