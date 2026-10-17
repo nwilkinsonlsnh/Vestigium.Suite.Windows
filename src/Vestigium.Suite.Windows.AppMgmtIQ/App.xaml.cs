@@ -71,7 +71,7 @@ public partial class App : Application
             }
         });
 
-        inventory = new MainViewModel();
+        inventory = new MainViewModel { IsLoading = true };
         var store = new AppMgmtSettingsStore(AppMgmtSettingsStore.DefaultRoot);
         var settings = new SettingsViewModel(Themes, inventory, store);
         settings.Load();
