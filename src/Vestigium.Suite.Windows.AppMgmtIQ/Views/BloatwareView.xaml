@@ -1,6 +1,7 @@
 <UserControl x:Class="Vestigium.Suite.Windows.AppMgmtIQ.Views.BloatwareView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:query="clr-namespace:Vestigium.Controls.QueryBar;assembly=Vestigium.Controls.QueryBar"
              Background="{DynamicResource Vestigium.Brushes.Surface.Window}">
   <UserControl.Resources>
     <BooleanToVisibilityConverter x:Key="BoolToVis" />
@@ -32,13 +33,16 @@
   <Grid Margin="12">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
     </Grid.RowDefinitions>
-    <DockPanel Margin="0,0,0,8">
-      <CheckBox DockPanel.Dock="Right" Style="{StaticResource CheckBox.Standard}" Content="Installed only" IsChecked="{Binding InstalledOnly}" />
-      <TextBlock Style="{StaticResource TextBlock.Caption}" VerticalAlignment="Center" Text="{Binding Status}" />
-    </DockPanel>
-    <DataGrid Grid.Row="1"
+    <query:VestigiumQueryBar Margin="0,0,0,8"
+                             Text="{Binding Query, UpdateSourceTrigger=PropertyChanged}"
+                             Session="{Binding Session}"
+                             Queries="{Binding Queries}"
+                             FilterRequested="OnFilter" />
+    <TextBlock Grid.Row="1" Style="{StaticResource TextBlock.Caption}" Margin="0,0,0,8" Text="{Binding Status}" />
+    <DataGrid Grid.Row="2"
               Style="{StaticResource DataGrid.Standard}"
               ItemsSource="{Binding Rows}"
               AutoGenerateColumns="False"
@@ -72,7 +76,7 @@
         <DataGridTextColumn Header="Package" Binding="{Binding Package}" Width="*" ElementStyle="{StaticResource LeftCell}" />
       </DataGrid.Columns>
     </DataGrid>
-    <Border Grid.RowSpan="2"
+    <Border Grid.RowSpan="3"
             Background="{DynamicResource Vestigium.Brushes.Surface.Window}"
             Opacity="0.92"
             Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
