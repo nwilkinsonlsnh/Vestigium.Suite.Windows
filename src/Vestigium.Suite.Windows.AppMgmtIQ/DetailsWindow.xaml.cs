@@ -7,18 +7,21 @@ namespace Vestigium.Suite.Windows.AppMgmtIQ;
 
 public partial class DetailsWindow : Window
 {
-    public DetailsWindow(PackageRow package)
+    public DetailsWindow()
     {
-        DataContext = new DetailsViewModel(package);
         InitializeComponent();
-        Loaded += OnLoaded;
     }
 
-    private void OnLoaded(object sender, RoutedEventArgs e)
+    public void SetPackage(PackageRow package)
     {
+        var previous = (DataContext as DetailsViewModel)?.SelectedTab?.Header;
+        var vm = new DetailsViewModel(package);
+        if (previous is not null)
+            vm.SelectedTab = vm.Tabs.FirstOrDefault(t => t.Header == previous) ?? vm.Tabs[0];
+        DataContext = vm;
         UpdateLayout();
         var first = FindRadio(TabStrip);
-        if (first is not null)
+        if (first is not null && first.IsChecked != true)
             first.IsChecked = true;
     }
 
