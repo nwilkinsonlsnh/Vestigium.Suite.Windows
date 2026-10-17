@@ -157,7 +157,7 @@ public sealed partial class MainViewModel : ObservableObject
             confirm: true);
         if (result.Status != RegistryWriteStatus.Ok)
         {
-            MessageBox.Show($"Could not clear NoRemove.\n{result.Status} {result.Message}", "NoRemove", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show($"Could not clear NoRemove.\n{result.Status} {result.Reason}", "NoRemove", MessageBoxButton.OK, MessageBoxImage.Error);
             return false;
         }
 
