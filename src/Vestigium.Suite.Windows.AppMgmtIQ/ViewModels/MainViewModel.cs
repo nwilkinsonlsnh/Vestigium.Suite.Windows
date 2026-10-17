@@ -84,6 +84,12 @@ public sealed partial class MainViewModel : ObservableObject
         string Value(string name)
             => key.Values.FirstOrDefault(v => string.Equals(v.Name, name, StringComparison.OrdinalIgnoreCase))?.DataText ?? "";
 
+        bool Flag(string name)
+        {
+            var text = Value(name);
+            return text is "1" or "true" or "True" or "yes" or "Yes";
+        }
+
         var display = Value("DisplayName");
         if (string.IsNullOrWhiteSpace(display))
             display = key.Name;
@@ -97,6 +103,11 @@ public sealed partial class MainViewModel : ObservableObject
             EstimatedSize = Value("EstimatedSize"),
             IsX64 = isX64,
             IsGlobal = isGlobal,
+            SystemComponent = Flag("SystemComponent"),
+            WindowsInstaller = Flag("WindowsInstaller"),
+            NoModify = Flag("NoModify"),
+            NoRemove = Flag("NoRemove"),
+            NoRepair = Flag("NoRepair"),
             UninstallString = Value("UninstallString"),
             KeyPath = key.Path,
             Hive = key.Hive.ToString(),
