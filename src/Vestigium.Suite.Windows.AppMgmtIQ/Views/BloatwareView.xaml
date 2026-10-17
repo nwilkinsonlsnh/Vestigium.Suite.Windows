@@ -4,13 +4,29 @@
              Background="{DynamicResource Vestigium.Brushes.Surface.Window}">
   <UserControl.Resources>
     <BooleanToVisibilityConverter x:Key="BoolToVis" />
-    <Style x:Key="BloatRow" TargetType="DataGridRow">
+    <Style x:Key="LeftCell" TargetType="TextBlock">
+      <Setter Property="HorizontalAlignment" Value="Left" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+      <Setter Property="Margin" Value="4,0,4,0" />
       <Setter Property="Foreground" Value="{DynamicResource Vestigium.Brushes.Text.Primary}" />
-      <Style.Resources>
-        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#334C8DFF" />
-        <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="#334C8DFF" />
-        <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="#F4F7FB" />
-      </Style.Resources>
+    </Style>
+    <Style x:Key="BloatRow" TargetType="DataGridRow" BasedOn="{StaticResource DataGridRow.Standard}">
+      <Style.Triggers>
+        <Trigger Property="IsSelected" Value="True">
+          <Setter Property="Background" Value="{DynamicResource Vestigium.Brushes.Accent.Softer}" />
+          <Setter Property="Foreground" Value="{DynamicResource Vestigium.Brushes.Text.Primary}" />
+        </Trigger>
+      </Style.Triggers>
+    </Style>
+    <Style x:Key="BloatCell" TargetType="DataGridCell" BasedOn="{StaticResource DataGridCell.Standard}">
+      <Setter Property="Foreground" Value="{DynamicResource Vestigium.Brushes.Text.Primary}" />
+      <Style.Triggers>
+        <Trigger Property="IsSelected" Value="True">
+          <Setter Property="Background" Value="Transparent" />
+          <Setter Property="Foreground" Value="{DynamicResource Vestigium.Brushes.Text.Primary}" />
+          <Setter Property="BorderBrush" Value="Transparent" />
+        </Trigger>
+      </Style.Triggers>
     </Style>
   </UserControl.Resources>
   <Grid Margin="12">
@@ -23,24 +39,37 @@
       <TextBlock Style="{StaticResource TextBlock.Caption}" VerticalAlignment="Center" Text="{Binding Status}" />
     </DockPanel>
     <DataGrid Grid.Row="1"
+              Style="{StaticResource DataGrid.Standard}"
               ItemsSource="{Binding Rows}"
               AutoGenerateColumns="False"
               IsReadOnly="True"
               SelectionMode="Single"
+              SelectionUnit="FullRow"
               HeadersVisibility="Column"
-              GridLinesVisibility="Horizontal"
               CanUserAddRows="False"
+              CanUserDeleteRows="False"
+              CanUserResizeColumns="True"
+              CanUserReorderColumns="True"
+              CanUserSortColumns="True"
+              VerticalScrollBarVisibility="Visible"
               RowStyle="{StaticResource BloatRow}"
+              CellStyle="{StaticResource BloatCell}"
               Background="{DynamicResource Vestigium.Brushes.Surface.Window}"
               Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}"
               BorderBrush="{DynamicResource Vestigium.Brushes.Border.Subtle}">
+      <DataGrid.Resources>
+        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#334C8DFF" />
+        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#F4F7FB" />
+        <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="#334C8DFF" />
+        <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="#F4F7FB" />
+      </DataGrid.Resources>
       <DataGrid.Columns>
-        <DataGridTextColumn Header="Display Name" Binding="{Binding Name}" Width="220" />
-        <DataGridTextColumn Header="Family" Binding="{Binding Family}" Width="280" />
-        <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="120" />
-        <DataGridTextColumn Header="Installed" Binding="{Binding InstalledText}" Width="90" />
-        <DataGridTextColumn Header="Provisioned" Binding="{Binding ProvisionedText}" Width="110" />
-        <DataGridTextColumn Header="Package" Binding="{Binding Package}" Width="*" />
+        <DataGridTextColumn Header="Display Name" Binding="{Binding Name}" Width="220" ElementStyle="{StaticResource LeftCell}" />
+        <DataGridTextColumn Header="Family" Binding="{Binding Family}" Width="280" ElementStyle="{StaticResource LeftCell}" />
+        <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="120" ElementStyle="{StaticResource LeftCell}" />
+        <DataGridTextColumn Header="Installed" Binding="{Binding InstalledText}" Width="90" ElementStyle="{StaticResource LeftCell}" />
+        <DataGridTextColumn Header="Provisioned" Binding="{Binding ProvisionedText}" Width="110" ElementStyle="{StaticResource LeftCell}" />
+        <DataGridTextColumn Header="Package" Binding="{Binding Package}" Width="*" ElementStyle="{StaticResource LeftCell}" />
       </DataGrid.Columns>
     </DataGrid>
     <Border Grid.RowSpan="2"
