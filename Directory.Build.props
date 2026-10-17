@@ -21,6 +21,8 @@
     <VestigiumKqlAppMgmtVersion>1.0.0</VestigiumKqlAppMgmtVersion>
     <VestigiumQueryBarVersion>1.1.0</VestigiumQueryBarVersion>
     <VestigiumClosedXmlVersion>1.0.1</VestigiumClosedXmlVersion>
+    <VestigiumAnalyticsVersion>1.0.4</VestigiumAnalyticsVersion>
+    <VestigiumChartsVersion>1.0.10</VestigiumChartsVersion>
     <MicrosoftExtensionsDiVersion>10.0.12</MicrosoftExtensionsDiVersion>
   </PropertyGroup>
 
