@@ -11,11 +11,19 @@ namespace Vestigium.Suite.Windows.AppMgmtIQ.Views;
 public partial class AppMgmtIqView : UserControl
 {
     private DetailsWindow? _details;
+    private SettingsViewModel? _settings;
 
     public AppMgmtIqView()
     {
         InitializeComponent();
         Loaded += OnLoaded;
+    }
+
+    public void Attach(SettingsViewModel settings)
+    {
+        _settings = settings;
+        PackageGrid.Tag = settings;
+        settings.OpenDetailsRequested += (_, package) => ShowOrUpdateDetails(package);
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
@@ -31,20 +39,19 @@ public partial class AppMgmtIqView : UserControl
 
     private void Grid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
-        ShowOrUpdateDetails();
+        if (DataContext is MainViewModel { SelectedPackage: { } package })
+            ShowOrUpdateDetails(package);
     }
 
     private void Grid_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (_details is { IsVisible: true })
-            ShowOrUpdateDetails();
+        _settings?.RefreshSelection();
+        if (_details is { IsVisible: true } && DataContext is MainViewModel { SelectedPackage: { } package })
+            ShowOrUpdateDetails(package);
     }
 
-    private void ShowOrUpdateDetails()
+    private void ShowOrUpdateDetails(PackageRow package)
     {
-        if (DataContext is not MainViewModel vm || vm.SelectedPackage is null)
-            return;
-
         if (_details is null || !_details.IsLoaded)
         {
             _details = new DetailsWindow
@@ -55,7 +62,7 @@ public partial class AppMgmtIqView : UserControl
             _details.Show();
         }
 
-        _details.SetPackage(vm.SelectedPackage);
+        _details.SetPackage(package);
         _details.Activate();
     }
 
