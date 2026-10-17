@@ -1,4 +1,5 @@
 using System.IO;
+using Vestigium.Helpers.Kql;
 using Vestigium.Helpers.WinReg;
 using Vestigium.Logging;
 
@@ -23,6 +24,7 @@ public static class HostLog
             cfg.AppId = appId;
             cfg.LogDirectory = root;
             WinRegCatalog.Register(cfg);
+            KqlLoggingCatalog.Register(cfg);
             AppMgmtCatalog.Register(cfg);
             extra?.Invoke(cfg);
         });
