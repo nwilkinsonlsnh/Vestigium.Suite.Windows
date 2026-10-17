@@ -3,27 +3,33 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:shell="clr-namespace:Vestigium.Controls.Shell;assembly=Vestigium.Controls"
         Title="AppMgmtIQ"
-        Height="900" Width="1400"
-        MinHeight="600" MinWidth="1000"
+        Height="980" Width="1800"
+        MinHeight="640" MinWidth="1400"
         ResizeMode="CanResize"
         WindowStartupLocation="Manual"
         Background="{DynamicResource Vestigium.Brushes.Surface.Window}">
-  <Window.Resources>
-    <ResourceDictionary>
-      <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="pack://application:,,,/Vestigium.Controls;component/Shell/MenuChrome.xaml" />
-      </ResourceDictionary.MergedDictionaries>
-    </ResourceDictionary>
-  </Window.Resources>
   <DockPanel>
-    <Menu DockPanel.Dock="Top">
-      <MenuItem Header="_File">
-        <MenuItem Header="E_xit" Click="Exit_Click" />
-      </MenuItem>
-      <MenuItem Header="_View">
-        <MenuItem Header="Status bar _visible" IsCheckable="True" IsChecked="{Binding ShowStatusBar}" />
-      </MenuItem>
-    </Menu>
+    <Grid DockPanel.Dock="Top" Margin="12,8,12,0">
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+        <RadioButton x:Name="AppMgmtTab"
+                     Content="AppMgmtIQ"
+                     Style="{StaticResource RadioButton.UnderlineTab}"
+                     GroupName="AppMgmtMainNav"
+                     IsChecked="True"
+                     Checked="MainNav_Checked" />
+        <RadioButton x:Name="SettingsTab"
+                     Content="Settings"
+                     Style="{StaticResource RadioButton.UnderlineTab}"
+                     GroupName="AppMgmtMainNav"
+                     Checked="MainNav_Checked" />
+      </StackPanel>
+      <RadioButton x:Name="HelpTab"
+                   Content="Help"
+                   Style="{StaticResource RadioButton.UnderlineTab}"
+                   GroupName="AppMgmtMainNav"
+                   HorizontalAlignment="Right"
+                   Checked="MainNav_Checked" />
+    </Grid>
     <shell:VestigiumShell x:Name="RootShell"
                           ShowNav="False"
                           Status="{Binding Status}"
