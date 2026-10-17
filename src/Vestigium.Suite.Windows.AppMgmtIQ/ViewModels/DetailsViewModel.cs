@@ -28,8 +28,11 @@ public sealed partial class DetailsViewModel : ObservableObject
         Tabs =
         [
             Build("General", package, GeneralNames),
+            Build("Version", package, VersionNames),
+            Build("Install", package, InstallNames),
             Build("Uninstall", package, UninstallNames),
             Build("Links", package, LinkNames),
+            Build("Patch", package, PatchNames),
             Build("Raw", package, null)
         ];
         SelectedTab = Tabs[0];
@@ -44,18 +47,39 @@ public sealed partial class DetailsViewModel : ObservableObject
 
     private static readonly string[] GeneralNames =
     [
-        "DisplayName", "DisplayVersion", "Publisher", "InstallDate", "EstimatedSize",
-        "InstallLocation", "InstallSource", "Language", "Version", "VersionMajor", "VersionMinor"
+        "DisplayName", "DisplayName_Localized", "DisplayVersion", "Publisher", "Comments",
+        "Contact", "DisplayIcon", "Language", "Cpu", "ProductId", "ReleaseTrain", "ReleaseType",
+        "SettingsIdentifier", "ParentDisplayName", "ParentKeyName"
+    ];
+
+    private static readonly string[] VersionNames =
+    [
+        "Version", "VersionMajor", "VersionMinor", "MajorVersion", "MinorVersion",
+        "ProductVersion", "PatchProductVersion", "SPLevel"
+    ];
+
+    private static readonly string[] InstallNames =
+    [
+        "InstallDate", "EstimatedSize", "Size", "InstallLocation", "InstallSource",
+        "InstanceId", "WindowsInstaller", "SystemComponent", "ClickToRunComponent",
+        "AuthorizedCDFPrefix", "AssociatedHotfixBuild"
     ];
 
     private static readonly string[] UninstallNames =
     [
-        "UninstallString", "QuietUninstallString", "ModifyPath", "NoModify", "NoRepair", "NoRemove"
+        "UninstallString", "UninstallString_Hidden", "QuietUninstallString", "ModifyPath",
+        "ModifyPath_Hidden", "NoModify", "NoRepair", "NoRemove"
     ];
 
     private static readonly string[] LinkNames =
     [
-        "HelpLink", "HelpTelephone", "URLInfoAbout", "URLUpdateInfo", "Readme", "Contact"
+        "HelpLink", "HelpTelephone", "URLInfoAbout", "URLUpdateInfo", "Readme"
+    ];
+
+    private static readonly string[] PatchNames =
+    [
+        "KBNumber", "PatchType", "InstalledPatchCodeList", "PatchedProductCodeList",
+        "SQLProductFamilyCode", "SQLProductPatchFamilyCode"
     ];
 
     private static DetailsTab Build(string header, PackageRow package, string[]? names)
