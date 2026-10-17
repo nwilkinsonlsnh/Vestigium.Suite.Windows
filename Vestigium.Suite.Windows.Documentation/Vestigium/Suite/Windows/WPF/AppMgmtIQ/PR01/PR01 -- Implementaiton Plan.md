@@ -94,7 +94,7 @@ Double-click a row → `DetailsWindow`.
 
 Details title: `{DisplayName} ({DisplayVersion})`.
 
-Details content: tabs that group the raw registry values (General, Uninstall, Links, Raw, etc.). isX64 and isGlobal visible.
+Details content: tabs that group the raw registry values (General, Uninstall, Links, Raw). isX64 and isGlobal visible.
 
 ---
 
@@ -102,8 +102,8 @@ Details content: tabs that group the raw registry values (General, Uninstall, Li
 
 1. On startup, ViewModel asks the Helper for the full inventory.
 2. Grid binds to the collection. Selection mode = Single.
-3. Double-click: open (or refresh) the details window with the selected package’s full value set.
-4. Title updates with the selection.
+3. Double-click: open the details window with the selected package’s full value set.
+4. Title is DisplayName (DisplayVersion).
 5. No uninstall path. No second walk.
 
 ---
@@ -114,7 +114,7 @@ Details content: tabs that group the raw registry values (General, Uninstall, Li
 | ---: | :--- | :--- | :--- |
 | 1 | PR01-01 | Chrome skeleton. `AppMgmtIqWindow`, ThemeManager, DI, HostLog, primary-monitor center. Icon and full theme menu deferred. | Done |
 | 2 | PR01-02 | Inventory grid. Bind to WinReg ListSubKeys/GetKey. Single selection. Model is temporary in host. | Done |
-| 3 | PR01-03 | Details window. Double-click. Title. Tabs for all values. | Open |
+| 3 | PR01-03 | Details window. Double-click. Title = DisplayName (DisplayVersion). Tabs: General, Uninstall, Links, Raw. | Done |
 | 4 | PR01-04 | Host tests. No registry. | Open |
 | 5 | PR01-05 | Owner runs the window against Requirements. | Owner |
 
@@ -159,4 +159,4 @@ When this plan finishes, move the whole `PR01/` folder to `Complete/PR01/`.
 
 ## Next action
 
-PR01-03. Details window on double-click. Title = DisplayName (DisplayVersion). Tabs for all registry values. Keep the model debt visible.
+PR01-04. Host tests that do not open the registry. Then owner gate (PR01-05).
