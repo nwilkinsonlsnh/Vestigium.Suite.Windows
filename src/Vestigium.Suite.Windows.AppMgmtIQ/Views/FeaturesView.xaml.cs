@@ -9,35 +9,18 @@ namespace Vestigium.Suite.Windows.AppMgmtIQ.Views;
 public partial class FeaturesView : UserControl
 {
     private FeatureDetailsWindow? _details;
-    private bool _started;
 
     public FeaturesView()
     {
         InitializeComponent();
         Loaded += OnLoaded;
-        IsVisibleChanged += OnVisibleChanged;
     }
 
-    private async void OnLoaded(object sender, RoutedEventArgs e)
+    private void OnLoaded(object sender, RoutedEventArgs e)
     {
         var scroller = FindAncestor<ScrollViewer>(this);
         if (scroller is not null)
             scroller.VerticalScrollBarVisibility = ScrollBarVisibility.Disabled;
-        await EnsureLoaded();
-    }
-
-    private async void OnVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
-    {
-        if (IsVisible)
-            await EnsureLoaded();
-    }
-
-    private async Task EnsureLoaded()
-    {
-        if (_started || DataContext is not FeaturesViewModel vm)
-            return;
-        _started = true;
-        await vm.LoadAsync();
     }
 
     private void Tree_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
