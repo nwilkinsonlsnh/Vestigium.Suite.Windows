@@ -1,6 +1,7 @@
 <UserControl x:Class="Vestigium.Suite.Windows.AppMgmtIQ.Views.AppMgmtIqView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:query="clr-namespace:Vestigium.Controls.QueryBar;assembly=Vestigium.Controls.QueryBar"
              Background="{DynamicResource Vestigium.Brushes.Surface.Window}"
              VerticalAlignment="Stretch"
              HorizontalAlignment="Stretch">
@@ -38,7 +39,16 @@
     </Style>
   </UserControl.Resources>
   <Grid Margin="12">
-    <DataGrid x:Name="PackageGrid"
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+    <query:VestigiumQueryBar Margin="0,0,0,8"
+                             Text="{Binding Query, UpdateSourceTrigger=PropertyChanged}"
+                             Session="{Binding Session}"
+                             Queries="{Binding Queries}" />
+    <DataGrid Grid.Row="1"
+              x:Name="PackageGrid"
               Style="{StaticResource DataGrid.Standard}"
               ItemsSource="{Binding Packages}"
               SelectedItem="{Binding SelectedPackage, Mode=TwoWay}"
@@ -145,7 +155,8 @@
       </DataGrid.Columns>
     </DataGrid>
 
-    <Border Background="{DynamicResource Vestigium.Brushes.Surface.Window}"
+    <Border Grid.RowSpan="2"
+            Background="{DynamicResource Vestigium.Brushes.Surface.Window}"
             Opacity="0.92"
             Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
       <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
