@@ -17,7 +17,7 @@ public partial class App : Application
 
     public static VestigiumShell? Shell { get; set; }
 
-    protected override void OnStartup(StartupEventArgs e)
+    protected override async void OnStartup(StartupEventArgs e)
     {
         HostLog.Initialize(HostIds.AppMgmtIQ);
         HostLog.Information(AppMgmtCatalog.AppStarted, "Lifecycle", "AppMgmtIQ started.");
@@ -31,15 +31,18 @@ public partial class App : Application
         Services = services.BuildServiceProvider();
 
         ShutdownMode = ShutdownMode.OnMainWindowClose;
-        MainWindow = CreateMainWindow();
+        MainWindow = CreateMainWindow(out var inventory, out var chrome);
         MainWindow.Show();
+
+        await inventory.LoadAsync();
+        chrome.Status.Message = inventory.Status;
 
         base.OnStartup(e);
     }
 
-    private static Window CreateMainWindow()
+    private static Window CreateMainWindow(out MainViewModel inventory, out VestigiumDefaultWindowViewModel chrome)
     {
-        var chrome = Services.GetRequiredService<VestigiumDefaultWindowViewModel>();
+        chrome = Services.GetRequiredService<VestigiumDefaultWindowViewModel>();
         var window = new AppMgmtIqWindow(chrome);
         Shell = window.HostShell;
 
@@ -68,17 +71,19 @@ public partial class App : Application
             }
         });
 
-        var vm = new MainViewModel();
-        vm.Load();
+        inventory = new MainViewModel();
         var store = new AppMgmtSettingsStore(AppMgmtSettingsStore.DefaultRoot);
-        var settings = new SettingsViewModel(Themes, vm, store);
+        var settings = new SettingsViewModel(Themes, inventory, store);
         settings.Load();
 
-        var inventory = window.HostShell["AppMgmtIQ"];
-        if (inventory is not null)
+        var page = new AppMgmtIqView { DataContext = inventory };
+        page.Attach(settings);
+
+        var item = window.HostShell["AppMgmtIQ"];
+        if (item is not null)
         {
-            inventory.Content = new AppMgmtIqView { DataContext = vm };
-            window.HostShell.SelectedItem = inventory;
+            item.Content = page;
+            window.HostShell.SelectedItem = item;
         }
 
         var settingsItem = window.HostShell["Settings"];
@@ -89,7 +94,7 @@ public partial class App : Application
         if (help is not null)
             help.Content = new HelpView();
 
-        chrome.Status.Message = vm.Status;
+        chrome.Status.Message = "Reading installed packages\u2026";
         return window;
     }
 }
