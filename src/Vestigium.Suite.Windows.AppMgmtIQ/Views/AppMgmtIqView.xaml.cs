@@ -1,5 +1,7 @@
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using Vestigium.Suite.Windows.AppMgmtIQ.ViewModels;
@@ -21,6 +23,10 @@ public partial class AppMgmtIqView : UserControl
         var scroller = FindAncestor<ScrollViewer>(this);
         if (scroller is not null)
             scroller.VerticalScrollBarVisibility = ScrollBarVisibility.Disabled;
+
+        var view = CollectionViewSource.GetDefaultView(PackageGrid.ItemsSource);
+        if (view is not null && view.SortDescriptions.Count == 0)
+            view.SortDescriptions.Add(new SortDescription(nameof(PackageRow.DisplayName), ListSortDirection.Ascending));
     }
 
     private void Grid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
