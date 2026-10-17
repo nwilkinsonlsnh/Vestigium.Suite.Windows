@@ -3,6 +3,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Vestigium.Controls.DependencyInjection;
 using Vestigium.Controls.Shell;
 using Vestigium.Converters.DependencyInjection;
+using Vestigium.Suite.Windows.AppMgmtIQ.ViewModels;
+using Vestigium.Suite.Windows.AppMgmtIQ.Views;
 using Vestigium.Themes;
 
 namespace Vestigium.Suite.Windows.AppMgmtIQ;
@@ -53,11 +55,17 @@ public partial class App : Application
             }
         });
 
+        var vm = new MainViewModel();
+        vm.Load();
+
         var item = window.HostShell["AppMgmtIQ"];
         if (item is not null)
+        {
+            item.Content = new AppMgmtIqView { DataContext = vm };
             window.HostShell.SelectedItem = item;
+        }
 
-        chrome.Status.Message = "Idle";
+        chrome.Status.Message = vm.Status;
         return window;
     }
 }
