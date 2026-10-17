@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Media;
 using Vestigium.Suite.Windows.AppMgmtIQ.ViewModels;
 
 namespace Vestigium.Suite.Windows.AppMgmtIQ.Views;
@@ -21,6 +22,10 @@ public partial class FeaturesView : UserControl
 
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
+        var scroller = FindAncestor<ScrollViewer>(this);
+        if (scroller is not null)
+            scroller.VerticalScrollBarVisibility = ScrollBarVisibility.Disabled;
+
         var view = CollectionViewSource.GetDefaultView(FeatureGrid.ItemsSource);
         if (view is not null && view.SortDescriptions.Count == 0)
             view.SortDescriptions.Add(new SortDescription(nameof(FeatureRow.Caption), ListSortDirection.Ascending));
@@ -63,5 +68,17 @@ public partial class FeaturesView : UserControl
         }
         _details.SetFeature(feature);
         _details.Activate();
+    }
+
+    private static T? FindAncestor<T>(DependencyObject start) where T : DependencyObject
+    {
+        var current = VisualTreeHelper.GetParent(start);
+        while (current is not null)
+        {
+            if (current is T match)
+                return match;
+            current = VisualTreeHelper.GetParent(current);
+        }
+        return null;
     }
 }
