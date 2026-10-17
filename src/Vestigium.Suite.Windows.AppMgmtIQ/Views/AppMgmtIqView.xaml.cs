@@ -37,6 +37,15 @@ public partial class AppMgmtIqView : UserControl
             view.SortDescriptions.Add(new SortDescription(nameof(PackageRow.DisplayName), ListSortDirection.Ascending));
     }
 
+    private void Grid_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        var row = FindAncestor<DataGridRow>(e.OriginalSource as DependencyObject);
+        if (row is null)
+            return;
+        row.IsSelected = true;
+        row.Focus();
+    }
+
     private void Grid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
         if (DataContext is MainViewModel { SelectedPackage: { } package })
@@ -68,7 +77,7 @@ public partial class AppMgmtIqView : UserControl
 
     private static T? FindAncestor<T>(DependencyObject start) where T : DependencyObject
     {
-        var current = VisualTreeHelper.GetParent(start);
+        var current = start;
         while (current is not null)
         {
             if (current is T match)
