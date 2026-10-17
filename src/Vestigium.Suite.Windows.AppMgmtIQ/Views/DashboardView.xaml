@@ -2,9 +2,30 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Background="{DynamicResource Vestigium.Brushes.Surface.Window}">
-  <TextBlock Margin="24"
-             FontSize="16"
-             TextWrapping="Wrap"
-             Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}"
-             Text="Dashboard. Placeholder. Counts and charts for the inventory land here." />
+  <DockPanel Margin="16">
+    <DockPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+      <Button DockPanel.Dock="Right" Style="{StaticResource Button.Primary}" Content="Refresh" Click="Refresh_Click" Padding="14,4" />
+      <TextBlock Style="{StaticResource TextBlock.Caption}" FontSize="18" VerticalAlignment="Center" Text="Inventory" />
+    </DockPanel>
+
+    <UniformGrid DockPanel.Dock="Top" Columns="4" Margin="0,0,0,12">
+      <Border x:Name="PackagesCard" Margin="0,0,8,0" />
+      <Border x:Name="FeaturesCard" Margin="0,0,8,0" />
+      <Border x:Name="EnabledCard" Margin="0,0,8,0" />
+      <Border x:Name="X64Card" />
+    </UniformGrid>
+
+    <TextBlock x:Name="SizeLine" DockPanel.Dock="Top" Style="{StaticResource TextBlock.Caption}" Margin="0,0,0,12" />
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+      <UniformGrid Columns="2">
+        <Border x:Name="Publishers" Height="300" Margin="0,0,8,8" />
+        <Border x:Name="Mix" Height="300" Margin="0,0,0,8" />
+        <Border x:Name="States" Height="300" Margin="0,0,8,8" />
+        <Border x:Name="Years" Height="300" Margin="0,0,0,8" />
+        <Border x:Name="Sizes" Height="300" Margin="0,0,8,0" />
+        <Border x:Name="Parents" Height="300" />
+      </UniformGrid>
+    </ScrollViewer>
+  </DockPanel>
 </UserControl>
