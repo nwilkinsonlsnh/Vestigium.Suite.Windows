@@ -18,6 +18,12 @@ public sealed partial class MainViewModel : ObservableObject
         (RegistryHiveKind.CurrentUser, @"Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall", false, false)
     ];
 
+    private readonly List<PackageRow> _all = [];
+    private bool _showGlobal = true;
+    private bool _showPerUser = true;
+    private string _datePattern = DisplayFormats.DefaultDateFormat.Pattern;
+    private int _decimals = 4;
+
     public ObservableCollection<PackageRow> Packages { get; } = [];
 
     [ObservableProperty]
@@ -28,7 +34,7 @@ public sealed partial class MainViewModel : ObservableObject
 
     public void Load()
     {
-        Packages.Clear();
+        _all.Clear();
         var client = RegistryHelper.Local;
         foreach (var (hive, path, isX64, isGlobal) in Roots)
         {
@@ -38,9 +44,38 @@ public sealed partial class MainViewModel : ObservableObject
                 var full = client.GetKey(hive, child.Path, RegistryViewKind.Default, RegistryDetailLevel.Full);
                 if (full is null)
                     continue;
-                Packages.Add(Project(full, isX64, isGlobal));
+                var row = Project(full, isX64, isGlobal);
+                row.ApplyDisplay(_datePattern, _decimals);
+                _all.Add(row);
             }
         }
+        ApplyFilter();
+    }
+
+    public void ApplySettings(bool showGlobal, bool showPerUser, string datePattern, int decimals)
+    {
+        _showGlobal = showGlobal;
+        _showPerUser = showPerUser;
+        _datePattern = string.IsNullOrWhiteSpace(datePattern) ? DisplayFormats.DefaultDateFormat.Pattern : datePattern;
+        _decimals = Math.Clamp(decimals, 0, 8);
+        foreach (var row in _all)
+            row.ApplyDisplay(_datePattern, _decimals);
+        ApplyFilter();
+    }
+
+    private void ApplyFilter()
+    {
+        var keep = SelectedPackage;
+        Packages.Clear();
+        foreach (var row in _all)
+        {
+            if (row.IsGlobal && !_showGlobal)
+                continue;
+            if (!row.IsGlobal && !_showPerUser)
+                continue;
+            Packages.Add(row);
+        }
+        SelectedPackage = Packages.Contains(keep!) ? keep : null;
         Status = $"{Packages.Count} packages";
     }
 
