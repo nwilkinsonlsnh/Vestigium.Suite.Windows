@@ -2,12 +2,16 @@ using System.Collections.ObjectModel;
 using System.Management;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Vestigium.Helpers.Kql;
+using Vestigium.Helpers.Kql.AppMgmt;
 
 namespace Vestigium.Suite.Windows.AppMgmtIQ.ViewModels;
 
 public sealed partial class FeaturesViewModel : ObservableObject
 {
     private readonly List<FeatureRow> _all = [];
+    private readonly KqlSession _session = AppMgmtKql.Features();
+    private KqlBoundQuery? _bound;
     private Dictionary<string, string> _parents = new(StringComparer.OrdinalIgnoreCase);
     private string _source = "flat";
     private bool _showEnabled = true;
@@ -15,6 +19,11 @@ public sealed partial class FeaturesViewModel : ObservableObject
     private bool _showAbsent;
 
     public ObservableCollection<FeatureNode> Roots { get; } = [];
+    public ObservableCollection<string> Queries { get; } = [];
+    public KqlSession Session => _session;
+
+    [ObservableProperty]
+    private string _query = string.Empty;
 
     [ObservableProperty]
     private FeatureRow? _selectedFeature;
@@ -36,6 +45,14 @@ public sealed partial class FeaturesViewModel : ObservableObject
 
     [ObservableProperty]
     private bool _showAbsentFlag;
+
+    partial void OnQueryChanged(string value)
+    {
+        _bound = KqlHost.Compile(value, _session, _bound, out var error);
+        ApplyFilter();
+        if (!string.IsNullOrEmpty(error))
+            Status = error;
+    }
 
     public async Task LoadAsync()
     {
@@ -113,7 +130,8 @@ public sealed partial class FeaturesViewModel : ObservableObject
             if (node is not null)
                 Roots.Add(node);
         }
-        Status = $"{Roots.Count} groups, {_all.Count} features ({_source})";
+        if (string.IsNullOrWhiteSpace(Query) || _bound is not null)
+            Status = $"{Roots.Count} groups, {_all.Count} features ({_source})";
     }
 
     private FeatureNode? Build(FeatureRow row, Dictionary<string, List<FeatureRow>> children)
@@ -137,7 +155,23 @@ public sealed partial class FeaturesViewModel : ObservableObject
                     node.Children.Add(child);
             }
         }
-        return Visible(row) || node.Children.Count > 0 ? node : null;
+        return Matches(row, parent) || node.Children.Count > 0 ? node : null;
+    }
+
+    private bool Matches(FeatureRow row, string parent)
+    {
+        if (!Visible(row))
+            return false;
+        if (_bound is null)
+            return true;
+        return _bound.Matches(FeatureAdapter.ToRow(_session, new FeatureFacts
+        {
+            Caption = row.Caption,
+            Name = row.Name,
+            State = row.State,
+            IsEnabled = row.IsEnabled,
+            Parent = parent
+        }));
     }
 
     private bool Visible(FeatureRow row)
