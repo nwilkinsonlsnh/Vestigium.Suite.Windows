@@ -56,7 +56,8 @@
     <query:VestigiumQueryBar Margin="0,0,0,8"
                              Text="{Binding Query, UpdateSourceTrigger=PropertyChanged}"
                              Session="{Binding Session}"
-                             Queries="{Binding Queries}" />
+                             Queries="{Binding Queries}"
+                             FilterRequested="OnFilter" />
     <Grid Grid.Row="1" Margin="20,0,0,6">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="28" />
