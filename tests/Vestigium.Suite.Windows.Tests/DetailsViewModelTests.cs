@@ -88,7 +88,8 @@ public class DetailsViewModelTests
             UninstallString = "",
             KeyPath = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Contoso",
             Hive = "LocalMachine",
-            Values = values ?? []
+            Values = values ?? [],
+            Icon = null
         };
 
     private static RegistryValueInfo Value(string name, string data)
