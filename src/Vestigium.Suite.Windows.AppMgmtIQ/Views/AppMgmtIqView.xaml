@@ -11,17 +11,15 @@
       <Setter Property="VerticalAlignment" Value="Center" />
       <Setter Property="Margin" Value="4,0,4,0" />
     </Style>
+    <Style x:Key="MenuIcon" TargetType="TextBlock">
+      <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
+      <Setter Property="FontSize" Value="14" />
+      <Setter Property="Foreground" Value="{DynamicResource Vestigium.Brushes.Text.Primary}" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
   </UserControl.Resources>
   <Grid Margin="12">
-    <Grid.RowDefinitions>
-      <RowDefinition Height="Auto" />
-      <RowDefinition Height="*" />
-    </Grid.RowDefinitions>
-    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,8">
-      <Button Content="Refresh" Command="{Binding RefreshCommand}" Padding="12,4" MinWidth="88" />
-    </StackPanel>
-    <DataGrid Grid.Row="1"
-              x:Name="PackageGrid"
+    <DataGrid x:Name="PackageGrid"
               Style="{StaticResource DataGrid.Standard}"
               ItemsSource="{Binding Packages}"
               SelectedItem="{Binding SelectedPackage, Mode=TwoWay}"
@@ -46,28 +44,54 @@
               SelectionChanged="Grid_SelectionChanged">
       <DataGrid.ContextMenu>
         <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
-          <MenuItem Header="Open Details" Command="{Binding OpenDetailsCommand}" IsEnabled="{Binding HasSelection}" />
-          <MenuItem Header="Uninstall" IsEnabled="False" ToolTip="Placeholder. Uninstall is not wired in this release." />
+          <MenuItem Header="Open Details" Command="{Binding OpenDetailsCommand}" IsEnabled="{Binding HasSelection}">
+            <MenuItem.Icon><TextBlock Text="&#xE8A7;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
+          </MenuItem>
+          <MenuItem Header="Uninstall" IsEnabled="False" ToolTip="Placeholder. Uninstall is not wired in this release.">
+            <MenuItem.Icon><TextBlock Text="&#xE74D;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
+          </MenuItem>
           <Separator />
           <MenuItem Header="Filter">
-            <MenuItem Header="Global packages" IsCheckable="True" IsChecked="{Binding ShowGlobal}" StaysOpenOnClick="True" />
-            <MenuItem Header="Per-user packages" IsCheckable="True" IsChecked="{Binding ShowPerUser}" StaysOpenOnClick="True" />
+            <MenuItem.Icon><TextBlock Text="&#xE71C;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
+            <MenuItem Header="Global packages" IsCheckable="True" IsChecked="{Binding ShowGlobal}" StaysOpenOnClick="True">
+              <MenuItem.Icon><TextBlock Text="&#xE774;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="Per-user packages" IsCheckable="True" IsChecked="{Binding ShowPerUser}" StaysOpenOnClick="True">
+              <MenuItem.Icon><TextBlock Text="&#xE77B;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
+            </MenuItem>
             <Separator />
-            <MenuItem Header="x64" IsCheckable="True" IsChecked="{Binding ShowX64}" StaysOpenOnClick="True" />
-            <MenuItem Header="x86" IsCheckable="True" IsChecked="{Binding ShowX86}" StaysOpenOnClick="True" />
+            <MenuItem Header="x64" IsCheckable="True" IsChecked="{Binding ShowX64}" StaysOpenOnClick="True">
+              <MenuItem.Icon><TextBlock Text="&#xE7F8;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="x86" IsCheckable="True" IsChecked="{Binding ShowX86}" StaysOpenOnClick="True">
+              <MenuItem.Icon><TextBlock Text="&#xE7F4;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
+            </MenuItem>
             <Separator />
-            <MenuItem Header="System components" IsCheckable="True" IsChecked="{Binding ShowSystemComponents}" StaysOpenOnClick="True" />
+            <MenuItem Header="System components" IsCheckable="True" IsChecked="{Binding ShowSystemComponents}" StaysOpenOnClick="True">
+              <MenuItem.Icon><TextBlock Text="&#xE713;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
+            </MenuItem>
             <Separator />
-            <MenuItem Header="Windows Installer" IsCheckable="True" IsChecked="{Binding ShowWindowsInstaller}" StaysOpenOnClick="True" />
-            <MenuItem Header="Other installers" IsCheckable="True" IsChecked="{Binding ShowOtherInstallers}" StaysOpenOnClick="True" />
+            <MenuItem Header="Windows Installer" IsCheckable="True" IsChecked="{Binding ShowWindowsInstaller}" StaysOpenOnClick="True">
+              <MenuItem.Icon><TextBlock Text="&#xE7B8;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="Other installers" IsCheckable="True" IsChecked="{Binding ShowOtherInstallers}" StaysOpenOnClick="True">
+              <MenuItem.Icon><TextBlock Text="&#xE8B7;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
+            </MenuItem>
           </MenuItem>
           <Separator />
           <MenuItem Header="Export">
-            <MenuItem Header="Export grid\u2026" IsEnabled="False" ToolTip="Vestigium.Helpers.ClosedXml is not published yet." />
-            <MenuItem Header="Export selected\u2026" IsEnabled="False" ToolTip="Vestigium.Helpers.ClosedXml is not published yet." />
+            <MenuItem.Icon><TextBlock Text="&#xE898;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
+            <MenuItem Header="Export grid\u2026" IsEnabled="False" ToolTip="Vestigium.Helpers.ClosedXml is not published yet.">
+              <MenuItem.Icon><TextBlock Text="&#xE8A5;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="Export selected\u2026" IsEnabled="False" ToolTip="Vestigium.Helpers.ClosedXml is not published yet.">
+              <MenuItem.Icon><TextBlock Text="&#xE8A7;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
+            </MenuItem>
           </MenuItem>
           <Separator />
-          <MenuItem Header="Refresh" Command="{Binding Host.RefreshCommand}" />
+          <MenuItem Header="Refresh" Command="{Binding Host.RefreshCommand}">
+            <MenuItem.Icon><TextBlock Text="&#xE72C;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
+          </MenuItem>
         </ContextMenu>
       </DataGrid.ContextMenu>
       <DataGrid.Columns>
@@ -93,8 +117,7 @@
       </DataGrid.Columns>
     </DataGrid>
 
-    <Border Grid.RowSpan="2"
-            Background="{DynamicResource Vestigium.Brushes.Surface.Window}"
+    <Border Background="{DynamicResource Vestigium.Brushes.Surface.Window}"
             Opacity="0.92"
             Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
       <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
