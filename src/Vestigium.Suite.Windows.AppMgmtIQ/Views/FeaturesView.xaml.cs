@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using Vestigium.Controls.QueryBar;
 using Vestigium.Suite.Windows.AppMgmtIQ.ViewModels;
 
 namespace Vestigium.Suite.Windows.AppMgmtIQ.Views;
@@ -113,6 +114,12 @@ public partial class FeaturesView : UserControl
     {
         if (DataContext is FeaturesViewModel host)
             host.ApplyQuery();
+    }
+
+    private void OnPin(object sender, VestigiumQueryRowEventArgs e)
+    {
+        if (DataContext is FeaturesViewModel host)
+            host.Pin(e.Row);
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
