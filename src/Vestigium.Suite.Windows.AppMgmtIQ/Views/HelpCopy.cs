@@ -128,9 +128,30 @@ internal static class HelpCopy
     private static Draft Dashboard()
         => new("Dashboard",
         [
-            "The dashboard is a reading of the four inventories, not a fifth one. Each section is one inventory, with the counts that describe it and the charts that break it down.",
-            "AppMgmtIQ is who published the software, how it is split between machine and user, when it was installed, and how large it is. Windows Features is how many are on and which parents own them. Bloatware is how much of the catalog is actually present. Active Setup is how much is armed to run, and whether it is a machine or a user component.",
-            "A section with two charts shows them together. A section with more than two gets a vertical list, and the area shows the one you pick. Refresh rebuilds the charts from the inventories currently in memory."
+            "The Dashboard is a reading of the four inventories, not a fifth one. It does not collect anything the suite has not already loaded. Each section is one inventory, with the counts that describe it and the charts that break it down. The figures are a summary of the current machine, and Refresh rebuilds them from the inventories as they stand.",
+            Head("AppMgmtIQ"),
+            "This section answers what is installed, who published it, and how large it is. The counts are the number of packages, how many are global, how many belong to the current user, and the share that is 64-bit.",
+            Term("Publishers", "A ranked view of who published the software, with a cumulative line showing how much of the inventory the top publishers account for."),
+            Term("Mix", "How the inventory splits between global and per-user, and between system components and 32-bit packages."),
+            Term("Install year", "When the software was installed, grouped by year, with a cumulative line. Packages with no install date are reported as Unknown."),
+            Term("Size", "The distribution of estimated size across the inventory, in megabytes."),
+            Head("Windows Features"),
+            "This section answers which features are on, and which parents own them. The counts are the number of features, and how many are enabled, disabled, and absent. The two charts are shown together.",
+            Term("Feature state", "The split between enabled and disabled features."),
+            Term("Feature parents", "Which parent owns how many features, ranked, with a cumulative line. Root features, those with no parent, are reported separately."),
+            Head("Bloatware"),
+            "This section answers which catalog entries are actually on this machine. The counts are the size of the catalog, how many are installed, how many are provisioned, and how many are missing.",
+            Term("Category", "How the catalog divides across System, Productivity, Xbox, Store, Media, and Games."),
+            Term("Presence", "How much of the catalog is installed against how much is not."),
+            Term("Provisioned", "How much of the catalog is held as a provisioned copy for new users."),
+            Head("Active Setup"),
+            "This section answers what is armed to run at the next logon. The counts are the number of components, how many are pending, how many carry a command, and how many are machine-level.",
+            Term("Pending", "How many components will run at the next logon against how many are current for this user."),
+            Term("Scope", "How the components split between the machine and the current user."),
+            Term("Bitness", "How the components split between 64-bit and 32-bit."),
+            Term("Command", "How many components have a StubPath against how many record a version only."),
+            Head("Reading the charts"),
+            "A section with two charts shows both at once. A section with more than two offers a list, and the area shows the one that is selected. A ranked chart carries a cumulative line, so the concentration of the inventory is visible as well as the individual values."
         ]);
 
     private static Draft Exports()
