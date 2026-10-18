@@ -19,6 +19,8 @@ public partial class ApplyActiveSetupWindow : Window
         };
         InitializeComponent();
         Heading.Text = TitleFor(job.Action);
+        ContinueButton.Content = ButtonFor(job.Action);
+        CloseButton.Content = "Cancel";
         Summary.Text = Describe(job);
         PathText.Text = Result.KeyPath;
         CommandText.Text = string.IsNullOrWhiteSpace(job.StubPath) ? "No command." : job.StubPath;
@@ -37,22 +39,18 @@ public partial class ApplyActiveSetupWindow : Window
 
         var error = Apply();
         _done = true;
-        ContinueButton.Content = "Close";
-        CloseButton.Visibility = Visibility.Collapsed;
-        Outcome.Visibility = Visibility.Visible;
         if (error is null)
         {
             Result.Ok = true;
-            Outcome.Text = "The change was applied.";
             ActiveSetupLog.Information(ActiveSetupLog.Changed, $"{_job.Action} applied. {Result.KeyPath}", _job.CorrelationId);
             ActiveSetupLog.Information(ActiveSetupLog.Completed, $"{_job.Action} completed.", _job.CorrelationId);
         }
         else
         {
             Result.Error = error;
-            Outcome.Text = error;
             ActiveSetupLog.Information(ActiveSetupLog.Completed, $"{_job.Action} failed. {error}", _job.CorrelationId);
         }
+        Close();
     }
 
     private void Close_Click(object sender, RoutedEventArgs e)
@@ -114,6 +112,13 @@ public partial class ApplyActiveSetupWindow : Window
         "delete" => "Delete Active Setup Entry",
         "clearstubpath" => "Clear Active Setup Command",
         _ => "Add Active Setup Entry"
+    };
+
+    private static string ButtonFor(string action) => action.Trim().ToLowerInvariant() switch
+    {
+        "delete" => "Delete Entry",
+        "clearstubpath" => "Clear Command",
+        _ => "Add Entry"
     };
 
     private static string Describe(ActiveSetupJob job) => job.Action.Trim().ToLowerInvariant() switch
