@@ -41,6 +41,8 @@
               CanUserDeleteRows="False"
               CanUserResizeColumns="True"
               CanUserReorderColumns="True"
+              CanUserSortColumns="False"
+              PreviewMouseLeftButtonDown="Grid_PreviewMouseLeftButtonDown"
               ColumnWidth="*"
               HorizontalScrollBarVisibility="Disabled"
               ScrollViewer.HorizontalScrollBarVisibility="Disabled"
