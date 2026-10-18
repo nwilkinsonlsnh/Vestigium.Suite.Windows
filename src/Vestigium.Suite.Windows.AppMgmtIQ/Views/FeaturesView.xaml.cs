@@ -37,6 +37,10 @@ public partial class FeaturesView : UserControl
         {
             CorrelationId = correlationId,
             ThemeId = _settings?.SelectedThemeId ?? "",
+            ParentLeft = Window.GetWindow(this)?.Left ?? 0,
+            ParentTop = Window.GetWindow(this)?.Top ?? 0,
+            ParentWidth = Window.GetWindow(this)?.ActualWidth ?? 0,
+            ParentHeight = Window.GetWindow(this)?.ActualHeight ?? 0,
             Enable = host.Enables.Select(change => new Vestigium.Suite.Windows.AppMgmtIQ.Features.FeatureJobItem { Caption = change.Caption, Name = change.Name, Reason = change.Reason, IsAbsent = change.IsAbsent }).ToList(),
             Disable = host.Disables.Select(change => new Vestigium.Suite.Windows.AppMgmtIQ.Features.FeatureJobItem { Caption = change.Caption, Name = change.Name, Reason = change.Reason }).ToList()
         };
