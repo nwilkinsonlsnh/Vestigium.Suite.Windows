@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -26,20 +28,54 @@ public partial class FeaturesView : UserControl
     {
         if (DataContext is not FeaturesViewModel host)
             return;
-        var plan = new FeaturePlanWindow(host.Enables.ToList(), host.Disables.ToList()) { Owner = Window.GetWindow(this) };
-        if (plan.ShowDialog() != true)
+        var correlationId = Guid.NewGuid().ToString("N");
+        var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Vestigium", "AppMgmtIQ", "Jobs");
+        Directory.CreateDirectory(dir);
+        var jobPath = Path.Combine(dir, correlationId + ".json");
+        var resultPath = Path.ChangeExtension(jobPath, ".result.json");
+        var job = new Vestigium.Suite.Windows.AppMgmtIQ.Features.FeatureJob
+        {
+            CorrelationId = correlationId,
+            Enable = host.Enables.Select(change => new Vestigium.Suite.Windows.AppMgmtIQ.Features.FeatureJobItem { Caption = change.Caption, Name = change.Name, Reason = change.Reason, IsAbsent = change.IsAbsent }).ToList(),
+            Disable = host.Disables.Select(change => new Vestigium.Suite.Windows.AppMgmtIQ.Features.FeatureJobItem { Caption = change.Caption, Name = change.Name, Reason = change.Reason }).ToList()
+        };
+        File.WriteAllText(jobPath, System.Text.Json.JsonSerializer.Serialize(job));
+        HostLog.Information(AppMgmtCatalog.FeatureApplyRequested, "Features", $"Feature apply requested. enable={job.Enable.Count} disable={job.Disable.Count}", correlationId);
+
+        var exe = Path.Combine(AppContext.BaseDirectory, "AppMgmtIQ.Features.exe");
+        try
+        {
+            Process.Start(new ProcessStartInfo(exe, "\"" + jobPath + "\"") { UseShellExecute = true, Verb = "runas" });
+        }
+        catch (System.ComponentModel.Win32Exception)
+        {
+            HostLog.Information(AppMgmtCatalog.FeatureApplyCancelled, "Features", "Feature apply was not elevated.", correlationId);
             return;
-        var lines = new List<string>();
-        if (plan.Enabled.Count > 0)
-            lines.Add("Enabled: " + string.Join(", ", plan.Enabled));
-        if (plan.Disabled.Count > 0)
-            lines.Add("Disabled: " + string.Join(", ", plan.Disabled));
-        if (plan.Restart.Count > 0)
-            lines.Add("Restart required: " + string.Join(", ", plan.Restart));
-        if (plan.Failed.Count > 0)
-            lines.Add("Failed: " + string.Join(", ", plan.Failed));
-        MessageBox.Show(string.Join(Environment.NewLine + Environment.NewLine, lines), "Feature changes", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        var result = WaitForResult(resultPath);
+        if (result is null || result.Cancelled)
+        {
+            HostLog.Information(AppMgmtCatalog.FeatureApplyCancelled, "Features", "Feature apply cancelled.", correlationId);
+            return;
+        }
+        HostLog.Information(AppMgmtCatalog.FeatureApplyCompleted, "Features", $"Feature apply completed. enabled={result.Enabled.Count} disabled={result.Disabled.Count} failed={result.Failed.Count}", correlationId);
         host.RefreshCommand.Execute(null);
+    }
+
+    private static Vestigium.Suite.Windows.AppMgmtIQ.Features.FeatureResult? WaitForResult(string path)
+    {
+        var until = DateTime.UtcNow.AddMinutes(30);
+        while (DateTime.UtcNow < until)
+        {
+            if (File.Exists(path))
+            {
+                try { return System.Text.Json.JsonSerializer.Deserialize<Vestigium.Suite.Windows.AppMgmtIQ.Features.FeatureResult>(File.ReadAllText(path)); }
+                catch (IOException) { }
+            }
+            Thread.Sleep(500);
+        }
+        return null;
     }
 
     public void Attach(SettingsViewModel settings)
