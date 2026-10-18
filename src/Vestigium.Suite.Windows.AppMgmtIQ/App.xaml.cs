@@ -122,17 +122,17 @@ public partial class App : Application
                     Subject = "Logon components",
                     Description = "Installed Components from HKLM and HKCU, both views."
                 },
-                new VestigiumNavItemSpec("Export")
-                {
-                    Title = "Export",
-                    Subject = "Workbook",
-                    Description = "Write packages and features to Excel."
-                },
                 new VestigiumNavItemSpec("Dashboard")
                 {
                     Title = "Dashboard",
                     Subject = "Inventory",
                     Description = "Counts and charts for the inventory."
+                },
+                new VestigiumNavItemSpec("Export")
+                {
+                    Title = "Export",
+                    Subject = "Workbook",
+                    Description = "Write packages and features to Excel."
                 },
                 new VestigiumNavItemSpec("Settings")
                 {
