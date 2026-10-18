@@ -160,13 +160,19 @@ internal static class HelpCopy
     private static Draft Exports()
         => new("Exports",
         [
-            "Export writes one workbook from the inventories already loaded. Summary is the first sheet, and it is the sheet Excel opens on. A further sheet is added for each inventory that is included.",
+            "Export writes a single Excel workbook from the inventories already loaded into the suite. It does not run a new scan. Summary is the first sheet, and it is the sheet Excel opens on. A further sheet is added for each inventory that is included. The file is written to Desktop\\Vestigium\\Exports\\AppMgmtIQ.",
             Head("Inventories"),
-            "AppMgmtIQ, Windows Features, Bloatware, and Active Setup are independent. Include any combination. At least one is required.",
+            "The four inventories are independent, and each is a checkbox. Include any combination. At least one is required. On a new installation all four are checked.",
+            Term("AppMgmtIQ", "The package grid. One row per uninstall registry key, with display name, publisher, version, install date, size, architecture, scope, and the operational flags."),
+            Term("Windows Features", "The component store. Display name, feature name, state, parent, and description."),
+            Term("Bloatware", "The catalog. Name, family, category, whether it is installed, whether it is provisioned, and the package name."),
+            Term("Active Setup", "The logon components. Display name, component, StubPath, version, scope, architecture, pending, and installed."),
             Head("Rows"),
-            "Current view respects the query bar and the filter menus on each page. Everything loaded ignores those and writes the full inventory.",
-            Head("Package details"),
-            "Include package registry values adds a Package Details sheet. It is the same set of values the details window shows, and it is only offered when AppMgmtIQ is included."
+            "Current view respects the query bar and the filter menus on each page, so the workbook matches what is on screen. Everything loaded ignores those filters and writes the full inventory for each included section.",
+            Head("Package Details"),
+            "Include package registry values adds a Package Details sheet. It is the same set of values the details window shows for each package, and it is only available when AppMgmtIQ is included.",
+            Head("What is remembered"),
+            "The choices on this page are saved with the application settings, under C:\\ProgramData\\Vestigium\\Settings\\AppMgmtIQ. Which inventories are included, Current view or Everything loaded, and whether package details are included all survive a restart."
         ]);
 
     private static Draft Settings()
