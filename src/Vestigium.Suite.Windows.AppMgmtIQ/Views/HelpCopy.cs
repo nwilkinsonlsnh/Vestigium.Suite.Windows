@@ -113,7 +113,9 @@ internal static class HelpCopy
     private static string Term(string word, string means) => "\x1b" + word + "|" + means;
 }
 
-internal sealed record Draft(string Title, IReadOnlyList<string> Lines, IReadOnlyList<Draft>? Sections = null)
+internal sealed record Draft(string Title, IReadOnlyList<string> Lines, IReadOnlyList<Draft> Sections)
 {
-    public IReadOnlyList<Draft> Sections { get; init; } = Sections ?? [];
+    public Draft(string title, IReadOnlyList<string> lines) : this(title, lines, [])
+    {
+    }
 }
