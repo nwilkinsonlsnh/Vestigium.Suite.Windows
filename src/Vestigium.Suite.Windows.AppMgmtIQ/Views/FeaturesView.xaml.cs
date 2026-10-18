@@ -14,6 +14,33 @@ public partial class FeaturesView : UserControl
         Loaded += OnLoaded;
     }
 
+    private void Plan_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not CheckBox box || box.DataContext is not FeatureNode node || DataContext is not FeaturesViewModel host)
+            return;
+        host.SetDesired(node, box.IsChecked == true);
+    }
+
+    private void Apply_Click(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is not FeaturesViewModel host)
+            return;
+        var plan = new FeaturePlanWindow(host.Enables.ToList(), host.Disables.ToList()) { Owner = Window.GetWindow(this) };
+        if (plan.ShowDialog() != true)
+            return;
+        var lines = new List<string>();
+        if (plan.Enabled.Count > 0)
+            lines.Add("Enabled: " + string.Join(", ", plan.Enabled));
+        if (plan.Disabled.Count > 0)
+            lines.Add("Disabled: " + string.Join(", ", plan.Disabled));
+        if (plan.Restart.Count > 0)
+            lines.Add("Restart required: " + string.Join(", ", plan.Restart));
+        if (plan.Failed.Count > 0)
+            lines.Add("Failed: " + string.Join(", ", plan.Failed));
+        MessageBox.Show(string.Join(Environment.NewLine + Environment.NewLine, lines), "Feature changes", MessageBoxButton.OK, MessageBoxImage.Information);
+        _ = host.Refresh();
+    }
+
     private void OnFilter(object sender, RoutedEventArgs e)
     {
         if (DataContext is FeaturesViewModel host)
