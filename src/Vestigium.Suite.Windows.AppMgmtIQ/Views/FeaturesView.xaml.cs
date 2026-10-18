@@ -8,6 +8,7 @@ namespace Vestigium.Suite.Windows.AppMgmtIQ.Views;
 
 public partial class FeaturesView : UserControl
 {
+    private SettingsViewModel? _settings;
     public FeaturesView()
     {
         InitializeComponent();
@@ -39,6 +40,27 @@ public partial class FeaturesView : UserControl
             lines.Add("Failed: " + string.Join(", ", plan.Failed));
         MessageBox.Show(string.Join(Environment.NewLine + Environment.NewLine, lines), "Feature changes", MessageBoxButton.OK, MessageBoxImage.Information);
         host.RefreshCommand.Execute(null);
+    }
+
+    public void Attach(SettingsViewModel settings)
+    {
+        _settings = settings;
+        if (Window.GetWindow(this) is { } window)
+            window.Closing += (_, _) => RememberExpansion();
+        else
+            Loaded += (_, _) =>
+            {
+                if (Window.GetWindow(this) is { } owner)
+                    owner.Closing += (_, _) => RememberExpansion();
+            };
+    }
+
+    private void RememberExpansion()
+    {
+        if (_settings is null || DataContext is not FeaturesViewModel host)
+            return;
+        if (host.UniformExpansion is bool expanded)
+            _settings.FeaturesExpanded = expanded;
     }
 
     private void OnFilter(object sender, RoutedEventArgs e)
@@ -73,6 +95,9 @@ public partial class FeaturesView : UserControl
     {
         foreach (var item in new[] { EnabledItem, DisabledItem, AbsentItem })
             PaintCheck(item);
+        var expanded = _settings?.FeaturesExpanded == true;
+        ExpandAllItem.IsChecked = expanded;
+        CollapseAllItem.IsChecked = !expanded;
 
         var container = ContainerFor(FeatureTree.SelectedItem);
         var expandable = container is { HasItems: true };
@@ -104,10 +129,18 @@ public partial class FeaturesView : UserControl
     }
 
     private void ExpandAll_Click(object sender, RoutedEventArgs e)
-        => SetExpanded(FeatureTree.Items.OfType<FeatureNode>(), true);
+    {
+        SetExpanded(FeatureTree.Items.OfType<FeatureNode>(), true);
+        if (_settings is not null)
+            _settings.FeaturesExpanded = true;
+    }
 
     private void CollapseAll_Click(object sender, RoutedEventArgs e)
-        => SetExpanded(FeatureTree.Items.OfType<FeatureNode>(), false);
+    {
+        SetExpanded(FeatureTree.Items.OfType<FeatureNode>(), false);
+        if (_settings is not null)
+            _settings.FeaturesExpanded = false;
+    }
 
     private static void SetExpanded(IEnumerable<FeatureNode> nodes, bool expanded)
     {
