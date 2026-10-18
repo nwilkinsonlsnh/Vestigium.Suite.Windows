@@ -15,6 +15,7 @@ public sealed class BloatwareResult
     public string CorrelationId { get; set; } = "";
     public string Action { get; set; } = "";
     public bool Ok { get; set; }
+    public bool OpenStore { get; set; }
     public string Detail { get; set; } = "";
     public string Error { get; set; } = "";
 }
