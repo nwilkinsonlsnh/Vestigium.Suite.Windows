@@ -52,7 +52,7 @@ public partial class ApplyFeatureChangesWindow : Window
         {
             ProgressText.Text = $"Enabling {item.Caption} ({++done} of {total})";
             Progress.Value = done;
-            var run = await RunPowerShell($"Enable-WindowsOptionalFeature -Online -FeatureName '{item.Name}' -NoRestart -ErrorAction Stop");
+            var run = await RunPowerShell($"Enable-WindowsOptionalFeature -Online -FeatureName '{item.Name}' -All -NoRestart -ErrorAction Stop");
             Record(result, item, run, enabled: true);
         }
         foreach (var item in _job.Disable)
@@ -79,6 +79,7 @@ public partial class ApplyFeatureChangesWindow : Window
         ProgressPage.Visibility = Visibility.Collapsed;
         ResultPage.Visibility = Visibility.Visible;
         ButtonBar.Visibility = Visibility.Visible;
+        CopyButton.Visibility = Visibility.Visible;
         CancelButton.Visibility = Visibility.Collapsed;
         ConfirmButton.Content = "Close";
         ConfirmButton.IsEnabled = true;
@@ -121,7 +122,7 @@ public partial class ApplyFeatureChangesWindow : Window
             var output = process.StandardOutput.ReadToEnd();
             var error = process.StandardError.ReadToEnd();
             process.WaitForExit();
-            var detail = string.IsNullOrWhiteSpace(error) ? output.Trim() : error.Trim();
+            var detail = FirstLine(string.IsNullOrWhiteSpace(error) ? output : error);
             return new DismRun(process.ExitCode, detail);
         });
     }
@@ -141,6 +142,33 @@ public partial class ApplyFeatureChangesWindow : Window
     {
         using var key = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Control\MiniNT");
         return key is not null;
+    }
+
+    private void Copy_Click(object sender, RoutedEventArgs e)
+    {
+        var lines = new List<string> { ResultSummary.Text, "" };
+        foreach (var item in _outcomes)
+        {
+            lines.Add(item.Caption);
+            lines.Add(item.Outcome);
+            if (!string.IsNullOrWhiteSpace(item.Detail))
+                lines.Add(item.Detail);
+            lines.Add("");
+        }
+        Clipboard.SetText(string.Join(Environment.NewLine, lines).TrimEnd());
+        CopyButton.Content = "Copied";
+    }
+
+    private static string FirstLine(string text)
+    {
+        foreach (var row in text.Split('\n'))
+        {
+            var trimmed = row.Trim().TrimStart('+').Trim();
+            if (trimmed.Length == 0 || trimmed.StartsWith("At line", StringComparison.OrdinalIgnoreCase) || trimmed.StartsWith("CategoryInfo", StringComparison.OrdinalIgnoreCase) || trimmed.StartsWith("FullyQualified", StringComparison.OrdinalIgnoreCase) || trimmed.All(ch => ch == '~' || ch == '-' || ch == '+'))
+                continue;
+            return trimmed;
+        }
+        return text.Trim();
     }
 
     private sealed record DismRun(int Code, string Detail);
