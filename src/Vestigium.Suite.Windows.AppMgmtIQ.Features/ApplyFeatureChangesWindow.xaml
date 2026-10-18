@@ -10,6 +10,7 @@
   <DockPanel Margin="16">
     <StackPanel x:Name="ButtonBar" DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
       <Button x:Name="CancelButton" Content="Cancel" Style="{StaticResource Button.Secondary}" Padding="16,4" Margin="0,0,8,0" IsCancel="True" Click="Cancel_Click" />
+      <Button x:Name="CopyButton" Content="Copy" Style="{StaticResource Button.Secondary}" Padding="16,4" Margin="0,0,8,0" Visibility="Collapsed" Click="Copy_Click" />
       <Button x:Name="ConfirmButton" Content="Confirm" Style="{StaticResource Button.Primary}" Padding="16,4" IsDefault="True" Click="Confirm_Click" />
     </StackPanel>
 
