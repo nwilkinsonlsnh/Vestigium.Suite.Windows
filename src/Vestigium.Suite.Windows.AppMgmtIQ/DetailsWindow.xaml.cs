@@ -36,11 +36,16 @@ public partial class DetailsWindow : Window
 
     private void Grid_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
     {
-        var row = FindAncestor<DataGridRow>(e.OriginalSource as DependencyObject);
-        if (row is null)
+        var cell = FindAncestor<DataGridCell>(e.OriginalSource as DependencyObject);
+        if (cell is null)
             return;
-        row.IsSelected = true;
-        row.Focus();
+        var info = new DataGridCellInfo(cell);
+        if (!ValueGrid.SelectedCells.Contains(info))
+        {
+            ValueGrid.SelectedCells.Clear();
+            ValueGrid.SelectedCells.Add(info);
+        }
+        cell.Focus();
     }
 
     private void Menu_Opened(object sender, RoutedEventArgs e)
