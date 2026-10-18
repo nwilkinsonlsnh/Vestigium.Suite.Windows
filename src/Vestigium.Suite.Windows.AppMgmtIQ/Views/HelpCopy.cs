@@ -5,93 +5,140 @@ internal static class HelpCopy
     public static IReadOnlyList<Draft> Topics(string version, IReadOnlyList<string> license)
         =>
         [
-            new("Overview",
-            [
-                "AppMgmtIQ is the installed-software view for a Windows machine.",
-                "It reads what is installed, which Windows features are on, which catalog apps are present, and what Active Setup will run at the next logon.",
-                Head("Where to find it"),
-                "AppMgmtIQ is the package grid. Windows Features, Bloatware, and Active Setup are the other inventories. Export writes a workbook. Dashboard charts each inventory. Settings holds the defaults. Help is this page."
-            ]),
-            new("AppMgmtIQ",
-            [
-                "The package grid. One row is one installed package, from the four uninstall registry roots.",
-                "Double-click a row for every registry value, on tabs. The title is the display name and version.",
-                Head("Find"),
-                "The query bar filters the grid. A word with no field searches every column. app.displayname, app.publisher, app.version, app.InstallDate, and app.size.mb are the named fields.",
-                "Right-click a row for Product uninstall, the forced uninstall items, copy, and refresh."
-            ]),
-            new("Windows Features",
-            [
-                "The optional Windows features, in the same tree as Turn Windows features on or off.",
-                "A parent checkbox is tri-state. Checked means the feature and its children are on. The middle state means some children are on. Clear means none are.",
-                Head("Find"),
-                "Check the features you want to change, then Apply Feature Changes on the menu. That opens the elevated worker. It summarizes what will be added and removed before it runs."
-            ]),
-            new("Bloatware",
-            [
-                "A catalog of known inbox and Store packages, marked with what this machine actually has.",
-                "Installed means this user has it. Provisioned means the machine keeps a copy for every new user.",
-                Head("Find"),
-                "Right-click a row. Add is shown when it is not installed. Remove is shown when it is. Add registers a local copy, then asks winget, and says so when a package has been retired."
-            ]),
-            new("Active Setup",
-            [
-                "The Installed Components keys. A row with a command and a higher version runs at the next logon for a user who does not have it.",
-                "Pending means the machine copy is ahead of this user's copy.",
-                Head("Find"),
-                "Right-click for Add, Delete, or Clear command. A machine change is elevated. A user change is not. The summary says what was written."
-            ]),
-            new("Dashboard",
-            [
-                "One section for each inventory. The sentence under the tabs says what that section is showing.",
-                "Two charts sit side by side. More than two gets a vertical list, and the area shows the one you pick."
-            ]),
-            new("Exports",
-            [
-                "Writes the current inventories to a workbook. The summary sheet is the first sheet. AppMgmtIQ and Windows Features are added when you include them."
-            ]),
-            new("Settings",
-            [
-                "The defaults for this app. Show global and per-user packages, the date format, and the size decimal places.",
-                "Settings are saved under C:\\ProgramData\\Vestigium\\Settings\\AppMgmtIQ. Logs are under C:\\ProgramData\\Vestigium\\Logs\\AppMgmtIQ."
-            ]),
-            new("License", license.Count == 0 ? ["The license file was empty."] : license, []),
+            Overview(),
+            Packages(),
+            Features(),
+            Bloatware(),
+            ActiveSetup(),
+            Dashboard(),
+            Exports(),
+            Settings(),
+            new("License", license.Count == 0 ? ["The license file was empty."] : license),
             Glossary(),
             About(version)
         ];
 
+    private static Draft Overview()
+        => new("Overview",
+        [
+            "AppMgmtIQ is a modern reading of what Windows has installed, what it can turn on, and what it will run the next time someone logs on.",
+            "Windows splits that story across several places. Add or Remove Programs reads the uninstall registry. Optional Features reads the component store. Inbox apps live in the AppX package store. Active Setup is a logon mechanism almost no management tool shows. This app puts those four inventories in one place, with the same query bar, the same grid, and the same way of writing a change.",
+            Head("How a change is made"),
+            "Reading is local and does not need elevation. Writing is separated. A machine change, a feature change, or a package remove is handed to a small elevated worker. The worker does one job, writes a result, and exits. The suite shows that result. The suite itself does not stay elevated.",
+            Head("Where to find it"),
+            "AppMgmtIQ is the package grid. Windows Features, Bloatware, and Active Setup are the other inventories. Export writes a workbook. Dashboard charts each inventory. Settings holds the defaults. Help is this page."
+        ]);
+
+    private static Draft Packages()
+        => new("AppMgmtIQ",
+        [
+            "This is the uninstall registry, which is what Add or Remove Programs has read since Windows 2000.",
+            "An installer that wants to appear in that list writes a key under Uninstall. The key name is usually a product code or a product name. The values describe the product: DisplayName, DisplayVersion, Publisher, InstallDate, EstimatedSize, UninstallString, and a set of flags such as NoRemove, NoModify, SystemComponent, and WindowsInstaller.",
+            "Windows keeps four of these trees. Two are for the machine, under HKEY_LOCAL_MACHINE, one for native 64-bit software and one for 32-bit software under WOW6432Node. Two are for the current user, under HKEY_CURRENT_USER, with the same split. A package in the machine tree is global. A package in the user tree belongs to that profile. A package under WOW6432Node is x86. The others are x64.",
+            "The grid is one row per key that has something to show. Double-click a row and every value on that key is shown, grouped, not dumped. The window title is the display name and the version, and it follows the selection.",
+            Head("How uninstall works"),
+            "The UninstallString is the command the installer left behind. Product runs that command as it was stored. A path with spaces is taken through the .exe, so C:\\Program Files is not split into C:\\Program. Forced uninstall is only offered for a Windows Installer package, and it builds msiexec /x with a quiet or basic interface instead of trusting the stored command.",
+            "NoRemove is a flag the package set. Clearing it writes 0 to that value, and the write is logged with the account that did it, before the uninstall is allowed to proceed.",
+            Head("Find"),
+            "The query bar filters the grid. A word with no field searches every column. app.displayname, app.publisher, app.version, app.InstallDate, and app.size.mb are the named fields."
+        ]);
+
+    private static Draft Features()
+        => new("Windows Features",
+        [
+            "Optional features are the components Windows can add or remove without a separate installer. Internet Information Services, the Hyper-V tools, and the legacy components all live here. The built-in dialog is Turn Windows features on or off. It reads the component store and presents a tree.",
+            "A feature has a state. Enabled means it is on. Disabled means it is installed and off. Absent means it is not on the machine. A feature also has a parent. The tree is that parent relationship, which is why a group such as WCF Services contains children.",
+            "The checkbox on a parent is tri-state because the parent is a summary of its children. Checked means the feature and everything under it are on. The middle state means some children are on. Clear means none are. A leaf is only ever checked or clear. Checking a child that needs its parent selects the parent too, so the summary that follows is not a surprise.",
+            Head("How a change is applied"),
+            "You check and clear on this form. Nothing is written yet. Apply Feature Changes opens an elevated worker, centered on this window. It lists exactly what will be enabled and what will be disabled. On continue it enables what was disabled, disables what was enabled, and suppresses a reboot where Windows allows it. The summary lists each feature and any error. The suite refreshes when it returns.",
+            Head("Find"),
+            "Expand and Collapse are on the menu, and so are Expand All and Collapse All. The expanded or collapsed state of the whole tree is remembered in Settings."
+        ]);
+
+    private static Draft Bloatware()
+        => new("Bloatware",
+        [
+            "Inbox applications are AppX packages. They are not in the uninstall registry. They are registered with the AppX deployment service, and a provisioned copy can be kept so that every new user profile receives the package at first logon.",
+            "This tab starts from a catalog, not from an inventory. The catalog is a known list of inbox and Store packages: the Bing apps, the Xbox components, the games that ship on a new image, Teams, and the ones Microsoft has since retired. Every catalog entry is shown. The Installed and Provisioned columns say whether this machine has it. A row with Installed = No is a package we know about, not a package that is here.",
+            "Installed means the package is registered for this user and can be launched. Provisioned means the machine holds a copy for new users. Removing only the user registration leaves the provisioned copy, and the next person who logs on receives it again. A real removal takes both.",
+            Head("How add and remove work"),
+            "Remove is elevated. It removes the package for every user by its full package name, then removes the provisioned copy when the row is provisioned. Add looks for an AppxManifest.xml already on the disk, from a provisioned package or from another user's copy, and registers that. If there is no local manifest, it asks winget to fetch the package. If winget finds more than one, it installs the Store match that is not a classic or a plugin. If the package is already installed, that is a success. If Microsoft has retired it, the window says so instead of pretending a download exists.",
+            Head("Find"),
+            "Right-click a row. Add is shown when it is not installed. Remove is shown when it is."
+        ]);
+
+    private static Draft ActiveSetup()
+        => new("Active Setup",
+        [
+            "Active Setup is a logon mechanism. It is not an installer and it is not a scheduled task. Windows compares a machine key with a per-user key at logon. If the machine version is higher, or the user has no key, Windows runs the command in StubPath and then writes the version into the user's key so it does not run again.",
+            "The keys live under SOFTWARE\\Microsoft\\Active Setup\\Installed Components, in HKEY_LOCAL_MACHINE and HKEY_CURRENT_USER, and again under WOW6432Node for 32-bit. The key name is the component, usually a GUID. The values that matter are the display name, StubPath, Version, and IsInstalled. Version is compared as comma-separated numbers, not as text.",
+            "Pending means the machine copy is ahead of this user's copy, so the command will run at the next logon. A component with no StubPath has nothing to run. That is normal for a component that only records a version.",
+            "This area is rarely audited. A StubPath is an arbitrary command. Replacing one, or adding a new component, is a way to run code for every user at logon. That is why the tab exists.",
+            Head("How a change is made"),
+            "Add, Delete, and Clear command are on the menu. A user-key change is written directly. A machine-key change is handed to an elevated worker, which applies it and exits. There is no second confirm window. The summary is the result. Delete removes the key. Clear command removes StubPath and leaves the version, so the component stays but will not run.",
+            Head("Find"),
+            "The query bar uses the setup catalog. setup.stubpath IS NULL and setup.stubpath IS NOT NULL select components by whether they have a command."
+        ]);
+
+    private static Draft Dashboard()
+        => new("Dashboard",
+        [
+            "The dashboard is a reading of the four inventories, not a fifth one. Each section is one inventory, with the counts that describe it and the charts that break it down.",
+            "AppMgmtIQ is who published the software, how it is split between machine and user, when it was installed, and how large it is. Windows Features is how many are on and which parents own them. Bloatware is how much of the catalog is actually present. Active Setup is how much is armed to run, and whether it is a machine or a user component.",
+            "A section with two charts shows them together. A section with more than two gets a vertical list, and the area shows the one you pick. Refresh rebuilds the charts from the inventories currently in memory."
+        ]);
+
+    private static Draft Exports()
+        => new("Exports",
+        [
+            "Export writes a workbook from the inventories. The first sheet is a summary and is the sheet Excel opens on. Further sheets are added for the inventories you include: the package grid, the package details, the feature tree.",
+            "Current filters exports what the grid is showing. All exports the inventory regardless of the query. Include details adds the registry values for each package, which is the same set the details window shows."
+        ]);
+
+    private static Draft Settings()
+        => new("Settings",
+        [
+            "Settings are the defaults for this app, stored as JSON under C:\\ProgramData\\Vestigium\\Settings\\AppMgmtIQ. They survive a restart. Logs are written next to them, under C:\\ProgramData\\Vestigium\\Logs\\AppMgmtIQ, and a change to a setting is logged with the old value and the new one.",
+            "Show global and show per-user decide which uninstall trees are included. The date format is how InstallDate is rendered. Decimal places is how EstimatedSize is rounded when it is shown as KB, MB, or GB. The Windows Features tree remembers whether it was left expanded or collapsed."
+        ]);
+
     private static Draft Glossary()
         => new("Glossary",
-            ["The words used on the grids."],
+            ["The words used on the grids, and what they mean in Windows."],
             [
                 new("Packages",
                 [
-                    Term("Display name", "The name Windows shows. The details title uses it with the version."),
-                    Term("Global", "Installed for the machine. HKLM. Per user is HKCU."),
-                    Term("x64", "The native uninstall key. x86 is the WOW6432Node key."),
-                    Term("System component", "Marked SystemComponent. Usually hidden from Add or Remove Programs."),
-                    Term("NoRemove", "The package asked not to be removed. Clearing it is logged.")
+                    Term("Display name", "The name the installer wrote. The details title uses it with the version."),
+                    Term("Global", "The key is under HKEY_LOCAL_MACHINE. It applies to every user."),
+                    Term("Per user", "The key is under HKEY_CURRENT_USER. It applies to this profile."),
+                    Term("x64", "The native uninstall key. x86 is the same key under WOW6432Node."),
+                    Term("System component", "SystemComponent is set. Add or Remove Programs hides these."),
+                    Term("Windows Installer", "The package was installed by msiexec. Forced uninstall is available."),
+                    Term("NoRemove", "The package set this flag. Clearing it is a logged write."),
+                    Term("UninstallString", "The command the installer left. Product runs it.")
                 ]),
                 new("Features",
                 [
                     Term("Enabled", "The feature is on."),
                     Term("Disabled", "The feature is installed and off."),
                     Term("Absent", "The feature is not installed."),
-                    Term("Parent", "The feature this one sits under in the tree.")
+                    Term("Parent", "The feature this one sits under. A parent checkbox summarizes its children."),
+                    Term("Tri-state", "Checked, partial, or clear. Only a parent can be partial.")
                 ]),
                 new("Bloatware",
                 [
-                    Term("Catalog", "The known list. A row here is not proof the app is installed."),
-                    Term("Installed", "Registered for this user."),
-                    Term("Provisioned", "Kept for every new user. Remove takes this too when the row is provisioned."),
-                    Term("Retired", "Microsoft no longer offers the package. Add says so.")
+                    Term("Catalog", "The known list. A row is not proof the package is installed."),
+                    Term("Installed", "Registered for this user with the AppX service."),
+                    Term("Provisioned", "Held for every new user. A new profile receives it at first logon."),
+                    Term("Retired", "Microsoft no longer ships or offers the package.")
                 ]),
                 new("Active Setup",
                 [
-                    Term("StubPath", "The command. It runs at logon when the version says it should."),
-                    Term("Version", "Compared as comma-separated numbers. A higher machine version runs again."),
+                    Term("Component", "The key name, usually a GUID."),
+                    Term("StubPath", "The command run at logon when the version says it should."),
+                    Term("Version", "Comma-separated numbers. A higher machine version runs again."),
                     Term("Pending", "This user does not yet have the machine version."),
-                    Term("Component", "The key name, usually a GUID.")
+                    Term("IsInstalled", "The component is marked ready. It is not proof the command succeeded.")
                 ])
             ]);
 
@@ -101,7 +148,7 @@ internal static class HelpCopy
             [
                 new("App",
                 [
-                    "AppMgmtIQ " + version + ". Installed packages, Windows features, catalog apps, and Active Setup.",
+                    "AppMgmtIQ " + version + ". Installed packages, Windows features, catalog apps, and Active Setup, in one suite.",
                     "Copyright (c) 2026 Nathaniel Wilkinson. MIT License. The notice is the License topic.",
                     "The public source for this host is Vestigium.Suite.Windows.",
                     Link("https://github.com/nwilkinsonlsnh/Vestigium.Suite.Windows", "Vestigium.Suite.Windows")
