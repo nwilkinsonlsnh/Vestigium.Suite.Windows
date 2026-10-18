@@ -10,12 +10,31 @@ public sealed partial class ExportViewModel : ObservableObject
     private readonly BloatwareViewModel _bloatware;
     private readonly ActiveSetupViewModel _setup;
 
-    public ExportViewModel(MainViewModel packages, FeaturesViewModel features, BloatwareViewModel bloatware, ActiveSetupViewModel setup)
+    private readonly AppMgmtSettingsStore _store;
+    private bool _loading;
+
+    public ExportViewModel(MainViewModel packages, FeaturesViewModel features, BloatwareViewModel bloatware, ActiveSetupViewModel setup, AppMgmtSettingsStore store)
     {
         _packages = packages;
         _features = features;
         _bloatware = bloatware;
         _setup = setup;
+        _store = store;
+        Load();
+    }
+
+    public void Load()
+    {
+        _loading = true;
+        var data = _store.Load();
+        IncludePackages = data.ExportPackages;
+        IncludeFeatures = data.ExportFeatures;
+        IncludeBloatware = data.ExportBloatware;
+        IncludeActiveSetup = data.ExportActiveSetup;
+        CurrentView = data.ExportCurrentView;
+        Everything = !data.ExportCurrentView;
+        IncludeDetails = data.ExportDetails;
+        _loading = false;
     }
 
     [ObservableProperty]
@@ -25,10 +44,10 @@ public sealed partial class ExportViewModel : ObservableObject
     private bool _includeFeatures = true;
 
     [ObservableProperty]
-    private bool _includeBloatware;
+    private bool _includeBloatware = true;
 
     [ObservableProperty]
-    private bool _includeActiveSetup;
+    private bool _includeActiveSetup = true;
 
     [ObservableProperty]
     private bool _currentView = true;
@@ -44,6 +63,27 @@ public sealed partial class ExportViewModel : ObservableObject
 
     [ObservableProperty]
     private string _lastPath = "";
+
+    partial void OnIncludePackagesChanged(bool value) => Persist();
+    partial void OnIncludeFeaturesChanged(bool value) => Persist();
+    partial void OnIncludeBloatwareChanged(bool value) => Persist();
+    partial void OnIncludeActiveSetupChanged(bool value) => Persist();
+    partial void OnCurrentViewChanged(bool value) => Persist();
+    partial void OnIncludeDetailsChanged(bool value) => Persist();
+
+    private void Persist()
+    {
+        if (_loading)
+            return;
+        var saved = _store.Load();
+        saved.ExportPackages = IncludePackages;
+        saved.ExportFeatures = IncludeFeatures;
+        saved.ExportBloatware = IncludeBloatware;
+        saved.ExportActiveSetup = IncludeActiveSetup;
+        saved.ExportCurrentView = CurrentView;
+        saved.ExportDetails = IncludeDetails;
+        _store.Save(saved);
+    }
 
     [RelayCommand]
     private void Export()
