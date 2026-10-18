@@ -86,8 +86,8 @@ public partial class BloatwareView : UserControl
     {
         var result = await Wait(resultPath);
         var ok = result?.Ok == true;
-        var outcome = ok ? result?.Detail ?? "The change was applied." : "The change failed.";
-        var detail = ok ? result?.Detail ?? "" : First(result?.Error, result?.Detail, "The worker did not report back.");
+        var outcome = ok ? result?.Detail ?? "The change was applied." : result?.Error ?? "The change failed.";
+        var detail = string.IsNullOrWhiteSpace(result?.Detail) ? "" : result.Detail;
         progress.Complete(outcome, detail);
         if (ok)
             host.RefreshCommand.Execute(null);
