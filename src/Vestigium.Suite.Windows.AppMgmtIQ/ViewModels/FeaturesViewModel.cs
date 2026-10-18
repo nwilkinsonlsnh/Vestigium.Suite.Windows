@@ -143,11 +143,12 @@ public sealed partial class FeaturesViewModel : ObservableObject
             }
         }
 
-        var visible = new List<FeatureNode>();
         foreach (var root in roots.OrderBy(row => row.Caption, StringComparer.OrdinalIgnoreCase))
-            Collect(root, children, visible);
-        foreach (var node in visible)
-            Roots.Add(node);
+        {
+            var node = Build(root, children);
+            foreach (var visible in TakeVisible(node))
+                Roots.Add(visible);
+        }
         if (string.IsNullOrWhiteSpace(Query) || _bound is not null)
             Status = $"{Roots.Count} groups, {_all.Count} features ({_source})";
     }
@@ -178,27 +179,19 @@ public sealed partial class FeaturesViewModel : ObservableObject
         return node;
     }
 
-    private void Collect(FeatureRow row, Dictionary<string, List<FeatureRow>> children, List<FeatureNode> into)
+    private List<FeatureNode> TakeVisible(FeatureNode node)
     {
-        var parent = _parents.TryGetValue(row.Name, out var name) ? name : "";
-        var matched = new List<FeatureNode>();
-        if (children.TryGetValue(row.Name, out var kids))
-        {
-            foreach (var kid in kids.OrderBy(k => k.Caption, StringComparer.OrdinalIgnoreCase))
-                Collect(kid, children, matched);
-        }
-        if (!Matches(row, parent))
-        {
-            into.AddRange(matched);
-            return;
-        }
-        var node = Build(row, children);
-        if (node is null)
-            return;
+        var kids = node.Children.ToList();
         node.Children.Clear();
-        foreach (var child in matched)
+        var kept = new List<FeatureNode>();
+        foreach (var child in kids)
+            kept.AddRange(TakeVisible(child));
+        var parent = _parents.TryGetValue(node.Name, out var name) ? name : "";
+        if (!Matches(node.Feature ?? new FeatureRow { Name = node.Name, Caption = node.Caption, State = node.State, IsEnabled = node.IsEnabled }, parent))
+            return kept;
+        foreach (var child in kept)
             node.Children.Add(child);
-        into.Add(node);
+        return [node];
     }
 
     private bool Matches(FeatureRow row, string parent)
