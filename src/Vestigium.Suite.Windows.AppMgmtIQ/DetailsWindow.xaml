@@ -29,8 +29,10 @@
         </DataTemplate>
       </ItemsControl.ItemTemplate>
     </ItemsControl>
-    <DataGrid Style="{StaticResource DataGrid.Standard}"
+    <DataGrid x:Name="ValueGrid"
+              Style="{StaticResource DataGrid.Standard}"
               ItemsSource="{Binding SelectedTab.Rows}"
+              SelectedItem="{Binding SelectedRow, Mode=TwoWay}"
               AutoGenerateColumns="False"
               IsReadOnly="True"
               HeadersVisibility="Column"
@@ -41,7 +43,24 @@
               ColumnWidth="*"
               HorizontalScrollBarVisibility="Disabled"
               ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-              VerticalScrollBarVisibility="Visible">
+              VerticalScrollBarVisibility="Visible"
+              PreviewMouseRightButtonDown="Grid_PreviewMouseRightButtonDown">
+      <DataGrid.ContextMenu>
+        <ContextMenu Style="{StaticResource ContextMenu.Standard}" Opened="Menu_Opened">
+          <MenuItem Header="Refresh" Style="{StaticResource MenuItem.Standard}" Click="Refresh_Click">
+            <MenuItem.Icon><TextBlock FontFamily="Segoe UI Symbol" FontSize="14" Text="&#x267B;" Foreground="#3DDC84" /></MenuItem.Icon>
+          </MenuItem>
+          <Separator />
+          <MenuItem x:Name="CopyItem" Header="Copy" Style="{StaticResource MenuItem.Standard}">
+            <MenuItem.Icon><TextBlock FontFamily="Segoe MDL2 Assets" FontSize="14" Text="&#xE8C8;" /></MenuItem.Icon>
+            <MenuItem Header="Value information" Style="{StaticResource MenuItem.Standard}" Click="CopyInfo_Click" />
+            <Separator />
+            <MenuItem Header="Name" Style="{StaticResource MenuItem.Standard}" Click="CopyName_Click" />
+            <MenuItem Header="Type" Style="{StaticResource MenuItem.Standard}" Click="CopyType_Click" />
+            <MenuItem Header="Data" Style="{StaticResource MenuItem.Standard}" Click="CopyData_Click" />
+          </MenuItem>
+        </ContextMenu>
+      </DataGrid.ContextMenu>
       <DataGrid.Columns>
         <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="180" MinWidth="120" ElementStyle="{StaticResource LeftCell}" />
         <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="88" MinWidth="72" ElementStyle="{StaticResource LeftCell}" />
