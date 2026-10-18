@@ -97,19 +97,19 @@
               PreviewMouseRightButtonDown="Tree_PreviewMouseRightButtonDown"
               MouseDoubleClick="Tree_MouseDoubleClick">
       <TreeView.ContextMenu>
-        <ContextMenu Opened="Menu_Opened">
-          <MenuItem Header="Open Details" Click="OpenDetails_Click">
+        <ContextMenu Style="{StaticResource ContextMenu.Standard}" Grid.IsSharedSizeScope="True" Opened="Menu_Opened">
+          <MenuItem Header="Open Details" Style="{StaticResource MenuItem.Standard}" Click="OpenDetails_Click">
             <MenuItem.Icon><TextBlock Text="&#xE8A7;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
           </MenuItem>
-          <Separator />
-          <MenuItem x:Name="ExpandItem" Header="Expand" Click="Expand_Click" IsEnabled="False">
+          <Separator Style="{StaticResource Separator.Menu}" />
+          <MenuItem x:Name="ExpandItem" Header="Expand" Style="{StaticResource MenuItem.Standard}" Click="Expand_Click" IsEnabled="False">
             <MenuItem.Icon><TextBlock Text="&#xE70D;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
           </MenuItem>
-          <MenuItem x:Name="CollapseItem" Header="Collapse" Click="Collapse_Click" IsEnabled="False">
+          <MenuItem x:Name="CollapseItem" Header="Collapse" Style="{StaticResource MenuItem.Standard}" Click="Collapse_Click" IsEnabled="False">
             <MenuItem.Icon><TextBlock Text="&#xE70E;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
           </MenuItem>
-          <Separator />
-          <MenuItem Header="Filter">
+          <Separator Style="{StaticResource Separator.Menu}" />
+          <MenuItem Header="Filter" Style="{StaticResource MenuItem.Standard}">
             <MenuItem.Icon><TextBlock Text="&#xE71C;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
             <MenuItem x:Name="EnabledItem" Checked="FilterCheck_Changed" Unchecked="FilterCheck_Changed" Header="Enabled" Style="{StaticResource MenuItem.Standard}" IsCheckable="True" IsChecked="{Binding PlacementTarget.DataContext.ShowEnabledFlag, RelativeSource={RelativeSource AncestorType=ContextMenu}}" StaysOpenOnClick="True">
               <MenuItem.Icon><TextBlock x:Name="EnabledCheck" FontFamily="Segoe MDL2 Assets" FontSize="16" Text="&#xE739;" /></MenuItem.Icon>
@@ -121,8 +121,8 @@
               <MenuItem.Icon><TextBlock x:Name="AbsentCheck" FontFamily="Segoe MDL2 Assets" FontSize="16" Text="&#xE739;" /></MenuItem.Icon>
             </MenuItem>
           </MenuItem>
-          <Separator />
-          <MenuItem Header="Refresh" Command="{Binding PlacementTarget.DataContext.RefreshCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+          <Separator Style="{StaticResource Separator.Menu}" />
+          <MenuItem Header="Refresh" Style="{StaticResource MenuItem.Standard}" Command="{Binding PlacementTarget.DataContext.RefreshCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
             <MenuItem.Icon><TextBlock FontFamily="Segoe UI Symbol" FontSize="14" Text="&#x267B;" Foreground="#3DDC84" /></MenuItem.Icon>
           </MenuItem>
         </ContextMenu>
