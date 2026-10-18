@@ -25,13 +25,13 @@ internal static class BloatwareApplier
         var local = Run(RegisterScript(job.Family));
         if (local.Code == 0)
         {
-            result.Detail = "Registered from the local package.";
+            result.Detail = $"{job.Name} was installed from the copy already on this machine.";
             return Finish(job, result, local);
         }
         var fetched = Run(WingetScript(job.Name, job.Family));
         if (fetched.Code == 0)
         {
-            result.Detail = "Fetched with winget.";
+            result.Detail = $"{job.Name} was installed.";
             return Finish(job, result, fetched);
         }
         result.OpenStore = false;
