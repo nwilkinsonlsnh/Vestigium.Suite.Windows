@@ -109,14 +109,20 @@ internal static class HelpCopy
     private static Draft ActiveSetup()
         => new("Active Setup",
         [
-            "Active Setup is a logon mechanism. It is not an installer and it is not a scheduled task. Windows compares a machine key with a per-user key at logon. If the machine version is higher, or the user has no key, Windows runs the command in StubPath and then writes the version into the user's key so it does not run again.",
-            "The keys live under SOFTWARE\\Microsoft\\Active Setup\\Installed Components, in HKEY_LOCAL_MACHINE and HKEY_CURRENT_USER, and again under WOW6432Node for 32-bit. The key name is the component, usually a GUID. The values that matter are the display name, StubPath, Version, and IsInstalled. Version is compared as comma-separated numbers, not as text.",
-            "Pending means the machine copy is ahead of this user's copy, so the command will run at the next logon. A component with no StubPath has nothing to run. That is normal for a component that only records a version.",
-            "This area is rarely audited. A StubPath is an arbitrary command. Replacing one, or adding a new component, is a way to run code for every user at logon. That is why the tab exists.",
-            Head("How a change is made"),
-            "Add, Delete, and Clear command are on the menu. A user-key change is written directly. A machine-key change is handed to an elevated worker, which applies it and exits. There is no second confirm window. The summary is the result. Delete removes the key. Clear command removes StubPath and leaves the version, so the component stays but will not run.",
-            Head("Find"),
-            "The query bar uses the setup catalog. setup.stubpath IS NULL and setup.stubpath IS NOT NULL select components by whether they have a command."
+            "Active Setup is a specialized Windows logon mechanism, distinct from standard installers or scheduled tasks, that is frequently overlooked and rarely audited. Because it can execute arbitrary commands, the StubPath, for every user at logon, it presents a significant surface area for both routine system management and potential exploitation. This tab brings complete visibility to these hidden components, allowing administrators to see exactly what is configured to run when a profile initializes.",
+            Head("Architecture and Execution Mechanics"),
+            "Windows processes Active Setup by comparing a machine-level registry key, HKEY_LOCAL_MACHINE, against a corresponding per-user key, HKEY_CURRENT_USER, during the logon sequence. The keys reside under SOFTWARE\\Microsoft\\Active Setup\\Installed Components, with 32-bit components correctly mapped to the WOW6432Node.",
+            "If the machine's version number is higher than the user's, or if the user lacks the key entirely, Windows executes the command defined in the component's StubPath. Once the execution completes, Windows stamps the updated version into the user's registry hive to prevent the command from running again. Crucially, the system compares these versions as comma-separated numbers, not as standard text strings.",
+            Head("Interface and Component States"),
+            "The data grid lists each component, typically identified by a GUID, along with its critical values: Display Name, StubPath, Version, and IsInstalled status.",
+            Term("Pending", "When a component is marked as Pending, it indicates that the machine copy is ahead of the current user's copy. This serves as a direct alert that the associated command is armed and waiting to run at the very next logon."),
+            Term("Dormant Components", "Components that lack a StubPath are completely normal. They simply record version data without requiring execution."),
+            Head("Applying System Changes"),
+            "Administrators can proactively manage these logon triggers using the Add, Delete, and Clear command options found in the menu.",
+            Term("Targeted Writes", "Changes made to a current user's key are written directly. Conversely, modifications to machine-level keys are handed to an elevated worker process that securely applies the change, exits, and instantly returns a summary result without requiring a redundant secondary confirmation window."),
+            Term("Remediation Options", "While Delete entirely removes the component key from the registry, the Clear command action is more surgical. It strips only the StubPath while preserving the version data, ensuring the component remains registered but is effectively neutralized from running code."),
+            Head("Search and Filtering"),
+            "The query bar is tailored specifically for the Active Setup catalog. Administrators can quickly isolate executable components by typing setup.stubpath IS NOT NULL, or filter for dormant keys by querying setup.stubpath IS NULL."
         ]);
 
     private static Draft Dashboard()
