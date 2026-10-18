@@ -105,20 +105,19 @@ public sealed partial class SettingsViewModel : ObservableObject
         ShowOtherInstallers = _host.ShowOtherInstallers;
         _loading = false;
         Push();
-        _store.Save(new AppMgmtSettings
-        {
-            ThemeId = SelectedThemeId,
-            ShowGlobal = ShowGlobal,
-            ShowPerUser = ShowPerUser,
-            ShowX64 = ShowX64,
-            ShowX86 = ShowX86,
-            ShowSystemComponents = ShowSystemComponents,
-            ShowWindowsInstaller = ShowWindowsInstaller,
-            ShowOtherInstallers = ShowOtherInstallers,
-            FeaturesExpanded = FeaturesExpanded,
-            DateFormat = SelectedDateFormat?.Label ?? DisplayFormats.DefaultDateFormat.Label,
-            DecimalPlaces = (int)DecimalPlaces
-        });
+        var saved = _store.Load();
+        saved.ThemeId = SelectedThemeId;
+        saved.ShowGlobal = ShowGlobal;
+        saved.ShowPerUser = ShowPerUser;
+        saved.ShowX64 = ShowX64;
+        saved.ShowX86 = ShowX86;
+        saved.ShowSystemComponents = ShowSystemComponents;
+        saved.ShowWindowsInstaller = ShowWindowsInstaller;
+        saved.ShowOtherInstallers = ShowOtherInstallers;
+        saved.FeaturesExpanded = FeaturesExpanded;
+        saved.DateFormat = SelectedDateFormat?.Label ?? DisplayFormats.DefaultDateFormat.Label;
+        saved.DecimalPlaces = (int)DecimalPlaces;
+        _store.Save(saved);
     }
 
     public void Load()
@@ -201,20 +200,19 @@ public sealed partial class SettingsViewModel : ObservableObject
             "Settings",
             $"{name}: current '{previous ?? "(unset)"}' new '{next ?? "(unset)"}'");
 
-        _store.Save(new AppMgmtSettings
-        {
-            ThemeId = SelectedThemeId,
-            ShowGlobal = ShowGlobal,
-            ShowPerUser = ShowPerUser,
-            ShowX64 = ShowX64,
-            ShowX86 = ShowX86,
-            ShowSystemComponents = ShowSystemComponents,
-            ShowWindowsInstaller = ShowWindowsInstaller,
-            ShowOtherInstallers = ShowOtherInstallers,
-            FeaturesExpanded = FeaturesExpanded,
-            DateFormat = SelectedDateFormat?.Label ?? DisplayFormats.DefaultDateFormat.Label,
-            DecimalPlaces = (int)DecimalPlaces
-        });
+        var saved = _store.Load();
+        saved.ThemeId = SelectedThemeId;
+        saved.ShowGlobal = ShowGlobal;
+        saved.ShowPerUser = ShowPerUser;
+        saved.ShowX64 = ShowX64;
+        saved.ShowX86 = ShowX86;
+        saved.ShowSystemComponents = ShowSystemComponents;
+        saved.ShowWindowsInstaller = ShowWindowsInstaller;
+        saved.ShowOtherInstallers = ShowOtherInstallers;
+        saved.FeaturesExpanded = FeaturesExpanded;
+        saved.DateFormat = SelectedDateFormat?.Label ?? DisplayFormats.DefaultDateFormat.Label;
+        saved.DecimalPlaces = (int)DecimalPlaces;
+        _store.Save(saved);
 
         HostLog.Information(AppMgmtCatalog.SettingsSaved, "Settings", $"Settings saved. {_store.FilePath}");
     }
