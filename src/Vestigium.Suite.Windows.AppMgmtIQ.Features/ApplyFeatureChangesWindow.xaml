@@ -4,7 +4,7 @@
         Title="Apply Feature Changes"
         Height="640" Width="760"
         MinHeight="420" MinWidth="560"
-        WindowStartupLocation="CenterScreen"
+        WindowStartupLocation="Manual"
         Background="{DynamicResource Vestigium.Brushes.Surface.Window}"
         Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}">
   <DockPanel Margin="16">
