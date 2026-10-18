@@ -8,8 +8,6 @@ namespace Vestigium.Suite.Windows.AppMgmtIQ.Views;
 
 public partial class FeaturesView : UserControl
 {
-    private FeatureDetailsWindow? _details;
-
     public FeaturesView()
     {
         InitializeComponent();
@@ -42,27 +40,6 @@ public partial class FeaturesView : UserControl
     {
         if (DataContext is FeaturesViewModel vm)
             vm.SelectedFeature = (e.NewValue as FeatureNode)?.Feature;
-        if (_details is { IsVisible: true } && e.NewValue is FeatureNode node)
-        {
-            var selected = node;
-            Dispatcher.BeginInvoke(() =>
-            {
-                if (_details is { IsVisible: true })
-                    _details.SetFeature(selected);
-            });
-        }
-    }
-
-    private void Tree_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-    {
-        if (FeatureTree.SelectedItem is FeatureNode node)
-            ShowDetails(node);
-    }
-
-    private void OpenDetails_Click(object sender, RoutedEventArgs e)
-    {
-        if (FeatureTree.SelectedItem is FeatureNode node)
-            ShowDetails(node);
     }
 
     private void Menu_Opened(object sender, RoutedEventArgs e)
@@ -122,20 +99,6 @@ public partial class FeaturesView : UserControl
                 return found;
         }
         return null;
-    }
-
-    private void ShowDetails(FeatureNode node)
-    {
-        if (_details is null || !_details.IsLoaded)
-        {
-            _details = new FeatureDetailsWindow { Owner = Window.GetWindow(this) };
-            _details.Closed += (_, _) => _details = null;
-            _details.Show();
-        }
-        var first = !_details.IsVisible;
-        _details.SetFeature(node);
-        if (first)
-            _details.Activate();
     }
 
     private static T? FindAncestor<T>(DependencyObject start) where T : DependencyObject
