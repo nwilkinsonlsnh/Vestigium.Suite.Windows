@@ -160,8 +160,13 @@ internal static class HelpCopy
     private static Draft Exports()
         => new("Exports",
         [
-            "Export writes a workbook from the inventories. The first sheet is a summary and is the sheet Excel opens on. Further sheets are added for the inventories you include: the package grid, the package details, the feature tree.",
-            "Current filters exports what the grid is showing. All exports the inventory regardless of the query. Include details adds the registry values for each package, which is the same set the details window shows."
+            "Export writes one workbook from the inventories already loaded. Summary is the first sheet, and it is the sheet Excel opens on. A further sheet is added for each inventory that is included.",
+            Head("Inventories"),
+            "AppMgmtIQ, Windows Features, Bloatware, and Active Setup are independent. Include any combination. At least one is required.",
+            Head("Rows"),
+            "Current view respects the query bar and the filter menus on each page. Everything loaded ignores those and writes the full inventory.",
+            Head("Package details"),
+            "Include package registry values adds a Package Details sheet. It is the same set of values the details window shows, and it is only offered when AppMgmtIQ is included."
         ]);
 
     private static Draft Settings()
