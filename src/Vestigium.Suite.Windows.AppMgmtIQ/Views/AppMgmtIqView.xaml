@@ -56,7 +56,9 @@
                                Text="{Binding Query, UpdateSourceTrigger=PropertyChanged}"
                                Session="{Binding Session}"
                                Queries="{Binding Queries}"
-                               FilterRequested="OnFilter" />
+                               Limit="{Binding MruLimit}"
+                               FilterRequested="OnFilter"
+                               PinRequested="OnPin" />
       <Button Grid.Column="1" Margin="8,0,0,0" Width="36" Height="36" Padding="0"
               VerticalAlignment="Center" HorizontalAlignment="Center"
               Style="{StaticResource Button.Utility}"
