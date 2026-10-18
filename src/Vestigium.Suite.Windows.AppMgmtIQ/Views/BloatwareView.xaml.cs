@@ -27,39 +27,11 @@ public partial class BloatwareView : UserControl
         RemoveItem.Visibility = installed ? Visibility.Visible : Visibility.Collapsed;
     }
 
-    private async void Add_Click(object sender, RoutedEventArgs e)
+    private void Add_Click(object sender, RoutedEventArgs e)
     {
-        if (DataContext is not BloatwareViewModel { Selected: { } row } host || row.Installed)
+        if (DataContext is not BloatwareViewModel { Selected: { } row } || row.Installed)
             return;
-        var owner = Window.GetWindow(this);
-        var (ok, detail) = await Task.Run(() => Register(row.Family));
-        new ActiveSetupSummaryWindow("Add Bloatware", ok ? "The change was applied." : "The change failed.", row.Name, detail) { Owner = owner }.ShowDialog();
-        if (ok)
-            host.RefreshCommand.Execute(null);
-    }
-
-    private static (bool Ok, string Detail) Register(string family)
-    {
-        var script = "$ErrorActionPreference='Stop'; $registered=0; $family='" + family.Replace("'", "''") + "'; " +
-            "$sources = @(); " +
-            "Get-AppxPackage -Name $family | ForEach-Object { $sources += $_.InstallLocation }; " +
-            "Get-AppxPackage -AllUsers -Name $family -ErrorAction SilentlyContinue | ForEach-Object { $sources += $_.InstallLocation }; " +
-            "Get-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue | Where-Object { $_.DisplayName -eq $family } | ForEach-Object { $sources += (Join-Path 'C:\\Program Files\\WindowsApps' $_.PackageName) }; " +
-            "$sources | Select-Object -Unique | ForEach-Object { $manifest = Join-Path $_ 'AppxManifest.xml'; if (Test-Path $manifest) { Add-AppxPackage -DisableDevelopmentMode -Register $manifest; $registered++ } }; " +
-            "if ($registered -eq 0) { throw 'No package source was found for this user. It may not be provisioned on this machine.' }";
-        var info = new ProcessStartInfo("powershell.exe", "-NoProfile -NonInteractive -Command " + script)
-        {
-            UseShellExecute = false,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            CreateNoWindow = true
-        };
-        using var process = Process.Start(info);
-        if (process is null)
-            return (false, "PowerShell did not start.");
-        var output = process.StandardOutput.ReadToEnd() + process.StandardError.ReadToEnd();
-        process.WaitForExit();
-        return process.ExitCode == 0 ? (true, output.Trim()) : (false, output.Trim());
+        _ = Run("Add", row);
     }
 
     private void Remove_Click(object sender, RoutedEventArgs e)
