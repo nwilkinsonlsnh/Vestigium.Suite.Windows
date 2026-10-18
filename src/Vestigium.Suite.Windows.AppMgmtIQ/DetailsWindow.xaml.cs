@@ -10,6 +10,7 @@ namespace Vestigium.Suite.Windows.AppMgmtIQ;
 public partial class DetailsWindow : Window
 {
     private PackageRow? _package;
+    private int _anchorColumn;
 
     public DetailsWindow()
     {
@@ -32,6 +33,60 @@ public partial class DetailsWindow : Window
         if (DataContext is not DetailsViewModel vm || sender is not RadioButton { DataContext: DetailsTab tab })
             return;
         vm.SelectedTab = tab;
+    }
+
+    private void Grid_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        var header = FindAncestor<DataGridColumnHeader>(e.OriginalSource as DependencyObject);
+        if (header?.Column is null)
+            return;
+        var index = header.Column.DisplayIndex;
+        var ctrl = (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control;
+        var shift = (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift;
+        if (shift)
+            SelectColumns(_anchorColumn, index);
+        else if (ctrl)
+            ToggleColumn(index);
+        else
+        {
+            _anchorColumn = index;
+            SelectColumns(index, index);
+        }
+        e.Handled = true;
+    }
+
+    private void SelectColumns(int from, int to)
+    {
+        var start = Math.Min(from, to);
+        var end = Math.Max(from, to);
+        ValueGrid.SelectedCells.Clear();
+        foreach (var item in ValueGrid.Items)
+        {
+            for (var i = start; i <= end; i++)
+            {
+                var column = ValueGrid.Columns.FirstOrDefault(c => c.DisplayIndex == i);
+                if (column is not null)
+                    ValueGrid.SelectedCells.Add(new DataGridCellInfo(item, column));
+            }
+        }
+    }
+
+    private void ToggleColumn(int index)
+    {
+        var column = ValueGrid.Columns.FirstOrDefault(c => c.DisplayIndex == index);
+        if (column is null)
+            return;
+        var selected = ValueGrid.SelectedCells.Any(cell => cell.Column == column);
+        if (selected)
+        {
+            foreach (var cell in ValueGrid.SelectedCells.Where(cell => cell.Column == column).ToList())
+                ValueGrid.SelectedCells.Remove(cell);
+            return;
+        }
+
+        foreach (var item in ValueGrid.Items)
+            ValueGrid.SelectedCells.Add(new DataGridCellInfo(item, column));
+        _anchorColumn = index;
     }
 
     private void Grid_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
