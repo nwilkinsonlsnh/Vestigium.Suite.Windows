@@ -43,7 +43,14 @@ public partial class FeaturesView : UserControl
         if (DataContext is FeaturesViewModel vm)
             vm.SelectedFeature = (e.NewValue as FeatureNode)?.Feature;
         if (_details is { IsVisible: true } && e.NewValue is FeatureNode node)
-            ShowDetails(node);
+        {
+            var selected = node;
+            Dispatcher.BeginInvoke(() =>
+            {
+                if (_details is { IsVisible: true })
+                    _details.SetFeature(selected);
+            });
+        }
     }
 
     private void Tree_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -125,8 +132,10 @@ public partial class FeaturesView : UserControl
             _details.Closed += (_, _) => _details = null;
             _details.Show();
         }
+        var first = !_details.IsVisible;
         _details.SetFeature(node);
-        _details.Activate();
+        if (first)
+            _details.Activate();
     }
 
     private static T? FindAncestor<T>(DependencyObject start) where T : DependencyObject
