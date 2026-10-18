@@ -15,6 +15,7 @@ public sealed class AppMgmtSettings
     public bool ShowOtherInstallers { get; set; } = true;
     public string DateFormat { get; set; } = DisplayFormats.DefaultDateFormat.Label;
     public int DecimalPlaces { get; set; } = 4;
+    public bool FeaturesExpanded { get; set; }
 }
 
 public sealed class AppMgmtSettingsStore
