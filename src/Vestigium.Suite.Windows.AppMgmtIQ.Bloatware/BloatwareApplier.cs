@@ -28,7 +28,7 @@ internal static class BloatwareApplier
             result.Detail = "Registered from the local package.";
             return Finish(job, result, local);
         }
-        var fetched = Run(WingetScript(job.Name));
+        var fetched = Run(WingetScript(job.Name, job.Family));
         if (fetched.Code == 0)
         {
             result.Detail = "Fetched with winget.";
@@ -78,8 +78,12 @@ internal static class BloatwareApplier
         or "microsoft.wallet" or "microsoft.oneconnect" or "microsoft.mixedreality.portal"
         or "microsoft.549981c3f5f10" or "microsoft.windows.devhome";
 
-    private static string WingetScript(string name)
-        => "winget install --name " + Quote(name) + " --source msstore --accept-package-agreements --accept-source-agreements --disable-interactivity";
+    private static string WingetScript(string name, string family)
+    {
+        var display = Quote(name);
+        var package = Quote(family);
+        return "$ErrorActionPreference='Continue'; $ok=$false; foreach ($q in @(" + display + "," + package + ")) { winget install --query $q --accept-package-agreements --accept-source-agreements --disable-interactivity; if ($LASTEXITCODE -eq 0) { $ok=$true; break } }; if (-not $ok) { throw 'winget could not match this package.' }";
+    }
 
     private static string Quote(string value) => "'" + (value ?? "").Replace("'", "''") + "'";
 
