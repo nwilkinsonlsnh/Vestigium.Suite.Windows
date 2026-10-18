@@ -4,8 +4,13 @@
     <RootNamespace>Vestigium.Suite.Windows.AppMgmtIQ</RootNamespace>
     <AssemblyName>AppMgmtIQ</AssemblyName>
     <ApplicationTitle>AppMgmtIQ</ApplicationTitle>
+    <ApplicationIcon>Assets\AppMgmtIQ.ico</ApplicationIcon>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\AppMgmtIQ.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
