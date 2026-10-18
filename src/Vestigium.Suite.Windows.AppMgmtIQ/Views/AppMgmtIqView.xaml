@@ -23,6 +23,15 @@
       <Setter Property="VerticalAlignment" Value="Center" />
       <Setter Property="Foreground" Value="{DynamicResource Vestigium.Brushes.Text.Primary}" />
     </Style>
+    <Style x:Key="CheckIcon" TargetType="TextBlock" BasedOn="{StaticResource MenuIcon}">
+      <Setter Property="Text" Value="&#xE739;" />
+      <Style.Triggers>
+        <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource AncestorType=MenuItem}}" Value="True">
+          <Setter Property="Text" Value="&#xE73A;" />
+          <Setter Property="Foreground" Value="#3DDC84" />
+        </DataTrigger>
+      </Style.Triggers>
+    </Style>
     <Style x:Key="PackageRow" TargetType="DataGridRow" BasedOn="{StaticResource DataGridRow.Standard}">
       <Style.Triggers>
         <Trigger Property="IsSelected" Value="True">
@@ -123,28 +132,28 @@
           <MenuItem Header="Filter" Style="{StaticResource MenuItem.Standard}">
             <MenuItem.Icon><TextBlock Text="&#xE71C;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
             <MenuItem Style="{StaticResource MenuItem.Standard}" Header="Global packages" IsCheckable="True" IsChecked="{Binding ShowGlobal}" StaysOpenOnClick="True">
-              <MenuItem.Icon><TextBlock Text="&#xE774;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
+              <MenuItem.Icon><TextBlock Style="{StaticResource CheckIcon}" /></MenuItem.Icon>
             </MenuItem>
             <MenuItem Style="{StaticResource MenuItem.Standard}" Header="Per-user packages" IsCheckable="True" IsChecked="{Binding ShowPerUser}" StaysOpenOnClick="True">
-              <MenuItem.Icon><TextBlock Text="&#xE77B;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
+              <MenuItem.Icon><TextBlock Style="{StaticResource CheckIcon}" /></MenuItem.Icon>
             </MenuItem>
             <Separator />
             <MenuItem Style="{StaticResource MenuItem.Standard}" Header="x64" IsCheckable="True" IsChecked="{Binding ShowX64}" StaysOpenOnClick="True">
-              <MenuItem.Icon><TextBlock Text="&#xE7F8;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
+              <MenuItem.Icon><TextBlock Style="{StaticResource CheckIcon}" /></MenuItem.Icon>
             </MenuItem>
             <MenuItem Style="{StaticResource MenuItem.Standard}" Header="x86" IsCheckable="True" IsChecked="{Binding ShowX86}" StaysOpenOnClick="True">
-              <MenuItem.Icon><TextBlock Text="&#xE7F4;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
+              <MenuItem.Icon><TextBlock Style="{StaticResource CheckIcon}" /></MenuItem.Icon>
             </MenuItem>
             <Separator />
             <MenuItem Style="{StaticResource MenuItem.Standard}" Header="System components" IsCheckable="True" IsChecked="{Binding ShowSystemComponents}" StaysOpenOnClick="True">
-              <MenuItem.Icon><TextBlock Text="&#xE713;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
+              <MenuItem.Icon><TextBlock Style="{StaticResource CheckIcon}" /></MenuItem.Icon>
             </MenuItem>
             <Separator />
             <MenuItem Style="{StaticResource MenuItem.Standard}" Header="Windows Installer" IsCheckable="True" IsChecked="{Binding ShowWindowsInstaller}" StaysOpenOnClick="True">
-              <MenuItem.Icon><TextBlock Text="&#xE7B8;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
+              <MenuItem.Icon><TextBlock Style="{StaticResource CheckIcon}" /></MenuItem.Icon>
             </MenuItem>
             <MenuItem Style="{StaticResource MenuItem.Standard}" Header="Other installers" IsCheckable="True" IsChecked="{Binding ShowOtherInstallers}" StaysOpenOnClick="True">
-              <MenuItem.Icon><TextBlock Text="&#xE8B7;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
+              <MenuItem.Icon><TextBlock Style="{StaticResource CheckIcon}" /></MenuItem.Icon>
             </MenuItem>
           </MenuItem>
           <Separator />
