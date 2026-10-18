@@ -62,6 +62,11 @@ public sealed partial class FeaturesViewModel : ObservableObject
         {
             var rows = await Task.Run(ReadAll);
             var dism = await Task.Run(() => DismParents.Read());
+            foreach (var row in rows)
+            {
+                if (string.IsNullOrWhiteSpace(row.Description) && DismParents.Descriptions.TryGetValue(row.Name, out var description))
+                    row.Description = description;
+            }
             _all.Clear();
             _all.AddRange(rows);
             if (dism is { Count: > 0 })
