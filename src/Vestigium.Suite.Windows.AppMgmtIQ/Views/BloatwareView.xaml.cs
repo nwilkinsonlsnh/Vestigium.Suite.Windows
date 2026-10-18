@@ -31,6 +31,16 @@ public partial class BloatwareView : UserControl
     {
         if (DataContext is not BloatwareViewModel { Selected: { } row } || row.Installed)
             return;
+        var owner = Window.GetWindow(this);
+        var fetch = new BloatwareFetchWindow(row.Name, row.Provisioned) { Owner = owner };
+        if (fetch.ShowDialog() != true)
+            return;
+        if (fetch.OpenStore)
+        {
+            var pfn = row.Family + "_8wekyb3d8bbwe";
+            Process.Start(new ProcessStartInfo("ms-windows-store://pdp/?PFN=" + pfn) { UseShellExecute = true });
+            return;
+        }
         _ = Run("Add", row);
     }
 
