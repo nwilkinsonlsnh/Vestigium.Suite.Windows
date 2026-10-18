@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>Vestigium.Suite.Windows.AppMgmtIQ.Bloatware</RootNamespace>
+    <AssemblyName>AppMgmtIQ.Bloatware</AssemblyName>
+    <ApplicationTitle>Apply Bloatware Changes</ApplicationTitle>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Vestigium.Logging" Version="$(VestigiumLoggingVersion)" />
+  </ItemGroup>
+</Project>
