@@ -45,7 +45,10 @@ public partial class DetailsWindow : Window
 
     private void Menu_Opened(object sender, RoutedEventArgs e)
     {
-        CopyItem.IsEnabled = (DataContext as DetailsViewModel)?.SelectedRow is not null;
+        var cells = ValueGrid.SelectedCells;
+        CopyItem.IsEnabled = cells.Count > 0;
+        var columns = cells.Select(cell => cell.Column.Header?.ToString()).Distinct().Count();
+        CopyDataItem.Visibility = columns <= 1 ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void Refresh_Click(object sender, RoutedEventArgs e)
@@ -79,19 +82,46 @@ public partial class DetailsWindow : Window
         });
     }
 
-    private void CopyInfo_Click(object sender, RoutedEventArgs e) => Copy(row => $"{row.Name}\t{row.Type}\t{row.Data}");
-
-    private void CopyName_Click(object sender, RoutedEventArgs e) => Copy(row => row.Name);
-
-    private void CopyType_Click(object sender, RoutedEventArgs e) => Copy(row => row.Type);
-
-    private void CopyData_Click(object sender, RoutedEventArgs e) => Copy(row => row.Data);
-
-    private void Copy(Func<ValueRow, string> pick)
+    private void CopyData_Click(object sender, RoutedEventArgs e)
     {
-        if ((DataContext as DetailsViewModel)?.SelectedRow is not ValueRow row)
+        var lines = ValueGrid.SelectedCells
+            .Select(cell => cell.Item)
+            .OfType<ValueRow>()
+            .Distinct()
+            .Select(row => row.Data);
+        var text = string.Join(Environment.NewLine, lines);
+        if (text.Length > 0)
+            Clipboard.SetText(text);
+    }
+
+    private void CopyInfo_Click(object sender, RoutedEventArgs e)
+    {
+        var cells = ValueGrid.SelectedCells.ToList();
+        if (cells.Count == 0)
             return;
-        Clipboard.SetText(pick(row));
+        var headers = cells
+            .Select(cell => cell.Column.Header?.ToString() ?? "")
+            .Distinct()
+            .ToList();
+        var rows = cells
+            .Select(cell => cell.Item)
+            .OfType<ValueRow>()
+            .Distinct()
+            .ToList();
+        var lines = new List<string> { string.Join("\t", headers) };
+        foreach (var row in rows)
+        {
+            var values = headers.Select(header => header switch
+            {
+                "Name" => row.Name,
+                "Type" => row.Type,
+                "Data" => row.Data,
+                _ => ""
+            });
+            lines.Add(string.Join("\t", values));
+        }
+
+        Clipboard.SetText(string.Join(Environment.NewLine, lines));
     }
 
     private void CheckRadio(string? header)
