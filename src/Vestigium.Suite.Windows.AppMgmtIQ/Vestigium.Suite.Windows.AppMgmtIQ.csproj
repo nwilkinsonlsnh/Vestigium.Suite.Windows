@@ -26,4 +26,8 @@
     <PackageReference Include="Vestigium.Helpers.Kql.AppMgmt" Version="$(VestigiumKqlAppMgmtVersion)" />
     <PackageReference Include="Vestigium.Helpers.WinReg" Version="$(VestigiumWinRegVersion)" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Vestigium.Suite.Windows.AppMgmtIQ.Features\Vestigium.Suite.Windows.AppMgmtIQ.Features.csproj" ReferenceOutputAssembly="false" />
+  </ItemGroup>
 </Project>
