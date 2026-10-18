@@ -18,7 +18,7 @@
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
-      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
     <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,0,12,10" Style="{StaticResource TextBlock.Caption}" Text="Display name" />
     <TextBlock Grid.Row="0" Grid.Column="1" Margin="0,0,0,10" TextWrapping="Wrap" Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}" Text="{Binding Caption}" />
@@ -30,7 +30,7 @@
     <TextBlock Grid.Row="3" Grid.Column="1" Margin="0,0,0,10" Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}" Text="{Binding State}" />
     <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,0,12,10" Style="{StaticResource TextBlock.Caption}" Text="Status" />
     <TextBlock Grid.Row="4" Grid.Column="1" Margin="0,0,0,10" Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}" Text="{Binding Status}" />
-    <TextBlock Grid.Row="5" Grid.Column="0" Style="{StaticResource TextBlock.Caption}" Text="Description" />
-    <TextBlock Grid.Row="5" Grid.Column="1" TextWrapping="Wrap" Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}" Text="{Binding Description}" />
+    <TextBlock Grid.Row="5" Grid.Column="0" Margin="0,0,12,0" VerticalAlignment="Top" Style="{StaticResource TextBlock.Caption}" Text="Description" />
+    <TextBlock Grid.Row="5" Grid.Column="1" VerticalAlignment="Top" TextWrapping="Wrap" Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}" Text="{Binding Description}" />
   </Grid>
 </Window>
