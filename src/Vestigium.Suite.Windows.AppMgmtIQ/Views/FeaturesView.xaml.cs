@@ -24,7 +24,7 @@ public partial class FeaturesView : UserControl
         host.SetBranch(node, node.CheckState != true);
     }
 
-    private void Apply_Click(object sender, RoutedEventArgs e)
+    private async void Apply_Click(object sender, RoutedEventArgs e)
     {
         if (DataContext is not FeaturesViewModel host)
             return;
@@ -53,7 +53,7 @@ public partial class FeaturesView : UserControl
             return;
         }
 
-        var result = WaitForResult(resultPath);
+        var result = await WaitForResultAsync(resultPath);
         if (result is null || result.Cancelled)
         {
             HostLog.Information(AppMgmtCatalog.FeatureApplyCancelled, "Features", "Feature apply cancelled.", correlationId);
@@ -63,7 +63,7 @@ public partial class FeaturesView : UserControl
         host.RefreshCommand.Execute(null);
     }
 
-    private static Vestigium.Suite.Windows.AppMgmtIQ.Features.FeatureResult? WaitForResult(string path)
+    private static async Task<Vestigium.Suite.Windows.AppMgmtIQ.Features.FeatureResult?> WaitForResultAsync(string path)
     {
         var until = DateTime.UtcNow.AddMinutes(30);
         while (DateTime.UtcNow < until)
@@ -73,7 +73,7 @@ public partial class FeaturesView : UserControl
                 try { return System.Text.Json.JsonSerializer.Deserialize<Vestigium.Suite.Windows.AppMgmtIQ.Features.FeatureResult>(File.ReadAllText(path)); }
                 catch (IOException) { }
             }
-            Thread.Sleep(500);
+            await Task.Delay(500);
         }
         return null;
     }
