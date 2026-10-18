@@ -13,6 +13,11 @@ public sealed class FeatureNode : INotifyPropertyChanged
     public FeatureRow? Feature { get; init; }
     public ObservableCollection<FeatureNode> Children { get; } = [];
 
+    public FeatureNode()
+    {
+        Children.CollectionChanged += (_, _) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(HasChildren)));
+    }
+
     public bool HasChildren => Children.Count > 0;
 
     public bool IsAbsent => Feature?.InstallState == 3;
