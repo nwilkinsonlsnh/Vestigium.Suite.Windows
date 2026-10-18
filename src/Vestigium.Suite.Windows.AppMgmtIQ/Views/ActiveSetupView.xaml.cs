@@ -17,6 +17,12 @@ public partial class ActiveSetupView : UserControl
         InitializeComponent();
     }
 
+    private void OnFilter(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is ActiveSetupViewModel host)
+            host.ApplyQuery();
+    }
+
     private async void Add_Click(object sender, RoutedEventArgs e)
     {
         if (DataContext is not ActiveSetupViewModel host)
