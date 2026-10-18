@@ -84,13 +84,13 @@
         <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="#F4F7FB" />
       </DataGrid.Resources>
       <DataGrid.ContextMenu>
-        <ContextMenu Grid.IsSharedSizeScope="True" Style="{StaticResource ContextMenu.Standard}">
+        <ContextMenu Grid.IsSharedSizeScope="True" Style="{StaticResource ContextMenu.Standard}" Opened="Menu_Opened">
           <MenuItem Header="Refresh" Style="{StaticResource MenuItem.Standard}" Command="{Binding RefreshCommand}">
             <MenuItem.Icon><TextBlock FontFamily="Segoe UI Symbol" FontSize="14" Text="&#x267B;" Foreground="#3DDC84" /></MenuItem.Icon>
           </MenuItem>
           <Separator Style="{StaticResource Separator.Standard}" />
-          <MenuItem Header="Add" Style="{StaticResource MenuItem.Standard}" Click="Add_Click" />
-          <MenuItem Header="Remove" Style="{StaticResource MenuItem.Standard}" Click="Remove_Click" />
+          <MenuItem x:Name="AddItem" Header="Add" Style="{StaticResource MenuItem.Standard}" Click="Add_Click" />
+          <MenuItem x:Name="RemoveItem" Header="Remove" Style="{StaticResource MenuItem.Standard}" Click="Remove_Click" />
           <Separator Style="{StaticResource Separator.Standard}" />
           <MenuItem Header="Copy" Style="{StaticResource MenuItem.Standard}">
             <MenuItem Header="Name" Style="{StaticResource MenuItem.Standard}" Click="CopyName_Click" />
