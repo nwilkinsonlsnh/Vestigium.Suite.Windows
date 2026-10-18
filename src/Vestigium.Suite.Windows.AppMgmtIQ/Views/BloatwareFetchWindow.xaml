@@ -1,0 +1,21 @@
+<Window x:Class="Vestigium.Suite.Windows.AppMgmtIQ.Views.BloatwareFetchWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Get Package"
+        Height="340" Width="560"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="{DynamicResource Vestigium.Brushes.Surface.Window}">
+  <DockPanel Margin="24">
+    <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+      <Button Content="Get from Store" Width="150" Margin="0,0,8,0" Style="{StaticResource Button.Primary}" Click="Store_Click" />
+      <Button Content="Register" Width="120" Margin="0,0,8,0" Style="{StaticResource Button.Secondary}" Click="Register_Click" />
+      <Button Content="Cancel" Width="120" Style="{StaticResource Button.Secondary}" IsCancel="True" />
+    </StackPanel>
+    <StackPanel>
+      <TextBlock Style="{StaticResource TextBlock.Heading}" Text="Get Package" />
+      <TextBlock x:Name="Body" Margin="0,16,0,0" TextWrapping="Wrap" Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}" />
+      <TextBlock x:Name="Detail" Margin="0,12,0,0" TextWrapping="Wrap" Foreground="{DynamicResource Vestigium.Brushes.Text.Secondary}" />
+    </StackPanel>
+  </DockPanel>
+</Window>
