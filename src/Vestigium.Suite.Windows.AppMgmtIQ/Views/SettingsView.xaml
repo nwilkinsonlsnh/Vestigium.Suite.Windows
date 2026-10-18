@@ -16,6 +16,10 @@
                    Content="Themes"
                    IsChecked="{Binding ThemesPageOpen}"
                    GroupName="SettingsPage" />
+      <RadioButton Style="{StaticResource RadioButton.UnderlineTab}"
+                   Content="MRUs"
+                   IsChecked="{Binding MrusPageOpen}"
+                   GroupName="SettingsPage" />
     </StackPanel>
 
     <StackPanel HorizontalAlignment="Left"
@@ -75,6 +79,73 @@
                 IsReadOnly="True"
                 Width="220"
                 HorizontalAlignment="Left" />
+    </StackPanel>
+
+    <StackPanel HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Width="480"
+                Margin="8,0,0,0"
+                Visibility="{Binding MrusPageOpen, Converter={StaticResource BoolToVis}}">
+      <TextBlock Style="{StaticResource TextBlock.Caption}" Margin="0,0,0,16" TextWrapping="Wrap"
+                 Text="Recent queries for each tab. Sticky entries stay at the top. Limit is the total. Sticky limit is the cap on pinned rows." />
+
+      <Label Style="{StaticResource Label.Standard}" Content="MRU limit" />
+      <nud:VestigiumNumericUpDown Value="{Binding MruLimit, Mode=TwoWay}"
+                                  SignMode="Unsigned"
+                                  Minimum="0"
+                                  Maximum="50"
+                                  Increment="1"
+                                  PageIncrement="1"
+                                  DecimalPlaces="0"
+                                  Width="120"
+                                  HorizontalAlignment="Left"
+                                  Margin="0,0,0,12" />
+
+      <Label Style="{StaticResource Label.Standard}" Content="Sticky limit" />
+      <nud:VestigiumNumericUpDown Value="{Binding StickyLimit, Mode=TwoWay}"
+                                  SignMode="Unsigned"
+                                  Minimum="0"
+                                  Maximum="20"
+                                  Increment="1"
+                                  PageIncrement="1"
+                                  DecimalPlaces="0"
+                                  Width="120"
+                                  HorizontalAlignment="Left"
+                                  Margin="0,0,0,16" />
+
+      <Label Style="{StaticResource Label.Standard}" Content="Tab" />
+      <ComboBox Style="{StaticResource ComboBox.Standard}"
+                ItemsSource="{Binding MruTabs}"
+                SelectedItem="{Binding SelectedMruTab, Mode=TwoWay}"
+                Width="220"
+                HorizontalAlignment="Left"
+                Margin="0,0,0,12" />
+
+      <ListBox ItemsSource="{Binding CurrentMrus}"
+               SelectedItem="{Binding SelectedMru, Mode=TwoWay}"
+               Height="220"
+               Margin="0,0,0,8">
+        <ListBox.ItemTemplate>
+          <DataTemplate>
+            <TextBlock>
+              <Run Text="{Binding IsSticky, Converter={x:Static local:StickyMarkConverter.Instance}}" />
+              <Run Text="{Binding Text}" />
+            </TextBlock>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+
+      <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+        <TextBox Text="{Binding NewMruText, UpdateSourceTrigger=PropertyChanged}" Width="240" Margin="0,0,8,0" />
+        <Button Content="Add" Command="{Binding AddMruCommand}" Padding="12,4" />
+      </StackPanel>
+
+      <StackPanel Orientation="Horizontal">
+        <Button Content="Delete" Command="{Binding DeleteMruCommand}" Padding="12,4" Margin="0,0,8,0" />
+        <Button Content="Up" Command="{Binding MoveMruUpCommand}" Padding="12,4" Margin="0,0,8,0" />
+        <Button Content="Down" Command="{Binding MoveMruDownCommand}" Padding="12,4" Margin="0,0,8,0" />
+        <Button Content="Sticky" Command="{Binding ToggleStickyCommand}" Padding="12,4" />
+      </StackPanel>
     </StackPanel>
   </DockPanel>
 </UserControl>
