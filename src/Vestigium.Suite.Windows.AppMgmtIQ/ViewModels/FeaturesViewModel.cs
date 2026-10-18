@@ -13,6 +13,8 @@ public sealed partial class FeaturesViewModel : ObservableObject
     private readonly KqlSession _session = AppMgmtKql.Features();
     private KqlBoundQuery? _bound;
     private Dictionary<string, string> _parents = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, bool> _intent = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, FeatureNode> _nodes = new(StringComparer.OrdinalIgnoreCase);
     private string _source = "flat";
     private bool _showEnabled = true;
     private bool _showDisabled = true;
@@ -45,6 +47,12 @@ public sealed partial class FeaturesViewModel : ObservableObject
 
     [ObservableProperty]
     private bool _showAbsentFlag;
+
+    [ObservableProperty]
+    private bool _hasPlan;
+
+    public ObservableCollection<FeatureChange> Enables { get; } = [];
+    public ObservableCollection<FeatureChange> Disables { get; } = [];
 
     public void ApplyQuery()
     {
@@ -114,6 +122,7 @@ public sealed partial class FeaturesViewModel : ObservableObject
 
     private void ApplyFilter()
     {
+        _nodes.Clear();
         Roots.Clear();
         var byName = _all.ToDictionary(row => row.Name, StringComparer.OrdinalIgnoreCase);
         var children = new Dictionary<string, List<FeatureRow>>(StringComparer.OrdinalIgnoreCase);
@@ -154,6 +163,8 @@ public sealed partial class FeaturesViewModel : ObservableObject
             Parent = parent,
             Feature = row
         };
+        node.ResetDesired();
+        _nodes[node.Name] = node;
         if (children.TryGetValue(row.Name, out var kids))
         {
             foreach (var kid in kids.OrderBy(k => k.Caption, StringComparer.OrdinalIgnoreCase))
@@ -284,4 +295,63 @@ public sealed partial class FeaturesViewModel : ObservableObject
         }
         return rows;
     }
+
+    public void SetDesired(FeatureNode node, bool desired)
+    {
+        if (desired == node.IsEnabled)
+            _intent.Remove(node.Name);
+        else
+            _intent[node.Name] = desired;
+        RebuildPlan();
+    }
+
+    private void RebuildPlan()
+    {
+        foreach (var node in _nodes.Values)
+            node.ResetDesired();
+        Enables.Clear();
+        Disables.Clear();
+
+        foreach (var (name, desired) in _intent)
+        {
+            if (!_nodes.TryGetValue(name, out var node))
+                continue;
+            if (desired)
+                MarkEnable(node, "");
+            else
+                MarkDisable(node, "");
+        }
+
+        HasPlan = Enables.Count + Disables.Count > 0;
+        Status = HasPlan
+            ? $"{Enables.Count} to enable, {Disables.Count} to disable"
+            : $"{Roots.Count} groups, {_all.Count} features ({_source})";
+    }
+
+    private void MarkEnable(FeatureNode node, string reason)
+    {
+        if (!string.IsNullOrEmpty(node.Parent) && _nodes.TryGetValue(node.Parent, out var parent) && !parent.IsEnabled)
+            MarkEnable(parent, $"required by {node.Caption}");
+        if (node.IsEnabled || Enables.Any(change => string.Equals(change.Name, node.Name, StringComparison.OrdinalIgnoreCase)))
+            return;
+        node.DesiredEnabled = true;
+        node.Reason = reason;
+        Enables.Add(new FeatureChange(node.Caption, node.Name, reason, node.IsAbsent));
+    }
+
+    private void MarkDisable(FeatureNode node, string reason)
+    {
+        foreach (var child in node.Children)
+        {
+            if (child.IsEnabled)
+                MarkDisable(child, $"required by {node.Caption}");
+        }
+        if (!node.IsEnabled || Disables.Any(change => string.Equals(change.Name, node.Name, StringComparison.OrdinalIgnoreCase)))
+            return;
+        node.DesiredEnabled = false;
+        node.Reason = reason;
+        Disables.Add(new FeatureChange(node.Caption, node.Name, reason, false));
+    }
 }
+
+public sealed record FeatureChange(string Caption, string Name, string Reason, bool IsAbsent);
