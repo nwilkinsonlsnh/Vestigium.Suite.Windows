@@ -1,4 +1,5 @@
 using System.Windows;
+using Microsoft.Win32;
 
 namespace Vestigium.Suite.Windows.AppMgmtIQ.Views;
 
@@ -17,10 +18,19 @@ public partial class ActiveSetupWizardWindow : Window
     public string Version => string.IsNullOrWhiteSpace(VersionBox.Text) ? "1,0" : VersionBox.Text.Trim();
     public bool IsGlobal => MachineBox.IsChecked == true;
     public bool IsX64 => X64Box.IsChecked == true;
-    public bool Installed => InstalledBox.IsChecked == true;
-
     private void Generate_Click(object sender, RoutedEventArgs e)
         => ComponentBox.Text = "{" + Guid.NewGuid().ToString().ToUpperInvariant() + "}";
+
+    private void Browse_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new OpenFileDialog
+        {
+            Title = "Choose the Active Setup Command",
+            Filter = "Programs and Scripts|*.exe;*.bat;*.cmd;*.ps1;*.dll|All Files|*.*"
+        };
+        if (dialog.ShowDialog(this) == true)
+            StubBox.Text = dialog.FileName;
+    }
 
     private void Continue_Click(object sender, RoutedEventArgs e)
     {
