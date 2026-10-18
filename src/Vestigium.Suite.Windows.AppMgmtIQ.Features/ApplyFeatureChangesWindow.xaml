@@ -8,7 +8,7 @@
         Background="{DynamicResource Vestigium.Brushes.Surface.Window}"
         Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}">
   <DockPanel Margin="16">
-    <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+    <StackPanel x:Name="ButtonBar" DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
       <Button x:Name="CancelButton" Content="Cancel" Style="{StaticResource Button.Secondary}" Padding="16,4" Margin="0,0,8,0" IsCancel="True" Click="Cancel_Click" />
       <Button x:Name="ConfirmButton" Content="Confirm" Style="{StaticResource Button.Primary}" Padding="16,4" IsDefault="True" Click="Confirm_Click" />
     </StackPanel>
@@ -37,10 +37,10 @@
       </Grid>
     </Grid>
 
-    <Grid x:Name="ProgressPage" Visibility="Collapsed">
+    <Grid x:Name="ProgressPage" Visibility="Collapsed" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
       <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-        <TextBlock x:Name="ProgressText" FontSize="16" HorizontalAlignment="Center" />
-        <ProgressBar x:Name="Progress" Height="8" Width="360" Margin="0,16,0,0" />
+        <TextBlock x:Name="ProgressText" FontSize="16" HorizontalAlignment="Center" TextAlignment="Center" />
+        <ProgressBar x:Name="Progress" Height="8" Width="360" Margin="0,16,0,0" HorizontalAlignment="Center" />
       </StackPanel>
     </Grid>
 
