@@ -18,6 +18,7 @@ public sealed partial class BloatwareViewModel : ObservableObject
     private KqlBoundQuery? _bound;
 
     public ObservableCollection<BloatwareRow> Rows { get; } = [];
+    public IReadOnlyList<BloatwareRow> All => _all;
     public ObservableCollection<string> Queries { get; } = [];
     public KqlSession Session => _session;
 
