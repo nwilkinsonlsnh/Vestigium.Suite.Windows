@@ -148,7 +148,7 @@ internal static class HelpCopy
             "This section answers what is armed to run at the next logon. The counts are the number of components, how many are pending, how many carry a command, and how many are machine-level.",
             Term("Pending", "How many components will run at the next logon against how many are current for this user."),
             Term("Scope", "How the components split between the machine and the current user."),
-            Term("Bitness", "How the components split between 64-bit and 32-bit."),
+            Term("Architecture", "How the components split between 64-bit and 32-bit."),
             Term("Command", "How many components have a StubPath against how many record a version only."),
             Head("Reading the charts"),
             "A section with two charts shows both at once. A section with more than two offers a list, and the area shows the one that is selected. A ranked chart carries a cumulative line, so the concentration of the inventory is visible as well as the individual values."
