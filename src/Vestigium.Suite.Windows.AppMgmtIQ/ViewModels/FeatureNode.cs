@@ -57,10 +57,12 @@ public sealed class FeatureNode : INotifyPropertyChanged
     {
         get
         {
-            var states = SelfAndDescendants().Select(node => node.DesiredEnabled).ToList();
-            if (states.All(on => on))
+            if (Children.Count == 0)
+                return DesiredEnabled;
+            var states = Children.Select(child => child.CheckState).ToList();
+            if (states.All(state => state == true) && DesiredEnabled)
                 return true;
-            return states.All(on => !on) ? false : null;
+            return states.All(state => state == false) && !DesiredEnabled ? false : null;
         }
     }
 
