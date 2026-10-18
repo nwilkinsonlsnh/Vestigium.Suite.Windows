@@ -18,6 +18,7 @@
       <Setter Property="Foreground" Value="{DynamicResource Vestigium.Brushes.Text.Primary}" />
       <Setter Property="Background" Value="Transparent" />
       <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+      <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
       <Style.Resources>
         <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#334C8DFF" />
         <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#F4F7FB" />
@@ -101,6 +102,13 @@
             <MenuItem.Icon><TextBlock Text="&#xE70D;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
           </MenuItem>
           <MenuItem x:Name="CollapseItem" Header="Collapse" Style="{StaticResource MenuItem.Standard}" Click="Collapse_Click" IsEnabled="False">
+            <MenuItem.Icon><TextBlock Text="&#xE70E;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
+          </MenuItem>
+          <Separator Style="{StaticResource Separator.Menu}" />
+          <MenuItem Header="Expand All" Style="{StaticResource MenuItem.Standard}" Click="ExpandAll_Click">
+            <MenuItem.Icon><TextBlock Text="&#xE70D;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
+          </MenuItem>
+          <MenuItem Header="Collapse All" Style="{StaticResource MenuItem.Standard}" Click="CollapseAll_Click">
             <MenuItem.Icon><TextBlock Text="&#xE70E;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
           </MenuItem>
           <Separator Style="{StaticResource Separator.Menu}" />
