@@ -131,28 +131,28 @@
           <Separator />
           <MenuItem Header="Filter" Style="{StaticResource MenuItem.Standard}">
             <MenuItem.Icon><TextBlock Text="&#xE71C;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
-            <MenuItem Style="{StaticResource MenuItem.Standard}" Header="Global packages" IsCheckable="True" IsChecked="{Binding ShowGlobal}" StaysOpenOnClick="True">
+            <MenuItem Style="{StaticResource MenuItem.Standard}" Header="Global packages" IsCheckable="True" IsChecked="{Binding DataContext.ShowGlobal, RelativeSource={RelativeSource AncestorType=ContextMenu}, Mode=TwoWay}" StaysOpenOnClick="True">
               <MenuItem.Icon><TextBlock Style="{StaticResource CheckIcon}" /></MenuItem.Icon>
             </MenuItem>
-            <MenuItem Style="{StaticResource MenuItem.Standard}" Header="Per-user packages" IsCheckable="True" IsChecked="{Binding ShowPerUser}" StaysOpenOnClick="True">
-              <MenuItem.Icon><TextBlock Style="{StaticResource CheckIcon}" /></MenuItem.Icon>
-            </MenuItem>
-            <Separator />
-            <MenuItem Style="{StaticResource MenuItem.Standard}" Header="x64" IsCheckable="True" IsChecked="{Binding ShowX64}" StaysOpenOnClick="True">
-              <MenuItem.Icon><TextBlock Style="{StaticResource CheckIcon}" /></MenuItem.Icon>
-            </MenuItem>
-            <MenuItem Style="{StaticResource MenuItem.Standard}" Header="x86" IsCheckable="True" IsChecked="{Binding ShowX86}" StaysOpenOnClick="True">
+            <MenuItem Style="{StaticResource MenuItem.Standard}" Header="Per-user packages" IsCheckable="True" IsChecked="{Binding DataContext.ShowPerUser, RelativeSource={RelativeSource AncestorType=ContextMenu}, Mode=TwoWay}" StaysOpenOnClick="True">
               <MenuItem.Icon><TextBlock Style="{StaticResource CheckIcon}" /></MenuItem.Icon>
             </MenuItem>
             <Separator />
-            <MenuItem Style="{StaticResource MenuItem.Standard}" Header="System components" IsCheckable="True" IsChecked="{Binding ShowSystemComponents}" StaysOpenOnClick="True">
+            <MenuItem Style="{StaticResource MenuItem.Standard}" Header="x64" IsCheckable="True" IsChecked="{Binding DataContext.ShowX64, RelativeSource={RelativeSource AncestorType=ContextMenu}, Mode=TwoWay}" StaysOpenOnClick="True">
+              <MenuItem.Icon><TextBlock Style="{StaticResource CheckIcon}" /></MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Style="{StaticResource MenuItem.Standard}" Header="x86" IsCheckable="True" IsChecked="{Binding DataContext.ShowX86, RelativeSource={RelativeSource AncestorType=ContextMenu}, Mode=TwoWay}" StaysOpenOnClick="True">
               <MenuItem.Icon><TextBlock Style="{StaticResource CheckIcon}" /></MenuItem.Icon>
             </MenuItem>
             <Separator />
-            <MenuItem Style="{StaticResource MenuItem.Standard}" Header="Windows Installer" IsCheckable="True" IsChecked="{Binding ShowWindowsInstaller}" StaysOpenOnClick="True">
+            <MenuItem Style="{StaticResource MenuItem.Standard}" Header="System components" IsCheckable="True" IsChecked="{Binding DataContext.ShowSystemComponents, RelativeSource={RelativeSource AncestorType=ContextMenu}, Mode=TwoWay}" StaysOpenOnClick="True">
               <MenuItem.Icon><TextBlock Style="{StaticResource CheckIcon}" /></MenuItem.Icon>
             </MenuItem>
-            <MenuItem Style="{StaticResource MenuItem.Standard}" Header="Other installers" IsCheckable="True" IsChecked="{Binding ShowOtherInstallers}" StaysOpenOnClick="True">
+            <Separator />
+            <MenuItem Style="{StaticResource MenuItem.Standard}" Header="Windows Installer" IsCheckable="True" IsChecked="{Binding DataContext.ShowWindowsInstaller, RelativeSource={RelativeSource AncestorType=ContextMenu}, Mode=TwoWay}" StaysOpenOnClick="True">
+              <MenuItem.Icon><TextBlock Style="{StaticResource CheckIcon}" /></MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Style="{StaticResource MenuItem.Standard}" Header="Other installers" IsCheckable="True" IsChecked="{Binding DataContext.ShowOtherInstallers, RelativeSource={RelativeSource AncestorType=ContextMenu}, Mode=TwoWay}" StaysOpenOnClick="True">
               <MenuItem.Icon><TextBlock Style="{StaticResource CheckIcon}" /></MenuItem.Icon>
             </MenuItem>
           </MenuItem>
