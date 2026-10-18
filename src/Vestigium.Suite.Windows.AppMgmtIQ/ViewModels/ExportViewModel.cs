@@ -7,21 +7,28 @@ public sealed partial class ExportViewModel : ObservableObject
 {
     private readonly MainViewModel _packages;
     private readonly FeaturesViewModel _features;
+    private readonly BloatwareViewModel _bloatware;
+    private readonly ActiveSetupViewModel _setup;
 
-    public ExportViewModel(MainViewModel packages, FeaturesViewModel features)
+    public ExportViewModel(MainViewModel packages, FeaturesViewModel features, BloatwareViewModel bloatware, ActiveSetupViewModel setup)
     {
         _packages = packages;
         _features = features;
+        _bloatware = bloatware;
+        _setup = setup;
     }
 
     [ObservableProperty]
-    private bool _packagesOnly = true;
+    private bool _includePackages = true;
 
     [ObservableProperty]
-    private bool _featuresOnly;
+    private bool _includeFeatures = true;
 
     [ObservableProperty]
-    private bool _both;
+    private bool _includeBloatware;
+
+    [ObservableProperty]
+    private bool _includeActiveSetup;
 
     [ObservableProperty]
     private bool _currentView = true;
@@ -41,11 +48,16 @@ public sealed partial class ExportViewModel : ObservableObject
     [RelayCommand]
     private void Export()
     {
+        if (!IncludePackages && !IncludeFeatures && !IncludeBloatware && !IncludeActiveSetup)
+        {
+            Status = "Choose at least one inventory.";
+            return;
+        }
+
         try
         {
-            var scope = Both ? ExportScope.Both : FeaturesOnly ? ExportScope.Features : ExportScope.Packages;
             var rows = Everything ? ExportRows.All : ExportRows.Current;
-            LastPath = InventoryExport.Write(_packages, _features, scope, rows, IncludeDetails);
+            LastPath = InventoryExport.Write(new ExportRequest(_packages, _features, _bloatware, _setup, IncludePackages, IncludeFeatures, IncludeBloatware, IncludeActiveSetup, rows, IncludeDetails));
             Status = "Wrote " + LastPath;
         }
         catch (Exception ex)
