@@ -94,14 +94,9 @@
               Background="{DynamicResource Vestigium.Brushes.Surface.Window}"
               BorderBrush="{DynamicResource Vestigium.Brushes.Border.Subtle}"
               SelectedItemChanged="Tree_SelectedItemChanged"
-              PreviewMouseRightButtonDown="Tree_PreviewMouseRightButtonDown"
-              MouseDoubleClick="Tree_MouseDoubleClick">
+              PreviewMouseRightButtonDown="Tree_PreviewMouseRightButtonDown">
       <TreeView.ContextMenu>
         <ContextMenu Style="{StaticResource ContextMenu.Standard}" Grid.IsSharedSizeScope="True" Opened="Menu_Opened">
-          <MenuItem Header="Open Details" Style="{StaticResource MenuItem.Standard}" Click="OpenDetails_Click">
-            <MenuItem.Icon><TextBlock Text="&#xE8A7;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
-          </MenuItem>
-          <Separator Style="{StaticResource Separator.Menu}" />
           <MenuItem x:Name="ExpandItem" Header="Expand" Style="{StaticResource MenuItem.Standard}" Click="Expand_Click" IsEnabled="False">
             <MenuItem.Icon><TextBlock Text="&#xE70D;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
           </MenuItem>
