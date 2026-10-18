@@ -54,6 +54,11 @@ internal static class KqlHost
         if (body.Length == 0 || Structured.IsMatch(text))
             return text;
 
+        var token = body.TrimEnd('.').Trim();
+        if (session.Fields.Any(field =>
+                field.Canonical.StartsWith(token, StringComparison.OrdinalIgnoreCase)
+                || field.Aliases.Any(alias => alias.StartsWith(token, StringComparison.OrdinalIgnoreCase))))
+            return text;
         var fields = session.Fields.Where(field => field.Type == KqlType.String).Select(field => field.Canonical).ToArray();
         if (fields.Length == 0)
             return text;
