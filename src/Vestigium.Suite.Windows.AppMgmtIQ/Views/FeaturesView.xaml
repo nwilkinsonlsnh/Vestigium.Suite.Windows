@@ -35,21 +35,21 @@
     <HierarchicalDataTemplate x:Key="FeatureTemplate" ItemsSource="{Binding Children}">
       <Grid Background="Transparent">
         <Grid.ColumnDefinitions>
-          <ColumnDefinition Width="28" />
-          <ColumnDefinition Width="320" />
-          <ColumnDefinition Width="200" />
-          <ColumnDefinition Width="180" />
-          <ColumnDefinition Width="80" />
+          <ColumnDefinition Width="28" SharedSizeGroup="FeatureCheck" />
+          <ColumnDefinition Width="480" MinWidth="240" SharedSizeGroup="FeatureCaption" />
+          <ColumnDefinition Width="240" MinWidth="140" SharedSizeGroup="FeatureName" />
+          <ColumnDefinition Width="200" MinWidth="120" SharedSizeGroup="FeatureParent" />
+          <ColumnDefinition Width="100" MinWidth="72" SharedSizeGroup="FeatureState" />
         </Grid.ColumnDefinitions>
         <CheckBox Grid.Column="0" IsChecked="{Binding IsEnabled, Mode=OneWay}" IsHitTestVisible="False" VerticalAlignment="Center" />
-        <TextBlock Grid.Column="1" Text="{Binding Caption}" VerticalAlignment="Center" Margin="4,0" Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}" />
-        <TextBlock Grid.Column="2" Text="{Binding Name}" VerticalAlignment="Center" Margin="4,0" Foreground="{DynamicResource Vestigium.Brushes.Text.Secondary}" />
-        <TextBlock Grid.Column="3" Text="{Binding Parent}" VerticalAlignment="Center" Margin="4,0" Foreground="{DynamicResource Vestigium.Brushes.Text.Secondary}" />
-        <TextBlock Grid.Column="4" Text="{Binding State}" VerticalAlignment="Center" Margin="4,0" Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}" />
+        <TextBlock Grid.Column="1" Text="{Binding Caption}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="4,0" Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}" />
+        <TextBlock Grid.Column="2" Text="{Binding Name}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="4,0" Foreground="{DynamicResource Vestigium.Brushes.Text.Secondary}" />
+        <TextBlock Grid.Column="3" Text="{Binding Parent}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="4,0" Foreground="{DynamicResource Vestigium.Brushes.Text.Secondary}" />
+        <TextBlock Grid.Column="4" Text="{Binding State}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="4,0" Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}" />
       </Grid>
     </HierarchicalDataTemplate>
   </UserControl.Resources>
-  <Grid Margin="12">
+  <Grid Margin="12" IsSharedSizeScope="True">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
@@ -76,16 +76,22 @@
     </Grid>
     <Grid Grid.Row="1" Margin="20,0,0,6">
       <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="28" />
-        <ColumnDefinition Width="320" />
-        <ColumnDefinition Width="200" />
-        <ColumnDefinition Width="180" />
-        <ColumnDefinition Width="80" />
+        <ColumnDefinition Width="28" SharedSizeGroup="FeatureCheck" />
+        <ColumnDefinition Width="480" MinWidth="240" SharedSizeGroup="FeatureCaption" />
+        <ColumnDefinition Width="6" />
+        <ColumnDefinition Width="240" MinWidth="140" SharedSizeGroup="FeatureName" />
+        <ColumnDefinition Width="6" />
+        <ColumnDefinition Width="200" MinWidth="120" SharedSizeGroup="FeatureParent" />
+        <ColumnDefinition Width="6" />
+        <ColumnDefinition Width="100" MinWidth="72" SharedSizeGroup="FeatureState" />
       </Grid.ColumnDefinitions>
       <TextBlock Grid.Column="1" Style="{StaticResource TextBlock.Caption}" Text="Display Name" />
-      <TextBlock Grid.Column="2" Style="{StaticResource TextBlock.Caption}" Text="Feature Name" />
-      <TextBlock Grid.Column="3" Style="{StaticResource TextBlock.Caption}" Text="Parent" />
-      <TextBlock Grid.Column="4" Style="{StaticResource TextBlock.Caption}" Text="State" />
+      <GridSplitter Grid.Column="2" Width="6" HorizontalAlignment="Stretch" Background="Transparent" />
+      <TextBlock Grid.Column="3" Style="{StaticResource TextBlock.Caption}" Text="Feature Name" />
+      <GridSplitter Grid.Column="4" Width="6" HorizontalAlignment="Stretch" Background="Transparent" />
+      <TextBlock Grid.Column="5" Style="{StaticResource TextBlock.Caption}" Text="Parent" />
+      <GridSplitter Grid.Column="6" Width="6" HorizontalAlignment="Stretch" Background="Transparent" />
+      <TextBlock Grid.Column="7" Style="{StaticResource TextBlock.Caption}" Text="State" />
     </Grid>
     <TreeView Grid.Row="2"
               x:Name="FeatureTree"
