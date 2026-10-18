@@ -9,24 +9,50 @@
         Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}">
   <DockPanel Margin="16">
     <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
-      <Button Content="Cancel" Style="{StaticResource Button.Secondary}" Padding="16,4" Margin="0,0,8,0" IsCancel="True" Click="Cancel_Click" />
+      <Button x:Name="CancelButton" Content="Cancel" Style="{StaticResource Button.Secondary}" Padding="16,4" Margin="0,0,8,0" IsCancel="True" Click="Cancel_Click" />
       <Button x:Name="ConfirmButton" Content="Confirm" Style="{StaticResource Button.Primary}" Padding="16,4" IsDefault="True" Click="Confirm_Click" />
     </StackPanel>
-    <TextBlock x:Name="Summary" DockPanel.Dock="Top" Margin="0,0,0,12" TextWrapping="Wrap" />
-    <Grid>
-      <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="*" />
-        <ColumnDefinition Width="12" />
-        <ColumnDefinition Width="*" />
-      </Grid.ColumnDefinitions>
-      <DockPanel Grid.Column="0">
-        <TextBlock DockPanel.Dock="Top" Style="{StaticResource TextBlock.Caption}" Text="Enable" Margin="0,0,0,6" />
-        <ListBox x:Name="EnableList" Style="{StaticResource ListBox.Standard}" />
-      </DockPanel>
-      <DockPanel Grid.Column="2">
-        <TextBlock DockPanel.Dock="Top" Style="{StaticResource TextBlock.Caption}" Text="Disable" Margin="0,0,0,6" />
-        <ListBox x:Name="DisableList" Style="{StaticResource ListBox.Standard}" />
-      </DockPanel>
+
+    <Grid x:Name="PlanPage">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="*" />
+      </Grid.RowDefinitions>
+      <TextBlock x:Name="Summary" Margin="0,0,0,12" TextWrapping="Wrap" />
+      <Grid Grid.Row="1">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="12" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <DockPanel Grid.Column="0">
+          <TextBlock DockPanel.Dock="Top" Style="{StaticResource TextBlock.Caption}" Text="Enable" Margin="0,0,0,6" />
+          <ListBox x:Name="EnableList" Style="{StaticResource ListBox.Standard}" />
+        </DockPanel>
+        <DockPanel Grid.Column="2">
+          <TextBlock DockPanel.Dock="Top" Style="{StaticResource TextBlock.Caption}" Text="Disable" Margin="0,0,0,6" />
+          <ListBox x:Name="DisableList" Style="{StaticResource ListBox.Standard}" />
+        </DockPanel>
+      </Grid>
+    </Grid>
+
+    <Grid x:Name="ResultPage" Visibility="Collapsed">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="*" />
+      </Grid.RowDefinitions>
+      <TextBlock x:Name="ResultSummary" Style="{StaticResource TextBlock.Caption}" Margin="0,0,0,12" TextWrapping="Wrap" />
+      <ListBox x:Name="ResultList" Grid.Row="1" Style="{StaticResource ListBox.Standard}">
+        <ListBox.ItemTemplate>
+          <DataTemplate>
+            <StackPanel Margin="4,6">
+              <TextBlock Text="{Binding Caption}" FontWeight="SemiBold" />
+              <TextBlock Text="{Binding Outcome}" Margin="0,2,0,0" Foreground="{DynamicResource Vestigium.Brushes.Text.Secondary}" />
+              <TextBlock Text="{Binding Detail}" Margin="0,2,0,0" TextWrapping="Wrap" />
+            </StackPanel>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
     </Grid>
   </DockPanel>
 </Window>
