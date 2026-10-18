@@ -13,6 +13,44 @@ public sealed class FeatureNode : INotifyPropertyChanged
     public FeatureRow? Feature { get; init; }
     public ObservableCollection<FeatureNode> Children { get; } = [];
 
+    public bool IsAbsent => Feature?.InstallState == 3;
+
+    private bool _desiredEnabled;
+    private string _reason = "";
+
+    public bool DesiredEnabled
+    {
+        get => _desiredEnabled;
+        set
+        {
+            if (_desiredEnabled == value)
+                return;
+            _desiredEnabled = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DesiredEnabled)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsChanged)));
+        }
+    }
+
+    public string Reason
+    {
+        get => _reason;
+        set
+        {
+            if (_reason == value)
+                return;
+            _reason = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Reason)));
+        }
+    }
+
+    public bool IsChanged => DesiredEnabled != IsEnabled;
+
+    public void ResetDesired()
+    {
+        DesiredEnabled = IsEnabled;
+        Reason = "";
+    }
+
     private bool _isExpanded;
 
     public bool IsExpanded
