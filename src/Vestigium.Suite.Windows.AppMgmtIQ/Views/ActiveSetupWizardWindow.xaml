@@ -12,7 +12,7 @@
       <Button Content="Cancel" Width="120" Style="{StaticResource Button.Secondary}" IsCancel="True" />
     </StackPanel>
     <StackPanel>
-      <TextBlock Style="{StaticResource TextBlock.Title}" Text="Add Active Setup Entry" />
+      <TextBlock Style="{StaticResource TextBlock.Heading}" Text="Add Active Setup Entry" />
       <TextBlock Margin="0,16,0,4" Foreground="{DynamicResource Vestigium.Brushes.Text.Secondary}" Text="Display Name" />
       <TextBox x:Name="NameBox" />
       <TextBlock Margin="0,12,0,4" Foreground="{DynamicResource Vestigium.Brushes.Text.Secondary}" Text="Component" />
