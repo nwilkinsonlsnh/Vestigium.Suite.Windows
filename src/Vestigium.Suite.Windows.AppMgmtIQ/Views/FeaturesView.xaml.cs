@@ -38,7 +38,7 @@ public partial class FeaturesView : UserControl
         if (plan.Failed.Count > 0)
             lines.Add("Failed: " + string.Join(", ", plan.Failed));
         MessageBox.Show(string.Join(Environment.NewLine + Environment.NewLine, lines), "Feature changes", MessageBoxButton.OK, MessageBoxImage.Information);
-        _ = host.Refresh();
+        host.RefreshCommand.Execute(null);
     }
 
     private void OnFilter(object sender, RoutedEventArgs e)
