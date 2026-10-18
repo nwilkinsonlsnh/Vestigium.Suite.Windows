@@ -8,8 +8,8 @@
         Background="{DynamicResource Vestigium.Brushes.Surface.Window}">
   <DockPanel Margin="24">
     <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
-      <Button Content="Continue" Width="120" Margin="0,0,8,0" Style="{StaticResource Button.Standard}" Click="Continue_Click" />
-      <Button Content="Cancel" Width="120" Style="{StaticResource Button.Standard}" IsCancel="True" />
+      <Button Content="Continue" Width="120" Margin="0,0,8,0" Style="{StaticResource Button.Primary}" Click="Continue_Click" />
+      <Button Content="Cancel" Width="120" Style="{StaticResource Button.Secondary}" IsCancel="True" />
     </StackPanel>
     <StackPanel>
       <TextBlock Style="{StaticResource TextBlock.Title}" Text="Add Active Setup Entry" />
@@ -17,7 +17,7 @@
       <TextBox x:Name="NameBox" />
       <TextBlock Margin="0,12,0,4" Foreground="{DynamicResource Vestigium.Brushes.Text.Secondary}" Text="Component" />
       <DockPanel>
-        <Button DockPanel.Dock="Right" Margin="8,0,0,0" Content="Generate" Style="{StaticResource Button.Standard}" Click="Generate_Click" />
+        <Button DockPanel.Dock="Right" Margin="8,0,0,0" Content="Generate" Style="{StaticResource Button.Secondary}" Click="Generate_Click" />
         <TextBox x:Name="ComponentBox" />
       </DockPanel>
       <TextBlock Margin="0,12,0,4" Foreground="{DynamicResource Vestigium.Brushes.Text.Secondary}" Text="StubPath" />
