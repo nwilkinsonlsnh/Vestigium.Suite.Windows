@@ -112,7 +112,7 @@ public partial class DashboardView : UserControl
         [
             ("Pending", Chart([Slice("Pending", rows.Count(row => row.Pending)), Slice("Current", rows.Count(row => !row.Pending))], "Pending")),
             ("Scope", Chart([Slice("Machine", rows.Count(row => row.IsGlobal)), Slice("User", rows.Count(row => !row.IsGlobal))], "Scope")),
-            ("Bitness", Chart([Slice("x64", rows.Count(row => row.IsX64)), Slice("x86", rows.Count(row => !row.IsX64))], "Bitness")),
+            ("Architecture", Chart([Slice("x64", rows.Count(row => row.IsX64)), Slice("x86", rows.Count(row => !row.IsX64))], "Architecture")),
             ("Command", Chart([Slice("Has command", rows.Count(row => !string.IsNullOrWhiteSpace(row.StubPath))), Slice("No command", rows.Count(row => string.IsNullOrWhiteSpace(row.StubPath)))], "Command"))
         ]);
     }
