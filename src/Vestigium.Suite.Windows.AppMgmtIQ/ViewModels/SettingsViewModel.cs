@@ -9,6 +9,7 @@ public sealed partial class SettingsViewModel : ObservableObject
     private readonly ThemeManager _themes;
     private readonly MainViewModel _host;
     private readonly AppMgmtSettingsStore _store;
+    private FeaturesViewModel? _features;
     private bool _loading;
 
     public SettingsViewModel(ThemeManager themes, MainViewModel host, AppMgmtSettingsStore store)
@@ -31,6 +32,8 @@ public sealed partial class SettingsViewModel : ObservableObject
     }
 
     public MainViewModel Host => _host;
+
+    public void Attach(FeaturesViewModel features) => _features = features;
 
     public IReadOnlyList<ThemeDefinition> Themes => _themes.AvailableThemes;
 
@@ -78,6 +81,9 @@ public sealed partial class SettingsViewModel : ObservableObject
     private bool _showOtherInstallers = true;
 
     [ObservableProperty]
+    private bool _featuresExpanded;
+
+    [ObservableProperty]
     private DateFormatOption _selectedDateFormat;
 
     [ObservableProperty]
@@ -109,6 +115,7 @@ public sealed partial class SettingsViewModel : ObservableObject
             ShowSystemComponents = ShowSystemComponents,
             ShowWindowsInstaller = ShowWindowsInstaller,
             ShowOtherInstallers = ShowOtherInstallers,
+            FeaturesExpanded = FeaturesExpanded,
             DateFormat = SelectedDateFormat?.Label ?? DisplayFormats.DefaultDateFormat.Label,
             DecimalPlaces = (int)DecimalPlaces
         });
@@ -125,6 +132,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         ShowSystemComponents = data.ShowSystemComponents;
         ShowWindowsInstaller = data.ShowWindowsInstaller;
         ShowOtherInstallers = data.ShowOtherInstallers;
+        FeaturesExpanded = data.FeaturesExpanded;
         DecimalPlaces = Math.Clamp(data.DecimalPlaces, 0, 8);
         SelectedDateFormat = DateFormats.FirstOrDefault(f => f.Label == data.DateFormat) ?? DisplayFormats.DefaultDateFormat;
         if (!string.IsNullOrWhiteSpace(data.ThemeId))
@@ -163,6 +171,11 @@ public sealed partial class SettingsViewModel : ObservableObject
     partial void OnShowSystemComponentsChanged(bool value) => Changed("System components", (!value).ToString(), value.ToString());
     partial void OnShowWindowsInstallerChanged(bool value) => Changed("Windows Installer", (!value).ToString(), value.ToString());
     partial void OnShowOtherInstallersChanged(bool value) => Changed("Other installers", (!value).ToString(), value.ToString());
+    partial void OnFeaturesExpandedChanged(bool value)
+    {
+        _features?.SetExpanded(value);
+        Changed("Windows features", (!value) ? "Expanded" : "Collapsed", value ? "Expanded" : "Collapsed");
+    }
     partial void OnSelectedDateFormatChanged(DateFormatOption value) => Changed("Date format", null, value?.Label);
 
     partial void OnDecimalPlacesChanged(decimal value)
@@ -198,6 +211,7 @@ public sealed partial class SettingsViewModel : ObservableObject
             ShowSystemComponents = ShowSystemComponents,
             ShowWindowsInstaller = ShowWindowsInstaller,
             ShowOtherInstallers = ShowOtherInstallers,
+            FeaturesExpanded = FeaturesExpanded,
             DateFormat = SelectedDateFormat?.Label ?? DisplayFormats.DefaultDateFormat.Label,
             DecimalPlaces = (int)DecimalPlaces
         });
