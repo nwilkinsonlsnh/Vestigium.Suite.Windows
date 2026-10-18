@@ -6,6 +6,7 @@ namespace Vestigium.Suite.Windows.AppMgmtIQ.Features;
 public partial class ApplyFeatureChangesWindow : Window
 {
     private readonly FeatureJob _job;
+    private readonly List<FeatureOutcome> _outcomes = [];
 
     public ApplyFeatureChangesWindow(FeatureJob job)
     {
@@ -43,13 +44,13 @@ public partial class ApplyFeatureChangesWindow : Window
         foreach (var item in _job.Enable)
         {
             Summary.Text = $"Enabling {item.Caption} ({++done} of {total})";
-            var run = await RunDism($"/Online /Enable-Feature /FeatureName:{item.Name} /NoRestart /Quiet");
+            var run = await RunDism($"/Online /Enable-Feature /FeatureName:{item.Name} /NoRestart");
             Record(result, item, run, enabled: true);
         }
         foreach (var item in _job.Disable)
         {
             Summary.Text = $"Disabling {item.Caption} ({++done} of {total})";
-            var run = await RunDism($"/Online /Disable-Feature /FeatureName:{item.Name} /NoRestart /Quiet");
+            var run = await RunDism($"/Online /Disable-Feature /FeatureName:{item.Name} /NoRestart");
             Record(result, item, run, enabled: false);
         }
         Result = result;
@@ -57,28 +58,38 @@ public partial class ApplyFeatureChangesWindow : Window
             FeatureLog.Completed,
             $"Feature apply completed. enabled={result.Enabled.Count} disabled={result.Disabled.Count} restart={result.Restart.Count} failed={result.Failed.Count}",
             _job.CorrelationId);
-        Summary.Text = result.Failed.Count == 0
-            ? $"Enabled {result.Enabled.Count}. Disabled {result.Disabled.Count}. Restart required {result.Restart.Count}."
-            : $"Enabled {result.Enabled.Count}. Disabled {result.Disabled.Count}. Failed {result.Failed.Count}: {string.Join("; ", result.Failed)}";
+        ShowResults(result);
+    }
+
+    private void ShowResults(FeatureResult result)
+    {
+        ResultSummary.Text = $"Enabled {result.Enabled.Count}    Disabled {result.Disabled.Count}    Restart required {result.Restart.Count}    Failed {result.Failed.Count}";
+        ResultList.ItemsSource = _outcomes.ToList();
+        PlanPage.Visibility = Visibility.Collapsed;
+        ResultPage.Visibility = Visibility.Visible;
+        CancelButton.Visibility = Visibility.Collapsed;
         ConfirmButton.Content = "Close";
         ConfirmButton.IsEnabled = true;
         ConfirmButton.Click -= Confirm_Click;
         ConfirmButton.Click += (_, _) => Close();
     }
 
-    private static void Record(FeatureResult result, FeatureJobItem item, DismRun run, bool enabled)
+    private void Record(FeatureResult result, FeatureJobItem item, DismRun run, bool enabled)
     {
         if (run.Code is 0 or 3010)
         {
             (enabled ? result.Enabled : result.Disabled).Add(item.Caption);
-            FeatureLog.Information(FeatureLog.Changed, $"{(enabled ? "Enabled" : "Disabled")} {item.Name}. exit={run.Code}", result.CorrelationId);
+            var outcome = run.Code == 3010 ? "Restart required" : enabled ? "Enabled" : "Disabled";
+            _outcomes.Add(new FeatureOutcome(item.Caption, outcome, run.Detail));
+            FeatureLog.Information(FeatureLog.Changed, $"{outcome} {item.Name}. exit={run.Code}", result.CorrelationId);
             if (run.Code == 3010)
                 result.Restart.Add(item.Caption);
             return;
         }
-        var reason = string.IsNullOrWhiteSpace(run.Detail) ? $"exit {run.Code}" : run.Detail;
-        result.Failed.Add($"{item.Caption}: {reason}");
-        FeatureLog.Information(FeatureLog.Changed, $"Failed {item.Name}. exit={run.Code}. {reason}", result.CorrelationId);
+        var detail = string.IsNullOrWhiteSpace(run.Detail) ? $"Exit {run.Code}" : run.Detail;
+        result.Failed.Add($"{item.Caption}: {detail}");
+        _outcomes.Add(new FeatureOutcome(item.Caption, "Failed", detail));
+        FeatureLog.Information(FeatureLog.Changed, $"Failed {item.Name}. exit={run.Code}. {detail}", result.CorrelationId);
     }
 
     private static Task<DismRun> RunDism(string arguments)
@@ -98,21 +109,19 @@ public partial class ApplyFeatureChangesWindow : Window
             var output = process.StandardOutput.ReadToEnd();
             var error = process.StandardError.ReadToEnd();
             process.WaitForExit();
-            var detail = FirstLine(string.IsNullOrWhiteSpace(error) ? output : error);
-            return new DismRun(process.ExitCode, detail);
+            return new DismRun(process.ExitCode, Detail(process.ExitCode, output, error));
         });
     }
 
-    private static string FirstLine(string text)
+    private static string Detail(int code, string output, string error)
     {
-        foreach (var line in text.Split('\n'))
-        {
-            var trimmed = line.Trim();
-            if (trimmed.Length > 0 && !trimmed.StartsWith("Deployment Image", StringComparison.OrdinalIgnoreCase))
-                return trimmed;
-        }
-        return "";
+        var text = string.IsNullOrWhiteSpace(error) ? output : error + Environment.NewLine + output;
+        var line = text.Split('\n').Select(row => row.Trim()).FirstOrDefault(row => row.StartsWith("Error", StringComparison.OrdinalIgnoreCase));
+        if (!string.IsNullOrWhiteSpace(line))
+            return code == 50 ? line + " The request is not supported. The process may not be elevated." : line;
+        return code == 0 ? "" : $"Exit {code}";
     }
 
     private sealed record DismRun(int Code, string Detail);
+    private sealed record FeatureOutcome(string Caption, string Outcome, string Detail);
 }
