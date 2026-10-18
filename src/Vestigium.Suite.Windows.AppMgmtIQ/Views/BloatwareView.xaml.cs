@@ -20,6 +20,13 @@ public partial class BloatwareView : UserControl
             host.ApplyQuery();
     }
 
+    private void Menu_Opened(object sender, RoutedEventArgs e)
+    {
+        var installed = DataContext is BloatwareViewModel { Selected.Installed: true };
+        AddItem.Visibility = installed ? Visibility.Collapsed : Visibility.Visible;
+        RemoveItem.Visibility = installed ? Visibility.Visible : Visibility.Collapsed;
+    }
+
     private void Add_Click(object sender, RoutedEventArgs e)
     {
         if (DataContext is not BloatwareViewModel { Selected: { } row } || row.Installed)
