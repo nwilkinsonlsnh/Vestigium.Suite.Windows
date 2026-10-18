@@ -45,6 +45,9 @@ public sealed partial class DetailsViewModel : ObservableObject
     [ObservableProperty]
     private DetailsTab? _selectedTab;
 
+    [ObservableProperty]
+    private ValueRow? _selectedRow;
+
     private static readonly string[] GeneralNames =
     [
         "DisplayName", "DisplayName_Localized", "DisplayVersion", "Publisher", "Comments",
