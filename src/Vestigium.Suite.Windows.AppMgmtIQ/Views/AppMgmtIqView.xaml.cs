@@ -54,6 +54,9 @@ public partial class AppMgmtIqView : UserControl
 
     private void Menu_Opened(object sender, RoutedEventArgs e)
     {
+        foreach (var item in new[] { GlobalItem, PerUserItem, X64Item, X86Item, SystemItem, InstallerItem, OtherItem })
+            PaintCheck(item);
+
         var package = DataContext is MainViewModel host ? host.SelectedPackage : null;
         var hasString = !string.IsNullOrWhiteSpace(package?.UninstallString);
         UninstallItem.IsEnabled = hasString;
@@ -102,6 +105,19 @@ public partial class AppMgmtIqView : UserControl
 
         _details.SetPackage(package);
         _details.Activate();
+    }
+
+    private void FilterCheck_Changed(object sender, RoutedEventArgs e) => PaintCheck(sender as MenuItem);
+
+    private static void PaintCheck(MenuItem? item)
+    {
+        if (item?.Icon is not TextBlock block)
+            return;
+        var on = item.IsChecked == true;
+        block.Text = on ? "\uE73A" : "\uE739";
+        block.Foreground = on
+            ? new SolidColorBrush(Color.FromRgb(0x3D, 0xDC, 0x84))
+            : new SolidColorBrush(Color.FromRgb(0xF4, 0xF7, 0xFB));
     }
 
     private static T? FindAncestor<T>(DependencyObject start) where T : DependencyObject
