@@ -42,18 +42,20 @@ public partial class FeaturesView : UserControl
     {
         if (DataContext is FeaturesViewModel vm)
             vm.SelectedFeature = (e.NewValue as FeatureNode)?.Feature;
+        if (_details is { IsVisible: true } && e.NewValue is FeatureNode node)
+            ShowDetails(node);
     }
 
     private void Tree_MouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
-        if (DataContext is FeaturesViewModel { SelectedFeature: { } feature })
-            ShowDetails(feature);
+        if (FeatureTree.SelectedItem is FeatureNode node)
+            ShowDetails(node);
     }
 
     private void OpenDetails_Click(object sender, RoutedEventArgs e)
     {
-        if (DataContext is FeaturesViewModel { SelectedFeature: { } feature })
-            ShowDetails(feature);
+        if (FeatureTree.SelectedItem is FeatureNode node)
+            ShowDetails(node);
     }
 
     private void Menu_Opened(object sender, RoutedEventArgs e)
@@ -115,7 +117,7 @@ public partial class FeaturesView : UserControl
         return null;
     }
 
-    private void ShowDetails(FeatureRow feature)
+    private void ShowDetails(FeatureNode node)
     {
         if (_details is null || !_details.IsLoaded)
         {
@@ -123,7 +125,7 @@ public partial class FeaturesView : UserControl
             _details.Closed += (_, _) => _details = null;
             _details.Show();
         }
-        _details.SetFeature(feature);
+        _details.SetFeature(node);
         _details.Activate();
     }
 
