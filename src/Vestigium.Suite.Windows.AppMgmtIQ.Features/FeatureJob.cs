@@ -33,4 +33,15 @@ public sealed class FeatureResult
     public List<string> Disabled { get; set; } = [];
     public List<string> Restart { get; set; } = [];
     public List<string> Failed { get; set; } = [];
+    public List<FeatureOutcomeRecord> Outcomes { get; set; } = [];
+}
+
+public sealed class FeatureOutcomeRecord
+{
+    public string Caption { get; set; } = "";
+    public string Name { get; set; } = "";
+    public string Outcome { get; set; } = "";
+    public bool Restart { get; set; }
+    public string RequiredBy { get; set; } = "";
+    public string Error { get; set; } = "";
 }
