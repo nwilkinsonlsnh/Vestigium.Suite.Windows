@@ -25,6 +25,9 @@ public sealed partial class BloatwareViewModel : ObservableObject
     private string _query = string.Empty;
 
     [ObservableProperty]
+    private BloatwareRow? _selected;
+
+    [ObservableProperty]
     private string _status = "Idle";
 
     [ObservableProperty]
