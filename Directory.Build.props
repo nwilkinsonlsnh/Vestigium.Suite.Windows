@@ -9,7 +9,7 @@
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <VestigiumLoggingVersion>1.7.2</VestigiumLoggingVersion>
+    <VestigiumLoggingVersion>2.0.0</VestigiumLoggingVersion>
     <VestigiumThemesVersion>1.0.6</VestigiumThemesVersion>
     <VestigiumControlsVersion>1.0.0</VestigiumControlsVersion>
     <VestigiumStatusBarVersion>1.0.1</VestigiumStatusBarVersion>
