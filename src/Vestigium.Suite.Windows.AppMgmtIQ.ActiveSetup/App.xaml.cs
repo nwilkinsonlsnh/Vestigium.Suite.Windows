@@ -2,7 +2,6 @@ using System.IO;
 using System.Text.Json;
 using System.Windows;
 using Vestigium.Logging;
-using Vestigium.Themes;
 
 namespace Vestigium.Suite.Windows.AppMgmtIQ.ActiveSetup;
 
@@ -20,17 +19,7 @@ public partial class App : Application
             if (jobPath.Length == 0 || !File.Exists(jobPath))
                 throw new FileNotFoundException("The job file was not found.", jobPath);
             job = JsonSerializer.Deserialize<ActiveSetupJob>(File.ReadAllText(jobPath), Json) ?? new ActiveSetupJob();
-            var themes = new ThemeManager();
-            themes.RegisterSuiteV1();
-            themes.Initialize(this, string.IsNullOrWhiteSpace(job.ThemeId) ? "LightBlue" : job.ThemeId);
-            var window = new ApplyActiveSetupWindow(job);
-            if (job.ParentWidth > 0 && job.ParentHeight > 0)
-            {
-                window.Left = job.ParentLeft + (job.ParentWidth - window.Width) / 2;
-                window.Top = job.ParentTop + (job.ParentHeight - window.Height) / 2;
-            }
-            window.ShowDialog();
-            WriteResult(jobPath, window.Result);
+            WriteResult(jobPath, ActiveSetupApplier.Apply(job));
         }
         catch (Exception ex)
         {
