@@ -127,10 +127,11 @@
                Margin="0,0,0,8">
         <ListBox.ItemTemplate>
           <DataTemplate>
-            <TextBlock>
-              <Run Text="{Binding IsSticky, Converter={x:Static local:StickyMarkConverter.Instance}}" />
-              <Run Text="{Binding Text}" />
-            </TextBlock>
+            <StackPanel Orientation="Horizontal">
+              <TextBlock Text="&#xE841;" FontFamily="Segoe MDL2 Assets" Margin="0,0,6,0"
+                         Visibility="{Binding IsSticky, Converter={StaticResource BoolToVis}}" />
+              <TextBlock Text="{Binding Text}" />
+            </StackPanel>
           </DataTemplate>
         </ListBox.ItemTemplate>
       </ListBox>
