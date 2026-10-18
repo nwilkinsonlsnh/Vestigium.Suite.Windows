@@ -36,6 +36,13 @@
       </Grid>
     </Grid>
 
+    <Grid x:Name="ProgressPage" Visibility="Collapsed">
+      <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+        <TextBlock x:Name="ProgressText" FontSize="16" HorizontalAlignment="Center" />
+        <ProgressBar x:Name="Progress" Height="8" Width="360" Margin="0,16,0,0" />
+      </StackPanel>
+    </Grid>
+
     <Grid x:Name="ResultPage" Visibility="Collapsed">
       <Grid.RowDefinitions>
         <RowDefinition Height="Auto" />
