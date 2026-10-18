@@ -23,6 +23,11 @@ public partial class App : Application
         themes.RegisterSuiteV1();
         themes.Initialize(this, string.IsNullOrWhiteSpace(job.ThemeId) ? "LightBlue" : job.ThemeId);
         var window = new ApplyFeatureChangesWindow(job);
+        if (job.ParentWidth > 0 && job.ParentHeight > 0)
+        {
+            window.Left = job.ParentLeft + (job.ParentWidth - window.Width) / 2;
+            window.Top = job.ParentTop + (job.ParentHeight - window.Height) / 2;
+        }
         window.ShowDialog();
         var resultPath = Path.ChangeExtension(e.Args[0], ".result.json");
         File.WriteAllText(resultPath, JsonSerializer.Serialize(window.Result, Json));
