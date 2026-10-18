@@ -25,6 +25,9 @@ public static class AppMgmtCatalog
     public const int ActiveSetupCompleted = 17070;
     public const int ActiveSetupCancelled = 17075;
     public const int ActiveSetupChanged = 17080;
+    public const int BloatwareRequested = 17090;
+    public const int BloatwareCompleted = 17095;
+    public const int BloatwareChanged = 17100;
 
     public static void Register(VestigiumLoggerOptions cfg)
     {
@@ -51,5 +54,8 @@ public static class AppMgmtCatalog
         cfg.RegisterEvent("ActiveSetupCompleted", "Vestigium.Suite.Windows.AppMgmtIQ.Events.ActiveSetupCompleted", Category, "ActiveSetup", ActiveSetupCompleted, "Information", "active setup change completed");
         cfg.RegisterEvent("ActiveSetupCancelled", "Vestigium.Suite.Windows.AppMgmtIQ.Events.ActiveSetupCancelled", Category, "ActiveSetup", ActiveSetupCancelled, "Information", "active setup change cancelled");
         cfg.RegisterEvent("ActiveSetupChanged", "Vestigium.Suite.Windows.AppMgmtIQ.Events.ActiveSetupChanged", Category, "ActiveSetup", ActiveSetupChanged, "Information", "active setup key changed");
+        cfg.RegisterEvent("BloatwareRequested", "Vestigium.Suite.Windows.AppMgmtIQ.Events.BloatwareRequested", Category, "Bloatware", BloatwareRequested, "Information", "bloatware change requested");
+        cfg.RegisterEvent("BloatwareCompleted", "Vestigium.Suite.Windows.AppMgmtIQ.Events.BloatwareCompleted", Category, "Bloatware", BloatwareCompleted, "Information", "bloatware change completed");
+        cfg.RegisterEvent("BloatwareChanged", "Vestigium.Suite.Windows.AppMgmtIQ.Events.BloatwareChanged", Category, "Bloatware", BloatwareChanged, "Information", "bloatware package changed");
     }
 }
