@@ -16,6 +16,7 @@ public sealed partial class ActiveSetupViewModel : ObservableObject
     private KqlBoundQuery? _bound;
 
     public ObservableCollection<ActiveSetupRow> Rows { get; } = [];
+    public IReadOnlyList<ActiveSetupRow> All => _all;
     public ObservableCollection<string> Queries { get; } = [];
     public KqlSession Session => _session;
 
