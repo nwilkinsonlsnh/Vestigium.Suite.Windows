@@ -28,13 +28,29 @@ public sealed partial class MainViewModel : ObservableObject
     private readonly List<PackageRow> _all = [];
     private readonly KqlSession _session = AppMgmtKql.Packages();
     private KqlBoundQuery? _bound;
+    [ObservableProperty]
     private bool _showGlobal = true;
+
+    [ObservableProperty]
     private bool _showPerUser = true;
+
+    [ObservableProperty]
     private bool _showX64 = true;
+
+    [ObservableProperty]
     private bool _showX86 = true;
+
+    [ObservableProperty]
     private bool _showSystemComponents;
+
+    [ObservableProperty]
     private bool _showWindowsInstaller = true;
+
+    [ObservableProperty]
     private bool _showOtherInstallers = true;
+
+    private bool _applying;
+    public event Action? FiltersChanged;
     private string _datePattern = DisplayFormats.DefaultDateFormat.Pattern;
     private int _decimals = 4;
 
@@ -192,18 +208,36 @@ public sealed partial class MainViewModel : ObservableObject
         string datePattern,
         int decimals)
     {
-        _showGlobal = showGlobal;
-        _showPerUser = showPerUser;
-        _showX64 = showX64;
-        _showX86 = showX86;
-        _showSystemComponents = showSystemComponents;
-        _showWindowsInstaller = showWindowsInstaller;
-        _showOtherInstallers = showOtherInstallers;
+        _applying = true;
+        ShowGlobal = showGlobal;
+        ShowPerUser = showPerUser;
+        ShowX64 = showX64;
+        ShowX86 = showX86;
+        ShowSystemComponents = showSystemComponents;
+        ShowWindowsInstaller = showWindowsInstaller;
+        ShowOtherInstallers = showOtherInstallers;
+        _applying = false;
         _datePattern = string.IsNullOrWhiteSpace(datePattern) ? DisplayFormats.DefaultDateFormat.Pattern : datePattern;
         _decimals = Math.Clamp(decimals, 0, 8);
         foreach (var row in _all)
             row.ApplyDisplay(_datePattern, _decimals);
         ApplyFilter();
+    }
+
+    partial void OnShowGlobalChanged(bool value) => FilterChanged();
+    partial void OnShowPerUserChanged(bool value) => FilterChanged();
+    partial void OnShowX64Changed(bool value) => FilterChanged();
+    partial void OnShowX86Changed(bool value) => FilterChanged();
+    partial void OnShowSystemComponentsChanged(bool value) => FilterChanged();
+    partial void OnShowWindowsInstallerChanged(bool value) => FilterChanged();
+    partial void OnShowOtherInstallersChanged(bool value) => FilterChanged();
+
+    private void FilterChanged()
+    {
+        if (_applying)
+            return;
+        ApplyFilter();
+        FiltersChanged?.Invoke();
     }
 
     private void ApplyFilter()
@@ -222,19 +256,19 @@ public sealed partial class MainViewModel : ObservableObject
 
     private bool Passes(PackageRow row)
     {
-        if (row.IsGlobal && !_showGlobal)
+        if (row.IsGlobal && !ShowGlobal)
             return false;
-        if (!row.IsGlobal && !_showPerUser)
+        if (!row.IsGlobal && !ShowPerUser)
             return false;
-        if (row.IsX64 && !_showX64)
+        if (row.IsX64 && !ShowX64)
             return false;
-        if (!row.IsX64 && !_showX86)
+        if (!row.IsX64 && !ShowX86)
             return false;
-        if (row.SystemComponent && !_showSystemComponents)
+        if (row.SystemComponent && !ShowSystemComponents)
             return false;
-        if (row.WindowsInstaller && !_showWindowsInstaller)
+        if (row.WindowsInstaller && !ShowWindowsInstaller)
             return false;
-        if (!row.WindowsInstaller && !_showOtherInstallers)
+        if (!row.WindowsInstaller && !ShowOtherInstallers)
             return false;
         if (_bound is null)
             return true;
