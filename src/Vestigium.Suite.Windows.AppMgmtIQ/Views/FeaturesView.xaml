@@ -41,7 +41,7 @@
           <ColumnDefinition Width="200" MinWidth="120" SharedSizeGroup="FeatureParent" />
           <ColumnDefinition Width="100" MinWidth="72" SharedSizeGroup="FeatureState" />
         </Grid.ColumnDefinitions>
-        <CheckBox Grid.Column="0" IsThreeState="True" IsChecked="{Binding CheckState, Mode=OneWay}" Click="Plan_Click" VerticalAlignment="Center" />
+        <CheckBox Grid.Column="0" IsThreeState="{Binding HasChildren}" IsChecked="{Binding CheckState, Mode=OneWay}" Click="Plan_Click" VerticalAlignment="Center" />
         <TextBlock Grid.Column="1" Text="{Binding Caption}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="4,0">
           <TextBlock.Style>
             <Style TargetType="TextBlock">
