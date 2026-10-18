@@ -22,8 +22,12 @@ public sealed partial class FeaturesViewModel : ObservableObject
     private bool _showAbsent;
 
     public ObservableCollection<FeatureNode> Roots { get; } = [];
-    public ObservableCollection<string> Queries { get; } = [];
+    public ObservableCollection<QueryMruRow> Queries { get; } = [];
     public KqlSession Session => _session;
+
+    public int MruLimit { get; set; } = 10;
+    public int StickyLimit { get; set; } = 3;
+    public event Action? MruChanged;
 
     [ObservableProperty]
     private string _query = string.Empty;
@@ -59,8 +63,19 @@ public sealed partial class FeaturesViewModel : ObservableObject
     {
         _bound = KqlHost.Compile(Query, _session, _bound, out var error);
         ApplyFilter();
+        QueryMru.Record(Queries, Query, MruLimit, StickyLimit);
+        MruChanged?.Invoke();
         if (!string.IsNullOrEmpty(error))
             Status = error;
+    }
+
+    public void Pin(object? row)
+    {
+        if (row is not QueryMruRow mru)
+            return;
+        if (!QueryMru.ToggleSticky(Queries, mru, StickyLimit))
+            Status = $"Sticky limit is {StickyLimit}.";
+        MruChanged?.Invoke();
     }
 
     public async Task LoadAsync()
