@@ -1,0 +1,39 @@
+<Window x:Class="Vestigium.Suite.Windows.AppMgmtIQ.Views.ActiveSetupWizardWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Add Active Setup Entry"
+        Height="520" Width="640"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="{DynamicResource Vestigium.Brushes.Surface.Window}">
+  <DockPanel Margin="24">
+    <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+      <Button Content="Continue" Width="120" Margin="0,0,8,0" Style="{StaticResource Button.Standard}" Click="Continue_Click" />
+      <Button Content="Cancel" Width="120" Style="{StaticResource Button.Standard}" IsCancel="True" />
+    </StackPanel>
+    <StackPanel>
+      <TextBlock Style="{StaticResource TextBlock.Title}" Text="Add Active Setup Entry" />
+      <TextBlock Margin="0,16,0,4" Foreground="{DynamicResource Vestigium.Brushes.Text.Secondary}" Text="Display Name" />
+      <TextBox x:Name="NameBox" />
+      <TextBlock Margin="0,12,0,4" Foreground="{DynamicResource Vestigium.Brushes.Text.Secondary}" Text="Component" />
+      <DockPanel>
+        <Button DockPanel.Dock="Right" Margin="8,0,0,0" Content="Generate" Style="{StaticResource Button.Standard}" Click="Generate_Click" />
+        <TextBox x:Name="ComponentBox" />
+      </DockPanel>
+      <TextBlock Margin="0,12,0,4" Foreground="{DynamicResource Vestigium.Brushes.Text.Secondary}" Text="StubPath" />
+      <TextBox x:Name="StubBox" />
+      <TextBlock Margin="0,12,0,4" Foreground="{DynamicResource Vestigium.Brushes.Text.Secondary}" Text="Version" />
+      <TextBox x:Name="VersionBox" Text="1,0" />
+      <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
+        <TextBlock VerticalAlignment="Center" Margin="0,0,12,0" Foreground="{DynamicResource Vestigium.Brushes.Text.Secondary}" Text="Scope" />
+        <RadioButton x:Name="MachineBox" Content="Machine" GroupName="Scope" IsChecked="True" Style="{StaticResource RadioButton.Standard}" />
+        <RadioButton Content="User" GroupName="Scope" Margin="16,0,0,0" Style="{StaticResource RadioButton.Standard}" />
+        <TextBlock VerticalAlignment="Center" Margin="32,0,12,0" Foreground="{DynamicResource Vestigium.Brushes.Text.Secondary}" Text="View" />
+        <RadioButton x:Name="X64Box" Content="x64" GroupName="View" IsChecked="True" Style="{StaticResource RadioButton.Standard}" />
+        <RadioButton Content="x86" GroupName="View" Margin="16,0,0,0" Style="{StaticResource RadioButton.Standard}" />
+      </StackPanel>
+      <CheckBox x:Name="InstalledBox" Margin="0,16,0,0" Content="Installed" IsChecked="True" Style="{StaticResource CheckBox.Standard}" />
+      <TextBlock x:Name="ErrorText" Margin="0,12,0,0" Foreground="{DynamicResource Vestigium.Brushes.Accent.Primary}" TextWrapping="Wrap" />
+    </StackPanel>
+  </DockPanel>
+</Window>
