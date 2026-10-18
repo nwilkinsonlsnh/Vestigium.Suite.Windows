@@ -18,7 +18,7 @@ public partial class FeaturesView : UserControl
     {
         if (sender is not CheckBox box || box.DataContext is not FeatureNode node || DataContext is not FeaturesViewModel host)
             return;
-        host.SetDesired(node, box.IsChecked == true);
+        host.SetBranch(node, node.CheckState != true);
     }
 
     private void Apply_Click(object sender, RoutedEventArgs e)
