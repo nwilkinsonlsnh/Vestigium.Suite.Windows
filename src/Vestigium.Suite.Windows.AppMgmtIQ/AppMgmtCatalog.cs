@@ -16,6 +16,10 @@ public static class AppMgmtCatalog
     public const int BloatwareLoaded = 17030;
     public const int NoRemoveCleared = 17035;
     public const int UninstallStarted = 17040;
+    public const int FeatureApplyRequested = 17045;
+    public const int FeatureApplyCompleted = 17050;
+    public const int FeatureApplyCancelled = 17055;
+    public const int FeatureChanged = 17060;
 
     public static void Register(VestigiumLoggerOptions cfg)
     {
@@ -33,5 +37,9 @@ public static class AppMgmtCatalog
         cfg.RegisterEvent("BloatwareLoaded", "Vestigium.Suite.Windows.AppMgmtIQ.Events.BloatwareLoaded", Category, "Bloatware", BloatwareLoaded, "Information", "bloatware catalog matched");
         cfg.RegisterEvent("NoRemoveCleared", "Vestigium.Suite.Windows.AppMgmtIQ.Events.NoRemoveCleared", Category, "Uninstall", NoRemoveCleared, "Warning", "NoRemove cleared by an administrator");
         cfg.RegisterEvent("UninstallStarted", "Vestigium.Suite.Windows.AppMgmtIQ.Events.UninstallStarted", Category, "Uninstall", UninstallStarted, "Information", "uninstall started");
+        cfg.RegisterEvent("FeatureApplyRequested", "Vestigium.Suite.Windows.AppMgmtIQ.Events.FeatureApplyRequested", Category, "Features", FeatureApplyRequested, "Information", "feature apply requested");
+        cfg.RegisterEvent("FeatureApplyCompleted", "Vestigium.Suite.Windows.AppMgmtIQ.Events.FeatureApplyCompleted", Category, "Features", FeatureApplyCompleted, "Information", "feature apply completed");
+        cfg.RegisterEvent("FeatureApplyCancelled", "Vestigium.Suite.Windows.AppMgmtIQ.Events.FeatureApplyCancelled", Category, "Features", FeatureApplyCancelled, "Information", "feature apply cancelled");
+        cfg.RegisterEvent("FeatureChanged", "Vestigium.Suite.Windows.AppMgmtIQ.Events.FeatureChanged", Category, "Features", FeatureChanged, "Information", "feature enabled or disabled");
     }
 }
