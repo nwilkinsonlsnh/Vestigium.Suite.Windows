@@ -35,5 +35,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Vestigium.Suite.Windows.AppMgmtIQ.Features\Vestigium.Suite.Windows.AppMgmtIQ.Features.csproj" />
+    <ProjectReference Include="..\Vestigium.Suite.Windows.AppMgmtIQ.ActiveSetup\Vestigium.Suite.Windows.AppMgmtIQ.ActiveSetup.csproj" />
   </ItemGroup>
 </Project>
