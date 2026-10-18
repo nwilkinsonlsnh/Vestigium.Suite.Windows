@@ -12,10 +12,6 @@ public partial class App : Application
     private void OnStartup(object sender, StartupEventArgs e)
     {
         FeatureLog.Initialize();
-        var themes = new ThemeManager();
-        themes.RegisterSuiteV1();
-        themes.Initialize(this, "LightBlue");
-
         if (e.Args.Length == 0 || !File.Exists(e.Args[0]))
         {
             Shutdown(1);
@@ -23,6 +19,9 @@ public partial class App : Application
         }
 
         var job = JsonSerializer.Deserialize<FeatureJob>(File.ReadAllText(e.Args[0]), Json) ?? new FeatureJob();
+        var themes = new ThemeManager();
+        themes.RegisterSuiteV1();
+        themes.Initialize(this, string.IsNullOrWhiteSpace(job.ThemeId) ? "LightBlue" : job.ThemeId);
         var window = new ApplyFeatureChangesWindow(job);
         window.ShowDialog();
         var resultPath = Path.ChangeExtension(e.Args[0], ".result.json");
