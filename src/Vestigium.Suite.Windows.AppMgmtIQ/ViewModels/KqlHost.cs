@@ -11,7 +11,7 @@ internal static class KqlHost
 
     public static KqlBoundQuery? Compile(string? text, KqlSession session, KqlBoundQuery? previous, out string status)
     {
-        if (string.IsNullOrWhiteSpace(text) || IsPartialField(text, session))
+        if (string.IsNullOrWhiteSpace(text) || !HasCriteria(text, session))
         {
             status = string.Empty;
             return null;
@@ -28,14 +28,24 @@ internal static class KqlHost
         return compiled.Query;
     }
 
-    private static bool IsPartialField(string text, KqlSession session)
+    private static bool HasCriteria(string text, KqlSession session)
     {
-        var body = text.Trim().TrimEnd('.').Trim();
-        if (body.Length == 0 || body.Any(ch => ch is ' ' or '(' or ')' or '=' or '!' or '<' or '>' or '"' or '\''))
-            return body.Length == 0;
-        return session.Fields.Any(field =>
-            field.Canonical.StartsWith(body, StringComparison.OrdinalIgnoreCase)
-            || field.Aliases.Any(alias => alias.StartsWith(body, StringComparison.OrdinalIgnoreCase)));
+        var body = text.Trim();
+        if (body.Length == 0)
+            return false;
+        var open = body.IndexOf('(');
+        if (open >= 0)
+            return body.IndexOf(')', open + 1) > open + 1;
+        if (body.Any(ch => ch is '=' or '!' or '<' or '>') || Structured.IsMatch(body) && body.Contains(' '))
+            return true;
+        var token = body.TrimEnd('.').Trim();
+        if (token.Length == 0)
+            return false;
+        if (session.Fields.Any(field =>
+                field.Canonical.StartsWith(token, StringComparison.OrdinalIgnoreCase)
+                || field.Aliases.Any(alias => alias.StartsWith(token, StringComparison.OrdinalIgnoreCase))))
+            return false;
+        return !body.Contains('.');
     }
 
     private static string Rewrite(string text, KqlSession session)
