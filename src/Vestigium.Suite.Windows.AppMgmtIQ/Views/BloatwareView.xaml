@@ -59,6 +59,8 @@
     <DataGrid Grid.Row="2"
               Style="{StaticResource DataGrid.Standard}"
               ItemsSource="{Binding Rows}"
+              SelectedItem="{Binding Selected}"
+              PreviewMouseRightButtonDown="Grid_PreviewMouseRightButtonDown"
               AutoGenerateColumns="False"
               IsReadOnly="True"
               SelectionMode="Single"
@@ -85,6 +87,12 @@
         <ContextMenu Grid.IsSharedSizeScope="True" Style="{StaticResource ContextMenu.Standard}">
           <MenuItem Header="Refresh" Style="{StaticResource MenuItem.Standard}" Command="{Binding RefreshCommand}">
             <MenuItem.Icon><TextBlock FontFamily="Segoe UI Symbol" FontSize="14" Text="&#x267B;" Foreground="#3DDC84" /></MenuItem.Icon>
+          </MenuItem>
+          <Separator Style="{StaticResource Separator.Standard}" />
+          <MenuItem Header="Copy" Style="{StaticResource MenuItem.Standard}">
+            <MenuItem Header="Name" Style="{StaticResource MenuItem.Standard}" Click="CopyName_Click" />
+            <MenuItem Header="Family" Style="{StaticResource MenuItem.Standard}" Click="CopyFamily_Click" />
+            <MenuItem Header="Package" Style="{StaticResource MenuItem.Standard}" Click="CopyPackage_Click" />
           </MenuItem>
         </ContextMenu>
       </DataGrid.ContextMenu>
