@@ -62,6 +62,8 @@ public partial class BloatwareView : UserControl
         };
         File.WriteAllText(jobPath, System.Text.Json.JsonSerializer.Serialize(job));
         HostLog.Information(AppMgmtCatalog.BloatwareRequested, "Bloatware", $"{action} requested. {row.Family}", correlationId);
+        var progress = new BloatwareProgressWindow(action, row.Name) { Owner = owner };
+        progress.Loaded += async (_, _) => await Finish(progress, host, action, row, resultPath);
         var exe = Path.Combine(AppContext.BaseDirectory, "AppMgmtIQ.Bloatware.exe");
         if (!File.Exists(exe))
         {
@@ -77,16 +79,22 @@ public partial class BloatwareView : UserControl
             new ActiveSetupSummaryWindow(action + " Bloatware", "The change was not elevated.", row.Name, ex.Message) { Owner = owner }.ShowDialog();
             return;
         }
+        progress.ShowDialog();
+    }
+
+    private static async Task Finish(BloatwareProgressWindow progress, BloatwareViewModel host, string action, BloatwareRow row, string resultPath)
+    {
         var result = await Wait(resultPath);
-        if (result?.OpenStore == true)
-            Process.Start(new ProcessStartInfo("ms-windows-store://pdp/?PFN=" + row.Family + "_8wekyb3d8bbwe") { UseShellExecute = true });
         var ok = result?.Ok == true;
-        var outcome = ok ? "The change was applied." : result?.OpenStore == true ? "Opened the Microsoft Store." : "The change failed.";
-        var detail = ok ? result?.Detail ?? "" : result?.OpenStore == true ? "No local package was found, and winget could not fetch it." : result?.Error ?? "The worker did not report back.";
-        new ActiveSetupSummaryWindow(action + " Bloatware", outcome, row.Name, detail) { Owner = owner }.ShowDialog();
+        var outcome = ok ? result?.Detail ?? "The change was applied." : "The change failed.";
+        var detail = ok ? result?.Detail ?? "" : First(result?.Error, result?.Detail, "The worker did not report back.");
+        progress.Complete(outcome, detail);
         if (ok)
             host.RefreshCommand.Execute(null);
     }
+
+    private static string First(params string?[] values)
+        => values.FirstOrDefault(value => !string.IsNullOrWhiteSpace(value)) ?? "";
 
     private static async Task<Vestigium.Suite.Windows.AppMgmtIQ.Bloatware.BloatwareResult?> Wait(string path)
     {
