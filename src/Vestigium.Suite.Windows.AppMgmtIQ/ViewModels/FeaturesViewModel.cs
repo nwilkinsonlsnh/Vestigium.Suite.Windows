@@ -305,6 +305,18 @@ public sealed partial class FeaturesViewModel : ObservableObject
         RebuildPlan();
     }
 
+    public void SetBranch(FeatureNode node, bool desired)
+    {
+        foreach (var item in node.SelfAndDescendants())
+        {
+            if (desired == item.IsEnabled)
+                _intent.Remove(item.Name);
+            else
+                _intent[item.Name] = desired;
+        }
+        RebuildPlan();
+    }
+
     private void RebuildPlan()
     {
         foreach (var node in _nodes.Values)
@@ -322,6 +334,8 @@ public sealed partial class FeaturesViewModel : ObservableObject
                 MarkDisable(node, "");
         }
 
+        foreach (var node in _nodes.Values)
+            node.NotifyCheckState();
         HasPlan = Enables.Count + Disables.Count > 0;
         Status = HasPlan
             ? $"{Enables.Count} to enable, {Disables.Count} to disable"
