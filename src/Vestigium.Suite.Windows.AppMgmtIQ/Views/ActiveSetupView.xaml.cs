@@ -39,7 +39,7 @@ public partial class ActiveSetupView : UserControl
             host.RefreshCommand.Execute(null);
             return;
         }
-        await RunWorker(host, correlationId, "Add", wizard.DisplayName, wizard.Component, wizard.StubPath, wizard.Version, wizard.IsX64, wizard.Installed);
+        await RunWorker(host, correlationId, "Add", wizard.DisplayName, wizard.Component, wizard.StubPath, wizard.Version, wizard.IsX64, true);
     }
 
     private async void Delete_Click(object sender, RoutedEventArgs e)
@@ -170,7 +170,7 @@ public partial class ActiveSetupView : UserControl
         key?.SetValue("", wizard.DisplayName, RegistryValueKind.String);
         key?.SetValue("StubPath", wizard.StubPath, RegistryValueKind.String);
         key?.SetValue("Version", wizard.Version, RegistryValueKind.String);
-        key?.SetValue("IsInstalled", wizard.Installed ? 1 : 0, RegistryValueKind.DWord);
+        key?.SetValue("IsInstalled", 1, RegistryValueKind.DWord);
     }
 
     private static void DeleteUser(ActiveSetupRow row)
