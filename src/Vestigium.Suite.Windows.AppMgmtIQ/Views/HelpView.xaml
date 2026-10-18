@@ -44,8 +44,8 @@
           </DataTemplate>
         </ItemsControl.ItemTemplate>
       </ItemsControl>
-      <Border Margin="16,0,8,0"
-              Padding="8,4,28,8"
+      <Border Margin="16,0,4,0"
+              Padding="4,4,0,4"
               CornerRadius="8"
               Background="{DynamicResource Vestigium.Brushes.Surface.Card}"
               BorderBrush="{DynamicResource Vestigium.Brushes.Border.Subtle}"
