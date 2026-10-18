@@ -14,6 +14,7 @@ public static class AppMgmtCatalog
     public const int FeaturesLoaded = 17020;
     public const int ExportWritten = 17025;
     public const int BloatwareLoaded = 17030;
+    public const int ActiveSetupLoaded = 17040;
     public const int NoRemoveCleared = 17035;
     public const int UninstallStarted = 17040;
     public const int FeatureApplyRequested = 17045;
