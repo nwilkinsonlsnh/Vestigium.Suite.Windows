@@ -127,21 +127,31 @@ public partial class ActiveSetupView : UserControl
         File.WriteAllText(jobPath, System.Text.Json.JsonSerializer.Serialize(job));
         HostLog.Information(AppMgmtCatalog.ActiveSetupRequested, "ActiveSetup", $"{action} requested. {component}", correlationId);
         var exe = Path.Combine(AppContext.BaseDirectory, "AppMgmtIQ.ActiveSetup.exe");
+        if (!File.Exists(exe))
+        {
+            MessageBox.Show("AppMgmtIQ.ActiveSetup.exe was not found next to the application. Rebuild the worker and try again.", "Active Setup");
+            HostLog.Information(AppMgmtCatalog.ActiveSetupCancelled, "ActiveSetup", $"{action} worker missing.", correlationId);
+            return;
+        }
         try
         {
             Process.Start(new ProcessStartInfo(exe, "\"" + jobPath + "\"") { UseShellExecute = true, Verb = "runas" });
         }
         catch (System.ComponentModel.Win32Exception)
         {
+            MessageBox.Show("The change was not elevated.", "Active Setup");
             HostLog.Information(AppMgmtCatalog.ActiveSetupCancelled, "ActiveSetup", $"{action} was not elevated.", correlationId);
             return;
         }
         var result = await WaitForResultAsync(resultPath);
         if (result is null || result.Cancelled)
         {
+            MessageBox.Show(result is null ? "The worker did not report back." : "The change was cancelled.", "Active Setup");
             HostLog.Information(AppMgmtCatalog.ActiveSetupCancelled, "ActiveSetup", $"{action} cancelled.", correlationId);
             return;
         }
+        if (!result.Ok)
+            MessageBox.Show(string.IsNullOrWhiteSpace(result.Error) ? "The change failed." : result.Error, "Active Setup");
         HostLog.Information(result.Ok ? AppMgmtCatalog.ActiveSetupChanged : AppMgmtCatalog.ActiveSetupCompleted, "ActiveSetup", result.Ok ? $"{action} applied. {result.KeyPath}" : result.Error, correlationId);
         host.RefreshCommand.Execute(null);
     }
