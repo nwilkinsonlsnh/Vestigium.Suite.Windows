@@ -29,6 +29,7 @@
     <PackageReference Include="Vestigium.Helpers.ClosedXml" Version="$(VestigiumClosedXmlVersion)" />
     <PackageReference Include="Vestigium.Helpers.Kql" Version="$(VestigiumKqlVersion)" />
     <PackageReference Include="Vestigium.Helpers.Kql.AppMgmt" Version="$(VestigiumKqlAppMgmtVersion)" />
+    <PackageReference Include="Vestigium.Helpers.Kql.ActiveSetup" Version="$(VestigiumKqlActiveSetupVersion)" />
     <PackageReference Include="Vestigium.Helpers.WinReg" Version="$(VestigiumWinRegVersion)" />
   </ItemGroup>
 
