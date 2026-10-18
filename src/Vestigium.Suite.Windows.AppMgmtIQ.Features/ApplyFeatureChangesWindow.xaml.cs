@@ -41,7 +41,7 @@ public partial class ApplyFeatureChangesWindow : Window
     private async void Confirm_Click(object sender, RoutedEventArgs e)
     {
         ConfirmButton.IsEnabled = false;
-        CancelButton.Visibility = Visibility.Collapsed;
+        ButtonBar.Visibility = Visibility.Collapsed;
         PlanPage.Visibility = Visibility.Collapsed;
         ProgressPage.Visibility = Visibility.Visible;
         Progress.Maximum = Math.Max(1, _job.Enable.Count + _job.Disable.Count);
@@ -52,14 +52,14 @@ public partial class ApplyFeatureChangesWindow : Window
         {
             ProgressText.Text = $"Enabling {item.Caption} ({++done} of {total})";
             Progress.Value = done;
-            var run = await RunDism($"/Online /Enable-Feature /FeatureName:{item.Name} /NoRestart");
+            var run = await RunPowerShell($"Enable-WindowsOptionalFeature -Online -FeatureName '{item.Name}' -NoRestart -ErrorAction Stop");
             Record(result, item, run, enabled: true);
         }
         foreach (var item in _job.Disable)
         {
             ProgressText.Text = $"Disabling {item.Caption} ({++done} of {total})";
             Progress.Value = done;
-            var run = await RunDism($"/Online /Disable-Feature /FeatureName:{item.Name} /NoRestart");
+            var run = await RunPowerShell($"Disable-WindowsOptionalFeature -Online -FeatureName '{item.Name}' -NoRestart -ErrorAction Stop");
             Record(result, item, run, enabled: false);
         }
         Result = result;
@@ -78,6 +78,7 @@ public partial class ApplyFeatureChangesWindow : Window
         ResultList.ItemsSource = _outcomes.ToList();
         ProgressPage.Visibility = Visibility.Collapsed;
         ResultPage.Visibility = Visibility.Visible;
+        ButtonBar.Visibility = Visibility.Visible;
         CancelButton.Visibility = Visibility.Collapsed;
         ConfirmButton.Content = "Close";
         ConfirmButton.IsEnabled = true;
@@ -103,12 +104,11 @@ public partial class ApplyFeatureChangesWindow : Window
         FeatureLog.Information(FeatureLog.Changed, $"Failed {item.Name}. exit={run.Code}. {detail}", result.CorrelationId);
     }
 
-    private static Task<DismRun> RunDism(string arguments)
+    private static Task<DismRun> RunPowerShell(string command)
     {
         return Task.Run(() =>
         {
-            var dism = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "dism.exe");
-            var start = new ProcessStartInfo(dism, arguments)
+            var start = new ProcessStartInfo("powershell.exe", "-NoProfile -NonInteractive -Command \"" + command + "\"")
             {
                 CreateNoWindow = true,
                 UseShellExecute = false,
@@ -117,11 +117,12 @@ public partial class ApplyFeatureChangesWindow : Window
             };
             using var process = Process.Start(start);
             if (process is null)
-                return new DismRun(-1, "DISM did not start.");
+                return new DismRun(-1, "PowerShell did not start.");
             var output = process.StandardOutput.ReadToEnd();
             var error = process.StandardError.ReadToEnd();
             process.WaitForExit();
-            return new DismRun(process.ExitCode, Detail(process.ExitCode, output, error));
+            var detail = string.IsNullOrWhiteSpace(error) ? output.Trim() : error.Trim();
+            return new DismRun(process.ExitCode, detail);
         });
     }
 
