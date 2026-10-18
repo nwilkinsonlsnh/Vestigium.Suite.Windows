@@ -28,6 +28,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Vestigium.Suite.Windows.AppMgmtIQ.Features\Vestigium.Suite.Windows.AppMgmtIQ.Features.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\Vestigium.Suite.Windows.AppMgmtIQ.Features\Vestigium.Suite.Windows.AppMgmtIQ.Features.csproj" />
   </ItemGroup>
 </Project>
