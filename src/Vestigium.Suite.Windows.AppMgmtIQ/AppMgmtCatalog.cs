@@ -21,13 +21,17 @@ public static class AppMgmtCatalog
     public const int FeatureApplyCompleted = 17050;
     public const int FeatureApplyCancelled = 17055;
     public const int FeatureChanged = 17060;
+    public const int ActiveSetupRequested = 17065;
+    public const int ActiveSetupCompleted = 17070;
+    public const int ActiveSetupCancelled = 17075;
+    public const int ActiveSetupChanged = 17080;
 
     public static void Register(VestigiumLoggerOptions cfg)
     {
         ArgumentNullException.ThrowIfNull(cfg);
         var taxonomy = new VestigiumTaxonomy();
         taxonomy.Register(Category, HostIds.AppMgmtIQ);
-        taxonomy.Register(Category, "Lifecycle", "Inventory", "Settings", "Features", "Export", "Bloatware", "Uninstall");
+        taxonomy.Register(Category, "Lifecycle", "Inventory", "Settings", "Features", "Export", "Bloatware", "Uninstall", "ActiveSetup");
         cfg.RegisterTaxonomy(taxonomy);
         cfg.RegisterEvent("AppStarted", "Vestigium.Suite.Windows.AppMgmtIQ.Events.AppStarted", Category, Subcategory, AppStarted, "Information", "host started");
         cfg.RegisterEvent("InventoryLoaded", "Vestigium.Suite.Windows.AppMgmtIQ.Events.InventoryLoaded", Category, Subcategory, InventoryLoaded, "Information", "inventory loaded");
@@ -42,5 +46,10 @@ public static class AppMgmtCatalog
         cfg.RegisterEvent("FeatureApplyCompleted", "Vestigium.Suite.Windows.AppMgmtIQ.Events.FeatureApplyCompleted", Category, "Features", FeatureApplyCompleted, "Information", "feature apply completed");
         cfg.RegisterEvent("FeatureApplyCancelled", "Vestigium.Suite.Windows.AppMgmtIQ.Events.FeatureApplyCancelled", Category, "Features", FeatureApplyCancelled, "Information", "feature apply cancelled");
         cfg.RegisterEvent("FeatureChanged", "Vestigium.Suite.Windows.AppMgmtIQ.Events.FeatureChanged", Category, "Features", FeatureChanged, "Information", "feature enabled or disabled");
+        cfg.RegisterEvent("ActiveSetupLoaded", "Vestigium.Suite.Windows.AppMgmtIQ.Events.ActiveSetupLoaded", Category, "ActiveSetup", ActiveSetupLoaded, "Information", "active setup loaded");
+        cfg.RegisterEvent("ActiveSetupRequested", "Vestigium.Suite.Windows.AppMgmtIQ.Events.ActiveSetupRequested", Category, "ActiveSetup", ActiveSetupRequested, "Information", "active setup change requested");
+        cfg.RegisterEvent("ActiveSetupCompleted", "Vestigium.Suite.Windows.AppMgmtIQ.Events.ActiveSetupCompleted", Category, "ActiveSetup", ActiveSetupCompleted, "Information", "active setup change completed");
+        cfg.RegisterEvent("ActiveSetupCancelled", "Vestigium.Suite.Windows.AppMgmtIQ.Events.ActiveSetupCancelled", Category, "ActiveSetup", ActiveSetupCancelled, "Information", "active setup change cancelled");
+        cfg.RegisterEvent("ActiveSetupChanged", "Vestigium.Suite.Windows.AppMgmtIQ.Events.ActiveSetupChanged", Category, "ActiveSetup", ActiveSetupChanged, "Information", "active setup key changed");
     }
 }
