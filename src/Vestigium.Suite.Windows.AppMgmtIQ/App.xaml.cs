@@ -1,7 +1,9 @@
 using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using Vestigium.Controls.DependencyInjection;
+using System.ComponentModel;
 using Vestigium.Controls.Shell;
+using Vestigium.Controls.StatusBar;
 using Vestigium.Converters.DependencyInjection;
 using Vestigium.Suite.Windows.AppMgmtIQ.ViewModels;
 using Vestigium.Suite.Windows.AppMgmtIQ.Views;
@@ -37,8 +39,44 @@ public partial class App : Application
         await Task.WhenAll(inventory.LoadAsync(), features.LoadAsync(), bloatware.LoadAsync());
         chrome.Status.Message = inventory.Status;
         dashboard.Bind(inventory, features);
+        WireStatus(chrome, inventory, features, bloatware);
 
         base.OnStartup(e);
+    }
+
+    private static void WireStatus(
+        VestigiumDefaultWindowViewModel chrome,
+        MainViewModel inventory,
+        FeaturesViewModel features,
+        BloatwareViewModel bloatware)
+    {
+        chrome.Status.Engine.Columns.Add(new StatusBarColumn
+        {
+            Key = "summary",
+            Kind = StatusBarColumnKind.Text,
+            Slot = StatusBarSlot.Center
+        });
+
+        void Update()
+        {
+            var title = Shell?.SelectedItem?.Title;
+            var text = title switch
+            {
+                "AppMgmtIQ" => inventory.Status,
+                "Windows Features" => features.Status,
+                "Bloatware" => bloatware.Status,
+                _ => ""
+            };
+            chrome.Status.Engine.PostImmediate("summary", new StatusBarUpdate { Text = text });
+        }
+
+        inventory.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(MainViewModel.Status)) Update(); };
+        features.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(FeaturesViewModel.Status)) Update(); };
+        bloatware.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(BloatwareViewModel.Status)) Update(); };
+        if (Shell is not null)
+            DependencyPropertyDescriptor.FromProperty(VestigiumShell.SelectedItemProperty, typeof(VestigiumShell))
+                .AddValueChanged(Shell, (_, _) => Update());
+        Update();
     }
 
     private static Window CreateMainWindow(
