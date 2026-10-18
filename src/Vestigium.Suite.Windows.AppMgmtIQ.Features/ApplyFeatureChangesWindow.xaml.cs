@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Windows;
-using System.Windows.Controls;
 
 namespace Vestigium.Suite.Windows.AppMgmtIQ.Features;
 
@@ -40,57 +39,80 @@ public partial class ApplyFeatureChangesWindow : Window
         ConfirmButton.IsEnabled = false;
         var result = new FeatureResult { CorrelationId = _job.CorrelationId };
         var done = 0;
-        var total = Math.Max(1, _job.Enable.Count + _job.Disable.Count);
+        var total = _job.Enable.Count + _job.Disable.Count;
         foreach (var item in _job.Enable)
         {
             Summary.Text = $"Enabling {item.Caption} ({++done} of {total})";
-            var code = await RunAsync($"Enable-WindowsOptionalFeature -Online -FeatureName '{item.Name}' -NoRestart");
-            Record(result, item, code, enabled: true);
+            var run = await RunDism($"/Online /Enable-Feature /FeatureName:{item.Name} /NoRestart /Quiet");
+            Record(result, item, run, enabled: true);
         }
         foreach (var item in _job.Disable)
         {
             Summary.Text = $"Disabling {item.Caption} ({++done} of {total})";
-            var code = await RunAsync($"Disable-WindowsOptionalFeature -Online -FeatureName '{item.Name}' -NoRestart");
-            Record(result, item, code, enabled: false);
+            var run = await RunDism($"/Online /Disable-Feature /FeatureName:{item.Name} /NoRestart /Quiet");
+            Record(result, item, run, enabled: false);
         }
         Result = result;
         FeatureLog.Information(
             FeatureLog.Completed,
             $"Feature apply completed. enabled={result.Enabled.Count} disabled={result.Disabled.Count} restart={result.Restart.Count} failed={result.Failed.Count}",
             _job.CorrelationId);
-        Summary.Text = $"Enabled {result.Enabled.Count}. Disabled {result.Disabled.Count}. Restart required {result.Restart.Count}. Failed {result.Failed.Count}.";
+        Summary.Text = result.Failed.Count == 0
+            ? $"Enabled {result.Enabled.Count}. Disabled {result.Disabled.Count}. Restart required {result.Restart.Count}."
+            : $"Enabled {result.Enabled.Count}. Disabled {result.Disabled.Count}. Failed {result.Failed.Count}: {string.Join("; ", result.Failed)}";
         ConfirmButton.Content = "Close";
         ConfirmButton.IsEnabled = true;
         ConfirmButton.Click -= Confirm_Click;
         ConfirmButton.Click += (_, _) => Close();
     }
 
-    private static void Record(FeatureResult result, FeatureJobItem item, int code, bool enabled)
+    private static void Record(FeatureResult result, FeatureJobItem item, DismRun run, bool enabled)
     {
-        if (code is 0 or 3010)
+        if (run.Code is 0 or 3010)
         {
             (enabled ? result.Enabled : result.Disabled).Add(item.Caption);
-            FeatureLog.Information(FeatureLog.Changed, $"{(enabled ? "Enabled" : "Disabled")} {item.Name}. exit={code}", result.CorrelationId);
-            if (code == 3010)
+            FeatureLog.Information(FeatureLog.Changed, $"{(enabled ? "Enabled" : "Disabled")} {item.Name}. exit={run.Code}", result.CorrelationId);
+            if (run.Code == 3010)
                 result.Restart.Add(item.Caption);
             return;
         }
-        result.Failed.Add($"{item.Caption} ({code})");
-        FeatureLog.Information(FeatureLog.Changed, $"Failed {item.Name}. exit={code}", result.CorrelationId);
+        var reason = string.IsNullOrWhiteSpace(run.Detail) ? $"exit {run.Code}" : run.Detail;
+        result.Failed.Add($"{item.Caption}: {reason}");
+        FeatureLog.Information(FeatureLog.Changed, $"Failed {item.Name}. exit={run.Code}. {reason}", result.CorrelationId);
     }
 
-    private static Task<int> RunAsync(string command)
+    private static Task<DismRun> RunDism(string arguments)
     {
         return Task.Run(() =>
         {
-            var start = new ProcessStartInfo("powershell.exe", $"-NoProfile -NonInteractive -Command \"{command}\"")
+            var start = new ProcessStartInfo("dism.exe", arguments)
             {
                 CreateNoWindow = true,
-                UseShellExecute = false
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
             };
             using var process = Process.Start(start);
-            process?.WaitForExit();
-            return process?.ExitCode ?? -1;
+            if (process is null)
+                return new DismRun(-1, "DISM did not start.");
+            var output = process.StandardOutput.ReadToEnd();
+            var error = process.StandardError.ReadToEnd();
+            process.WaitForExit();
+            var detail = FirstLine(string.IsNullOrWhiteSpace(error) ? output : error);
+            return new DismRun(process.ExitCode, detail);
         });
     }
+
+    private static string FirstLine(string text)
+    {
+        foreach (var line in text.Split('\n'))
+        {
+            var trimmed = line.Trim();
+            if (trimmed.Length > 0 && !trimmed.StartsWith("Deployment Image", StringComparison.OrdinalIgnoreCase))
+                return trimmed;
+        }
+        return "";
+    }
+
+    private sealed record DismRun(int Code, string Detail);
 }
