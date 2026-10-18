@@ -58,6 +58,9 @@ public partial class FeaturesView : UserControl
 
     private void Menu_Opened(object sender, RoutedEventArgs e)
     {
+        foreach (var item in new[] { EnabledItem, DisabledItem, AbsentItem })
+            PaintCheck(item);
+
         var container = ContainerFor(FeatureTree.SelectedItem);
         var expandable = container is { HasItems: true };
         var inside = ParentContainer(container) is { HasItems: true };
@@ -134,5 +137,18 @@ public partial class FeaturesView : UserControl
             current = VisualTreeHelper.GetParent(current);
         }
         return null;
+    }
+
+    private void FilterCheck_Changed(object sender, RoutedEventArgs e) => PaintCheck(sender as MenuItem);
+
+    private static void PaintCheck(MenuItem? item)
+    {
+        if (item?.Icon is not TextBlock block)
+            return;
+        var on = item.IsChecked == true;
+        block.Text = on ? "\uE73A" : "\uE739";
+        block.Foreground = on
+            ? new SolidColorBrush(Color.FromRgb(0x3D, 0xDC, 0x84))
+            : new SolidColorBrush(Color.FromRgb(0xF4, 0xF7, 0xFB));
     }
 }
