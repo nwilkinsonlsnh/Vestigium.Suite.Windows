@@ -71,6 +71,15 @@ public sealed record UninstallPlan(string FileName, string Arguments, string Dis
                 return (text[1..end], text[(end + 1)..].Trim());
         }
 
+        foreach (var extension in new[] { ".exe", ".bat", ".cmd", ".com", ".msi" })
+        {
+            var at = text.IndexOf(extension, StringComparison.OrdinalIgnoreCase);
+            if (at < 0)
+                continue;
+            var end = at + extension.Length;
+            return (text[..end], text[end..].Trim());
+        }
+
         var space = text.IndexOf(' ');
         return space < 0 ? (text, string.Empty) : (text[..space], text[(space + 1)..].Trim());
     }
