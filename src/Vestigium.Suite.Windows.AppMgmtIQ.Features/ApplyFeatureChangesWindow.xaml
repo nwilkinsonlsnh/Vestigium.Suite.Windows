@@ -13,6 +13,7 @@
       <Button x:Name="ConfirmButton" Content="Confirm" Style="{StaticResource Button.Primary}" Padding="16,4" IsDefault="True" Click="Confirm_Click" />
     </StackPanel>
 
+    <Grid>
     <Grid x:Name="PlanPage">
       <Grid.RowDefinitions>
         <RowDefinition Height="Auto" />
@@ -60,6 +61,7 @@
           </DataTemplate>
         </ListBox.ItemTemplate>
       </ListBox>
+    </Grid>
     </Grid>
   </DockPanel>
 </Window>
