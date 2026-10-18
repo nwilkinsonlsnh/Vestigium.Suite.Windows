@@ -21,7 +21,7 @@ internal static class KqlHost
         if (!compiled.Ok)
         {
             status = compiled.Error?.Message ?? "query failed";
-            return previous;
+            return null;
         }
 
         status = string.Empty;
