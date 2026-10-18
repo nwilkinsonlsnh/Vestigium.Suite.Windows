@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using Microsoft.Win32;
+using Vestigium.Controls.QueryBar;
 using Vestigium.Suite.Windows.AppMgmtIQ.ViewModels;
 using Worker = Vestigium.Suite.Windows.AppMgmtIQ.ActiveSetup;
 
@@ -21,6 +22,12 @@ public partial class ActiveSetupView : UserControl
     {
         if (DataContext is ActiveSetupViewModel host)
             host.ApplyQuery();
+    }
+
+    private void OnPin(object sender, VestigiumQueryRowEventArgs e)
+    {
+        if (DataContext is ActiveSetupViewModel host)
+            host.Pin(e.Row);
     }
 
     private async void Add_Click(object sender, RoutedEventArgs e)
