@@ -144,6 +144,7 @@ public partial class App : Application
         bloatware = new BloatwareViewModel { IsLoading = true };
         var store = new AppMgmtSettingsStore(AppMgmtSettingsStore.DefaultRoot);
         var settings = new SettingsViewModel(Themes, inventory, store);
+        settings.Attach(featuresVm);
         settings.Load();
 
         var page = new AppMgmtIqView { DataContext = inventory };
