@@ -2,11 +2,25 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Apply Feature Changes"
-        Height="640" Width="760"
-        MinHeight="420" MinWidth="560"
+        Height="640" Width="860"
+        MinHeight="420" MinWidth="640"
         WindowStartupLocation="Manual"
         Background="{DynamicResource Vestigium.Brushes.Surface.Window}"
         Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}">
+  <Window.Resources>
+    <DataTemplate x:Key="OutcomeRow">
+      <Grid Margin="2,4">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="180" />
+          <ColumnDefinition Width="70" />
+        </Grid.ColumnDefinitions>
+        <TextBlock Text="{Binding Caption}" />
+        <TextBlock Grid.Column="1" Text="{Binding Name}" Foreground="{DynamicResource Vestigium.Brushes.Text.Secondary}" />
+        <TextBlock Grid.Column="2" Text="{Binding RestartText}" />
+      </Grid>
+    </DataTemplate>
+  </Window.Resources>
   <DockPanel Margin="16">
     <StackPanel x:Name="ButtonBar" DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
       <Button x:Name="CancelButton" Content="Cancel" Style="{StaticResource Button.Secondary}" Padding="16,4" Margin="0,0,8,0" IsCancel="True" Click="Cancel_Click" />
@@ -49,19 +63,37 @@
       <Grid.RowDefinitions>
         <RowDefinition Height="Auto" />
         <RowDefinition Height="*" />
+        <RowDefinition Height="Auto" />
       </Grid.RowDefinitions>
       <TextBlock x:Name="ResultSummary" Style="{StaticResource TextBlock.Caption}" Margin="0,0,0,12" TextWrapping="Wrap" />
-      <ListBox x:Name="ResultList" Grid.Row="1" Style="{StaticResource ListBox.Standard}">
-        <ListBox.ItemTemplate>
-          <DataTemplate>
-            <StackPanel Margin="4,6">
-              <TextBlock Text="{Binding Caption}" FontWeight="SemiBold" />
-              <TextBlock Text="{Binding Outcome}" Margin="0,2,0,0" Foreground="{DynamicResource Vestigium.Brushes.Text.Secondary}" />
-              <TextBlock Text="{Binding Detail}" Margin="0,2,0,0" TextWrapping="Wrap" />
-            </StackPanel>
-          </DataTemplate>
-        </ListBox.ItemTemplate>
-      </ListBox>
+      <Grid Grid.Row="1">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="12" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <DockPanel Grid.Column="0">
+          <TextBlock DockPanel.Dock="Top" Style="{StaticResource TextBlock.Caption}" Text="Enabled" Margin="0,0,0,6" />
+          <ListBox x:Name="EnabledGrid" Style="{StaticResource ListBox.Standard}" ItemTemplate="{StaticResource OutcomeRow}" />
+        </DockPanel>
+        <DockPanel Grid.Column="2">
+          <TextBlock DockPanel.Dock="Top" Style="{StaticResource TextBlock.Caption}" Text="Disabled" Margin="0,0,0,6" />
+          <ListBox x:Name="DisabledGrid" Style="{StaticResource ListBox.Standard}" ItemTemplate="{StaticResource OutcomeRow}" />
+        </DockPanel>
+      </Grid>
+      <DockPanel x:Name="FailedPanel" Grid.Row="2" Margin="0,12,0,0" Visibility="Collapsed">
+        <TextBlock DockPanel.Dock="Top" Style="{StaticResource TextBlock.Caption}" Text="Failed" Margin="0,0,0,6" />
+        <ListBox x:Name="FailedGrid" Style="{StaticResource ListBox.Standard}" MaxHeight="140">
+          <ListBox.ItemTemplate>
+            <DataTemplate>
+              <StackPanel Margin="2,4">
+                <TextBlock Text="{Binding Caption}" FontWeight="SemiBold" />
+                <TextBlock Text="{Binding Error}" TextWrapping="Wrap" />
+              </StackPanel>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </DockPanel>
     </Grid>
     </Grid>
   </DockPanel>
