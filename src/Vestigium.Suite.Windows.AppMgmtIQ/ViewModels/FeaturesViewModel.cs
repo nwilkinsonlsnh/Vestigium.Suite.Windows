@@ -187,7 +187,7 @@ public sealed partial class FeaturesViewModel : ObservableObject
         foreach (var child in kids)
             kept.AddRange(TakeVisible(child));
         var parent = _parents.TryGetValue(node.Name, out var name) ? name : "";
-        if (!Matches(node.Feature ?? new FeatureRow { Name = node.Name, Caption = node.Caption, State = node.State, IsEnabled = node.IsEnabled }, parent))
+        if (node.Feature is null || !Matches(node.Feature, parent))
             return kept;
         foreach (var child in kept)
             node.Children.Add(child);
