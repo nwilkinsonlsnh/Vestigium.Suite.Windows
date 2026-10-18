@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -34,6 +35,8 @@ public sealed partial class ExportViewModel : ObservableObject
         CurrentView = data.ExportCurrentView;
         Everything = !data.ExportCurrentView;
         IncludeDetails = data.ExportDetails;
+        OpenFileAfterExport = data.ExportOpenFile;
+        OpenFolderAfterExport = data.ExportOpenFolder;
         _loading = false;
     }
 
@@ -59,6 +62,12 @@ public sealed partial class ExportViewModel : ObservableObject
     private bool _includeDetails;
 
     [ObservableProperty]
+    private bool _openFileAfterExport;
+
+    [ObservableProperty]
+    private bool _openFolderAfterExport;
+
+    [ObservableProperty]
     private string _status = "Writes to Desktop\\Vestigium\\Exports\\AppMgmtIQ.";
 
     [ObservableProperty]
@@ -70,6 +79,8 @@ public sealed partial class ExportViewModel : ObservableObject
     partial void OnIncludeActiveSetupChanged(bool value) => Persist();
     partial void OnCurrentViewChanged(bool value) => Persist();
     partial void OnIncludeDetailsChanged(bool value) => Persist();
+    partial void OnOpenFileAfterExportChanged(bool value) => Persist();
+    partial void OnOpenFolderAfterExportChanged(bool value) => Persist();
 
     private void Persist()
     {
@@ -82,6 +93,8 @@ public sealed partial class ExportViewModel : ObservableObject
         saved.ExportActiveSetup = IncludeActiveSetup;
         saved.ExportCurrentView = CurrentView;
         saved.ExportDetails = IncludeDetails;
+        saved.ExportOpenFile = OpenFileAfterExport;
+        saved.ExportOpenFolder = OpenFolderAfterExport;
         _store.Save(saved);
     }
 
@@ -99,10 +112,20 @@ public sealed partial class ExportViewModel : ObservableObject
             var rows = Everything ? ExportRows.All : ExportRows.Current;
             LastPath = InventoryExport.Write(new ExportRequest(_packages, _features, _bloatware, _setup, IncludePackages, IncludeFeatures, IncludeBloatware, IncludeActiveSetup, rows, IncludeDetails));
             Status = "Wrote " + LastPath;
+            OpenAfterExport(LastPath);
         }
         catch (Exception ex)
         {
             Status = ex.Message;
         }
+    }
+
+    private void OpenAfterExport(string path)
+    {
+        if (OpenFolderAfterExport)
+            Process.Start("explorer.exe", $"/select,\"{path}\"");
+
+        if (OpenFileAfterExport)
+            Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
     }
 }

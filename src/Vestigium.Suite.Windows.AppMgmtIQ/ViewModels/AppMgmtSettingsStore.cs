@@ -22,6 +22,8 @@ public sealed class AppMgmtSettings
     public bool ExportActiveSetup { get; set; } = true;
     public bool ExportCurrentView { get; set; } = true;
     public bool ExportDetails { get; set; }
+    public bool ExportOpenFile { get; set; }
+    public bool ExportOpenFolder { get; set; }
 }
 
 public sealed class AppMgmtSettingsStore

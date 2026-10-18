@@ -21,7 +21,13 @@
       <RadioButton Style="{StaticResource RadioButton.UnderlineTab}" Content="Everything loaded" IsChecked="{Binding Everything}" GroupName="ExportRows" Margin="0,0,0,18" />
 
       <CheckBox Style="{StaticResource CheckBox.Standard}" Content="Include package registry values"
-                IsChecked="{Binding IncludeDetails}" IsEnabled="{Binding IncludePackages}" Margin="0,0,0,20" />
+                IsChecked="{Binding IncludeDetails}" IsEnabled="{Binding IncludePackages}" Margin="0,0,0,18" />
+
+      <TextBlock Style="{StaticResource TextBlock.Caption}" Text="After export" Margin="0,0,0,8" />
+      <CheckBox Style="{StaticResource CheckBox.Standard}" Content="Open file after export"
+                IsChecked="{Binding OpenFileAfterExport}" Margin="0,0,0,6" />
+      <CheckBox Style="{StaticResource CheckBox.Standard}" Content="Open folder after export"
+                IsChecked="{Binding OpenFolderAfterExport}" Margin="0,0,0,20" />
 
       <Button Style="{StaticResource Button.Primary}" Content="Write workbook" Command="{Binding ExportCommand}" Padding="16,6" HorizontalAlignment="Left" />
       <TextBlock Style="{StaticResource TextBlock.Caption}" Text="{Binding Status}" TextWrapping="Wrap" Margin="0,16,0,4" />
