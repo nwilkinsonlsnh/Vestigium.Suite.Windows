@@ -9,6 +9,8 @@ internal static class DismParents
 {
     private const string Online = "DISM_{53BFAE52-B167-4E2F-A258-0A37B57FF845}";
 
+    public static Dictionary<string, string> Descriptions { get; } = new(StringComparer.OrdinalIgnoreCase);
+
     public static Dictionary<string, string>? Read()
     {
         if (DismInitialize(2, null, null) != 0)
@@ -34,8 +36,17 @@ internal static class DismParents
             DismDelete(features);
 
             var parents = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            Descriptions.Clear();
             foreach (var name in names)
             {
+                if (DismGetFeatureInfo(session, name, null, 2, out var infoPtr) == 0 && infoPtr != IntPtr.Zero)
+                {
+                    var info = Marshal.PtrToStructure<DismFeatureInfo>(infoPtr);
+                    if (!string.IsNullOrWhiteSpace(info.Description))
+                        Descriptions[name] = info.Description;
+                    DismDelete(infoPtr);
+                }
+
                 if (DismGetFeatureParent(session, name, null, 2, out var parentPtr, out var parentCount) != 0 || parentPtr == IntPtr.Zero || parentCount == 0)
                     continue;
                 var parent = Marshal.PtrToStructure<DismFeature>(parentPtr);
@@ -69,6 +80,9 @@ internal static class DismParents
     private static extern int DismGetFeatures(uint session, string? identifier, int packageIdentifier, out IntPtr features, out uint count);
 
     [DllImport("dismapi.dll", CharSet = CharSet.Unicode)]
+    private static extern int DismGetFeatureInfo(uint session, string featureName, string? identifier, int packageIdentifier, out IntPtr featureInfo);
+
+    [DllImport("dismapi.dll", CharSet = CharSet.Unicode)]
     private static extern int DismGetFeatureParent(uint session, string featureName, string? identifier, int packageIdentifier, out IntPtr features, out uint count);
 
     [DllImport("dismapi.dll")]
@@ -79,5 +93,17 @@ internal static class DismParents
     {
         public string FeatureName;
         public int State;
+    }
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    private struct DismFeatureInfo
+    {
+        public string FeatureName;
+        public int FeatureState;
+        public string DisplayName;
+        public string Description;
+        public int RestartRequired;
+        public IntPtr CustomProperty;
+        public uint CustomPropertyCount;
     }
 }
