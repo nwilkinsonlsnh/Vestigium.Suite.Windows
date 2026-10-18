@@ -1,0 +1,98 @@
+<UserControl x:Class="Vestigium.Suite.Windows.AppMgmtIQ.Views.ActiveSetupView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:query="clr-namespace:Vestigium.Controls.QueryBar;assembly=Vestigium.Controls.QueryBar"
+             Background="{DynamicResource Vestigium.Brushes.Surface.Window}">
+  <UserControl.Resources>
+    <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    <Style x:Key="LeftCell" TargetType="TextBlock">
+      <Setter Property="HorizontalAlignment" Value="Left" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+      <Setter Property="Margin" Value="4,0,4,0" />
+      <Setter Property="Foreground" Value="{DynamicResource Vestigium.Brushes.Text.Primary}" />
+    </Style>
+    <Style x:Key="SetupRow" TargetType="DataGridRow" BasedOn="{StaticResource DataGridRow.Standard}">
+      <Style.Triggers>
+        <Trigger Property="IsSelected" Value="True">
+          <Setter Property="Background" Value="{DynamicResource Vestigium.Brushes.Accent.Softer}" />
+          <Setter Property="Foreground" Value="{DynamicResource Vestigium.Brushes.Text.Primary}" />
+        </Trigger>
+      </Style.Triggers>
+    </Style>
+    <Style x:Key="SetupCell" TargetType="DataGridCell" BasedOn="{StaticResource DataGridCell.Standard}">
+      <Setter Property="Foreground" Value="{DynamicResource Vestigium.Brushes.Text.Primary}" />
+      <Style.Triggers>
+        <Trigger Property="IsSelected" Value="True">
+          <Setter Property="Background" Value="Transparent" />
+          <Setter Property="Foreground" Value="{DynamicResource Vestigium.Brushes.Text.Primary}" />
+          <Setter Property="BorderBrush" Value="Transparent" />
+        </Trigger>
+      </Style.Triggers>
+    </Style>
+  </UserControl.Resources>
+  <Grid Margin="12">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+    <Grid Margin="0,0,0,8">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" MinWidth="0" />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+      <query:VestigiumQueryBar Grid.Column="0" MinWidth="0"
+                               Text="{Binding Query, UpdateSourceTrigger=PropertyChanged}"
+                               Session="{Binding Session}"
+                               Queries="{Binding Queries}"
+                               FilterRequested="OnFilter" />
+      <Button Grid.Column="1" Margin="8,0,0,0" Width="36" Height="36" Padding="0"
+              VerticalAlignment="Center" HorizontalAlignment="Center"
+              Style="{StaticResource Button.Utility}"
+              Command="{Binding RefreshCommand}" ToolTip="Refresh">
+        <TextBlock FontFamily="Segoe UI Symbol" FontSize="18" Text="&#x267B;"
+                   Foreground="#3DDC84"
+                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+      </Button>
+    </Grid>
+    <DataGrid Grid.Row="1"
+              Style="{StaticResource DataGrid.Standard}"
+              ItemsSource="{Binding Rows}"
+              AutoGenerateColumns="False"
+              IsReadOnly="True"
+              SelectionMode="Single"
+              HeadersVisibility="Column"
+              GridLinesVisibility="Horizontal"
+              RowStyle="{StaticResource SetupRow}"
+              CellStyle="{StaticResource SetupCell}"
+              Background="{DynamicResource Vestigium.Brushes.Surface.Window}"
+              Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}"
+              BorderBrush="{DynamicResource Vestigium.Brushes.Border.Subtle}">
+      <DataGrid.ContextMenu>
+        <ContextMenu Style="{StaticResource ContextMenu.Standard}">
+          <MenuItem Header="Refresh" Style="{StaticResource MenuItem.Standard}" Command="{Binding RefreshCommand}">
+            <MenuItem.Icon><TextBlock FontFamily="Segoe UI Symbol" FontSize="14" Text="&#x267B;" Foreground="#3DDC84" /></MenuItem.Icon>
+          </MenuItem>
+        </ContextMenu>
+      </DataGrid.ContextMenu>
+      <DataGrid.Columns>
+        <DataGridTextColumn Header="Display Name" Binding="{Binding DisplayName}" Width="220" ElementStyle="{StaticResource LeftCell}" />
+        <DataGridTextColumn Header="Component" Binding="{Binding Component}" Width="280" ElementStyle="{StaticResource LeftCell}" />
+        <DataGridTextColumn Header="StubPath" Binding="{Binding StubPath}" Width="*" ElementStyle="{StaticResource LeftCell}" />
+        <DataGridTextColumn Header="Version" Binding="{Binding Version}" Width="110" ElementStyle="{StaticResource LeftCell}" />
+        <DataGridTextColumn Header="Scope" Binding="{Binding Scope}" Width="90" ElementStyle="{StaticResource LeftCell}" />
+        <DataGridTextColumn Header="Bit" Binding="{Binding Bit}" Width="60" ElementStyle="{StaticResource LeftCell}" />
+        <DataGridTextColumn Header="Installed" Binding="{Binding InstalledText}" Width="90" ElementStyle="{StaticResource LeftCell}" />
+        <DataGridTextColumn Header="Pending" Binding="{Binding PendingText}" Width="80" ElementStyle="{StaticResource LeftCell}" />
+      </DataGrid.Columns>
+    </DataGrid>
+    <Border Grid.RowSpan="2"
+            Background="{DynamicResource Vestigium.Brushes.Surface.Window}"
+            Opacity="0.92"
+            Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
+      <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+        <ProgressBar IsIndeterminate="True" Width="240" Height="6" Margin="0,0,0,12" />
+        <TextBlock Style="{StaticResource TextBlock.Caption}" HorizontalAlignment="Center" Text="{Binding LoadingMessage}" />
+      </StackPanel>
+    </Border>
+  </Grid>
+</UserControl>
