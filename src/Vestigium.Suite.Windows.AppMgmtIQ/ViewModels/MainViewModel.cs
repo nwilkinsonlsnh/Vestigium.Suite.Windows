@@ -8,6 +8,7 @@ using CommunityToolkit.Mvvm.Input;
 using Vestigium.Helpers.Kql;
 using Vestigium.Helpers.Kql.AppMgmt;
 using Vestigium.Helpers.WinReg;
+using Vestigium.Suite.Windows.AppMgmtIQ.Views;
 
 namespace Vestigium.Suite.Windows.AppMgmtIQ.ViewModels;
 
