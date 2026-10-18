@@ -15,6 +15,7 @@ public sealed partial class FeaturesViewModel : ObservableObject
     private Dictionary<string, string> _parents = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, bool> _intent = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, FeatureNode> _nodes = new(StringComparer.OrdinalIgnoreCase);
+    private bool _expandOnLoad;
     private string _source = "flat";
     private bool _showEnabled = true;
     private bool _showDisabled = true;
@@ -91,6 +92,7 @@ public sealed partial class FeaturesViewModel : ObservableObject
                 _source = "dialog map";
             }
             ApplyFilter();
+            SetExpanded(_expandOnLoad);
             HostLog.Information(AppMgmtCatalog.FeaturesLoaded, "Features", $"Windows features loaded. {_all.Count} features. Tree from {_source}.");
         }
         finally
@@ -303,6 +305,26 @@ public sealed partial class FeaturesViewModel : ObservableObject
         else
             _intent[node.Name] = desired;
         RebuildPlan();
+    }
+
+    public void SetExpanded(bool expanded)
+    {
+        _expandOnLoad = expanded;
+        foreach (var node in _nodes.Values)
+            node.IsExpanded = expanded && node.Children.Count > 0;
+    }
+
+    public bool? UniformExpansion
+    {
+        get
+        {
+            var branches = _nodes.Values.Where(node => node.Children.Count > 0).ToList();
+            if (branches.Count == 0)
+                return null;
+            if (branches.All(node => node.IsExpanded))
+                return true;
+            return branches.All(node => !node.IsExpanded) ? false : null;
+        }
     }
 
     public void SetBranch(FeatureNode node, bool desired)
