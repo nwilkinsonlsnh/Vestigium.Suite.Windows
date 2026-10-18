@@ -104,9 +104,9 @@ public sealed partial class BloatwareViewModel : ObservableObject
             Name = entry.Name,
             Family = entry.Family,
             Category = entry.Category,
-            Installed = installed.Contains(entry.Family),
-            Provisioned = provisioned.Contains(entry.Family),
-            Package = packages.TryGetValue(entry.Family, out var full) ? full : ""
+            Installed = installed.Any(entry.Matches),
+            Provisioned = provisioned.Any(entry.Matches),
+            Package = PackageFor(packages, entry)
         }).ToList();
     }
 
@@ -124,6 +124,16 @@ public sealed partial class BloatwareViewModel : ObservableObject
         foreach (var row in client.ListSubKeys(RegistryHiveKind.CurrentUser, UserPackages, RegistryViewKind.Default, RegistryDetailLevel.Identity))
             map.TryAdd(Family(row.Name), row.Name);
         return map;
+    }
+
+    private static string PackageFor(Dictionary<string, string> packages, BloatwareEntry entry)
+    {
+        if (packages.TryGetValue(entry.Family, out var full))
+            return full;
+        foreach (var alias in entry.Aliases)
+            if (packages.TryGetValue(alias, out full))
+                return full;
+        return "";
     }
 
     private static string Family(string fullName)
