@@ -21,7 +21,10 @@
         <TextBox x:Name="ComponentBox" />
       </DockPanel>
       <TextBlock Margin="0,12,0,4" Foreground="{DynamicResource Vestigium.Brushes.Text.Secondary}" Text="StubPath" />
-      <TextBox x:Name="StubBox" />
+      <DockPanel>
+        <Button DockPanel.Dock="Right" Margin="8,0,0,0" Content="Browse" Style="{StaticResource Button.Secondary}" Click="Browse_Click" />
+        <TextBox x:Name="StubBox" />
+      </DockPanel>
       <TextBlock Margin="0,12,0,4" Foreground="{DynamicResource Vestigium.Brushes.Text.Secondary}" Text="Version" />
       <TextBox x:Name="VersionBox" Text="1,0" />
       <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
@@ -32,7 +35,6 @@
         <RadioButton x:Name="X64Box" Content="x64" GroupName="View" IsChecked="True" Style="{StaticResource RadioButton.Standard}" />
         <RadioButton Content="x86" GroupName="View" Margin="16,0,0,0" Style="{StaticResource RadioButton.Standard}" />
       </StackPanel>
-      <CheckBox x:Name="InstalledBox" Margin="0,16,0,0" Content="Installed" IsChecked="True" Style="{StaticResource CheckBox.Standard}" />
       <TextBlock x:Name="ErrorText" Margin="0,12,0,0" Foreground="{DynamicResource Vestigium.Brushes.Accent.Primary}" TextWrapping="Wrap" />
     </StackPanel>
   </DockPanel>
