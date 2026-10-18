@@ -186,7 +186,7 @@ public partial class App : Application
 
         var export = window.HostShell["Export"];
         if (export is not null)
-            export.Content = new ExportView { DataContext = new ExportViewModel(inventory, featuresVm, bloatware, setup) };
+            export.Content = new ExportView { DataContext = new ExportViewModel(inventory, featuresVm, bloatware, setup, store) };
 
         dashboard = new DashboardView();
         var dashboardItem = window.HostShell["Dashboard"];
