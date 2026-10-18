@@ -3,23 +3,25 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Background="{DynamicResource Vestigium.Brushes.Surface.Window}">
   <ScrollViewer VerticalScrollBarVisibility="Auto">
-    <StackPanel Margin="24" MaxWidth="720" HorizontalAlignment="Left">
-      <TextBlock Style="{StaticResource TextBlock.Caption}" Text="Export" FontSize="18" Margin="0,0,0,6" />
-      <TextBlock Style="{StaticResource TextBlock.Caption}" TextWrapping="Wrap" Margin="0,0,0,20"
-                 Text="One workbook. Summary is the first sheet. Packages and Features are added only when you ask for them." />
+    <StackPanel Margin="24" MaxWidth="640" HorizontalAlignment="Left">
+      <TextBlock Style="{StaticResource TextBlock.Heading}" Text="Export" />
+      <TextBlock Style="{StaticResource TextBlock.Caption}" TextWrapping="Wrap" Margin="0,8,0,20"
+                 Text="One workbook. Summary is the first sheet. A sheet is added for each inventory you include." />
 
-      <TextBlock Style="{StaticResource TextBlock.Caption}" Text="What" Margin="0,0,0,8" />
-      <RadioButton Style="{StaticResource RadioButton.UnderlineTab}" Content="Packages" IsChecked="{Binding PackagesOnly}" GroupName="ExportScope" Margin="0,0,0,6" />
-      <RadioButton Style="{StaticResource RadioButton.UnderlineTab}" Content="Features" IsChecked="{Binding FeaturesOnly}" GroupName="ExportScope" Margin="0,0,0,6" />
-      <RadioButton Style="{StaticResource RadioButton.UnderlineTab}" Content="Packages and features" IsChecked="{Binding Both}" GroupName="ExportScope" Margin="0,0,0,18" />
+      <TextBlock Style="{StaticResource TextBlock.Caption}" Text="Inventories" Margin="0,0,0,8" />
+      <CheckBox Style="{StaticResource CheckBox.Standard}" Content="AppMgmtIQ" IsChecked="{Binding IncludePackages}" Margin="0,0,0,6" />
+      <CheckBox Style="{StaticResource CheckBox.Standard}" Content="Windows Features" IsChecked="{Binding IncludeFeatures}" Margin="0,0,0,6" />
+      <CheckBox Style="{StaticResource CheckBox.Standard}" Content="Bloatware" IsChecked="{Binding IncludeBloatware}" Margin="0,0,0,6" />
+      <CheckBox Style="{StaticResource CheckBox.Standard}" Content="Active Setup" IsChecked="{Binding IncludeActiveSetup}" Margin="0,0,0,18" />
 
-      <TextBlock Style="{StaticResource TextBlock.Caption}" Text="Which rows" Margin="0,0,0,8" />
-      <RadioButton Style="{StaticResource RadioButton.UnderlineTab}" Content="Current view" IsChecked="{Binding CurrentView}" GroupName="ExportRows" Margin="0,0,0,6" />
+      <TextBlock Style="{StaticResource TextBlock.Caption}" Text="Rows" Margin="0,0,0,8" />
+      <RadioButton Style="{StaticResource RadioButton.UnderlineTab}" Content="Current view" IsChecked="{Binding CurrentView}" GroupName="ExportRows" Margin="0,0,0,4" />
       <TextBlock Style="{StaticResource TextBlock.Caption}" Margin="24,0,0,8" TextWrapping="Wrap"
-                 Text="Respects the query bar and the filter menus on each page." />
+                 Text="Uses the query bar and the filter menus on each page." />
       <RadioButton Style="{StaticResource RadioButton.UnderlineTab}" Content="Everything loaded" IsChecked="{Binding Everything}" GroupName="ExportRows" Margin="0,0,0,18" />
 
-      <CheckBox Style="{StaticResource CheckBox.Standard}" Content="Include package registry values" IsChecked="{Binding IncludeDetails}" Margin="0,0,0,20" />
+      <CheckBox Style="{StaticResource CheckBox.Standard}" Content="Include package registry values"
+                IsChecked="{Binding IncludeDetails}" IsEnabled="{Binding IncludePackages}" Margin="0,0,0,20" />
 
       <Button Style="{StaticResource Button.Primary}" Content="Write workbook" Command="{Binding ExportCommand}" Padding="16,6" HorizontalAlignment="Left" />
       <TextBlock Style="{StaticResource TextBlock.Caption}" Text="{Binding Status}" TextWrapping="Wrap" Margin="0,16,0,4" />
