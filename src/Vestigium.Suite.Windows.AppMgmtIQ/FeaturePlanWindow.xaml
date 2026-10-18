@@ -1,7 +1,7 @@
 <Window x:Class="Vestigium.Suite.Windows.AppMgmtIQ.FeaturePlanWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Apply feature changes"
+        Title="Apply Feature Changes"
         Height="640" Width="760"
         MinHeight="420" MinWidth="560"
         WindowStartupLocation="CenterOwner"
@@ -24,11 +24,11 @@
       </Grid.ColumnDefinitions>
       <DockPanel Grid.Column="0">
         <TextBlock DockPanel.Dock="Top" Style="{StaticResource TextBlock.Caption}" Text="Enable" Margin="0,0,0,6" />
-        <ListBox x:Name="EnableList" />
+        <ListBox x:Name="EnableList" Style="{StaticResource ListBox.Standard}" />
       </DockPanel>
       <DockPanel Grid.Column="2">
         <TextBlock DockPanel.Dock="Top" Style="{StaticResource TextBlock.Caption}" Text="Disable" Margin="0,0,0,6" />
-        <ListBox x:Name="DisableList" />
+        <ListBox x:Name="DisableList" Style="{StaticResource ListBox.Standard}" />
       </DockPanel>
     </Grid>
   </DockPanel>
