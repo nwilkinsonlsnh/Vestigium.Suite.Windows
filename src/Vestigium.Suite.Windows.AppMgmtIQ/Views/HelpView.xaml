@@ -27,7 +27,7 @@
       <ItemsControl x:Name="PageSections"
                     DockPanel.Dock="Top"
                     Visibility="Collapsed"
-                    Margin="0,0,0,8">
+                    Margin="16,0,24,8">
         <ItemsControl.ItemsPanel>
           <ItemsPanelTemplate>
             <StackPanel Orientation="Horizontal" />
@@ -44,11 +44,18 @@
           </DataTemplate>
         </ItemsControl.ItemTemplate>
       </ItemsControl>
-      <FlowDocumentScrollViewer x:Name="Reader"
-                                VerticalScrollBarVisibility="Auto"
-                                IsToolBarVisible="False"
-                                Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}"
-                                Background="{DynamicResource Vestigium.Brushes.Surface.Window}" />
+      <Border Margin="16,0,8,0"
+              Padding="8,4,28,8"
+              CornerRadius="8"
+              Background="{DynamicResource Vestigium.Brushes.Surface.Card}"
+              BorderBrush="{DynamicResource Vestigium.Brushes.Border.Subtle}"
+              BorderThickness="1">
+        <FlowDocumentScrollViewer x:Name="Reader"
+                                  VerticalScrollBarVisibility="Auto"
+                                  IsToolBarVisible="False"
+                                  Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}"
+                                  Background="Transparent" />
+      </Border>
     </DockPanel>
   </Grid>
 </UserControl>
