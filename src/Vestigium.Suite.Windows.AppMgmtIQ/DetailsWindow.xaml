@@ -32,7 +32,8 @@
     <DataGrid x:Name="ValueGrid"
               Style="{StaticResource DataGrid.Standard}"
               ItemsSource="{Binding SelectedTab.Rows}"
-              SelectedItem="{Binding SelectedRow, Mode=TwoWay}"
+              SelectionMode="Extended"
+              SelectionUnit="Cell"
               AutoGenerateColumns="False"
               IsReadOnly="True"
               HeadersVisibility="Column"
@@ -53,11 +54,9 @@
           <Separator />
           <MenuItem x:Name="CopyItem" Header="Copy" Style="{StaticResource MenuItem.Standard}">
             <MenuItem.Icon><TextBlock FontFamily="Segoe MDL2 Assets" FontSize="14" Text="&#xE8C8;" /></MenuItem.Icon>
-            <MenuItem Header="Value information" Style="{StaticResource MenuItem.Standard}" Click="CopyInfo_Click" />
+            <MenuItem x:Name="CopyDataItem" Header="Value Data" Style="{StaticResource MenuItem.Standard}" Click="CopyData_Click" />
             <Separator />
-            <MenuItem Header="Name" Style="{StaticResource MenuItem.Standard}" Click="CopyName_Click" />
-            <MenuItem Header="Type" Style="{StaticResource MenuItem.Standard}" Click="CopyType_Click" />
-            <MenuItem Header="Data" Style="{StaticResource MenuItem.Standard}" Click="CopyData_Click" />
+            <MenuItem Header="Value Information" Style="{StaticResource MenuItem.Standard}" Click="CopyInfo_Click" />
           </MenuItem>
         </ContextMenu>
       </DataGrid.ContextMenu>
