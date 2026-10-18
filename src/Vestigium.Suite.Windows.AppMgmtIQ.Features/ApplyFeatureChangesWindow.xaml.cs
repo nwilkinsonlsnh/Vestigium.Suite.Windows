@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Windows;
+using Microsoft.Win32;
 
 namespace Vestigium.Suite.Windows.AppMgmtIQ.Features;
 
@@ -117,9 +118,17 @@ public partial class ApplyFeatureChangesWindow : Window
     {
         var text = string.IsNullOrWhiteSpace(error) ? output : error + Environment.NewLine + output;
         var line = text.Split('\n').Select(row => row.Trim()).FirstOrDefault(row => row.StartsWith("Error", StringComparison.OrdinalIgnoreCase));
+        if (code == 50 && MiniNtPresent())
+            return "Error 50. DISM thinks this machine is Windows PE because HKLM\\SYSTEM\\CurrentControlSet\\Control\\MiniNT exists. That key blocks /Online. It is not an elevation failure.";
         if (!string.IsNullOrWhiteSpace(line))
-            return code == 50 ? line + " The request is not supported. The process may not be elevated." : line;
+            return line;
         return code == 0 ? "" : $"Exit {code}";
+    }
+
+    private static bool MiniNtPresent()
+    {
+        using var key = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Control\MiniNT");
+        return key is not null;
     }
 
     private sealed record DismRun(int Code, string Detail);
