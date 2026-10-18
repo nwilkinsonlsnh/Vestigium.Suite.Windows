@@ -143,12 +143,11 @@ public sealed partial class FeaturesViewModel : ObservableObject
             }
         }
 
+        var visible = new List<FeatureNode>();
         foreach (var root in roots.OrderBy(row => row.Caption, StringComparer.OrdinalIgnoreCase))
-        {
-            var node = Build(root, children);
-            if (node is not null)
-                Roots.Add(node);
-        }
+            Collect(root, children, visible);
+        foreach (var node in visible)
+            Roots.Add(node);
         if (string.IsNullOrWhiteSpace(Query) || _bound is not null)
             Status = $"{Roots.Count} groups, {_all.Count} features ({_source})";
     }
@@ -176,7 +175,30 @@ public sealed partial class FeaturesViewModel : ObservableObject
                     node.Children.Add(child);
             }
         }
-        return Matches(row, parent) || node.Children.Count > 0 ? node : null;
+        return node;
+    }
+
+    private void Collect(FeatureRow row, Dictionary<string, List<FeatureRow>> children, List<FeatureNode> into)
+    {
+        var parent = _parents.TryGetValue(row.Name, out var name) ? name : "";
+        var matched = new List<FeatureNode>();
+        if (children.TryGetValue(row.Name, out var kids))
+        {
+            foreach (var kid in kids.OrderBy(k => k.Caption, StringComparer.OrdinalIgnoreCase))
+                Collect(kid, children, matched);
+        }
+        if (!Matches(row, parent))
+        {
+            into.AddRange(matched);
+            return;
+        }
+        var node = Build(row, children);
+        if (node is null)
+            return;
+        node.Children.Clear();
+        foreach (var child in matched)
+            node.Children.Add(child);
+        into.Add(node);
     }
 
     private bool Matches(FeatureRow row, string parent)
