@@ -35,7 +35,7 @@ internal static class BloatwareApplier
         var family = Quote(job.Family);
         var action = job.Action.Trim();
         if (action.Equals("Remove", StringComparison.OrdinalIgnoreCase))
-            return $"Get-AppxPackage -AllUsers -Name {family} | Remove-AppxPackage -AllUsers; if ({(job.Provisioned ? "$true" : "$false")}) {{ Get-AppxProvisionedPackage -Online | Where-Object {{ $_.DisplayName -eq {family} }} | Remove-AppxProvisionedPackage -Online }}";
+            return "$ErrorActionPreference='Continue'; Get-AppxPackage -AllUsers -Name " + family + " | ForEach-Object { Remove-AppxPackage -Package $_.PackageFullName -AllUsers }; Get-AppxProvisionedPackage -Online | Where-Object { $_.DisplayName -eq " + family + " } | Remove-AppxProvisionedPackage -Online";
         if (action.Equals("Add", StringComparison.OrdinalIgnoreCase))
             return $"Get-AppxPackage -AllUsers -Name {family} | ForEach-Object {{ Add-AppxPackage -DisableDevelopmentMode -Register (Join-Path $_.InstallLocation 'AppxManifest.xml') }}";
         return null;
