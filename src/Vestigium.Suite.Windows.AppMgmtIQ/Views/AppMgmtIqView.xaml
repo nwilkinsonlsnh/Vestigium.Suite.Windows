@@ -109,7 +109,7 @@
           </MenuItem>
           <MenuItem x:Name="UninstallItem" Header="Uninstall" Style="{StaticResource MenuItem.Standard}">
             <MenuItem.Icon><TextBlock Text="&#xE74D;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
-            <MenuItem x:Name="UninstallRegistered" Header="As registered" Style="{StaticResource MenuItem.Standard}" Click="UninstallRegistered_Click" ToolTip="Run UninstallString exactly as stored.">
+            <MenuItem x:Name="UninstallRegistered" Header="Product" Style="{StaticResource MenuItem.Standard}" Click="UninstallRegistered_Click" ToolTip="Run UninstallString exactly as stored.">
               <MenuItem.Icon><TextBlock Text="&#xE74D;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
             </MenuItem>
             <MenuItem x:Name="UninstallQuiet" Header="Forced (no interface)" Style="{StaticResource MenuItem.Standard}" Click="UninstallQuiet_Click" ToolTip="msiexec /x /qn. MSI only.">
