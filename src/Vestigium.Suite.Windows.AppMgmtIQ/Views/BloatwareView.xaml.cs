@@ -3,6 +3,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Vestigium.Controls.QueryBar;
 using Vestigium.Suite.Windows.AppMgmtIQ.ViewModels;
 
 namespace Vestigium.Suite.Windows.AppMgmtIQ.Views;
@@ -18,6 +19,12 @@ public partial class BloatwareView : UserControl
     {
         if (DataContext is BloatwareViewModel host)
             host.ApplyQuery();
+    }
+
+    private void OnPin(object sender, VestigiumQueryRowEventArgs e)
+    {
+        if (DataContext is BloatwareViewModel host)
+            host.Pin(e.Row);
     }
 
     private void Menu_Opened(object sender, RoutedEventArgs e)
