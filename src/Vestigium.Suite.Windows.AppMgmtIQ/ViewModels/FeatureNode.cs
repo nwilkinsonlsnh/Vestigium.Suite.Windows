@@ -28,6 +28,7 @@ public sealed class FeatureNode : INotifyPropertyChanged
             _desiredEnabled = value;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DesiredEnabled)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsChanged)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CheckState)));
         }
     }
 
@@ -44,6 +45,30 @@ public sealed class FeatureNode : INotifyPropertyChanged
     }
 
     public bool IsChanged => DesiredEnabled != IsEnabled;
+
+    public bool? CheckState
+    {
+        get
+        {
+            var states = SelfAndDescendants().Select(node => node.DesiredEnabled).ToList();
+            if (states.All(on => on))
+                return true;
+            return states.All(on => !on) ? false : null;
+        }
+    }
+
+    public void NotifyCheckState()
+        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CheckState)));
+
+    public IEnumerable<FeatureNode> SelfAndDescendants()
+    {
+        yield return this;
+        foreach (var child in Children)
+        {
+            foreach (var node in child.SelfAndDescendants())
+                yield return node;
+        }
+    }
 
     public void ResetDesired()
     {
