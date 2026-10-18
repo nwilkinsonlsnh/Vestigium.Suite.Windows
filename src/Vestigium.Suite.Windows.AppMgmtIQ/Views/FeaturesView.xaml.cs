@@ -65,6 +65,11 @@ public partial class FeaturesView : UserControl
             return;
         }
         HostLog.Information(AppMgmtCatalog.FeatureApplyCompleted, "Features", $"Feature apply completed. enabled={result.Enabled.Count} disabled={result.Disabled.Count} failed={result.Failed.Count}", correlationId);
+        foreach (var item in result.Outcomes)
+        {
+            var detail = string.IsNullOrWhiteSpace(item.Error) ? item.Outcome : item.Error;
+            HostLog.Information(AppMgmtCatalog.FeatureChanged, "Features", $"{item.Outcome} {item.Name}. {detail}", correlationId);
+        }
         host.RefreshCommand.Execute(null);
     }
 
