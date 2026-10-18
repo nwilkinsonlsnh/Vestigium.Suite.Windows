@@ -4,6 +4,10 @@ public sealed class FeatureJob
 {
     public string CorrelationId { get; set; } = "";
     public string ThemeId { get; set; } = "";
+    public double ParentLeft { get; set; }
+    public double ParentTop { get; set; }
+    public double ParentWidth { get; set; }
+    public double ParentHeight { get; set; }
     public List<FeatureJobItem> Enable { get; set; } = [];
     public List<FeatureJobItem> Disable { get; set; } = [];
 }
@@ -20,6 +24,10 @@ public sealed class FeatureResult
 {
     public string CorrelationId { get; set; } = "";
     public string ThemeId { get; set; } = "";
+    public double ParentLeft { get; set; }
+    public double ParentTop { get; set; }
+    public double ParentWidth { get; set; }
+    public double ParentHeight { get; set; }
     public bool Cancelled { get; set; }
     public List<string> Enabled { get; set; } = [];
     public List<string> Disabled { get; set; } = [];
