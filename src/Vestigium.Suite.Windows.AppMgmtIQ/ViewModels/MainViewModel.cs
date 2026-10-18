@@ -52,12 +52,16 @@ public sealed partial class MainViewModel : ObservableObject
 
     private bool _applying;
     public event Action? FiltersChanged;
+    public event Action? MruChanged;
     private string _datePattern = DisplayFormats.DefaultDateFormat.Pattern;
     private int _decimals = 4;
 
     public ObservableCollection<PackageRow> Packages { get; } = [];
-    public ObservableCollection<string> Queries { get; } = [];
+    public ObservableCollection<QueryMruRow> Queries { get; } = [];
     public KqlSession Session => _session;
+
+    public int MruLimit { get; set; } = 10;
+    public int StickyLimit { get; set; } = 3;
 
     [ObservableProperty]
     private string _query = string.Empty;
@@ -78,8 +82,19 @@ public sealed partial class MainViewModel : ObservableObject
     {
         _bound = KqlHost.Compile(Query, _session, _bound, out var error);
         ApplyFilter();
+        QueryMru.Record(Queries, Query, MruLimit, StickyLimit);
+        MruChanged?.Invoke();
         if (!string.IsNullOrEmpty(error))
             Status = error;
+    }
+
+    public void Pin(object? row)
+    {
+        if (row is not QueryMruRow mru)
+            return;
+        if (!QueryMru.ToggleSticky(Queries, mru, StickyLimit))
+            Status = $"Sticky limit is {StickyLimit}.";
+        MruChanged?.Invoke();
     }
 
     public async Task LoadAsync()
