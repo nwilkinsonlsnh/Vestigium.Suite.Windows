@@ -38,4 +38,7 @@ public static class HostLog
 
     public static void Information(int eventId, string subcategory, string message)
         => VestigiumLog.Information(eventId, VestigiumStatus.Success, AppMgmtCatalog.Category, subcategory, message, appId: HostIds.AppMgmtIQ);
+
+    public static void Information(int eventId, string subcategory, string message, string correlationId)
+        => VestigiumLog.Write(eventId, VestigiumLogLevel.Information, VestigiumStatus.Success, AppMgmtCatalog.Category, subcategory, message, null, HostIds.AppMgmtIQ, correlationId, null);
 }
