@@ -59,7 +59,7 @@ public partial class App : Application
 
         void Update()
         {
-            var title = Shell?.SelectedItem?.Title;
+            var title = Shell?.SelectedItem?.Header;
             var text = title switch
             {
                 "AppMgmtIQ" => inventory.Status,
