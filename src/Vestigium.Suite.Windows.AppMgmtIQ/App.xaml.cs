@@ -155,7 +155,7 @@ public partial class App : Application
         setup = new ActiveSetupViewModel { IsLoading = true };
         var store = new AppMgmtSettingsStore(AppMgmtSettingsStore.DefaultRoot);
         var settings = new SettingsViewModel(Themes, inventory, store);
-        settings.Attach(featuresVm);
+        settings.BindMrus(featuresVm, bloatware, setup);
         settings.Load();
 
         var page = new AppMgmtIqView { DataContext = inventory };
