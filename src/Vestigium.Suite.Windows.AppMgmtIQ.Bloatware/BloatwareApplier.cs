@@ -34,8 +34,10 @@ internal static class BloatwareApplier
             result.Detail = "Fetched with winget.";
             return Finish(job, result, fetched);
         }
-        result.OpenStore = true;
-        result.Error = "No local package was found, and winget could not fetch it.";
+        result.OpenStore = false;
+        result.Error = Retired(job.Family)
+            ? $"{job.Name} is no longer available. Microsoft retired this package, and it is not offered in the Microsoft Store."
+            : $"{job.Name} is not on this machine, and it could not be fetched. There is no local copy, and the Microsoft Store source did not have it.";
         result.Detail = fetched.Output;
         BloatwareLog.Information(BloatwareLog.Completed, result.Error, job.CorrelationId);
         return result;
@@ -70,6 +72,11 @@ internal static class BloatwareApplier
         var quoted = Quote(family);
         return "$ErrorActionPreference='Stop'; $registered=0; $sources=@(); Get-AppxPackage -AllUsers -Name " + quoted + " | ForEach-Object { $sources += $_.InstallLocation }; Get-AppxProvisionedPackage -Online | Where-Object { $_.DisplayName -eq " + quoted + " } | ForEach-Object { $sources += (Join-Path 'C:\\Program Files\\WindowsApps' $_.PackageName) }; $sources | Select-Object -Unique | ForEach-Object { $manifest = Join-Path $_ 'AppxManifest.xml'; if (Test-Path $manifest) { Add-AppxPackage -DisableDevelopmentMode -Register $manifest; $registered++ } }; if ($registered -eq 0) { throw 'No local manifest.' }";
     }
+
+    private static bool Retired(string family) => family.ToLowerInvariant() is
+        "microsoft.mspaint" or "microsoft.print3d" or "microsoft.3dbuilder" or "microsoft.microsoft3dviewer"
+        or "microsoft.wallet" or "microsoft.oneconnect" or "microsoft.mixedreality.portal"
+        or "microsoft.549981c3f5f10" or "microsoft.windows.devhome";
 
     private static string WingetScript(string name)
         => "winget install --name " + Quote(name) + " --source msstore --accept-package-agreements --accept-source-agreements --disable-interactivity";
