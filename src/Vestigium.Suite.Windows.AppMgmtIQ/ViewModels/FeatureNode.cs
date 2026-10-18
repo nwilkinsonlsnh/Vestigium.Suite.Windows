@@ -13,6 +13,8 @@ public sealed class FeatureNode : INotifyPropertyChanged
     public FeatureRow? Feature { get; init; }
     public ObservableCollection<FeatureNode> Children { get; } = [];
 
+    public bool HasChildren => Children.Count > 0;
+
     public bool IsAbsent => Feature?.InstallState == 3;
 
     private bool _desiredEnabled;
