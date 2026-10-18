@@ -8,6 +8,7 @@
     <Project Path="src/Vestigium.Suite.Windows.AppMgmtIQ/Vestigium.Suite.Windows.AppMgmtIQ.csproj" />
     <Project Path="src/Vestigium.Suite.Windows.AppMgmtIQ.Features/Vestigium.Suite.Windows.AppMgmtIQ.Features.csproj" />
     <Project Path="src/Vestigium.Suite.Windows.AppMgmtIQ.ActiveSetup/Vestigium.Suite.Windows.AppMgmtIQ.ActiveSetup.csproj" />
+    <Project Path="src/Vestigium.Suite.Windows.AppMgmtIQ.Bloatware/Vestigium.Suite.Windows.AppMgmtIQ.Bloatware.csproj" />
   </Folder>
   <Folder Name="/Tests/">
     <Project Path="tests/Vestigium.Suite.Windows.Tests/Vestigium.Suite.Windows.Tests.csproj" />
