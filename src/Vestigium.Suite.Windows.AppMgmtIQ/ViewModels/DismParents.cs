@@ -11,6 +11,15 @@ internal static class DismParents
 
     public static Dictionary<string, string> Descriptions { get; } = new(StringComparer.OrdinalIgnoreCase);
 
+    public static Dictionary<string, string> DisplayNames { get; } = new(StringComparer.OrdinalIgnoreCase);
+
+    public static string? BestText(string name)
+    {
+        if (Descriptions.TryGetValue(name, out var description) && !string.IsNullOrWhiteSpace(description))
+            return description;
+        return DisplayNames.TryGetValue(name, out var display) && !string.IsNullOrWhiteSpace(display) ? display : null;
+    }
+
     public static Dictionary<string, string>? Read()
     {
         if (DismInitialize(2, null, null) != 0)
@@ -37,13 +46,18 @@ internal static class DismParents
 
             var parents = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             Descriptions.Clear();
+            DisplayNames.Clear();
             foreach (var name in names)
             {
                 if (DismGetFeatureInfo(session, name, null, 2, out var infoPtr) == 0 && infoPtr != IntPtr.Zero)
                 {
                     var info = Marshal.PtrToStructure<DismFeatureInfo>(infoPtr);
-                    if (!string.IsNullOrWhiteSpace(info.Description))
-                        Descriptions[name] = info.Description;
+                    var description = Marshal.PtrToStringUni(info.Description);
+                    var display = Marshal.PtrToStringUni(info.DisplayName);
+                    if (!string.IsNullOrWhiteSpace(description))
+                        Descriptions[name] = description;
+                    if (!string.IsNullOrWhiteSpace(display))
+                        DisplayNames[name] = display;
                     DismDelete(infoPtr);
                 }
 
@@ -95,15 +109,15 @@ internal static class DismParents
         public int State;
     }
 
-    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    [StructLayout(LayoutKind.Explicit)]
     private struct DismFeatureInfo
     {
-        public string FeatureName;
-        public int FeatureState;
-        public string DisplayName;
-        public string Description;
-        public int RestartRequired;
-        public IntPtr CustomProperty;
-        public uint CustomPropertyCount;
+        [FieldOffset(0)] public IntPtr FeatureName;
+        [FieldOffset(8)] public int FeatureState;
+        [FieldOffset(16)] public IntPtr DisplayName;
+        [FieldOffset(24)] public IntPtr Description;
+        [FieldOffset(32)] public int RestartRequired;
+        [FieldOffset(40)] public IntPtr CustomProperty;
+        [FieldOffset(48)] public uint CustomPropertyCount;
     }
 }
