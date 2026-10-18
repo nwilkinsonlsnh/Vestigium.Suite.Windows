@@ -98,18 +98,27 @@
               PreviewMouseRightButtonDown="Tree_PreviewMouseRightButtonDown">
       <TreeView.ContextMenu>
         <ContextMenu Style="{StaticResource ContextMenu.Standard}" Grid.IsSharedSizeScope="True" Opened="Menu_Opened">
+          <MenuItem Header="Expand All" Style="{StaticResource MenuItem.Standard}" Click="ExpandAll_Click">
+            <MenuItem.Icon>
+              <StackPanel>
+                <TextBlock Text="&#xE70D;" Style="{StaticResource MenuIcon}" Margin="0,-6,0,-8" />
+                <TextBlock Text="&#xE70D;" Style="{StaticResource MenuIcon}" Margin="0,-8,0,0" />
+              </StackPanel>
+            </MenuItem.Icon>
+          </MenuItem>
           <MenuItem x:Name="ExpandItem" Header="Expand" Style="{StaticResource MenuItem.Standard}" Click="Expand_Click" IsEnabled="False">
             <MenuItem.Icon><TextBlock Text="&#xE70D;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
           </MenuItem>
           <MenuItem x:Name="CollapseItem" Header="Collapse" Style="{StaticResource MenuItem.Standard}" Click="Collapse_Click" IsEnabled="False">
             <MenuItem.Icon><TextBlock Text="&#xE70E;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
           </MenuItem>
-          <Separator Style="{StaticResource Separator.Menu}" />
-          <MenuItem Header="Expand All" Style="{StaticResource MenuItem.Standard}" Click="ExpandAll_Click">
-            <MenuItem.Icon><TextBlock Text="&#xE70D;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
-          </MenuItem>
           <MenuItem Header="Collapse All" Style="{StaticResource MenuItem.Standard}" Click="CollapseAll_Click">
-            <MenuItem.Icon><TextBlock Text="&#xE70E;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
+            <MenuItem.Icon>
+              <StackPanel>
+                <TextBlock Text="&#xE70E;" Style="{StaticResource MenuIcon}" Margin="0,-6,0,-8" />
+                <TextBlock Text="&#xE70E;" Style="{StaticResource MenuIcon}" Margin="0,-8,0,0" />
+              </StackPanel>
+            </MenuItem.Icon>
           </MenuItem>
           <Separator Style="{StaticResource Separator.Menu}" />
           <MenuItem Header="Filter" Style="{StaticResource MenuItem.Standard}">
