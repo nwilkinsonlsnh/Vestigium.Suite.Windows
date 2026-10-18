@@ -3,6 +3,12 @@ using System.Text.Json;
 
 namespace Vestigium.Suite.Windows.AppMgmtIQ.ViewModels;
 
+public sealed class QueryMruEntry
+{
+    public string Text { get; set; } = "";
+    public bool IsSticky { get; set; }
+}
+
 public sealed class AppMgmtSettings
 {
     public string? ThemeId { get; set; }
@@ -24,6 +30,12 @@ public sealed class AppMgmtSettings
     public bool ExportDetails { get; set; }
     public bool ExportOpenFile { get; set; }
     public bool ExportOpenFolder { get; set; }
+    public int MruLimit { get; set; } = 10;
+    public int StickyLimit { get; set; } = 3;
+    public List<QueryMruEntry> PackageMrus { get; set; } = [];
+    public List<QueryMruEntry> FeatureMrus { get; set; } = [];
+    public List<QueryMruEntry> BloatwareMrus { get; set; } = [];
+    public List<QueryMruEntry> ActiveSetupMrus { get; set; } = [];
 }
 
 public sealed class AppMgmtSettingsStore
