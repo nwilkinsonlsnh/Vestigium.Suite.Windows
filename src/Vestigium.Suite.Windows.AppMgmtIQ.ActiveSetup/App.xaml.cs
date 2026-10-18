@@ -34,7 +34,7 @@ public partial class App : Application
         }
         catch (Exception ex)
         {
-            VestigiumLog.Write(ActiveSetupLog.Completed, VestigiumLogLevel.Error, VestigiumStatus.Failure, ActiveSetupLog.Category, "ActiveSetup", ex.Message, ex, ActiveSetupLog.AppId, job?.CorrelationId);
+            VestigiumLog.Write(ActiveSetupLog.Completed, VestigiumLogLevel.Error, VestigiumStatus.Failed, ActiveSetupLog.Category, "ActiveSetup", ex.Message, ex, ActiveSetupLog.AppId, job?.CorrelationId);
             WriteResult(jobPath, new ActiveSetupResult
             {
                 CorrelationId = job?.CorrelationId ?? "",
