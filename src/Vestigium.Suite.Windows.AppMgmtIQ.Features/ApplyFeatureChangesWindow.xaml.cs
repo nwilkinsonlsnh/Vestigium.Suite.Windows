@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Security.Principal;
 using System.Windows;
 using Microsoft.Win32;
 
@@ -39,18 +40,24 @@ public partial class ApplyFeatureChangesWindow : Window
     private async void Confirm_Click(object sender, RoutedEventArgs e)
     {
         ConfirmButton.IsEnabled = false;
+        CancelButton.Visibility = Visibility.Collapsed;
+        PlanPage.Visibility = Visibility.Collapsed;
+        ProgressPage.Visibility = Visibility.Visible;
+        Progress.Maximum = Math.Max(1, _job.Enable.Count + _job.Disable.Count);
         var result = new FeatureResult { CorrelationId = _job.CorrelationId };
         var done = 0;
         var total = _job.Enable.Count + _job.Disable.Count;
         foreach (var item in _job.Enable)
         {
-            Summary.Text = $"Enabling {item.Caption} ({++done} of {total})";
+            ProgressText.Text = $"Enabling {item.Caption} ({++done} of {total})";
+            Progress.Value = done;
             var run = await RunDism($"/Online /Enable-Feature /FeatureName:{item.Name} /NoRestart");
             Record(result, item, run, enabled: true);
         }
         foreach (var item in _job.Disable)
         {
-            Summary.Text = $"Disabling {item.Caption} ({++done} of {total})";
+            ProgressText.Text = $"Disabling {item.Caption} ({++done} of {total})";
+            Progress.Value = done;
             var run = await RunDism($"/Online /Disable-Feature /FeatureName:{item.Name} /NoRestart");
             Record(result, item, run, enabled: false);
         }
@@ -64,9 +71,11 @@ public partial class ApplyFeatureChangesWindow : Window
 
     private void ShowResults(FeatureResult result)
     {
-        ResultSummary.Text = $"Enabled {result.Enabled.Count}    Disabled {result.Disabled.Count}    Restart required {result.Restart.Count}    Failed {result.Failed.Count}";
+        var elevated = new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator);
+        ResultSummary.Text = $"Enabled {result.Enabled.Count}    Disabled {result.Disabled.Count}    Restart required {result.Restart.Count}    Failed {result.Failed.Count}"
+            + (elevated ? "" : "    This process is not elevated.");
         ResultList.ItemsSource = _outcomes.ToList();
-        PlanPage.Visibility = Visibility.Collapsed;
+        ProgressPage.Visibility = Visibility.Collapsed;
         ResultPage.Visibility = Visibility.Visible;
         CancelButton.Visibility = Visibility.Collapsed;
         ConfirmButton.Content = "Close";
@@ -97,7 +106,8 @@ public partial class ApplyFeatureChangesWindow : Window
     {
         return Task.Run(() =>
         {
-            var start = new ProcessStartInfo("dism.exe", arguments)
+            var dism = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "dism.exe");
+            var start = new ProcessStartInfo(dism, arguments)
             {
                 CreateNoWindow = true,
                 UseShellExecute = false,
