@@ -37,7 +37,7 @@ internal static class BloatwareApplier
         if (action.Equals("Remove", StringComparison.OrdinalIgnoreCase))
             return "$ErrorActionPreference='Continue'; Get-AppxPackage -AllUsers -Name " + family + " | ForEach-Object { Remove-AppxPackage -Package $_.PackageFullName -AllUsers }; Get-AppxProvisionedPackage -Online | Where-Object { $_.DisplayName -eq " + family + " } | Remove-AppxProvisionedPackage -Online";
         if (action.Equals("Add", StringComparison.OrdinalIgnoreCase))
-            return $"Get-AppxPackage -AllUsers -Name {family} | ForEach-Object {{ Add-AppxPackage -DisableDevelopmentMode -Register (Join-Path $_.InstallLocation 'AppxManifest.xml') }}";
+            return "$ErrorActionPreference='Continue'; $registered=0; $sources=@(); Get-AppxPackage -AllUsers -Name " + family + " | ForEach-Object { $sources += $_.InstallLocation }; Get-AppxProvisionedPackage -Online | Where-Object { $_.DisplayName -eq " + family + " } | ForEach-Object { $sources += (Join-Path 'C:\\Program Files\\WindowsApps' $_.PackageName) }; $sources | Select-Object -Unique | ForEach-Object { $manifest = Join-Path $_ 'AppxManifest.xml'; if (Test-Path $manifest) { Add-AppxPackage -DisableDevelopmentMode -Register $manifest; $registered++ } }; if ($registered -eq 0) { throw 'No package source was found on this machine.' }";
         return null;
     }
 
