@@ -1,4 +1,5 @@
 using System.IO;
+using System.Security.Principal;
 using Vestigium.Logging;
 
 namespace Vestigium.Suite.Windows.AppMgmtIQ.Features;
@@ -34,8 +35,19 @@ internal static class FeatureLog
             cfg.RegisterEvent("FeatureApplyCancelled", "Vestigium.Suite.Windows.AppMgmtIQ.Events.FeatureApplyCancelled", Category, "Features", Cancelled, "Information", "feature apply cancelled");
             cfg.RegisterEvent("FeatureChanged", "Vestigium.Suite.Windows.AppMgmtIQ.Events.FeatureChanged", Category, "Features", Changed, "Information", "feature enabled or disabled");
         });
+        VestigiumLogger.BindLifetime(System.Windows.Application.Current);
     }
 
     public static void Information(int eventId, string message, string correlationId)
-        => VestigiumLog.Write(eventId, VestigiumLogLevel.Information, VestigiumStatus.Success, Category, "Features", message, null, AppId, correlationId, null);
+        => VestigiumLog.Write(
+            eventId,
+            VestigiumLogLevel.Information,
+            VestigiumStatus.Success,
+            Category,
+            "Features",
+            message,
+            null,
+            AppId,
+            correlationId,
+            new Dictionary<string, string?> { ["user"] = WindowsIdentity.GetCurrent().Name });
 }
