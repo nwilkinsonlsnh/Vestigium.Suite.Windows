@@ -129,32 +129,51 @@ public partial class ActiveSetupView : UserControl
         var exe = Path.Combine(AppContext.BaseDirectory, "AppMgmtIQ.ActiveSetup.exe");
         if (!File.Exists(exe))
         {
-            MessageBox.Show("AppMgmtIQ.ActiveSetup.exe was not found next to the application. Rebuild the worker and try again.", "Active Setup");
-            HostLog.Information(AppMgmtCatalog.ActiveSetupCancelled, "ActiveSetup", $"{action} worker missing.", correlationId);
+            ShowSummary(owner, action, component, "The worker was not found.", exe);
+            HostLog.Information(AppMgmtCatalog.ActiveSetupCancelled, "ActiveSetup", $"{action} worker missing. {exe}", correlationId);
             return;
         }
         try
         {
             Process.Start(new ProcessStartInfo(exe, "\"" + jobPath + "\"") { UseShellExecute = true, Verb = "runas" });
         }
-        catch (System.ComponentModel.Win32Exception)
+        catch (System.ComponentModel.Win32Exception ex)
         {
-            MessageBox.Show("The change was not elevated.", "Active Setup");
-            HostLog.Information(AppMgmtCatalog.ActiveSetupCancelled, "ActiveSetup", $"{action} was not elevated.", correlationId);
+            ShowSummary(owner, action, component, "The change was not elevated.", ex.ToString());
+            HostLog.Information(AppMgmtCatalog.ActiveSetupCancelled, "ActiveSetup", $"{action} was not elevated. {ex.Message}", correlationId);
             return;
         }
         var result = await WaitForResultAsync(resultPath);
-        if (result is null || result.Cancelled)
+        if (result is null)
         {
-            MessageBox.Show(result is null ? "The worker did not report back." : "The change was cancelled.", "Active Setup");
+            ShowSummary(owner, action, component, "The worker did not report back.", "No result file was written.");
+            HostLog.Information(AppMgmtCatalog.ActiveSetupCancelled, "ActiveSetup", $"{action} did not report back.", correlationId);
+            return;
+        }
+        if (result.Cancelled)
+        {
+            ShowSummary(owner, action, component, "The change was cancelled.", result.KeyPath);
             HostLog.Information(AppMgmtCatalog.ActiveSetupCancelled, "ActiveSetup", $"{action} cancelled.", correlationId);
             return;
         }
-        if (!result.Ok)
-            MessageBox.Show(string.IsNullOrWhiteSpace(result.Error) ? "The change failed." : result.Error, "Active Setup");
+        ShowSummary(owner, action, component, result.Ok ? "The change was applied." : "The change failed.", result.Ok ? result.KeyPath : result.Error);
         HostLog.Information(result.Ok ? AppMgmtCatalog.ActiveSetupChanged : AppMgmtCatalog.ActiveSetupCompleted, "ActiveSetup", result.Ok ? $"{action} applied. {result.KeyPath}" : result.Error, correlationId);
-        host.RefreshCommand.Execute(null);
+        if (result.Ok)
+            host.RefreshCommand.Execute(null);
     }
+
+    private static void ShowSummary(Window? owner, string action, string component, string outcome, string detail)
+    {
+        var window = new ActiveSetupSummaryWindow(TitleFor(action), outcome, component, detail) { Owner = owner };
+        window.ShowDialog();
+    }
+
+    private static string TitleFor(string action) => action.ToLowerInvariant() switch
+    {
+        "delete" => "Delete Active Setup Entry",
+        "clearstubpath" => "Clear Active Setup Command",
+        _ => "Add Active Setup Entry"
+    };
 
     private static async Task<Worker.ActiveSetupResult?> WaitForResultAsync(string path)
     {
