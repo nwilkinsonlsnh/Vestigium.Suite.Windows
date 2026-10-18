@@ -15,6 +15,7 @@ public sealed partial class SettingsViewModel : ObservableObject
     {
         _themes = themes;
         _host = host;
+        _host.FiltersChanged += SyncFromHost;
         _store = store;
         _selectedThemeId = themes.Current?.Id ?? themes.AvailableThemes.FirstOrDefault()?.Id;
         _selectedDateFormat = DisplayFormats.DefaultDateFormat;
@@ -83,6 +84,35 @@ public sealed partial class SettingsViewModel : ObservableObject
     private decimal _decimalPlaces = 4;
 
     public bool HasSelection => _host.SelectedPackage is not null;
+
+    private void SyncFromHost()
+    {
+        if (_loading)
+            return;
+        _loading = true;
+        ShowGlobal = _host.ShowGlobal;
+        ShowPerUser = _host.ShowPerUser;
+        ShowX64 = _host.ShowX64;
+        ShowX86 = _host.ShowX86;
+        ShowSystemComponents = _host.ShowSystemComponents;
+        ShowWindowsInstaller = _host.ShowWindowsInstaller;
+        ShowOtherInstallers = _host.ShowOtherInstallers;
+        _loading = false;
+        Push();
+        _store.Save(new AppMgmtSettings
+        {
+            ThemeId = SelectedThemeId,
+            ShowGlobal = ShowGlobal,
+            ShowPerUser = ShowPerUser,
+            ShowX64 = ShowX64,
+            ShowX86 = ShowX86,
+            ShowSystemComponents = ShowSystemComponents,
+            ShowWindowsInstaller = ShowWindowsInstaller,
+            ShowOtherInstallers = ShowOtherInstallers,
+            DateFormat = SelectedDateFormat?.Label ?? DisplayFormats.DefaultDateFormat.Label,
+            DecimalPlaces = (int)DecimalPlaces
+        });
+    }
 
     public void Load()
     {
