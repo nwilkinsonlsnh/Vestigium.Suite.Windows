@@ -16,6 +16,12 @@ public sealed class AppMgmtSettings
     public string DateFormat { get; set; } = DisplayFormats.DefaultDateFormat.Label;
     public int DecimalPlaces { get; set; } = 4;
     public bool FeaturesExpanded { get; set; }
+    public bool ExportPackages { get; set; } = true;
+    public bool ExportFeatures { get; set; } = true;
+    public bool ExportBloatware { get; set; } = true;
+    public bool ExportActiveSetup { get; set; } = true;
+    public bool ExportCurrentView { get; set; } = true;
+    public bool ExportDetails { get; set; }
 }
 
 public sealed class AppMgmtSettingsStore
