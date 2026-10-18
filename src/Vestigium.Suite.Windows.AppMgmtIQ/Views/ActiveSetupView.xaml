@@ -57,6 +57,8 @@
     <DataGrid Grid.Row="1"
               Style="{StaticResource DataGrid.Standard}"
               ItemsSource="{Binding Rows}"
+              SelectedItem="{Binding Selected}"
+              PreviewMouseRightButtonDown="Grid_PreviewMouseRightButtonDown"
               AutoGenerateColumns="False"
               IsReadOnly="True"
               SelectionMode="Single"
@@ -71,6 +73,16 @@
         <ContextMenu Style="{StaticResource ContextMenu.Standard}">
           <MenuItem Header="Refresh" Style="{StaticResource MenuItem.Standard}" Command="{Binding RefreshCommand}">
             <MenuItem.Icon><TextBlock FontFamily="Segoe UI Symbol" FontSize="14" Text="&#x267B;" Foreground="#3DDC84" /></MenuItem.Icon>
+          </MenuItem>
+          <Separator Style="{StaticResource Separator.Standard}" />
+          <MenuItem Header="Add..." Style="{StaticResource MenuItem.Standard}" Click="Add_Click" />
+          <MenuItem Header="Delete..." Style="{StaticResource MenuItem.Standard}" Click="Delete_Click" />
+          <MenuItem Header="Clear StubPath" Style="{StaticResource MenuItem.Standard}" Click="Clear_Click" />
+          <Separator Style="{StaticResource Separator.Standard}" />
+          <MenuItem Header="Copy" Style="{StaticResource MenuItem.Standard}">
+            <MenuItem Header="Component" Style="{StaticResource MenuItem.Standard}" Click="CopyComponent_Click" />
+            <MenuItem Header="StubPath" Style="{StaticResource MenuItem.Standard}" Click="CopyStub_Click" />
+            <MenuItem Header="Key Path" Style="{StaticResource MenuItem.Standard}" Click="CopyPath_Click" />
           </MenuItem>
         </ContextMenu>
       </DataGrid.ContextMenu>
