@@ -52,20 +52,21 @@ internal static class HelpCopy
     private static Draft Packages()
         => new("AppMgmtIQ",
         [
-            "This primary module is a comprehensive reader for the Windows uninstall registry, the same underlying data Add or Remove Programs has used since Windows 2000. Whenever an installer registers a product, it writes a key, typically a product code or a name, containing descriptive values such as DisplayName, DisplayVersion, Publisher, InstallDate, EstimatedSize, and UninstallString, alongside operational flags such as NoRemove, NoModify, SystemComponent, and WindowsInstaller.",
-            Head("Registry architecture and scope"),
-            "Windows maintains four distinct uninstall trees. This view consolidates all of them.",
-            "Machine-wide, or global, is stored under HKEY_LOCAL_MACHINE. Software native to 64-bit Windows resides in the main key, while 32-bit software is routed to WOW6432Node. Packages in this tree are flagged as Global in the grid.",
-            "Per-user is stored under HKEY_CURRENT_USER, with the same 64-bit and 32-bit split. These packages belong strictly to the active user profile.",
-            "Architecture follows the key. A package under WOW6432Node is 32-bit. The others are marked x64.",
-            Head("Interface and details"),
-            "The main interface presents one row per valid registry key, with the core attributes and the checkbox flags at a glance. Double-click a row and every registry value on that key is shown, grouped rather than dumped as raw text. The detail window title is the display name and the version, and it follows the selection.",
-            Head("Uninstall"),
-            "The tool relies on the stored UninstallString. It handles a path with spaces by taking it through the .exe, so C:\\Program Files is not split into C:\\Program.",
-            "Forced uninstall is offered only for a Windows Installer package. Rather than trusting the stored command, it builds msiexec /x with a quiet or basic interface.",
-            "If a package has set NoRemove, the module can clear it. That writes 0 to the value, and the write is logged under the account that did it before the uninstall is allowed to proceed.",
-            Head("Search and filtering"),
-            "The query bar is a live filter for the grid. A word with no field searches every column. For a precise filter, use a named field: app.displayname, app.publisher, app.version, app.InstallDate, and app.size.mb."
+            "This primary module functions as a comprehensive reader for the Windows uninstall registry, the same underlying data used by Add or Remove Programs since Windows 2000. Whenever an installer registers a product, it writes a key, typically a product code or a name, containing descriptive values such as DisplayName, DisplayVersion, Publisher, InstallDate, EstimatedSize, and UninstallString, alongside operational flags like NoRemove, NoModify, SystemComponent, and WindowsInstaller.",
+            Head("Registry Architecture and Scope"),
+            "Windows maintains four distinct uninstall trees, all of which are seamlessly consolidated into this single view.",
+            Term("Machine-Wide (Global)", "Stored under HKEY_LOCAL_MACHINE. Software native to 64-bit Windows resides here, while 32-bit (x86) software is routed to the WOW6432Node. Packages in this tree are flagged as Global in the grid."),
+            Term("Per-User", "Stored under HKEY_CURRENT_USER with the same 64-bit and 32-bit split. These packages belong strictly to the active user profile."),
+            Term("Architecture", "Packages located under the WOW6432Node are identified as 32-bit, while the others are marked via the x64 column."),
+            Head("Interface and Details"),
+            "The main interface presents one row per valid registry key, displaying core attributes and checkbox flags at a glance. Double-clicking any row opens a detailed, organized view of every registry value associated with that key, intelligently grouped rather than dumped as raw text. The detail window dynamically updates its title to reflect the selected application's display name and version.",
+            Head("Uninstall Mechanics"),
+            "When an uninstallation is triggered, the application processes the action based on the installer's properties.",
+            Term("Command Execution", "The tool relies on the stored UninstallString. It safely handles paths with spaces by evaluating them through the .exe boundary, ensuring paths like C:\\Program Files are not erroneously split into C:\\Program."),
+            Term("Forced Uninstall", "This option is exclusively available for Windows Installer packages. Rather than trusting the stored command string, it explicitly builds an msiexec /x command utilizing a basic or quiet interface."),
+            Term("Overriding Restrictions", "If a package has secured itself using the NoRemove flag, the module can override it. Clearing this restriction writes a 0 to the registry value, an action that is securely logged under the modifying account before the uninstall is permitted to proceed."),
+            Head("Search and Filtering"),
+            "The query bar acts as a live filter for the data grid. Entering a generic word searches every column simultaneously. For precision filtering, operators can query specific named fields: app.displayname, app.publisher, app.version, app.InstallDate, and app.size.mb."
         ]);
 
     private static Draft Features()
