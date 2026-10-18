@@ -12,7 +12,7 @@
       <Grid Margin="2,4">
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="*" />
-          <ColumnDefinition Width="180" />
+          <ColumnDefinition Width="260" />
           <ColumnDefinition Width="70" />
         </Grid.ColumnDefinitions>
         <TextBlock Text="{Binding Caption}" />
