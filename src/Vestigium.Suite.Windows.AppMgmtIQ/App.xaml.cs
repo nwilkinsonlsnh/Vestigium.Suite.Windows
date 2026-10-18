@@ -159,7 +159,11 @@ public partial class App : Application
 
         var features = window.HostShell["Windows Features"];
         if (features is not null)
-            features.Content = new FeaturesView { DataContext = featuresVm };
+        {
+            var featuresView = new FeaturesView { DataContext = featuresVm };
+            featuresView.Attach(settings);
+            features.Content = featuresView;
+        }
 
         var bloat = window.HostShell["Bloatware"];
         if (bloat is not null)
