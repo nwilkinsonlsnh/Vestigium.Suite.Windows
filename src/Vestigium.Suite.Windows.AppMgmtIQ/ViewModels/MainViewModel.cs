@@ -126,14 +126,8 @@ public sealed partial class MainViewModel : ObservableObject
                 return;
         }
 
-        var note = plan.Rewritten ? $"\n\n{plan.Note}" : string.Empty;
-        var go = MessageBox.Show(
-            owner,
-            $"Uninstall {package.DisplayName}?\n\nCommand:\n{plan.Display}{note}\n\nActor: {actor}",
-            "Uninstall",
-            MessageBoxButton.YesNo,
-            MessageBoxImage.Warning);
-        if (go != MessageBoxResult.Yes)
+        var confirm = new UninstallConfirmWindow(package.DisplayName, plan.Display, actor, plan.Note) { Owner = owner };
+        if (confirm.ShowDialog() != true)
             return;
 
         HostLog.Information(
@@ -157,15 +151,9 @@ public sealed partial class MainViewModel : ObservableObject
             return;
         }
 
-        if (code is 0 or 3010 or null)
-        {
-            Status = $"Uninstalled {package.DisplayName}. Refreshing\u2026";
-            await LoadAsync();
-        }
-        else
-        {
-            Status = $"Uninstall exited {code}.";
-        }
+        Status = $"Uninstall finished for {package.DisplayName}. Refreshing\u2026";
+        await LoadAsync();
+        new ActiveSetupSummaryWindow("Uninstall", code is 0 or 3010 or null ? $"{package.DisplayName} was uninstalled." : $"{package.DisplayName} exited {code}.", plan.Display, code is null ? "The process did not report an exit code." : $"Exit code {code}.") { Owner = owner }.ShowDialog();
     }
 
     private static bool ClearNoRemove(PackageRow package, string actor)
