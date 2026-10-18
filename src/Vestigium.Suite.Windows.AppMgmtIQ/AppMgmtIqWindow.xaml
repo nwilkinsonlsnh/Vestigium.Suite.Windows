@@ -24,6 +24,10 @@
                      Style="{StaticResource RadioButton.UnderlineTab}"
                      GroupName="AppMgmtMainNav"
                      Checked="MainNav_Checked" />
+        <RadioButton Content="Active Setup"
+                     Style="{StaticResource RadioButton.UnderlineTab}"
+                     GroupName="AppMgmtMainNav"
+                     Checked="MainNav_Checked" />
         <RadioButton Content="Export"
                      Style="{StaticResource RadioButton.UnderlineTab}"
                      GroupName="AppMgmtMainNav"
