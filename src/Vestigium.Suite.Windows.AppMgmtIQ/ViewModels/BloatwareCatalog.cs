@@ -48,15 +48,21 @@ public static class BloatwareCatalog
         Entry("Microsoft.MicrosoftStickyNotes", "Sticky Notes", "Productivity"),
         Entry("Microsoft.Todos", "To Do", "Productivity"),
         Entry("Microsoft.PowerAutomateDesktop", "Power Automate", "Productivity"),
-        Entry("MicrosoftTeams", "Teams", "Productivity"),
+        Entry("MicrosoftTeams", "Teams", "Productivity", "MSTeams"),
         Entry("Microsoft.OutlookForWindows", "Outlook", "Productivity"),
         Entry("Microsoft.WindowsCommunicationsApps", "Mail and Calendar", "Productivity"),
         Entry("Microsoft.Messaging", "Messaging", "Productivity"),
         Entry("Facebook.Facebook", "Facebook", "Store")
     ];
 
-    private static BloatwareEntry Entry(string family, string name, string category) =>
-        new(family, name, category);
+    private static BloatwareEntry Entry(string family, string name, string category, params string[] aliases) =>
+        new(family, name, category, aliases);
+
 }
 
-public sealed record BloatwareEntry(string Family, string Name, string Category);
+public sealed record BloatwareEntry(string Family, string Name, string Category, params string[] Aliases)
+{
+    public bool Matches(string family)
+        => Family.Equals(family, StringComparison.OrdinalIgnoreCase)
+           || Aliases.Any(alias => alias.Equals(family, StringComparison.OrdinalIgnoreCase));
+}
