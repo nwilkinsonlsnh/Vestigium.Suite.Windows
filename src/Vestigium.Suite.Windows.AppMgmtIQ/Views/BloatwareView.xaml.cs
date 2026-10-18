@@ -31,16 +31,6 @@ public partial class BloatwareView : UserControl
     {
         if (DataContext is not BloatwareViewModel { Selected: { } row } || row.Installed)
             return;
-        var owner = Window.GetWindow(this);
-        var fetch = new BloatwareFetchWindow(row.Name, row.Provisioned) { Owner = owner };
-        if (fetch.ShowDialog() != true)
-            return;
-        if (fetch.OpenStore)
-        {
-            var pfn = row.Family + "_8wekyb3d8bbwe";
-            Process.Start(new ProcessStartInfo("ms-windows-store://pdp/?PFN=" + pfn) { UseShellExecute = true });
-            return;
-        }
         _ = Run("Add", row);
     }
 
@@ -88,8 +78,12 @@ public partial class BloatwareView : UserControl
             return;
         }
         var result = await Wait(resultPath);
+        if (result?.OpenStore == true)
+            Process.Start(new ProcessStartInfo("ms-windows-store://pdp/?PFN=" + row.Family + "_8wekyb3d8bbwe") { UseShellExecute = true });
         var ok = result?.Ok == true;
-        new ActiveSetupSummaryWindow(action + " Bloatware", ok ? "The change was applied." : "The change failed.", row.Name, ok ? result?.Detail ?? "" : result?.Error ?? "The worker did not report back.") { Owner = owner }.ShowDialog();
+        var outcome = ok ? "The change was applied." : result?.OpenStore == true ? "Opened the Microsoft Store." : "The change failed.";
+        var detail = ok ? result?.Detail ?? "" : result?.OpenStore == true ? "No local package was found, and winget could not fetch it." : result?.Error ?? "The worker did not report back.";
+        new ActiveSetupSummaryWindow(action + " Bloatware", outcome, row.Name, detail) { Owner = owner }.ShowDialog();
         if (ok)
             host.RefreshCommand.Execute(null);
     }
