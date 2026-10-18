@@ -12,7 +12,7 @@
       <Button x:Name="CloseButton" Content="Close" Width="120" Style="{StaticResource Button.Standard}" Click="Close_Click" />
     </StackPanel>
     <StackPanel>
-      <TextBlock x:Name="Heading" Style="{StaticResource TextBlock.Title}" Text="Apply Active Setup Changes" />
+      <TextBlock x:Name="Heading" Style="{StaticResource TextBlock.Heading}" Text="Apply Active Setup Changes" />
       <TextBlock x:Name="Summary" Margin="0,16,0,0" TextWrapping="Wrap" Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}" />
       <TextBlock x:Name="PathText" Margin="0,12,0,0" TextWrapping="Wrap" Foreground="{DynamicResource Vestigium.Brushes.Text.Secondary}" />
       <TextBlock x:Name="CommandText" Margin="0,8,0,0" TextWrapping="Wrap" Foreground="{DynamicResource Vestigium.Brushes.Text.Secondary}" />
