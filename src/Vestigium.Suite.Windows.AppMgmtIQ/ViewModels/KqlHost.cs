@@ -11,7 +11,7 @@ internal static class KqlHost
 
     public static KqlBoundQuery? Compile(string? text, KqlSession session, KqlBoundQuery? previous, out string status)
     {
-        if (string.IsNullOrWhiteSpace(text))
+        if (string.IsNullOrWhiteSpace(text) || IsPartialField(text, session))
         {
             status = string.Empty;
             return null;
@@ -26,6 +26,16 @@ internal static class KqlHost
 
         status = string.Empty;
         return compiled.Query;
+    }
+
+    private static bool IsPartialField(string text, KqlSession session)
+    {
+        var body = text.Trim().TrimEnd('.').Trim();
+        if (body.Length == 0 || body.Any(ch => ch is ' ' or '(' or ')' or '=' or '!' or '<' or '>' or '"' or '\''))
+            return body.Length == 0;
+        return session.Fields.Any(field =>
+            field.Canonical.StartsWith(body, StringComparison.OrdinalIgnoreCase)
+            || field.Aliases.Any(alias => alias.StartsWith(body, StringComparison.OrdinalIgnoreCase)));
     }
 
     private static string Rewrite(string text, KqlSession session)
