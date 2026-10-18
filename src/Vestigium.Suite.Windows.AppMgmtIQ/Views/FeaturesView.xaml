@@ -14,23 +14,9 @@
       <Setter Property="Foreground" Value="{DynamicResource Vestigium.Brushes.Text.Primary}" />
       <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
-    <Style x:Key="FeatureItem" TargetType="TreeViewItem">
-      <Setter Property="Foreground" Value="{DynamicResource Vestigium.Brushes.Text.Primary}" />
-      <Setter Property="Background" Value="Transparent" />
+    <Style x:Key="FeatureItem" TargetType="TreeViewItem" BasedOn="{StaticResource TreeViewItem.Standard}">
       <Setter Property="HorizontalContentAlignment" Value="Stretch" />
       <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
-      <Style.Resources>
-        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#334C8DFF" />
-        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#F4F7FB" />
-        <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="#334C8DFF" />
-        <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="#F4F7FB" />
-      </Style.Resources>
-      <Style.Triggers>
-        <Trigger Property="IsSelected" Value="True">
-          <Setter Property="Background" Value="{DynamicResource Vestigium.Brushes.Accent.Softer}" />
-          <Setter Property="Foreground" Value="{DynamicResource Vestigium.Brushes.Text.Primary}" />
-        </Trigger>
-      </Style.Triggers>
     </Style>
     <HierarchicalDataTemplate x:Key="FeatureTemplate" ItemsSource="{Binding Children}">
       <Grid Background="Transparent">
@@ -41,7 +27,7 @@
           <ColumnDefinition Width="200" MinWidth="120" SharedSizeGroup="FeatureParent" />
           <ColumnDefinition Width="100" MinWidth="72" SharedSizeGroup="FeatureState" />
         </Grid.ColumnDefinitions>
-        <CheckBox Grid.Column="0" IsThreeState="{Binding HasChildren}" IsChecked="{Binding CheckState, Mode=OneWay}" Click="Plan_Click" VerticalAlignment="Center" />
+        <CheckBox Grid.Column="0" Style="{StaticResource CheckBox.Standard}" IsThreeState="{Binding HasChildren}" IsChecked="{Binding CheckState, Mode=OneWay}" Click="Plan_Click" VerticalAlignment="Center" />
         <TextBlock Grid.Column="1" Text="{Binding Caption}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="4,0">
           <TextBlock.Style>
             <Style TargetType="TextBlock">
@@ -106,6 +92,7 @@
     </Grid>
     <TreeView Grid.Row="2"
               x:Name="FeatureTree"
+              Style="{StaticResource TreeView.Standard}"
               ItemsSource="{Binding Roots}"
               ItemTemplate="{StaticResource FeatureTemplate}"
               ItemContainerStyle="{StaticResource FeatureItem}"
