@@ -23,6 +23,9 @@ public sealed partial class ActiveSetupViewModel : ObservableObject
     private string _query = string.Empty;
 
     [ObservableProperty]
+    private ActiveSetupRow? _selected;
+
+    [ObservableProperty]
     private string _status = "Idle";
 
     [ObservableProperty]
