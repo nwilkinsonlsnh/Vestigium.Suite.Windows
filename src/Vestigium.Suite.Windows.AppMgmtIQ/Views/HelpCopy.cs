@@ -92,13 +92,18 @@ internal static class HelpCopy
     private static Draft Bloatware()
         => new("Bloatware",
         [
-            "Inbox applications are AppX packages. They are not in the uninstall registry. They are registered with the AppX deployment service, and a provisioned copy can be kept so that every new user profile receives the package at first logon.",
-            "This tab starts from a catalog, not from an inventory. The catalog is a known list of inbox and Store packages: the Bing apps, the Xbox components, the games that ship on a new image, Teams, and the ones Microsoft has since retired. Every catalog entry is shown. The Installed and Provisioned columns say whether this machine has it. A row with Installed = No is a package we know about, not a package that is here.",
-            "Installed means the package is registered for this user and can be launched. Provisioned means the machine holds a copy for new users. Removing only the user registration leaves the provisioned copy, and the next person who logs on receives it again. A real removal takes both.",
-            Head("How add and remove work"),
-            "Remove is elevated. It removes the package for every user by its full package name, then removes the provisioned copy when the row is provisioned. Add looks for an AppxManifest.xml already on the disk, from a provisioned package or from another user's copy, and registers that. If there is no local manifest, it asks winget to fetch the package. If winget finds more than one, it installs the Store match that is not a classic or a plugin. If the package is already installed, that is a success. If Microsoft has retired it, the window says so instead of pretending a download exists.",
-            Head("Find"),
-            "Right-click a row. Add is shown when it is not installed. Remove is shown when it is."
+            "This module specializes in managing AppX packages, commonly referred to as inbox applications or bloatware. Because these applications do not reside in the standard Windows uninstall registry, they must be managed through the AppX deployment service.",
+            Head("A Catalog-First Approach"),
+            "Unlike the other inventories that strictly read what is present on the machine, the Bloatware tab operates from a predefined catalog of known inbox and Microsoft Store packages. This extensive list includes Bing applications, Xbox components, pre-installed games such as Candy Crush, modern utilities like Dev Home and Copilot, and even legacy applications that Microsoft has since retired. Because every catalog entry is shown, a row indicating that it is not installed simply means it is a tracked package missing from the current machine.",
+            Head("Package States: Installed vs. Provisioned"),
+            "The grid clearly categorizes the status of each catalog item using two critical metrics.",
+            Term("Installed", "The package is actively registered to the current user profile and can be launched immediately."),
+            Term("Provisioned", "A master copy of the package is stored on the machine's disk. When a new user logs into the machine for the first time, Windows automatically uses this provisioned copy to deploy the application to their profile."),
+            "A true removal requires addressing both states. Removing only the user registration leaves the provisioned copy intact, guaranteeing the application will return the next time a new profile is created.",
+            Head("Intelligent Add and Remove Workflows"),
+            "Interacting with packages is designed to be comprehensive and system-aware. Right-clicking a row dynamically presents context options. Add is offered for missing packages, while Remove is available for installed ones.",
+            Term("Elevated Removal", "The removal process runs elevated to ensure total eradication. It uninstalls the target package across every user profile by its full package name. Crucially, if the interface indicates the package is provisioned, the worker also deletes the provisioned master copy, ensuring the bloatware cannot silently reinstall for future users."),
+            Term("Intelligent Add and Restore", "When adding a package, the tool prioritizes local resources. It first scans the disk for an existing AppxManifest.xml, either from an existing provisioned copy or another user's profile, and securely registers it. If a local manifest cannot be found, the system falls back to winget to download the package. If winget returns multiple options, the tool automatically filters for the precise Store match, explicitly ignoring classic desktop installers and plugins. Furthermore, if a package has been officially retired by Microsoft, the application transparently reports this status instead of attempting to fetch a non-existent download.")
         ]);
 
     private static Draft ActiveSetup()
