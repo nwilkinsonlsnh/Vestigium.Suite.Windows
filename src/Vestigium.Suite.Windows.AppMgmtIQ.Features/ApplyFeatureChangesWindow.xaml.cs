@@ -75,7 +75,20 @@ public partial class ApplyFeatureChangesWindow : Window
         var elevated = new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator);
         ResultSummary.Text = $"Enabled {result.Enabled.Count}    Disabled {result.Disabled.Count}    Restart required {result.Restart.Count}    Failed {result.Failed.Count}"
             + (elevated ? "" : "    This process is not elevated.");
-        ResultList.ItemsSource = _outcomes.ToList();
+        EnabledGrid.ItemsSource = _outcomes.Where(item => item.Outcome is "Enabled" or "Restart required").ToList();
+        DisabledGrid.ItemsSource = _outcomes.Where(item => item.Outcome == "Disabled").ToList();
+        var failed = _outcomes.Where(item => item.Outcome == "Failed").ToList();
+        FailedGrid.ItemsSource = failed;
+        FailedPanel.Visibility = failed.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
+        result.Outcomes = _outcomes.Select(item => new FeatureOutcomeRecord
+        {
+            Caption = item.Caption,
+            Name = item.Name,
+            Outcome = item.Outcome,
+            Restart = item.Restart,
+            RequiredBy = item.RequiredBy,
+            Error = item.Error
+        }).ToList();
         ProgressPage.Visibility = Visibility.Collapsed;
         ResultPage.Visibility = Visibility.Visible;
         ButtonBar.Visibility = Visibility.Visible;
@@ -93,15 +106,15 @@ public partial class ApplyFeatureChangesWindow : Window
         {
             (enabled ? result.Enabled : result.Disabled).Add(item.Caption);
             var outcome = run.Code == 3010 ? "Restart required" : enabled ? "Enabled" : "Disabled";
-            _outcomes.Add(new FeatureOutcome(item.Caption, outcome, run.Detail));
+            _outcomes.Add(new FeatureOutcome(item.Caption, item.Name, outcome, run.Code == 3010, item.Reason, ""));
             FeatureLog.Information(FeatureLog.Changed, $"{outcome} {item.Name}. exit={run.Code}", result.CorrelationId);
             if (run.Code == 3010)
                 result.Restart.Add(item.Caption);
             return;
         }
         var detail = string.IsNullOrWhiteSpace(run.Detail) ? $"Exit {run.Code}" : run.Detail;
-        result.Failed.Add($"{item.Caption}: {detail}");
-        _outcomes.Add(new FeatureOutcome(item.Caption, "Failed", detail));
+        result.Failed.Add($"{item.Caption}: {FirstLine(detail)}");
+        _outcomes.Add(new FeatureOutcome(item.Caption, item.Name, "Failed", false, item.Reason, detail));
         FeatureLog.Information(FeatureLog.Changed, $"Failed {item.Name}. exit={run.Code}. {detail}", result.CorrelationId);
     }
 
@@ -146,14 +159,20 @@ public partial class ApplyFeatureChangesWindow : Window
 
     private void Copy_Click(object sender, RoutedEventArgs e)
     {
-        var lines = new List<string> { ResultSummary.Text, "" };
-        foreach (var item in _outcomes)
+        var lines = new List<string> { ResultSummary.Text, "", "Enabled" };
+        foreach (var item in _outcomes.Where(row => row.Outcome is "Enabled" or "Restart required"))
+            lines.Add($"{item.Caption}\t{item.Name}\tRestart={(item.Restart ? "Yes" : "No")}");
+        lines.Add("");
+        lines.Add("Disabled");
+        foreach (var item in _outcomes.Where(row => row.Outcome == "Disabled"))
+            lines.Add($"{item.Caption}\t{item.Name}");
+        var failed = _outcomes.Where(row => row.Outcome == "Failed").ToList();
+        if (failed.Count > 0)
         {
-            lines.Add(item.Caption);
-            lines.Add(item.Outcome);
-            if (!string.IsNullOrWhiteSpace(item.Detail))
-                lines.Add(item.Detail);
             lines.Add("");
+            lines.Add("Failed");
+            foreach (var item in failed)
+                lines.Add($"{item.Caption}\t{item.Name}\t{item.Error}");
         }
         Clipboard.SetText(string.Join(Environment.NewLine, lines).TrimEnd());
         CopyButton.Content = "Copied";
@@ -172,5 +191,8 @@ public partial class ApplyFeatureChangesWindow : Window
     }
 
     private sealed record DismRun(int Code, string Detail);
-    private sealed record FeatureOutcome(string Caption, string Outcome, string Detail);
+    private sealed record FeatureOutcome(string Caption, string Name, string Outcome, bool Restart, string RequiredBy, string Error)
+    {
+        public string RestartText => Restart ? "Restart" : "";
+    }
 }
