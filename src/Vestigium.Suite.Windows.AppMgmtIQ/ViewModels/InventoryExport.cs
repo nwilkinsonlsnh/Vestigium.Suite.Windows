@@ -2,63 +2,73 @@ using Vestigium.Helpers.ClosedXml;
 
 namespace Vestigium.Suite.Windows.AppMgmtIQ.ViewModels;
 
-public enum ExportScope
-{
-    Packages,
-    Features,
-    Both
-}
-
 public enum ExportRows
 {
     Current,
     All
 }
 
+public sealed record ExportRequest(
+    MainViewModel Packages,
+    FeaturesViewModel Features,
+    BloatwareViewModel Bloatware,
+    ActiveSetupViewModel Setup,
+    bool IncludePackages,
+    bool IncludeFeatures,
+    bool IncludeBloatware,
+    bool IncludeActiveSetup,
+    ExportRows Rows,
+    bool Details);
+
 public static class InventoryExport
 {
-    public static string Write(MainViewModel packages, FeaturesViewModel features, ExportScope scope, ExportRows rows, bool details)
+    public static string Write(ExportRequest request)
     {
-        var includePackages = scope is ExportScope.Packages or ExportScope.Both;
-        var includeFeatures = scope is ExportScope.Features or ExportScope.Both;
-        var packageRows = includePackages
-            ? rows == ExportRows.Current ? packages.Packages.ToArray() : packages.AllPackages.ToArray()
+        var packageRows = request.IncludePackages
+            ? request.Rows == ExportRows.Current ? request.Packages.Packages.ToArray() : request.Packages.AllPackages.ToArray()
             : [];
-        var featureRows = includeFeatures ? FeatureRows(features, rows) : [];
+        var featureRows = request.IncludeFeatures ? FeatureRows(request.Features, request.Rows) : [];
+        var bloatRows = request.IncludeBloatware
+            ? request.Rows == ExportRows.Current ? request.Bloatware.Rows.ToArray() : request.Bloatware.All.ToArray()
+            : [];
+        var setupRows = request.IncludeActiveSetup
+            ? request.Rows == ExportRows.Current ? request.Setup.Rows.ToArray() : request.Setup.All.ToArray()
+            : [];
 
         using var book = WorkbookHelper.Create("Summary", HostIds.AppMgmtIQ);
-        WriteSummary(book, packages, scope, rows, details, packageRows.Length, featureRows.Count);
-        if (includePackages)
+        WriteSummary(book, request, packageRows.Length, featureRows.Count, bloatRows.Length, setupRows.Length);
+        if (request.IncludePackages)
             WritePackages(book, packageRows);
-        if (includePackages && details)
+        if (request.IncludePackages && request.Details)
             WritePackageDetails(book, packageRows);
-        if (includeFeatures)
+        if (request.IncludeFeatures)
             WriteFeatures(book, featureRows);
+        if (request.IncludeBloatware)
+            WriteBloatware(book, bloatRows);
+        if (request.IncludeActiveSetup)
+            WriteActiveSetup(book, setupRows);
 
         var path = book.SaveAs(WorkbookHelper.NewExportPath(HostIds.AppMgmtIQ, "inventory"));
         HostLog.Information(AppMgmtCatalog.ExportWritten, "Export", $"Workbook written. {path}");
         return path;
     }
 
-    private static void WriteSummary(
-        WorkbookSession book,
-        MainViewModel packages,
-        ExportScope scope,
-        ExportRows rows,
-        bool details,
-        int packageCount,
-        int featureCount)
+    private static void WriteSummary(WorkbookSession book, ExportRequest request, int packageCount, int featureCount, int bloatCount, int setupCount)
     {
         var table = SheetTable.KeyValue("Item", "Value",
         [
             ("Machine", Environment.MachineName),
             ("When", DateTime.Now.ToString("dd MMM yyyy HH:mm")),
-            ("Scope", ScopeText(scope)),
-            ("Rows", rows == ExportRows.Current ? "Current view" : "Everything loaded"),
-            ("Details", details ? "Yes" : "No"),
-            ("Package query", packages.Query),
+            ("Rows", request.Rows == ExportRows.Current ? "Current view" : "Everything loaded"),
+            ("AppMgmtIQ", request.IncludePackages ? "Yes" : "No"),
+            ("Windows Features", request.IncludeFeatures ? "Yes" : "No"),
+            ("Bloatware", request.IncludeBloatware ? "Yes" : "No"),
+            ("Active Setup", request.IncludeActiveSetup ? "Yes" : "No"),
+            ("Package details", request.Details ? "Yes" : "No"),
             ("Packages", packageCount),
-            ("Features", featureCount)
+            ("Features", featureCount),
+            ("Bloatware rows", bloatCount),
+            ("Active Setup rows", setupCount)
         ], "Summary");
         book.Sheet("Summary").WriteTable(table, new SheetWriteOptions { TabColor = "4C8DFF" });
     }
@@ -113,10 +123,21 @@ public static class InventoryExport
             .ToList();
     }
 
-    private static string ScopeText(ExportScope scope) => scope switch
+    private static void WriteBloatware(WorkbookSession book, IReadOnlyList<BloatwareRow> rows)
     {
-        ExportScope.Packages => "Packages",
-        ExportScope.Features => "Features",
-        _ => "Packages and features"
-    };
+        var table = SheetTable.Create(
+            ["Name", "Family", "Category", "Installed", "Provisioned", "Package"],
+            rows.Select(row => (IReadOnlyList<object?>)[row.Name, row.Family, row.Category, row.Installed, row.Provisioned, row.Package]),
+            "Bloatware");
+        book.Sheet("Bloatware").WriteTable(table, new SheetWriteOptions { TabColor = "C47B2B" });
+    }
+
+    private static void WriteActiveSetup(WorkbookSession book, IReadOnlyList<ActiveSetupRow> rows)
+    {
+        var table = SheetTable.Create(
+            ["Display Name", "Component", "Stub Path", "Version", "Scope", "Architecture", "Pending", "Installed"],
+            rows.Select(row => (IReadOnlyList<object?>)[row.DisplayName, row.Component, row.StubPath, row.Version, row.Scope, row.Bit, row.Pending, row.Installed]),
+            "ActiveSetup");
+        book.Sheet("Active Setup").WriteTable(table, new SheetWriteOptions { TabColor = "8B5CF6" });
+    }
 }
