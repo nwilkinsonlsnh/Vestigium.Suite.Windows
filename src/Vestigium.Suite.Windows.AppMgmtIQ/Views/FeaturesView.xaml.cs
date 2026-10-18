@@ -76,6 +76,21 @@ public partial class FeaturesView : UserControl
         target.BringIntoView();
     }
 
+    private void ExpandAll_Click(object sender, RoutedEventArgs e)
+        => SetExpanded(FeatureTree.Items.OfType<FeatureNode>(), true);
+
+    private void CollapseAll_Click(object sender, RoutedEventArgs e)
+        => SetExpanded(FeatureTree.Items.OfType<FeatureNode>(), false);
+
+    private static void SetExpanded(IEnumerable<FeatureNode> nodes, bool expanded)
+    {
+        foreach (var node in nodes)
+        {
+            node.IsExpanded = expanded;
+            SetExpanded(node.Children, expanded);
+        }
+    }
+
     private TreeViewItem? ContainerFor(object? item)
     {
         return item is null ? null : FindContainer(FeatureTree, item);
