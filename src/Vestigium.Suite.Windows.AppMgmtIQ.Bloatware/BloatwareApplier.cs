@@ -29,10 +29,10 @@ internal static class BloatwareApplier
             return Finish(job, result, local);
         }
         var fetched = Run(WingetScript(job.Name, job.Family));
-        if (fetched.Code == 0)
+        if (fetched.Code == 0 || AlreadyInstalled(fetched.Output))
         {
-            result.Detail = $"{job.Name} was installed.";
-            return Finish(job, result, fetched);
+            result.Detail = AlreadyInstalled(fetched.Output) ? $"{job.Name} is already installed." : $"{job.Name} was installed.";
+            return Finish(job, result, (0, fetched.Output));
         }
         result.OpenStore = false;
         result.Error = Retired(job.Family)
@@ -84,6 +84,11 @@ internal static class BloatwareApplier
         var package = Quote(family);
         return "$ErrorActionPreference='Continue'; $queries=@(" + display + ",('Microsoft ' + " + display + ")," + package + "); $best=$null; $bestScore=-1; foreach ($q in $queries) { $rows = winget search --query $q --accept-source-agreements | Where-Object { $_ -match '\\s(winget|msstore)\\s*$' }; foreach ($row in $rows) { $parts = @($row.Trim() -split '\\s+'); if ($parts.Count -lt 4) { continue }; $source = $parts[-1]; $version = $parts[-2]; $id = $parts[-3]; if ($id -notmatch '^[A-Za-z0-9][A-Za-z0-9._-]{2,}$') { continue }; $score = 0; if ($source -eq 'msstore') { $score += 10 }; if ($id -match '\\.' -or $id -match '^[A-Z0-9]{12}$') { $score += 5 }; if ($row -match 'classic|plugin|preview') { $score -= 20 }; if ($score -gt $bestScore) { $bestScore = $score; $best = [pscustomobject]@{ Id = $id; Source = $source } } } }; if (-not $best) { throw 'winget did not return an installable package id.' }; Write-Output ('Installing ' + $best.Id + ' from ' + $best.Source); winget install --id $best.Id --source $best.Source --accept-package-agreements --accept-source-agreements --disable-interactivity; if ($LASTEXITCODE -ne 0) { throw 'winget could not install the selected package.' }";
     }
+
+    private static bool AlreadyInstalled(string output)
+        => output.Contains("already installed", StringComparison.OrdinalIgnoreCase)
+           || output.Contains("No available upgrade found", StringComparison.OrdinalIgnoreCase)
+           || output.Contains("No newer package versions", StringComparison.OrdinalIgnoreCase);
 
     private static string Quote(string value) => "'" + (value ?? "").Replace("'", "''") + "'";
 
