@@ -72,13 +72,21 @@ internal static class HelpCopy
     private static Draft Features()
         => new("Windows Features",
         [
-            "Optional features are the components Windows can add or remove without a separate installer. Internet Information Services, the Hyper-V tools, and the legacy components all live here. The built-in dialog is Turn Windows features on or off. It reads the component store and presents a tree.",
-            "A feature has a state. Enabled means it is on. Disabled means it is installed and off. Absent means it is not on the machine. A feature also has a parent. The tree is that parent relationship, which is why a group such as WCF Services contains children.",
-            "The checkbox on a parent is tri-state because the parent is a summary of its children. Checked means the feature and everything under it are on. The middle state means some children are on. Clear means none are. A leaf is only ever checked or clear. Checking a child that needs its parent selects the parent too, so the summary that follows is not a surprise.",
-            Head("How a change is applied"),
-            "You check and clear on this form. Nothing is written yet. Apply Feature Changes opens an elevated worker, centered on this window. It lists exactly what will be enabled and what will be disabled. On continue it enables what was disabled, disables what was enabled, and suppresses a reboot where Windows allows it. The summary lists each feature and any error. The suite refreshes when it returns.",
-            Head("Find"),
-            "Expand and Collapse are on the menu, and so are Expand All and Collapse All. The expanded or collapsed state of the whole tree is remembered in Settings."
+            "The Windows Features module provides direct management of the Windows component store, allowing administrators to add or remove optional system components without requiring separate external installers. This interface serves as a powerful, modern replacement for the legacy Turn Windows features on or off dialog, handling native elements such as Internet Information Services (IIS), Hyper-V tools, and various legacy components.",
+            Head("Feature States and Hierarchy"),
+            "Every feature within the component store exists in one of three specific states.",
+            Term("Enabled", "The feature is actively turned on."),
+            Term("Disabled", "The feature is installed on the system but currently turned off."),
+            Term("Absent", "The feature's payload is entirely removed from the machine."),
+            "Features are organized into a strict parent-child hierarchical tree. Because a parent node acts as a structural summary of the features beneath it, its checkbox operates in a tri-state mode. A fully checked box indicates that the parent and all of its children are enabled. A clear box indicates none are enabled. An indeterminate, or middle, state signifies that only some children are enabled. Leaf nodes, features without children, only utilize a standard checked or clear state. Checking a dependent child automatically selects its required parent, ensuring there are no hidden dependencies when it is time to apply the configuration.",
+            Head("Interface and Navigation"),
+            "The main grid cleanly exposes the underlying architecture of each component by displaying its Display Name, Feature Name, Parent, and current State. For easier navigation through complex trees like .NET Framework or IIS services, users can utilize Expand, Collapse, Expand All, and Collapse All functions directly from the menu. To maintain a consistent workflow, the expanded or collapsed state of the entire tree is persistently remembered in the application's Settings.",
+            Head("Applying Feature Changes"),
+            "Unlike direct registry edits, checking or clearing boxes in this tab simply stages the intended configuration locally. No changes are written to the system immediately.",
+            Term("Apply Feature Changes", "Invokes a dedicated, elevated worker process centered on the screen."),
+            Term("Confirmation", "The worker acts as a final confirmation, explicitly listing exactly which features are staged to be enabled and which will be disabled."),
+            Term("Execution", "The worker processes the queue and suppresses system reboots wherever Windows allows it."),
+            Term("Summary", "Once finished, it presents a summary listing each targeted feature along with any associated errors, and the main suite automatically refreshes its inventory to reflect the new state.")
         ]);
 
     private static Draft Bloatware()
