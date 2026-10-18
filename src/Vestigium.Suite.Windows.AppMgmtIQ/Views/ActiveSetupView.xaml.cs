@@ -46,7 +46,8 @@ public partial class ActiveSetupView : UserControl
     {
         if (DataContext is not ActiveSetupViewModel host || host.Selected is not { } row)
             return;
-        if (MessageBox.Show($"Delete {row.DisplayName}?\n{KeyPath(row)}", "Delete Active Setup Entry", MessageBoxButton.OKCancel, MessageBoxImage.Warning) != MessageBoxResult.OK)
+        var confirm = new ActiveSetupConfirmWindow(row.DisplayName, KeyPath(row)) { Owner = Window.GetWindow(this) };
+        if (confirm.ShowDialog() != true)
             return;
         var correlationId = Guid.NewGuid().ToString("N");
         if (!row.IsGlobal)
