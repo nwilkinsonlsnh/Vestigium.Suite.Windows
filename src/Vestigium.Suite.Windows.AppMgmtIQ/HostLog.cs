@@ -1,4 +1,5 @@
 using System.IO;
+using System.Security.Principal;
 using Vestigium.Helpers.Analytics;
 using Vestigium.Helpers.Charts;
 using Vestigium.Helpers.ClosedXml;
@@ -34,11 +35,15 @@ public static class HostLog
             AppMgmtCatalog.Register(cfg);
             extra?.Invoke(cfg);
         });
+        VestigiumLogger.BindLifetime(System.Windows.Application.Current);
     }
 
+    private static IReadOnlyDictionary<string, string?> Actor =>
+        new Dictionary<string, string?> { ["user"] = WindowsIdentity.GetCurrent().Name };
+
     public static void Information(int eventId, string subcategory, string message)
-        => VestigiumLog.Information(eventId, VestigiumStatus.Success, AppMgmtCatalog.Category, subcategory, message, appId: HostIds.AppMgmtIQ);
+        => VestigiumLog.Write(eventId, VestigiumLogLevel.Information, VestigiumStatus.Success, AppMgmtCatalog.Category, subcategory, message, null, HostIds.AppMgmtIQ, null, Actor);
 
     public static void Information(int eventId, string subcategory, string message, string correlationId)
-        => VestigiumLog.Write(eventId, VestigiumLogLevel.Information, VestigiumStatus.Success, AppMgmtCatalog.Category, subcategory, message, null, HostIds.AppMgmtIQ, correlationId, null);
+        => VestigiumLog.Write(eventId, VestigiumLogLevel.Information, VestigiumStatus.Success, AppMgmtCatalog.Category, subcategory, message, null, HostIds.AppMgmtIQ, correlationId, Actor);
 }
