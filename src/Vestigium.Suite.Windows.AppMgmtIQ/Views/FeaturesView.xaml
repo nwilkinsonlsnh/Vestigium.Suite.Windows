@@ -76,11 +76,7 @@
                                Session="{Binding Session}"
                                Queries="{Binding Queries}"
                                FilterRequested="OnFilter" />
-      <StackPanel Grid.Column="1" Orientation="Horizontal">
-      <Button Margin="8,0,0,0" Padding="12,4" VerticalAlignment="Center"
-              Style="{StaticResource Button.Primary}"
-              Content="Apply changes" IsEnabled="{Binding HasPlan}" Click="Apply_Click" />
-      <Button Margin="8,0,0,0" Width="36" Height="36" Padding="0"
+      <Button Grid.Column="1" Margin="8,0,0,0" Width="36" Height="36" Padding="0"
               VerticalAlignment="Center" HorizontalAlignment="Center"
               Style="{StaticResource Button.Utility}"
               Command="{Binding RefreshCommand}" ToolTip="Refresh">
@@ -88,7 +84,6 @@
                    Foreground="#3DDC84"
                    HorizontalAlignment="Center" VerticalAlignment="Center" />
       </Button>
-      </StackPanel>
     </Grid>
     <Grid Grid.Row="1" Margin="20,0,0,6">
       <Grid.ColumnDefinitions>
@@ -156,6 +151,10 @@
             </MenuItem>
           </MenuItem>
           <Separator Style="{StaticResource Separator.Menu}" />
+          <MenuItem Header="Apply changes" Style="{StaticResource MenuItem.Standard}" Click="Apply_Click"
+                    IsEnabled="{Binding PlacementTarget.DataContext.HasPlan, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+            <MenuItem.Icon><TextBlock Text="&#xE73E;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
+          </MenuItem>
           <MenuItem Header="Refresh" Style="{StaticResource MenuItem.Standard}" Command="{Binding PlacementTarget.DataContext.RefreshCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
             <MenuItem.Icon><TextBlock FontFamily="Segoe UI Symbol" FontSize="14" Text="&#x267B;" Foreground="#3DDC84" /></MenuItem.Icon>
           </MenuItem>
