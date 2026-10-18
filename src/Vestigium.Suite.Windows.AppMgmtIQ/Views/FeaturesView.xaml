@@ -97,7 +97,7 @@
               PreviewMouseRightButtonDown="Tree_PreviewMouseRightButtonDown"
               MouseDoubleClick="Tree_MouseDoubleClick">
       <TreeView.ContextMenu>
-        <ContextMenu x:Name="FeatureMenu" Opened="Menu_Opened">
+        <ContextMenu Opened="Menu_Opened">
           <MenuItem Header="Open Details" Click="OpenDetails_Click">
             <MenuItem.Icon><TextBlock Text="&#xE8A7;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
           </MenuItem>
@@ -111,47 +111,14 @@
           <Separator />
           <MenuItem Header="Filter">
             <MenuItem.Icon><TextBlock Text="&#xE71C;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
-            <MenuItem Header="Enabled" Style="{StaticResource MenuItem.Standard}" IsCheckable="True" IsChecked="{Binding PlacementTarget.DataContext.ShowEnabledFlag, RelativeSource={RelativeSource AncestorType=ContextMenu}}" StaysOpenOnClick="True">
-              <MenuItem.Icon><TextBlock FontFamily="Segoe MDL2 Assets" FontSize="16" Text="&#xE739;" Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}">
-              <TextBlock.Style>
-                <Style TargetType="TextBlock">
-                  <Style.Triggers>
-                    <DataTrigger Binding="{Binding DataContext.ShowEnabledFlag, Source={x:Reference FeatureMenu}}" Value="True">
-                      <Setter Property="Text" Value="&#xE73A;" />
-                      <Setter Property="Foreground" Value="#3DDC84" />
-                    </DataTrigger>
-                  </Style.Triggers>
-                </Style>
-              </TextBlock.Style>
-            </TextBlock></MenuItem.Icon>
+            <MenuItem x:Name="EnabledItem" Checked="FilterCheck_Changed" Unchecked="FilterCheck_Changed" Header="Enabled" Style="{StaticResource MenuItem.Standard}" IsCheckable="True" IsChecked="{Binding PlacementTarget.DataContext.ShowEnabledFlag, RelativeSource={RelativeSource AncestorType=ContextMenu}}" StaysOpenOnClick="True">
+              <MenuItem.Icon><TextBlock x:Name="EnabledCheck" FontFamily="Segoe MDL2 Assets" FontSize="16" Text="&#xE739;" /></MenuItem.Icon>
             </MenuItem>
-            <MenuItem Header="Disabled" Style="{StaticResource MenuItem.Standard}" IsCheckable="True" IsChecked="{Binding PlacementTarget.DataContext.ShowDisabledFlag, RelativeSource={RelativeSource AncestorType=ContextMenu}}" StaysOpenOnClick="True">
-              <MenuItem.Icon><TextBlock FontFamily="Segoe MDL2 Assets" FontSize="16" Text="&#xE739;" Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}">
-              <TextBlock.Style>
-                <Style TargetType="TextBlock">
-                  <Style.Triggers>
-                    <DataTrigger Binding="{Binding DataContext.ShowDisabledFlag, Source={x:Reference FeatureMenu}}" Value="True">
-                      <Setter Property="Text" Value="&#xE73A;" />
-                      <Setter Property="Foreground" Value="#3DDC84" />
-                    </DataTrigger>
-                  </Style.Triggers>
-                </Style>
-              </TextBlock.Style>
-            </TextBlock></MenuItem.Icon>
+            <MenuItem x:Name="DisabledItem" Checked="FilterCheck_Changed" Unchecked="FilterCheck_Changed" Header="Disabled" Style="{StaticResource MenuItem.Standard}" IsCheckable="True" IsChecked="{Binding PlacementTarget.DataContext.ShowDisabledFlag, RelativeSource={RelativeSource AncestorType=ContextMenu}}" StaysOpenOnClick="True">
+              <MenuItem.Icon><TextBlock x:Name="DisabledCheck" FontFamily="Segoe MDL2 Assets" FontSize="16" Text="&#xE739;" /></MenuItem.Icon>
             </MenuItem>
-            <MenuItem Header="Absent" Style="{StaticResource MenuItem.Standard}" IsCheckable="True" IsChecked="{Binding PlacementTarget.DataContext.ShowAbsentFlag, RelativeSource={RelativeSource AncestorType=ContextMenu}}" StaysOpenOnClick="True">
-              <MenuItem.Icon><TextBlock FontFamily="Segoe MDL2 Assets" FontSize="16" Text="&#xE739;" Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}">
-              <TextBlock.Style>
-                <Style TargetType="TextBlock">
-                  <Style.Triggers>
-                    <DataTrigger Binding="{Binding DataContext.ShowAbsentFlag, Source={x:Reference FeatureMenu}}" Value="True">
-                      <Setter Property="Text" Value="&#xE73A;" />
-                      <Setter Property="Foreground" Value="#3DDC84" />
-                    </DataTrigger>
-                  </Style.Triggers>
-                </Style>
-              </TextBlock.Style>
-            </TextBlock></MenuItem.Icon>
+            <MenuItem x:Name="AbsentItem" Checked="FilterCheck_Changed" Unchecked="FilterCheck_Changed" Header="Absent" Style="{StaticResource MenuItem.Standard}" IsCheckable="True" IsChecked="{Binding PlacementTarget.DataContext.ShowAbsentFlag, RelativeSource={RelativeSource AncestorType=ContextMenu}}" StaysOpenOnClick="True">
+              <MenuItem.Icon><TextBlock x:Name="AbsentCheck" FontFamily="Segoe MDL2 Assets" FontSize="16" Text="&#xE739;" /></MenuItem.Icon>
             </MenuItem>
           </MenuItem>
           <Separator />
