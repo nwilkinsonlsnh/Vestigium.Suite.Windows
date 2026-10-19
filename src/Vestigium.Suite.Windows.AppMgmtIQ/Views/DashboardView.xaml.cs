@@ -12,6 +12,7 @@ public partial class DashboardView : UserControl
     private FeaturesViewModel? _features;
     private BloatwareViewModel? _bloat;
     private ActiveSetupViewModel? _setup;
+    private StartupViewModel? _startup;
     private List<(string Title, UIElement Chart)> _charts = [];
 
     public DashboardView()
@@ -19,12 +20,13 @@ public partial class DashboardView : UserControl
         InitializeComponent();
     }
 
-    public void Bind(MainViewModel packages, FeaturesViewModel features, BloatwareViewModel bloat, ActiveSetupViewModel setup)
+    public void Bind(MainViewModel packages, FeaturesViewModel features, BloatwareViewModel bloat, ActiveSetupViewModel setup, StartupViewModel startup)
     {
         _packages = packages;
         _features = features;
         _bloat = bloat;
         _setup = setup;
+        _startup = startup;
         Refresh();
     }
 
@@ -34,7 +36,7 @@ public partial class DashboardView : UserControl
 
     private void Refresh()
     {
-        if (_packages is null || _features is null || _bloat is null || _setup is null || PackagesTab is null)
+        if (_packages is null || _features is null || _bloat is null || _setup is null || _startup is null || PackagesTab is null)
             return;
         if (PackagesTab.IsChecked == true)
             ShowPackages();
@@ -42,8 +44,10 @@ public partial class DashboardView : UserControl
             ShowFeatures();
         else if (BloatTab.IsChecked == true)
             ShowBloat();
-        else
+        else if (SetupTab.IsChecked == true)
             ShowSetup();
+        else
+            ShowStartup();
     }
 
     private void ShowPackages()
@@ -114,6 +118,25 @@ public partial class DashboardView : UserControl
             ("Scope", Chart([Slice("Machine", rows.Count(row => row.IsGlobal)), Slice("User", rows.Count(row => !row.IsGlobal))], "Scope")),
             ("Architecture", Chart([Slice("x64", rows.Count(row => row.IsX64)), Slice("x86", rows.Count(row => !row.IsX64))], "Architecture")),
             ("Command", Chart([Slice("Has command", rows.Count(row => !string.IsNullOrWhiteSpace(row.StubPath))), Slice("No command", rows.Count(row => string.IsNullOrWhiteSpace(row.StubPath)))], "Command"))
+        ]);
+    }
+
+    private void ShowStartup()
+    {
+        var rows = _startup!.All;
+        var linked = rows.Count(row => !string.IsNullOrWhiteSpace(row.Package));
+        Story.Text = "What starts with Windows, and which package it belongs to.";
+        SetCards(
+            ("Entries", rows.Count.ToString()),
+            ("Run", rows.Count(row => row.Source == "Run").ToString()),
+            ("Startup folder", rows.Count(row => row.Source == "Startup folder").ToString()),
+            ("Linked", Percent(linked, rows.Count)));
+        ShowCharts(
+        [
+            ("Source", Chart(TopSlices(rows.Select(row => Blank(row.Source)), 6), "Source", true)),
+            ("Scope", Chart([Slice("HKLM", rows.Count(row => row.Scope == "HKLM")), Slice("HKCU", rows.Count(row => row.Scope == "HKCU")), Slice("Common", rows.Count(row => row.Scope == "Common")), Slice("User", rows.Count(row => row.Scope == "User"))], "Scope")),
+            ("Linked", Chart([Slice("Linked", linked), Slice("Unlinked", rows.Count - linked)], "Linked")),
+            ("Bit", Chart([Slice("64", rows.Count(row => row.Bit == "64")), Slice("32", rows.Count(row => row.Bit == "32")), Slice("Folder", rows.Count(row => string.IsNullOrWhiteSpace(row.Bit)))], "Bit"))
         ]);
     }
 
