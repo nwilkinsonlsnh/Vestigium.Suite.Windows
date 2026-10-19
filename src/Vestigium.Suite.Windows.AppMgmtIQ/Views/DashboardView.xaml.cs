@@ -125,18 +125,19 @@ public partial class DashboardView : UserControl
     {
         var rows = _startup!.All;
         var linked = rows.Count(row => !string.IsNullOrWhiteSpace(row.Package));
-        Story.Text = "What starts with Windows, and which package it belongs to.";
+        var enabled = rows.Count(row => row.Enabled);
+        Story.Text = "What starts with Windows, which of those are actually enabled, and which package they belong to.";
         SetCards(
             ("Entries", rows.Count.ToString()),
-            ("Run", rows.Count(row => row.Source == "Run").ToString()),
-            ("Startup folder", rows.Count(row => row.Source == "Startup folder").ToString()),
+            ("Enabled", enabled.ToString()),
+            ("Disabled", (rows.Count - enabled).ToString()),
             ("Linked", Percent(linked, rows.Count)));
         ShowCharts(
         [
+            ("State", Chart([Slice("Enabled", enabled), Slice("Disabled", rows.Count - enabled)], "State")),
             ("Source", Chart(TopSlices(rows.Select(row => Blank(row.Source)), 6), "Source", true)),
             ("Scope", Chart([Slice("HKLM", rows.Count(row => row.Scope == "HKLM")), Slice("HKCU", rows.Count(row => row.Scope == "HKCU")), Slice("Common", rows.Count(row => row.Scope == "Common")), Slice("User", rows.Count(row => row.Scope == "User"))], "Scope")),
-            ("Linked", Chart([Slice("Linked", linked), Slice("Unlinked", rows.Count - linked)], "Linked")),
-            ("Bit", Chart([Slice("64", rows.Count(row => row.Bit == "64")), Slice("32", rows.Count(row => row.Bit == "32")), Slice("Folder", rows.Count(row => string.IsNullOrWhiteSpace(row.Bit)))], "Bit"))
+            ("Linked", Chart([Slice("Linked", linked), Slice("Unlinked", rows.Count - linked)], "Linked"))
         ]);
     }
 
