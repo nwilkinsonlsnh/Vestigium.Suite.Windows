@@ -1,5 +1,8 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
+using System.Text.Json;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -17,6 +20,8 @@ public sealed partial class StartupViewModel : ObservableObject
     private const string UserRun = @"Software\Microsoft\Windows\CurrentVersion\Run";
     private const string UserRunOnce = @"Software\Microsoft\Windows\CurrentVersion\RunOnce";
     private const string Approved = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved";
+
+    private static readonly JsonSerializerOptions Json = new() { WriteIndented = true };
 
     private readonly List<StartupRow> _all = [];
     private readonly KqlSession _session = AppMgmtKql.Startup();
@@ -127,10 +132,10 @@ public sealed partial class StartupViewModel : ObservableObject
     }
 
     [RelayCommand(CanExecute = nameof(CanToggle))]
-    private void Enable() => SetEnabled(true);
+    private Task Enable() => SetEnabled(true);
 
     [RelayCommand(CanExecute = nameof(CanToggle))]
-    private void Disable() => SetEnabled(false);
+    private Task Disable() => SetEnabled(false);
 
     [RelayCommand]
     private void EnableAll() => Later("Enable All");
@@ -155,13 +160,13 @@ public sealed partial class StartupViewModel : ObservableObject
 
     private void Later(string action) => Status = $"{action} is not wired yet.";
 
-    private void SetEnabled(bool enabled)
+    private async Task SetEnabled(bool enabled)
     {
         if (Selected is not { } row)
             return;
         if (row.Scope is "HKLM" or "Common")
         {
-            Status = "HKLM writes go through AppMgmtIQ.Startup. Not wired yet.";
+            await Elevate([row], enabled);
             return;
         }
 
@@ -183,6 +188,73 @@ public sealed partial class StartupViewModel : ObservableObject
         var verb = enabled ? "enabled" : "disabled";
         HostLog.Information(AppMgmtCatalog.StartupChanged, "Startup", $"Startup {row.Name} {verb}.");
         Status = $"{row.Name} {verb}.";
+    }
+
+    private async Task Elevate(IReadOnlyList<StartupRow> rows, bool enabled)
+    {
+        var id = Guid.NewGuid().ToString("N");
+        var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Vestigium", "AppMgmtIQ", "Jobs");
+        Directory.CreateDirectory(dir);
+        var jobPath = Path.Combine(dir, id + ".json");
+        var resultPath = Path.ChangeExtension(jobPath, ".result.json");
+        var verb = enabled ? "Enable" : "Disable";
+        var job = new StartupLaunchJob
+        {
+            CorrelationId = id,
+            Items = rows.Select(row => new StartupLaunchItem
+            {
+                Name = row.Name,
+                Key = row.Key,
+                Branch = row.Source == "Startup folder" ? "StartupFolder" : row.Bit == "32" ? "Run32" : "Run",
+                Action = verb,
+                IsX64 = row.Bit != "32"
+            }).ToList()
+        };
+        File.WriteAllText(jobPath, JsonSerializer.Serialize(job, Json));
+        HostLog.Information(AppMgmtCatalog.StartupRequested, "Startup", $"Startup change requested. {rows.Count} items.", id);
+
+        var exe = Path.Combine(AppContext.BaseDirectory, "AppMgmtIQ.Startup.exe");
+        try
+        {
+            Process.Start(new ProcessStartInfo(exe, "\"" + jobPath + "\"") { UseShellExecute = true, Verb = "runas" });
+        }
+        catch (Win32Exception)
+        {
+            HostLog.Information(AppMgmtCatalog.StartupCancelled, "Startup", "Startup change was not elevated.", id);
+            Status = "Elevation cancelled.";
+            return;
+        }
+
+        var result = await WaitForResult(resultPath);
+        if (result is null)
+        {
+            HostLog.Information(AppMgmtCatalog.StartupCancelled, "Startup", "Startup change cancelled.", id);
+            Status = "Elevation cancelled.";
+            return;
+        }
+
+        var changed = new HashSet<string>(result.Changed, StringComparer.OrdinalIgnoreCase);
+        foreach (var row in rows)
+            if (changed.Contains(row.Name))
+                row.Enabled = enabled;
+        Apply();
+        HostLog.Information(AppMgmtCatalog.StartupCompleted, "Startup", $"Startup change completed. changed={result.Changed.Count} denied={result.Denied.Count} failed={result.Failed.Count}", id);
+        Status = $"{result.Changed.Count} changed. {result.Denied.Count} denied. {result.Failed.Count} failed.";
+    }
+
+    private static async Task<StartupLaunchResult?> WaitForResult(string path)
+    {
+        var until = DateTime.UtcNow.AddMinutes(2);
+        while (DateTime.UtcNow < until)
+        {
+            if (File.Exists(path))
+            {
+                try { return JsonSerializer.Deserialize<StartupLaunchResult>(File.ReadAllText(path), Json); }
+                catch (IOException) { }
+            }
+            await Task.Delay(500);
+        }
+        return null;
     }
 
     private void Apply()
