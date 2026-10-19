@@ -116,6 +116,12 @@ public partial class FeaturesView : UserControl
             host.ApplyQuery();
     }
 
+    private void OnCommit(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is FeaturesViewModel host)
+            host.CommitQuery();
+    }
+
     private void OnPin(object sender, VestigiumQueryRowEventArgs e)
     {
         if (DataContext is FeaturesViewModel host)
