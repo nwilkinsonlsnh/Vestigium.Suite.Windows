@@ -3,6 +3,8 @@ using System.IO;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Vestigium.Helpers.Kql;
+using Vestigium.Helpers.Kql.AppMgmt;
 using Vestigium.Helpers.WinReg;
 
 namespace Vestigium.Suite.Windows.AppMgmtIQ.ViewModels;
@@ -16,10 +18,21 @@ public sealed partial class StartupViewModel : ObservableObject
     private const string UserRunOnce = @"Software\Microsoft\Windows\CurrentVersion\RunOnce";
 
     private readonly List<StartupRow> _all = [];
+    private readonly KqlSession _session = AppMgmtKql.Startup();
+    private KqlBoundQuery? _bound;
     private MainViewModel? _inventory;
 
     public ObservableCollection<StartupRow> Rows { get; } = [];
     public IReadOnlyList<StartupRow> All => _all;
+    public ObservableCollection<QueryMruRow> Queries { get; } = [];
+    public KqlSession Session => _session;
+
+    public int MruLimit { get; set; } = 10;
+    public int StickyLimit { get; set; } = 3;
+    public event Action? MruChanged;
+
+    [ObservableProperty]
+    private string _query = string.Empty;
 
     [ObservableProperty]
     private StartupRow? _selected;
@@ -34,6 +47,33 @@ public sealed partial class StartupViewModel : ObservableObject
     private string _loadingMessage = "Reading startup entries\u2026";
 
     public void Attach(MainViewModel inventory) => _inventory = inventory;
+
+    public void ApplyQuery()
+    {
+        _bound = KqlHost.Compile(Query, _session, _bound, out var error);
+        Apply();
+        if (!string.IsNullOrEmpty(error))
+            Status = error;
+    }
+
+    public void CommitQuery()
+    {
+        ApplyQuery();
+        if (_bound is not null)
+        {
+            QueryMru.Record(Queries, Query, MruLimit, StickyLimit);
+            MruChanged?.Invoke();
+        }
+    }
+
+    public void Pin(object? row)
+    {
+        if (row is not QueryMruRow mru)
+            return;
+        if (!QueryMru.ToggleSticky(Queries, mru, StickyLimit))
+            Status = $"Sticky limit is {StickyLimit}.";
+        MruChanged?.Invoke();
+    }
 
     public async Task LoadAsync()
     {
@@ -85,10 +125,26 @@ public sealed partial class StartupViewModel : ObservableObject
     {
         var keep = Selected;
         Rows.Clear();
-        foreach (var row in _all.OrderBy(row => row.Name, StringComparer.OrdinalIgnoreCase))
+        foreach (var row in _all.Where(Matches).OrderBy(row => row.Name, StringComparer.OrdinalIgnoreCase))
             Rows.Add(row);
         Selected = keep is null ? null : Rows.FirstOrDefault(row => row.Name == keep.Name && row.Command == keep.Command && row.Source == keep.Source);
-        Status = $"{Rows.Count} entries";
+        if (string.IsNullOrWhiteSpace(Query) || _bound is not null)
+            Status = $"{Rows.Count} entries";
+    }
+
+    private bool Matches(StartupRow row)
+    {
+        if (_bound is null)
+            return true;
+        return _bound.Matches(StartupAdapter.ToRow(_session, new StartupFacts
+        {
+            Name = row.Name,
+            Command = row.Command,
+            Source = row.Source,
+            Scope = row.Scope,
+            IsX64 = row.Bit switch { "64" => true, "32" => false, _ => null },
+            Package = row.Package
+        }));
     }
 
     private static string Match(StartupRow row, List<PackageHint> hints)
