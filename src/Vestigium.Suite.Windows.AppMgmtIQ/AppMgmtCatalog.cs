@@ -30,6 +30,9 @@ public static class AppMgmtCatalog
     public const int BloatwareChanged = 17100;
     public const int StartupLoaded = 17105;
     public const int StartupChanged = 17110;
+    public const int StartupRequested = 17115;
+    public const int StartupCompleted = 17120;
+    public const int StartupCancelled = 17125;
 
     public static void Register(VestigiumLoggerOptions cfg)
     {
@@ -61,5 +64,8 @@ public static class AppMgmtCatalog
         cfg.RegisterEvent("BloatwareChanged", "Vestigium.Suite.Windows.AppMgmtIQ.Events.BloatwareChanged", Category, "Bloatware", BloatwareChanged, "Information", "bloatware package changed");
         cfg.RegisterEvent("StartupLoaded", "Vestigium.Suite.Windows.AppMgmtIQ.Events.StartupLoaded", Category, "Startup", StartupLoaded, "Information", "startup entries loaded");
         cfg.RegisterEvent("StartupChanged", "Vestigium.Suite.Windows.AppMgmtIQ.Events.StartupChanged", Category, "Startup", StartupChanged, "Information", "startup entry enabled or disabled");
+        cfg.RegisterEvent("StartupRequested", "Vestigium.Suite.Windows.AppMgmtIQ.Events.StartupRequested", Category, "Startup", StartupRequested, "Information", "startup change requested");
+        cfg.RegisterEvent("StartupCompleted", "Vestigium.Suite.Windows.AppMgmtIQ.Events.StartupCompleted", Category, "Startup", StartupCompleted, "Information", "startup change completed");
+        cfg.RegisterEvent("StartupCancelled", "Vestigium.Suite.Windows.AppMgmtIQ.Events.StartupCancelled", Category, "Startup", StartupCancelled, "Information", "startup change cancelled");
     }
 }
