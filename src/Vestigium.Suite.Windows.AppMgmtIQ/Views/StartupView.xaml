@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Background="{DynamicResource Vestigium.Brushes.Surface.Window}">
   <UserControl.Resources>
+    <BooleanToVisibilityConverter x:Key="BoolToVis" />
     <Style x:Key="LeftCell" TargetType="TextBlock">
       <Setter Property="HorizontalAlignment" Value="Left" />
       <Setter Property="VerticalAlignment" Value="Center" />
@@ -29,7 +30,22 @@
     </Style>
   </UserControl.Resources>
   <Grid Margin="12">
-    <DataGrid Style="{StaticResource DataGrid.Standard}"
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,8">
+      <Button Width="36" Height="36" Padding="0"
+              VerticalAlignment="Center" HorizontalAlignment="Center"
+              Style="{StaticResource Button.Utility}"
+              Command="{Binding RefreshCommand}" ToolTip="Refresh">
+        <TextBlock FontFamily="Segoe UI Symbol" FontSize="18" Text="&#x267B;"
+                   Foreground="#3DDC84"
+                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+      </Button>
+    </StackPanel>
+    <DataGrid Grid.Row="1"
+              Style="{StaticResource DataGrid.Standard}"
               ItemsSource="{Binding Rows}"
               SelectedItem="{Binding Selected}"
               AutoGenerateColumns="False"
@@ -51,5 +67,14 @@
         <DataGridTextColumn Header="Package" Binding="{Binding Package}" Width="200" ElementStyle="{StaticResource LeftCell}" />
       </DataGrid.Columns>
     </DataGrid>
+    <Border Grid.RowSpan="2"
+            Background="{DynamicResource Vestigium.Brushes.Surface.Window}"
+            Opacity="0.92"
+            Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
+      <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+        <ProgressBar IsIndeterminate="True" Width="240" Height="6" Margin="0,0,0,12" />
+        <TextBlock Style="{StaticResource TextBlock.Caption}" HorizontalAlignment="Center" Text="{Binding LoadingMessage}" />
+      </StackPanel>
+    </Border>
   </Grid>
 </UserControl>
