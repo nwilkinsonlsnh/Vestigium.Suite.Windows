@@ -6,11 +6,11 @@
 **Date:** 19 October 2026  
 **Product papers:** [Requirements_v1.0.md](../Requirements_v1.0.md), [Design_v1.0.md](../Design_v1.0.md)
 
-This file is the **definition of done for PR02**. It adds a Startup / Persistence view so AppMgmtIQ can show what installed software (or other processes) registered to run automatically, with KQL filtering via the shared QueryBar and a Dashboard summary.
+This file is the **definition of done for PR02**. It adds a Startup / Persistence view so AppMgmtIQ can show what installed software (or other processes) registered to run automatically, filter it, and turn those entries on or off.
 
-**One sentence:** Enumerate Run, RunOnce, RunOnceEx, and Startup folder entries from the standard locations, show them in a grid with source and command, link each entry back to an installed package when a match exists, filter the grid with the QueryBar against a Startup KQL catalog, and surface a Dashboard section for the same data.
+**One sentence:** Enumerate Run, RunOnce, RunOnceEx, and Startup folder entries, show them in a grid with source, command, and enabled state, link each entry to an installed package when a match exists, filter with the QueryBar, surface a Dashboard section, and let an administrator enable or disable entries (one or all in the current view) by writing the Windows StartupApproved flag.
 
-**This version is not** a startup manager that disables or deletes entries. Not a Scheduled Task editor. Not a service controller. Read-only inventory of persistence locations that commonly belong to installed applications.
+**This version is not** a Scheduled Task editor. Not a service controller. Not a private cache of deleted values. Disable is the Windows flag, not a tool-owned subkey.
 
 ---
 
@@ -33,6 +33,16 @@ The host (via Helper or temporary host walk) enumerates:
 - `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup` (per-user)
 - `%ProgramData%\Microsoft\Windows\Start Menu\Programs\Startup` (common)
 
+### Enable flag
+
+Windows stores the on/off state next to the entry, not by deleting it:
+
+- `...\Explorer\StartupApproved\Run`
+- `...\Explorer\StartupApproved\Run32`
+- `...\Explorer\StartupApproved\StartupFolder`
+
+First byte `02` or `06` means Enabled. Anything else means Disabled. No flag means Enabled. RunOnce and RunOnceEx have no disable flag; they run once.
+
 Entries with no display name use the value name or file name as the fallback.
 
 ---
@@ -52,9 +62,10 @@ Columns (minimum):
 | Source | Run / RunOnce / RunOnceEx / Startup folder |
 | Scope | HKLM / HKCU / Common / User |
 | Bit | 64 / 32 (for registry) |
+| State | Enabled / Disabled |
 | Package | Linked installed package DisplayName when matched, else blank |
 
-Single selection. Read-only. No enable/disable controls in this PR.
+Single selection.
 
 ### R02-02 Package linkage
 
@@ -62,7 +73,7 @@ When the command path or value name can be matched to an installed package (by U
 
 ### R02-03 Details
 
-Double-click or selection shows the raw command and the source key/folder path.
+Selection shows the raw command, the source key or folder path, and the enabled state.
 
 ### R02-04 Chrome
 
@@ -72,7 +83,7 @@ Startup tab appears in the main navigation alongside existing tabs. Theme and st
 
 The Startup view hosts a `VestigiumQueryBar` wired the same way as the existing inventory, features, bloatware, and Active Setup views (`FilterRequested`, `Committed`, `PinRequested`, `Session`, `Queries`, `Limit`).
 
-A Startup field catalog lands in `Vestigium.Helpers.Kql.AppMgmt` (or a sibling catalog project if the domain grows) and is exposed as a session (e.g. `AppMgmtKql.Startup()`). Minimum fields:
+A Startup field catalog lands in `Vestigium.Helpers.Kql.AppMgmt` and is exposed as `AppMgmtKql.Startup()`. Minimum fields:
 
 | Canonical | Type | Notes |
 |---|---|---|
@@ -82,6 +93,7 @@ A Startup field catalog lands in `Vestigium.Helpers.Kql.AppMgmt` (or a sibling c
 | `startup.scope` | String | HKLM / HKCU / Common / User |
 | `startup.isX64` | Boolean | Registry view |
 | `startup.package` | String | Linked package name, blank if none |
+| `startup.enabled` | Boolean | StartupApproved flag. Missing flag is true. |
 
 Live filter on typing (debounced). Commit (Enter or saved-apply) records the query in MRU only when the query binds successfully. Same `QueryMru` limits and sticky behavior as the other views.
 
@@ -89,34 +101,63 @@ Live filter on typing (debounced). Commit (Enter or saved-apply) records the que
 
 The Dashboard gains a **Startup** radio section alongside Packages / Features / Bloatware / Active Setup. It binds to the same Startup collection.
 
-Cards (minimum): total entries, by source (Run / RunOnce / Startup folder), scope (HKLM vs HKCU), linked vs unlinked.
+Cards (minimum): total entries, enabled, disabled, linked vs unlinked.
 
-Charts (minimum): source breakdown, scope pie, linked vs unlinked.
+Charts (minimum): state pie, source breakdown, scope pie, linked vs unlinked.
 
 Story text updated. Cards match the grid counts.
+
+### R02-07 Enable and disable
+
+Disable and Enable write the Windows StartupApproved flag. The Run value stays. The entry stays in the grid and stays linked to its package.
+
+Context menu:
+
+| Action | Does |
+|---|---|
+| Enable | Sets the flag to enabled for the selected row. |
+| Disable | Sets the flag to disabled for the selected row. |
+| Enable All | Sets the flag to enabled for every row in the current filtered view. |
+| Disable All | Sets the flag to disabled for every row in the current filtered view. |
+| Remove | Deletes the registry value or Startup folder item. Confirm. Not the default. |
+| Open source | Opens the registry key or the folder. |
+| Jump to package | Selects the linked package in the inventory tab. Disabled when unlinked. |
+
+Rules:
+
+- Enable All and Disable All operate on the **current filtered rows**, not the full set. A filter of `startup.source == 'Run'` must not touch Startup folder entries.
+- Confirm before a bulk action. The dialog shows the count and a scope split (HKCU vs HKLM).
+- HKCU writes do not need elevation. HKLM and common Startup folder writes do. A denied write is a status, not a crash. The dialog reports how many succeeded and how many were denied.
+- RunOnce and RunOnceEx are skipped by Enable and Disable. They have no flag. Remove is the only write for them.
+- Every write logs name, source, scope, before, after, and result.
+- No silent bulk write. No "disable everything on the machine" without the confirm.
+
+AutorunsDisabled is not used. It is a Sysinternals convention. Windows does not read it, and other tools treat the entry as gone rather than disabled.
 
 ---
 
 ## Must not change in PR02
 
-- Disable, delete, or edit any Run or Startup entry
 - Scheduled Tasks (parked)
-- Services (parked — separate helper exists)
-- Full App Paths or file-association walk (PR03)
-- Any write to the registry or file system for these locations
+- Services (parked)
+- Full App Paths or file-association walk (later PR)
+- Private backup store of deleted values
+- Writes that are not confirmed
 
 ---
 
 ## Acceptance
 
 1. Startup tab lists entries from all listed registry keys and both Startup folders.
-2. Source, Scope, and Bit columns are correct for the location.
+2. Source, Scope, Bit, and State columns are correct for the location.
 3. Package column shows a match when one is reasonably available; blank otherwise.
-4. QueryBar filters the grid against the Startup catalog. Only successfully bound queries are recorded in MRU.
-5. Dashboard Startup section shows cards and charts that match the grid counts.
-6. No controls that modify Run keys or Startup folders.
-7. Existing inventory, features, bloatware, and Active Setup tabs remain unchanged.
-8. Host tests stay off the live registry for these new paths.
+4. QueryBar filters the grid against the Startup catalog, including `startup.enabled`. Only successfully bound queries are recorded in MRU.
+5. Dashboard Startup section shows cards and charts that match the grid counts, including enabled and disabled.
+6. Enable and Disable flip the StartupApproved flag. The Run value remains.
+7. Enable All and Disable All act only on the current filtered rows, after a confirm that shows the count.
+8. An HKLM write that is denied is reported. It does not throw.
+9. Existing inventory, features, bloatware, and Active Setup tabs remain unchanged.
+10. Host tests stay off the live registry for these new paths.
 
 ---
 
@@ -124,22 +165,24 @@ Story text updated. Cards match the grid counts.
 
 | Call | Why |
 |---|---|
-| Read-only | Application management inventory, not a startup cleaner. |
+| StartupApproved for disable | Windows flag. Task Manager, Settings, and other tools agree. |
+| Bulk on the filtered view | Streamlines administration without surprising the operator. |
+| Confirm on bulk | Count and scope are visible before the write. |
 | Best-effort package link | Useful context without requiring perfect matching. |
 | Both views for Run | 32-bit and 64-bit Run keys both exist. |
 | Startup folders included | Common place installers drop shortcuts. |
-| QueryBar + catalog in this PR | Same filter experience as existing tabs. Catalog lives in Helpers so other hosts can reuse it. |
+| QueryBar + catalog in this PR | Same filter experience as existing tabs. |
 | Dashboard section in this PR | Summary stays in sync with the new tab. |
 
 ### Rejected
 
 | Idea | Why out |
 |---|---|
-| Enable/disable toggles | Out of scope for inventory PR. |
+| AutorunsDisabled subkey | Tool convention. Windows does not read it. Entry vanishes from Task Manager. |
+| Delete as the disable | Not reversible by other tools. |
 | Scheduled Tasks in the same grid | Different store and permissions. Parked. |
 | Perfect package matching | Too brittle. Best-effort is enough. |
-| Dedicated Dashboard PR later | Dashboard would lag the data. |
-| Host-local field list instead of catalog | Breaks the shared KQL pattern. |
+| Silent Disable All | Operator must see the count first. |
 
 ---
 
@@ -148,4 +191,4 @@ Story text updated. Cards match the grid counts.
 - Scheduled Tasks
 - Services tied to installed products
 - RunOnceEx processing order
-- Disable / remove actions
+- Add a new startup entry from the UI
