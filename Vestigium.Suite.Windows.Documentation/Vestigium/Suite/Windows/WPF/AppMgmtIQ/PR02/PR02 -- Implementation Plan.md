@@ -144,7 +144,7 @@ Elevated project has no shell of its own. It reads a job, applies the writes, wr
 | 11 | PR02.012 | Context menu shell: Enable, Disable, Enable All, Disable All, Remove, Open source, Jump to package. Commands no-op except Copy. | Done |
 | 12 | PR02.013 | StartupApproved write for one HKCU row. In process. Log. Refresh the row. | Done |
 | 13 | PR02.014 | Create `Vestigium.Suite.Windows.AppMgmtIQ.Startup`. WinExe, `requireAdministrator`, job/result contract matching Features. | Done |
-| 14 | PR02.015 | Host launches `AppMgmtIQ.Startup` for HKLM and common writes. One launch per batch. Cancelled UAC is a status. | |
+| 14 | PR02.015 | Host launches `AppMgmtIQ.Startup` for HKLM and common writes. One launch per batch. Cancelled UAC is a status. | Done |
 | 15 | PR02.016 | Enable All and Disable All on the current filtered rows. Confirm with count and scope split. Skip RunOnce / RunOnceEx. Split HKCU in process, HKLM through the elevated exe. | |
 | 16 | PR02.017 | Remove for registry values and Startup folder items. Confirm. Same elevation split. | |
 | 17 | PR02.018 | Open source and Jump to package. | |
@@ -195,4 +195,4 @@ When this plan finishes, move the whole `PR02/` folder to `Complete/PR02/`.
 
 ## Next action
 
-PR02.015. Host launches `AppMgmtIQ.Startup` for HKLM and common writes.
+PR02.016. Enable All and Disable All on the current filtered rows.
