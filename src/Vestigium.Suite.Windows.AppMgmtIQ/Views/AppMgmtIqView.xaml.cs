@@ -33,6 +33,12 @@ public partial class AppMgmtIqView : UserControl
             host.ApplyQuery();
     }
 
+    private void OnCommit(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is MainViewModel host)
+            host.CommitQuery();
+    }
+
     private void OnPin(object sender, VestigiumQueryRowEventArgs e)
     {
         if (DataContext is MainViewModel host)
