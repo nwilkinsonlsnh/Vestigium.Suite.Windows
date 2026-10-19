@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Vestigium.Helpers.WinReg;
@@ -72,6 +73,8 @@ public sealed partial class StartupViewModel : ObservableObject
         ReadOnceEx(client, RegistryHiveKind.LocalMachine, RegistryViewKind.Registry32, RunOnceEx, "HKLM", "32", rows);
         ReadValues(client, RegistryHiveKind.CurrentUser, RegistryViewKind.Registry64, UserRun, "Run", "HKCU", "64", rows);
         ReadValues(client, RegistryHiveKind.CurrentUser, RegistryViewKind.Registry64, UserRunOnce, "RunOnce", "HKCU", "64", rows);
+        ReadFolder(Environment.GetFolderPath(Environment.SpecialFolder.Startup), "User", rows);
+        ReadFolder(Environment.GetFolderPath(Environment.SpecialFolder.CommonStartup), "Common", rows);
 
         return rows;
     }
@@ -120,6 +123,46 @@ public sealed partial class StartupViewModel : ObservableObject
                     : $"{title} / {value.Name}";
                 Add(rows, name, false, value.DataText, "RunOnceEx", scope, bit);
             }
+        }
+    }
+
+    private static void ReadFolder(string folder, string scope, List<StartupRow> rows)
+    {
+        if (string.IsNullOrWhiteSpace(folder) || !Directory.Exists(folder))
+            return;
+        foreach (var file in Directory.EnumerateFiles(folder))
+        {
+            var name = Path.GetFileName(file);
+            if (string.Equals(name, "desktop.ini", StringComparison.OrdinalIgnoreCase))
+                continue;
+            var display = Path.GetFileNameWithoutExtension(file);
+            if (string.IsNullOrWhiteSpace(display))
+                display = name;
+            var command = string.Equals(Path.GetExtension(file), ".lnk", StringComparison.OrdinalIgnoreCase)
+                ? ResolveShortcut(file)
+                : file;
+            Add(rows, display, false, command, "Startup folder", scope, "");
+        }
+    }
+
+    private static string ResolveShortcut(string path)
+    {
+        try
+        {
+            var type = Type.GetTypeFromProgID("WScript.Shell");
+            if (type is null)
+                return path;
+            dynamic shell = Activator.CreateInstance(type)!;
+            dynamic link = shell.CreateShortcut(path);
+            string target = link.TargetPath ?? "";
+            string args = link.Arguments ?? "";
+            if (string.IsNullOrWhiteSpace(target))
+                return path;
+            return string.IsNullOrWhiteSpace(args) ? target : $"{target} {args}".Trim();
+        }
+        catch
+        {
+            return path;
         }
     }
 
