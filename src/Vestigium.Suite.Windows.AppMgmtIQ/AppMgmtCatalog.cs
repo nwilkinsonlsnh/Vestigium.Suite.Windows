@@ -29,6 +29,7 @@ public static class AppMgmtCatalog
     public const int BloatwareCompleted = 17095;
     public const int BloatwareChanged = 17100;
     public const int StartupLoaded = 17105;
+    public const int StartupChanged = 17110;
 
     public static void Register(VestigiumLoggerOptions cfg)
     {
@@ -59,5 +60,6 @@ public static class AppMgmtCatalog
         cfg.RegisterEvent("BloatwareCompleted", "Vestigium.Suite.Windows.AppMgmtIQ.Events.BloatwareCompleted", Category, "Bloatware", BloatwareCompleted, "Information", "bloatware change completed");
         cfg.RegisterEvent("BloatwareChanged", "Vestigium.Suite.Windows.AppMgmtIQ.Events.BloatwareChanged", Category, "Bloatware", BloatwareChanged, "Information", "bloatware package changed");
         cfg.RegisterEvent("StartupLoaded", "Vestigium.Suite.Windows.AppMgmtIQ.Events.StartupLoaded", Category, "Startup", StartupLoaded, "Information", "startup entries loaded");
+        cfg.RegisterEvent("StartupChanged", "Vestigium.Suite.Windows.AppMgmtIQ.Events.StartupChanged", Category, "Startup", StartupChanged, "Information", "startup entry enabled or disabled");
     }
 }
