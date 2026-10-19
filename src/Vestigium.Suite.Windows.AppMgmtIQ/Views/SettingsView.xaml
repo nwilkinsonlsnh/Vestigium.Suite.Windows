@@ -121,7 +121,8 @@
                 HorizontalAlignment="Left"
                 Margin="0,0,0,12" />
 
-      <ListBox ItemsSource="{Binding CurrentMrus}"
+      <ListBox Style="{StaticResource ListBox.Standard}"
+               ItemsSource="{Binding CurrentMrus}"
                SelectedItem="{Binding SelectedMru, Mode=TwoWay}"
                Height="220"
                Margin="0,0,0,8">
@@ -129,23 +130,46 @@
           <DataTemplate>
             <StackPanel Orientation="Horizontal">
               <TextBlock Text="&#xE841;" FontFamily="Segoe MDL2 Assets" Margin="0,0,6,0"
+                         Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}"
                          Visibility="{Binding IsSticky, Converter={StaticResource BoolToVis}}" />
-              <TextBlock Text="{Binding Text}" />
+              <TextBlock Text="{Binding Text}"
+                         Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}" />
             </StackPanel>
           </DataTemplate>
         </ListBox.ItemTemplate>
       </ListBox>
 
       <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-        <TextBox Text="{Binding NewMruText, UpdateSourceTrigger=PropertyChanged}" Width="240" Margin="0,0,8,0" />
-        <Button Content="Add" Command="{Binding AddMruCommand}" Padding="12,4" />
+        <TextBox Style="{StaticResource TextBox.Standard}"
+                 Text="{Binding NewMruText, UpdateSourceTrigger=PropertyChanged}"
+                 Width="240"
+                 Margin="0,0,8,0" />
+        <Button Style="{StaticResource Button.Utility}"
+                Content="Add"
+                Command="{Binding AddMruCommand}"
+                Padding="12,4" />
       </StackPanel>
 
       <StackPanel Orientation="Horizontal">
-        <Button Content="Delete" Command="{Binding DeleteMruCommand}" Padding="12,4" Margin="0,0,8,0" />
-        <Button Content="Up" Command="{Binding MoveMruUpCommand}" Padding="12,4" Margin="0,0,8,0" />
-        <Button Content="Down" Command="{Binding MoveMruDownCommand}" Padding="12,4" Margin="0,0,8,0" />
-        <Button Content="Sticky" Command="{Binding ToggleStickyCommand}" Padding="12,4" />
+        <Button Style="{StaticResource Button.Utility}"
+                Content="Delete"
+                Command="{Binding DeleteMruCommand}"
+                Padding="12,4"
+                Margin="0,0,8,0" />
+        <Button Style="{StaticResource Button.Utility}"
+                Content="Up"
+                Command="{Binding MoveMruUpCommand}"
+                Padding="12,4"
+                Margin="0,0,8,0" />
+        <Button Style="{StaticResource Button.Utility}"
+                Content="Down"
+                Command="{Binding MoveMruDownCommand}"
+                Padding="12,4"
+                Margin="0,0,8,0" />
+        <Button Style="{StaticResource Button.Utility}"
+                Content="Sticky"
+                Command="{Binding ToggleStickyCommand}"
+                Padding="12,4" />
       </StackPanel>
     </StackPanel>
   </DockPanel>
