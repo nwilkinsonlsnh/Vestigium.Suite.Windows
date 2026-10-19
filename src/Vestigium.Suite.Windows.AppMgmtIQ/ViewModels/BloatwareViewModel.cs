@@ -45,9 +45,12 @@ public sealed partial class BloatwareViewModel : ObservableObject
     {
         _bound = KqlHost.Compile(Query, _session, _bound, out var error);
         Apply();
-        QueryMru.Record(Queries, Query, MruLimit, StickyLimit);
-        MruChanged?.Invoke();
-        if (!string.IsNullOrEmpty(error))
+        if (string.IsNullOrEmpty(error))
+        {
+            QueryMru.Record(Queries, Query, MruLimit, StickyLimit);
+            MruChanged?.Invoke();
+        }
+        else
             Status = error;
     }
 
