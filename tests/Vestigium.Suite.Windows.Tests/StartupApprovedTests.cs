@@ -32,4 +32,11 @@ public class StartupApprovedTests
         Assert.False(StartupApproved.IsEnabled("03000000FDC2BA25"));
         Assert.True(StartupApproved.IsEnabled("0200000000000000"));
     }
+
+    [Fact]
+    public void Written_bytes_round_trip()
+    {
+        Assert.True(StartupApproved.IsEnabled(StartupApproved.EnabledBytes()));
+        Assert.False(StartupApproved.IsEnabled(StartupApproved.DisabledBytes()));
+    }
 }
