@@ -33,13 +33,13 @@ public partial class App : Application
         Services = services.BuildServiceProvider();
 
         ShutdownMode = ShutdownMode.OnMainWindowClose;
-        MainWindow = CreateMainWindow(out var inventory, out var features, out var bloatware, out var setup, out var chrome, out var dashboard);
+        MainWindow = CreateMainWindow(out var inventory, out var features, out var bloatware, out var setup, out var startup, out var chrome, out var dashboard);
         MainWindow.Show();
 
         await Task.WhenAll(inventory.LoadAsync(), features.LoadAsync(), bloatware.LoadAsync(), setup.LoadAsync());
         chrome.Status.Message = inventory.Status;
         dashboard.Bind(inventory, features, bloatware, setup);
-        WireStatus(chrome, inventory, features, bloatware, setup);
+        WireStatus(chrome, inventory, features, bloatware, setup, startup);
 
         base.OnStartup(e);
     }
@@ -49,7 +49,8 @@ public partial class App : Application
         MainViewModel inventory,
         FeaturesViewModel features,
         BloatwareViewModel bloatware,
-        ActiveSetupViewModel setup)
+        ActiveSetupViewModel setup,
+        StartupViewModel startup)
     {
         chrome.Status.Engine.Columns.Add(new StatusBarColumn
         {
@@ -67,6 +68,7 @@ public partial class App : Application
                 "Windows Features" => features.Status,
                 "Bloatware" => bloatware.Status,
                 "Active Setup" => setup.Status,
+                "Startup" => startup.Status,
                 _ => ""
             };
             chrome.Status.Engine.PostImmediate("summary", new StatusBarUpdate { Text = text });
@@ -76,6 +78,7 @@ public partial class App : Application
         features.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(FeaturesViewModel.Status)) Update(); };
         bloatware.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(BloatwareViewModel.Status)) Update(); };
         setup.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(ActiveSetupViewModel.Status)) Update(); };
+        startup.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(StartupViewModel.Status)) Update(); };
         if (Shell is not null)
             DependencyPropertyDescriptor.FromProperty(VestigiumShell.SelectedItemProperty, typeof(VestigiumShell))
                 .AddValueChanged(Shell, (_, _) => Update());
@@ -87,6 +90,7 @@ public partial class App : Application
         out FeaturesViewModel featuresVm,
         out BloatwareViewModel bloatware,
         out ActiveSetupViewModel setup,
+        out StartupViewModel startup,
         out VestigiumDefaultWindowViewModel chrome,
         out DashboardView dashboard)
     {
@@ -122,6 +126,12 @@ public partial class App : Application
                     Subject = "Logon components",
                     Description = "Installed Components from HKLM and HKCU, both views."
                 },
+                new VestigiumNavItemSpec("Startup")
+                {
+                    Title = "Startup",
+                    Subject = "Persistence",
+                    Description = "Run, RunOnce, RunOnceEx, and Startup folder entries."
+                },
                 new VestigiumNavItemSpec("Dashboard")
                 {
                     Title = "Dashboard",
@@ -153,6 +163,7 @@ public partial class App : Application
         featuresVm = new FeaturesViewModel { IsLoading = true };
         bloatware = new BloatwareViewModel { IsLoading = true };
         setup = new ActiveSetupViewModel { IsLoading = true };
+        startup = new StartupViewModel();
         var store = new AppMgmtSettingsStore(AppMgmtSettingsStore.DefaultRoot);
         var settings = new SettingsViewModel(Themes, inventory, store);
         settings.BindMrus(featuresVm, bloatware, setup);
@@ -183,6 +194,10 @@ public partial class App : Application
         var active = window.HostShell["Active Setup"];
         if (active is not null)
             active.Content = new ActiveSetupView { DataContext = setup };
+
+        var start = window.HostShell["Startup"];
+        if (start is not null)
+            start.Content = new StartupView { DataContext = startup };
 
         var export = window.HostShell["Export"];
         if (export is not null)
