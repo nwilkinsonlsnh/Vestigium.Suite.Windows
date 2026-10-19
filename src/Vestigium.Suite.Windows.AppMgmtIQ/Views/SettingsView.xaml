@@ -144,29 +144,29 @@
                  Text="{Binding NewMruText, UpdateSourceTrigger=PropertyChanged}"
                  Width="240"
                  Margin="0,0,8,0" />
-        <Button Style="{StaticResource Button.Utility}"
+        <Button Style="{StaticResource Button.Secondary}"
                 Content="Add"
                 Command="{Binding AddMruCommand}"
                 Padding="12,4" />
       </StackPanel>
 
       <StackPanel Orientation="Horizontal">
-        <Button Style="{StaticResource Button.Utility}"
+        <Button Style="{StaticResource Button.Secondary}"
                 Content="Delete"
                 Command="{Binding DeleteMruCommand}"
                 Padding="12,4"
                 Margin="0,0,8,0" />
-        <Button Style="{StaticResource Button.Utility}"
+        <Button Style="{StaticResource Button.Secondary}"
                 Content="Up"
                 Command="{Binding MoveMruUpCommand}"
                 Padding="12,4"
                 Margin="0,0,8,0" />
-        <Button Style="{StaticResource Button.Utility}"
+        <Button Style="{StaticResource Button.Secondary}"
                 Content="Down"
                 Command="{Binding MoveMruDownCommand}"
                 Padding="12,4"
                 Margin="0,0,8,0" />
-        <Button Style="{StaticResource Button.Utility}"
+        <Button Style="{StaticResource Button.Secondary}"
                 Content="Sticky"
                 Command="{Binding ToggleStickyCommand}"
                 Padding="12,4" />
