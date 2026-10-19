@@ -28,13 +28,14 @@ public static class AppMgmtCatalog
     public const int BloatwareRequested = 17090;
     public const int BloatwareCompleted = 17095;
     public const int BloatwareChanged = 17100;
+    public const int StartupLoaded = 17105;
 
     public static void Register(VestigiumLoggerOptions cfg)
     {
         ArgumentNullException.ThrowIfNull(cfg);
         var taxonomy = new VestigiumTaxonomy();
         taxonomy.Register(Category, HostIds.AppMgmtIQ);
-        taxonomy.Register(Category, "Lifecycle", "Inventory", "Settings", "Features", "Export", "Bloatware", "Uninstall", "ActiveSetup");
+        taxonomy.Register(Category, "Lifecycle", "Inventory", "Settings", "Features", "Export", "Bloatware", "Uninstall", "ActiveSetup", "Startup");
         cfg.RegisterTaxonomy(taxonomy);
         cfg.RegisterEvent("AppStarted", "Vestigium.Suite.Windows.AppMgmtIQ.Events.AppStarted", Category, Subcategory, AppStarted, "Information", "host started");
         cfg.RegisterEvent("InventoryLoaded", "Vestigium.Suite.Windows.AppMgmtIQ.Events.InventoryLoaded", Category, Subcategory, InventoryLoaded, "Information", "inventory loaded");
@@ -57,5 +58,6 @@ public static class AppMgmtCatalog
         cfg.RegisterEvent("BloatwareRequested", "Vestigium.Suite.Windows.AppMgmtIQ.Events.BloatwareRequested", Category, "Bloatware", BloatwareRequested, "Information", "bloatware change requested");
         cfg.RegisterEvent("BloatwareCompleted", "Vestigium.Suite.Windows.AppMgmtIQ.Events.BloatwareCompleted", Category, "Bloatware", BloatwareCompleted, "Information", "bloatware change completed");
         cfg.RegisterEvent("BloatwareChanged", "Vestigium.Suite.Windows.AppMgmtIQ.Events.BloatwareChanged", Category, "Bloatware", BloatwareChanged, "Information", "bloatware package changed");
+        cfg.RegisterEvent("StartupLoaded", "Vestigium.Suite.Windows.AppMgmtIQ.Events.StartupLoaded", Category, "Startup", StartupLoaded, "Information", "startup entries loaded");
     }
 }
