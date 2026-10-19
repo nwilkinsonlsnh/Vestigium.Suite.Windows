@@ -8,9 +8,9 @@
 
 This file is the **definition of done for PR02**. It adds a Startup / Persistence view so AppMgmtIQ can show what installed software (or other processes) registered to run automatically, filter it, and turn those entries on or off.
 
-**One sentence:** Enumerate Run, RunOnce, RunOnceEx, and Startup folder entries, show them in a grid with source, command, and enabled state, link each entry to an installed package when a match exists, filter with the QueryBar, surface a Dashboard section, and let an administrator enable or disable entries (one or all in the current view) by writing the Windows StartupApproved flag.
+**One sentence:** Enumerate Run, RunOnce, RunOnceEx, and Startup folder entries, show them in a grid with source, command, and enabled state, link each entry to an installed package when a match exists, filter with the QueryBar, surface a Dashboard section, and let an administrator enable or disable entries (one or all in the current view) by writing the Windows StartupApproved flag. HKCU writes stay in the host. HKLM and common Startup folder writes go through a separate elevated project.
 
-**This version is not** a Scheduled Task editor. Not a service controller. Not a private cache of deleted values. Disable is the Windows flag, not a tool-owned subkey.
+**This version is not** a Scheduled Task editor. Not a service controller. Not a private cache of deleted values. Disable is the Windows flag, not a tool-owned subkey. The main application is not elevated.
 
 ---
 
@@ -77,7 +77,7 @@ Selection shows the raw command, the source key or folder path, and the enabled 
 
 ### R02-04 Chrome
 
-Startup tab appears in the main navigation alongside existing tabs. Theme and status bar unchanged.
+Startup tab appears in the main navigation alongside existing tabs. Theme and status bar unchanged. The main application stays `asInvoker`.
 
 ### R02-05 QueryBar and KQL catalog
 
@@ -127,12 +127,33 @@ Rules:
 
 - Enable All and Disable All operate on the **current filtered rows**, not the full set. A filter of `startup.source == 'Run'` must not touch Startup folder entries.
 - Confirm before a bulk action. The dialog shows the count and a scope split (HKCU vs HKLM).
-- HKCU writes do not need elevation. HKLM and common Startup folder writes do. A denied write is a status, not a crash. The dialog reports how many succeeded and how many were denied.
 - RunOnce and RunOnceEx are skipped by Enable and Disable. They have no flag. Remove is the only write for them.
 - Every write logs name, source, scope, before, after, and result.
 - No silent bulk write. No "disable everything on the machine" without the confirm.
 
 AutorunsDisabled is not used. It is a Sysinternals convention. Windows does not read it, and other tools treat the entry as gone rather than disabled.
+
+### R02-08 Elevation boundary
+
+The main application is not elevated. Elevation is a separate project, the same shape as `AppMgmtIQ.Features` and `AppMgmtIQ.Bloatware`.
+
+| Write | Where |
+|---|---|
+| HKCU Run, HKCU Startup folder | Host, in process. No UAC. |
+| HKLM Run, HKLM RunOnce, common Startup folder | `Vestigium.Suite.Windows.AppMgmtIQ.Startup`. `requireAdministrator`. |
+
+The elevated project is `Vestigium.Suite.Windows.AppMgmtIQ.Startup`. Assembly `AppMgmtIQ.Startup`. WinExe. Manifest `requireAdministrator`. It is launched only when an HKLM or common write is in the job.
+
+Contract matches Features:
+
+1. Host writes a job file (correlation id, items, intended state).
+2. Host starts `AppMgmtIQ.Startup.exe` with `Verb = runas` and the job path.
+3. The elevated exe applies the StartupApproved writes (or the remove) and writes a result file.
+4. Host reads the result, refreshes the rows, and reports succeeded / denied / cancelled.
+
+A bulk action that mixes HKCU and HKLM does the HKCU writes in process and the HKLM writes in one elevated launch. One UAC prompt per elevated batch, not one per row.
+
+If the operator cancels UAC, the HKLM items are reported as cancelled. The HKCU items already written stay written.
 
 ---
 
@@ -143,6 +164,7 @@ AutorunsDisabled is not used. It is a Sysinternals convention. Windows does not 
 - Full App Paths or file-association walk (later PR)
 - Private backup store of deleted values
 - Writes that are not confirmed
+- Elevating the main application
 
 ---
 
@@ -155,9 +177,11 @@ AutorunsDisabled is not used. It is a Sysinternals convention. Windows does not 
 5. Dashboard Startup section shows cards and charts that match the grid counts, including enabled and disabled.
 6. Enable and Disable flip the StartupApproved flag. The Run value remains.
 7. Enable All and Disable All act only on the current filtered rows, after a confirm that shows the count.
-8. An HKLM write that is denied is reported. It does not throw.
-9. Existing inventory, features, bloatware, and Active Setup tabs remain unchanged.
-10. Host tests stay off the live registry for these new paths.
+8. An HKCU write does not prompt for elevation.
+9. An HKLM or common write launches `AppMgmtIQ.Startup`. Cancelling UAC is reported, not thrown.
+10. A mixed bulk action uses one elevated launch for the HKLM items.
+11. Existing inventory, features, bloatware, and Active Setup tabs remain unchanged.
+12. Host tests stay off the live registry for these new paths.
 
 ---
 
@@ -168,6 +192,8 @@ AutorunsDisabled is not used. It is a Sysinternals convention. Windows does not 
 | StartupApproved for disable | Windows flag. Task Manager, Settings, and other tools agree. |
 | Bulk on the filtered view | Streamlines administration without surprising the operator. |
 | Confirm on bulk | Count and scope are visible before the write. |
+| Separate elevated project | Same pattern as Features and Bloatware. Main app stays unelevated. |
+| One UAC per elevated batch | Not one prompt per row. |
 | Best-effort package link | Useful context without requiring perfect matching. |
 | Both views for Run | 32-bit and 64-bit Run keys both exist. |
 | Startup folders included | Common place installers drop shortcuts. |
@@ -183,6 +209,8 @@ AutorunsDisabled is not used. It is a Sysinternals convention. Windows does not 
 | Scheduled Tasks in the same grid | Different store and permissions. Parked. |
 | Perfect package matching | Too brittle. Best-effort is enough. |
 | Silent Disable All | Operator must see the count first. |
+| Elevate the main application | Elevates reads and UI that do not need it. |
+| UAC per row | Noisy. One launch per batch. |
 
 ---
 
