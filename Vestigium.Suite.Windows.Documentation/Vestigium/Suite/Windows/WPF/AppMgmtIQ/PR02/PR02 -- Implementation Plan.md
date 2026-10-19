@@ -120,7 +120,7 @@ Dashboard gains a **Startup** radio section (alongside Packages / Features / Blo
 | 3 | PR02.003 | Enumerate user and common Startup folders. Shortcuts resolved to targets where possible. | Done |
 | 4 | PR02.004 | Best-effort package linkage against existing inventory. | Done |
 | 5 | PR02.005 | Grid columns, selection, status count. Theme the grid. | Done |
-| 6 | PR02.006 | KQL catalog: add StartupCatalog, StartupFacts, StartupAdapter, and AppMgmtKql.Startup() in Vestigium.Helpers.Kql.AppMgmt. Fields match R02-05. | |
+| 6 | PR02.006 | KQL catalog: add StartupCatalog, StartupFacts, StartupAdapter, and AppMgmtKql.Startup() in Vestigium.Helpers.Kql.AppMgmt. Fields match R02-05. | Done |
 | 7 | PR02.007 | Wire VestigiumQueryBar in StartupView (same bindings and events as AppMgmtIqView). ViewModel implements ApplyQuery / CommitQuery / Pin / QueryMru. | |
 | 8 | PR02.008 | Host tests for row projection, linkage logic, and catalog field binding (no live registry). | |
 | 9 | PR02.009 | Dashboard: add Startup radio section. Bind to StartupViewModel. Cards: total entries, by source (Run / RunOnce / Startup folder), scope (HKLM vs HKCU), linked vs unlinked. Charts: source breakdown (Pareto or pie), scope pie, linked vs unlinked. Story text updated. | |
@@ -164,4 +164,4 @@ When this plan finishes, move the whole `PR02/` folder to `Complete/PR02/`.
 
 ## Next action
 
-PR02.006. KQL catalog for Startup.
+PR02.007. Wire the QueryBar. Publish Vestigium.Helpers.Kql.AppMgmt 1.2.0 first, then pin it in Suite.
