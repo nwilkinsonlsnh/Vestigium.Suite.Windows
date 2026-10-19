@@ -10,6 +10,7 @@ public sealed class StartupJobItem
 {
     public string Name { get; set; } = "";
     public string Key { get; set; } = "";
+    public string Source { get; set; } = "Run";
     public string Branch { get; set; } = "Run";
     public string Action { get; set; } = "Disable";
     public bool IsX64 { get; set; } = true;
