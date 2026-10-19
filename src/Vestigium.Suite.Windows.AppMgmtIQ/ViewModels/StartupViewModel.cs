@@ -138,10 +138,10 @@ public sealed partial class StartupViewModel : ObservableObject
     private Task Disable() => SetEnabled(false);
 
     [RelayCommand]
-    private void EnableAll() => Later("Enable All");
+    private Task EnableAll() => SetMany(true);
 
     [RelayCommand]
-    private void DisableAll() => Later("Disable All");
+    private Task DisableAll() => SetMany(false);
 
     [RelayCommand(CanExecute = nameof(HasSelection))]
     private void Remove() => Later("Remove");
@@ -166,23 +166,16 @@ public sealed partial class StartupViewModel : ObservableObject
             return;
         if (row.Scope is "HKLM" or "Common")
         {
-            await Elevate([row], enabled);
+            var outcome = await Elevate([row], enabled);
+            Apply();
+            Status = outcome is null
+                ? "Elevation cancelled."
+                : $"{outcome.Value.Changed} changed. {outcome.Value.Denied} denied. {outcome.Value.Failed} failed.";
             return;
         }
 
-        var branch = row.Source == "Startup folder" ? "StartupFolder" : row.Bit == "32" ? "Run32" : "Run";
-        var path = Approved + "\\" + branch;
-        var data = enabled ? StartupApproved.EnabledBytes() : StartupApproved.DisabledBytes();
-        var result = RegistryHelper.Local.SetValue(
-            RegistryHiveKind.CurrentUser, path, row.Key, data,
-            RegistryValueKind.Binary, RegistryViewKind.Registry64, confirm: true);
-        if (result.Status != RegistryWriteStatus.Ok)
-        {
-            HostLog.Warning(AppMgmtCatalog.StartupChanged, "Startup", $"Startup {row.Name} denied. {result.Reason}");
-            Status = $"Denied. {result.Reason}";
+        if (!WriteUser(row, enabled))
             return;
-        }
-
         row.Enabled = enabled;
         Apply();
         var verb = enabled ? "enabled" : "disabled";
@@ -190,7 +183,73 @@ public sealed partial class StartupViewModel : ObservableObject
         Status = $"{row.Name} {verb}.";
     }
 
-    private async Task Elevate(IReadOnlyList<StartupRow> rows, bool enabled)
+    private async Task SetMany(bool enabled)
+    {
+        var candidates = Rows.Where(row => row.Source is not ("RunOnce" or "RunOnceEx")).ToList();
+        var skipped = Rows.Count - candidates.Count;
+        if (candidates.Count == 0)
+        {
+            Status = skipped == 0 ? "Nothing to change." : $"{skipped} RunOnce entries skipped.";
+            return;
+        }
+
+        var user = candidates.Where(row => row.Scope is not ("HKLM" or "Common")).ToList();
+        var machine = candidates.Where(row => row.Scope is "HKLM" or "Common").ToList();
+        var verb = enabled ? "Enable" : "Disable";
+        var message = $"{verb} {candidates.Count} entries in the current view?\n\nHKCU: {user.Count}\nHKLM: {machine.Count}"
+            + (skipped > 0 ? $"\n\n{skipped} RunOnce entries will be skipped." : "");
+        if (MessageBox.Show(message, verb + " all", MessageBoxButton.OKCancel, MessageBoxImage.Question) != MessageBoxResult.OK)
+        {
+            Status = "Cancelled.";
+            return;
+        }
+
+        var changed = 0;
+        var denied = 0;
+        foreach (var row in user)
+        {
+            if (WriteUser(row, enabled))
+            {
+                row.Enabled = enabled;
+                changed++;
+            }
+            else
+                denied++;
+        }
+
+        if (machine.Count > 0)
+        {
+            var outcome = await Elevate(machine, enabled);
+            if (outcome is null)
+            {
+                Apply();
+                Status = $"{changed} changed in HKCU. Elevation cancelled.";
+                return;
+            }
+            changed += outcome.Value.Changed;
+            denied += outcome.Value.Denied;
+        }
+
+        Apply();
+        Status = $"{changed} changed. {denied} denied.";
+    }
+
+    private bool WriteUser(StartupRow row, bool enabled)
+    {
+        var branch = row.Source == "Startup folder" ? "StartupFolder" : row.Bit == "32" ? "Run32" : "Run";
+        var path = Approved + "\\" + branch;
+        var data = enabled ? StartupApproved.EnabledBytes() : StartupApproved.DisabledBytes();
+        var result = RegistryHelper.Local.SetValue(
+            RegistryHiveKind.CurrentUser, path, row.Key, data,
+            RegistryValueKind.Binary, RegistryViewKind.Registry64, confirm: true);
+        if (result.Status == RegistryWriteStatus.Ok)
+            return true;
+        HostLog.Warning(AppMgmtCatalog.StartupChanged, "Startup", $"Startup {row.Name} denied. {result.Reason}");
+        Status = $"Denied. {result.Reason}";
+        return false;
+    }
+
+    private async Task<(int Changed, int Denied, int Failed)?> Elevate(IReadOnlyList<StartupRow> rows, bool enabled)
     {
         var id = Guid.NewGuid().ToString("N");
         var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Vestigium", "AppMgmtIQ", "Jobs");
@@ -221,25 +280,22 @@ public sealed partial class StartupViewModel : ObservableObject
         catch (Win32Exception)
         {
             HostLog.Information(AppMgmtCatalog.StartupCancelled, "Startup", "Startup change was not elevated.", id);
-            Status = "Elevation cancelled.";
-            return;
+            return null;
         }
 
         var result = await WaitForResult(resultPath);
         if (result is null)
         {
             HostLog.Information(AppMgmtCatalog.StartupCancelled, "Startup", "Startup change cancelled.", id);
-            Status = "Elevation cancelled.";
-            return;
+            return null;
         }
 
         var changed = new HashSet<string>(result.Changed, StringComparer.OrdinalIgnoreCase);
         foreach (var row in rows)
             if (changed.Contains(row.Name))
                 row.Enabled = enabled;
-        Apply();
         HostLog.Information(AppMgmtCatalog.StartupCompleted, "Startup", $"Startup change completed. changed={result.Changed.Count} denied={result.Denied.Count} failed={result.Failed.Count}", id);
-        Status = $"{result.Changed.Count} changed. {result.Denied.Count} denied. {result.Failed.Count} failed.";
+        return (result.Changed.Count, result.Denied.Count, result.Failed.Count);
     }
 
     private static async Task<StartupLaunchResult?> WaitForResult(string path)
