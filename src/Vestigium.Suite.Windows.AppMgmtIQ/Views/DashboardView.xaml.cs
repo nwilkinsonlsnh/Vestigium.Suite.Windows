@@ -121,7 +121,7 @@ public partial class DashboardView : UserControl
     {
         _charts = charts.ToList();
         Selector.Children.Clear();
-        var many = charts.Count > 2;
+        var many = charts.Count > 1;
         SelectorHost.Visibility = many ? Visibility.Visible : Visibility.Collapsed;
         Pair.Visibility = many ? Visibility.Collapsed : Visibility.Visible;
         SingleChart.Visibility = many ? Visibility.Visible : Visibility.Collapsed;
