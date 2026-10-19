@@ -16,6 +16,7 @@ public sealed partial class StartupViewModel : ObservableObject
     private const string RunOnceEx = @"SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnceEx";
     private const string UserRun = @"Software\Microsoft\Windows\CurrentVersion\Run";
     private const string UserRunOnce = @"Software\Microsoft\Windows\CurrentVersion\RunOnce";
+    private const string Approved = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved";
 
     private readonly List<StartupRow> _all = [];
     private readonly KqlSession _session = AppMgmtKql.Startup();
@@ -142,28 +143,54 @@ public sealed partial class StartupViewModel : ObservableObject
             Source = row.Source,
             Scope = row.Scope,
             IsX64 = row.Bit switch { "64" => true, "32" => false, _ => null },
-            Package = row.Package
+            Package = row.Package,
+            Enabled = row.Enabled
         }));
     }
 
     private static List<StartupRow> ReadAll()
     {
         var client = RegistryHelper.Local;
+        var approved = ReadApproved(client);
         var rows = new List<StartupRow>();
 
-        ReadValues(client, RegistryHiveKind.LocalMachine, RegistryViewKind.Registry64, Run, "Run", "HKLM", "64", rows);
-        ReadValues(client, RegistryHiveKind.LocalMachine, RegistryViewKind.Registry32, Run, "Run", "HKLM", "32", rows);
-        ReadValues(client, RegistryHiveKind.LocalMachine, RegistryViewKind.Registry64, RunOnce, "RunOnce", "HKLM", "64", rows);
-        ReadValues(client, RegistryHiveKind.LocalMachine, RegistryViewKind.Registry32, RunOnce, "RunOnce", "HKLM", "32", rows);
-        ReadOnceEx(client, RegistryHiveKind.LocalMachine, RegistryViewKind.Registry64, RunOnceEx, "HKLM", "64", rows);
-        ReadOnceEx(client, RegistryHiveKind.LocalMachine, RegistryViewKind.Registry32, RunOnceEx, "HKLM", "32", rows);
-        ReadValues(client, RegistryHiveKind.CurrentUser, RegistryViewKind.Registry64, UserRun, "Run", "HKCU", "64", rows);
-        ReadValues(client, RegistryHiveKind.CurrentUser, RegistryViewKind.Registry64, UserRunOnce, "RunOnce", "HKCU", "64", rows);
-        ReadFolder(Environment.GetFolderPath(Environment.SpecialFolder.Startup), "User", rows);
-        ReadFolder(Environment.GetFolderPath(Environment.SpecialFolder.CommonStartup), "Common", rows);
+        ReadValues(client, RegistryHiveKind.LocalMachine, RegistryViewKind.Registry64, Run, "Run", "HKLM", "64", approved, rows);
+        ReadValues(client, RegistryHiveKind.LocalMachine, RegistryViewKind.Registry32, Run, "Run", "HKLM", "32", approved, rows);
+        ReadValues(client, RegistryHiveKind.LocalMachine, RegistryViewKind.Registry64, RunOnce, "RunOnce", "HKLM", "64", approved, rows);
+        ReadValues(client, RegistryHiveKind.LocalMachine, RegistryViewKind.Registry32, RunOnce, "RunOnce", "HKLM", "32", approved, rows);
+        ReadOnceEx(client, RegistryHiveKind.LocalMachine, RegistryViewKind.Registry64, RunOnceEx, "HKLM", "64", approved, rows);
+        ReadOnceEx(client, RegistryHiveKind.LocalMachine, RegistryViewKind.Registry32, RunOnceEx, "HKLM", "32", approved, rows);
+        ReadValues(client, RegistryHiveKind.CurrentUser, RegistryViewKind.Registry64, UserRun, "Run", "HKCU", "64", approved, rows);
+        ReadValues(client, RegistryHiveKind.CurrentUser, RegistryViewKind.Registry64, UserRunOnce, "RunOnce", "HKCU", "64", approved, rows);
+        ReadFolder(Environment.GetFolderPath(Environment.SpecialFolder.Startup), "User", approved, rows);
+        ReadFolder(Environment.GetFolderPath(Environment.SpecialFolder.CommonStartup), "Common", approved, rows);
 
         return rows;
     }
+
+    private static Dictionary<string, bool> ReadApproved(RegistryClient client)
+    {
+        var map = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+        ReadApproved(client, RegistryHiveKind.LocalMachine, RegistryViewKind.Registry64, "HKLM", map);
+        ReadApproved(client, RegistryHiveKind.LocalMachine, RegistryViewKind.Registry32, "HKLM", map);
+        ReadApproved(client, RegistryHiveKind.CurrentUser, RegistryViewKind.Registry64, "HKCU", map);
+        return map;
+    }
+
+    private static void ReadApproved(RegistryClient client, RegistryHiveKind hive, RegistryViewKind view, string scope, Dictionary<string, bool> map)
+    {
+        foreach (var branch in new[] { "Run", "Run32", "StartupFolder" })
+        {
+            var key = client.GetKey(hive, Approved + "\\" + branch, view, RegistryDetailLevel.Full);
+            if (key is null)
+                continue;
+            foreach (var value in key.Values)
+                map[$"{scope}|{branch}|{value.Name}"] = StartupApproved.IsEnabled(value.Data ?? value.DataText);
+        }
+    }
+
+    private static bool Flag(Dictionary<string, bool> approved, string scope, string branch, string name)
+        => !approved.TryGetValue($"{scope}|{branch}|{name}", out var enabled) || enabled;
 
     private static void ReadValues(
         RegistryClient client,
@@ -173,13 +200,15 @@ public sealed partial class StartupViewModel : ObservableObject
         string source,
         string scope,
         string bit,
+        Dictionary<string, bool> approved,
         List<StartupRow> rows)
     {
         var key = client.GetKey(hive, path, view, RegistryDetailLevel.Full);
         if (key is null)
             return;
+        var branch = bit == "32" ? "Run32" : "Run";
         foreach (var value in key.Values)
-            Add(rows, value.Name, value.IsDefault, value.DataText, source, scope, bit);
+            Add(rows, value.Name, value.IsDefault, value.DataText, source, scope, bit, Flag(approved, scope, branch, value.Name));
     }
 
     private static void ReadOnceEx(
@@ -189,9 +218,10 @@ public sealed partial class StartupViewModel : ObservableObject
         string path,
         string scope,
         string bit,
+        Dictionary<string, bool> approved,
         List<StartupRow> rows)
     {
-        ReadValues(client, hive, view, path, "RunOnceEx", scope, bit, rows);
+        ReadValues(client, hive, view, path, "RunOnceEx", scope, bit, approved, rows);
         foreach (var child in client.ListSubKeys(hive, path, view, RegistryDetailLevel.Identity))
         {
             if (string.Equals(child.Name, "Depend", StringComparison.OrdinalIgnoreCase))
@@ -207,15 +237,16 @@ public sealed partial class StartupViewModel : ObservableObject
                 var name = string.IsNullOrWhiteSpace(title)
                     ? $"{child.Name} / {value.Name}"
                     : $"{title} / {value.Name}";
-                Add(rows, name, false, value.DataText, "RunOnceEx", scope, bit);
+                Add(rows, name, false, value.DataText, "RunOnceEx", scope, bit, true);
             }
         }
     }
 
-    private static void ReadFolder(string folder, string scope, List<StartupRow> rows)
+    private static void ReadFolder(string folder, string scope, Dictionary<string, bool> approved, List<StartupRow> rows)
     {
         if (string.IsNullOrWhiteSpace(folder) || !Directory.Exists(folder))
             return;
+        var hiveScope = scope == "Common" ? "HKLM" : "HKCU";
         foreach (var file in Directory.EnumerateFiles(folder))
         {
             var name = Path.GetFileName(file);
@@ -227,7 +258,7 @@ public sealed partial class StartupViewModel : ObservableObject
             var command = string.Equals(Path.GetExtension(file), ".lnk", StringComparison.OrdinalIgnoreCase)
                 ? ResolveShortcut(file)
                 : file;
-            Add(rows, display, false, command, "Startup folder", scope, "");
+            Add(rows, display, false, command, "Startup folder", scope, "", Flag(approved, hiveScope, "StartupFolder", name));
         }
     }
 
@@ -252,7 +283,7 @@ public sealed partial class StartupViewModel : ObservableObject
         }
     }
 
-    private static void Add(List<StartupRow> rows, string name, bool isDefault, string? command, string source, string scope, string bit)
+    private static void Add(List<StartupRow> rows, string name, bool isDefault, string? command, string source, string scope, string bit, bool enabled)
     {
         var text = command?.Trim() ?? "";
         if (text.Length == 0)
@@ -264,7 +295,8 @@ public sealed partial class StartupViewModel : ObservableObject
             Source = source,
             Scope = scope,
             Bit = bit,
-            Package = ""
+            Package = "",
+            Enabled = enabled
         });
     }
 }
