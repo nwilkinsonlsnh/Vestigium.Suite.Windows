@@ -1,0 +1,55 @@
+<UserControl x:Class="Vestigium.Suite.Windows.AppMgmtIQ.Views.StartupView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{DynamicResource Vestigium.Brushes.Surface.Window}">
+  <UserControl.Resources>
+    <Style x:Key="LeftCell" TargetType="TextBlock">
+      <Setter Property="HorizontalAlignment" Value="Left" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+      <Setter Property="Margin" Value="4,0,4,0" />
+      <Setter Property="Foreground" Value="{DynamicResource Vestigium.Brushes.Text.Primary}" />
+    </Style>
+    <Style x:Key="StartupRow" TargetType="DataGridRow" BasedOn="{StaticResource DataGridRow.Standard}">
+      <Style.Triggers>
+        <Trigger Property="IsSelected" Value="True">
+          <Setter Property="Background" Value="{DynamicResource Vestigium.Brushes.Accent.Softer}" />
+          <Setter Property="Foreground" Value="{DynamicResource Vestigium.Brushes.Text.Primary}" />
+        </Trigger>
+      </Style.Triggers>
+    </Style>
+    <Style x:Key="StartupCell" TargetType="DataGridCell" BasedOn="{StaticResource DataGridCell.Standard}">
+      <Setter Property="Foreground" Value="{DynamicResource Vestigium.Brushes.Text.Primary}" />
+      <Style.Triggers>
+        <Trigger Property="IsSelected" Value="True">
+          <Setter Property="Background" Value="Transparent" />
+          <Setter Property="Foreground" Value="{DynamicResource Vestigium.Brushes.Text.Primary}" />
+          <Setter Property="BorderBrush" Value="Transparent" />
+        </Trigger>
+      </Style.Triggers>
+    </Style>
+  </UserControl.Resources>
+  <Grid Margin="12">
+    <DataGrid Style="{StaticResource DataGrid.Standard}"
+              ItemsSource="{Binding Rows}"
+              SelectedItem="{Binding Selected}"
+              AutoGenerateColumns="False"
+              IsReadOnly="True"
+              SelectionMode="Single"
+              HeadersVisibility="Column"
+              GridLinesVisibility="Horizontal"
+              RowStyle="{StaticResource StartupRow}"
+              CellStyle="{StaticResource StartupCell}"
+              Background="{DynamicResource Vestigium.Brushes.Surface.Window}"
+              Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}"
+              BorderBrush="{DynamicResource Vestigium.Brushes.Border.Subtle}">
+      <DataGrid.Columns>
+        <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="220" ElementStyle="{StaticResource LeftCell}" />
+        <DataGridTextColumn Header="Command" Binding="{Binding Command}" Width="*" ElementStyle="{StaticResource LeftCell}" />
+        <DataGridTextColumn Header="Source" Binding="{Binding Source}" Width="180" ElementStyle="{StaticResource LeftCell}" />
+        <DataGridTextColumn Header="Scope" Binding="{Binding Scope}" Width="90" ElementStyle="{StaticResource LeftCell}" />
+        <DataGridTextColumn Header="Bit" Binding="{Binding Bit}" Width="60" ElementStyle="{StaticResource LeftCell}" />
+        <DataGridTextColumn Header="Package" Binding="{Binding Package}" Width="200" ElementStyle="{StaticResource LeftCell}" />
+      </DataGrid.Columns>
+    </DataGrid>
+  </Grid>
+</UserControl>
