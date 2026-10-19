@@ -13,6 +13,7 @@ public sealed partial class SettingsViewModel : ObservableObject
     private FeaturesViewModel? _features;
     private BloatwareViewModel? _bloatware;
     private ActiveSetupViewModel? _setup;
+    private StartupViewModel? _startup;
     private bool _loading;
 
     public SettingsViewModel(ThemeManager themes, MainViewModel host, AppMgmtSettingsStore store)
@@ -38,22 +39,24 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     public void Attach(FeaturesViewModel features) => _features = features;
 
-    public void BindMrus(FeaturesViewModel features, BloatwareViewModel bloatware, ActiveSetupViewModel setup)
+    public void BindMrus(FeaturesViewModel features, BloatwareViewModel bloatware, ActiveSetupViewModel setup, StartupViewModel startup)
     {
         _features = features;
         _bloatware = bloatware;
         _setup = setup;
+        _startup = startup;
         _host.MruChanged += SaveMrus;
         features.MruChanged += SaveMrus;
         bloatware.MruChanged += SaveMrus;
         setup.MruChanged += SaveMrus;
+        startup.MruChanged += SaveMrus;
     }
 
     public IReadOnlyList<ThemeDefinition> Themes => _themes.AvailableThemes;
 
     public IReadOnlyList<DateFormatOption> DateFormats => DisplayFormats.DateFormats;
 
-    public IReadOnlyList<string> MruTabs { get; } = ["Packages", "Features", "Bloatware", "Active Setup"];
+    public IReadOnlyList<string> MruTabs { get; } = ["Packages", "Features", "Bloatware", "Active Setup", "Startup"];
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(AppMgmtPageOpen))]
@@ -132,6 +135,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         "Features" => _features?.Queries ?? [],
         "Bloatware" => _bloatware?.Queries ?? [],
         "Active Setup" => _setup?.Queries ?? [],
+        "Startup" => _startup?.Queries ?? [],
         _ => _host.Queries
     };
 
@@ -179,6 +183,8 @@ public sealed partial class SettingsViewModel : ObservableObject
             Fill(_bloatware.Queries, data.BloatwareMrus);
         if (_setup is not null)
             Fill(_setup.Queries, data.ActiveSetupMrus);
+        if (_startup is not null)
+            Fill(_startup.Queries, data.StartupMrus);
         ApplyLimits();
         _loading = false;
         Push();
@@ -201,10 +207,12 @@ public sealed partial class SettingsViewModel : ObservableObject
         if (_features is not null) { _features.MruLimit = n; _features.StickyLimit = x; }
         if (_bloatware is not null) { _bloatware.MruLimit = n; _bloatware.StickyLimit = x; }
         if (_setup is not null) { _setup.MruLimit = n; _setup.StickyLimit = x; }
+        if (_startup is not null) { _startup.MruLimit = n; _startup.StickyLimit = x; }
         QueryMru.Trim(_host.Queries, n);
         if (_features is not null) QueryMru.Trim(_features.Queries, n);
         if (_bloatware is not null) QueryMru.Trim(_bloatware.Queries, n);
         if (_setup is not null) QueryMru.Trim(_setup.Queries, n);
+        if (_startup is not null) QueryMru.Trim(_startup.Queries, n);
     }
 
     public void RefreshSelection()
@@ -342,6 +350,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         saved.FeatureMrus = ToEntries(_features?.Queries);
         saved.BloatwareMrus = ToEntries(_bloatware?.Queries);
         saved.ActiveSetupMrus = ToEntries(_setup?.Queries);
+        saved.StartupMrus = ToEntries(_startup?.Queries);
         _store.Save(saved);
     }
 
@@ -385,6 +394,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         saved.FeatureMrus = ToEntries(_features?.Queries);
         saved.BloatwareMrus = ToEntries(_bloatware?.Queries);
         saved.ActiveSetupMrus = ToEntries(_setup?.Queries);
+        saved.StartupMrus = ToEntries(_startup?.Queries);
         _store.Save(saved);
     }
 
