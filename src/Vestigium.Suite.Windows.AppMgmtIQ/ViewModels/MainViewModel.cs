@@ -82,9 +82,12 @@ public sealed partial class MainViewModel : ObservableObject
     {
         _bound = KqlHost.Compile(Query, _session, _bound, out var error);
         ApplyFilter();
-        QueryMru.Record(Queries, Query, MruLimit, StickyLimit);
-        MruChanged?.Invoke();
-        if (!string.IsNullOrEmpty(error))
+        if (string.IsNullOrEmpty(error))
+        {
+            QueryMru.Record(Queries, Query, MruLimit, StickyLimit);
+            MruChanged?.Invoke();
+        }
+        else
             Status = error;
     }
 
