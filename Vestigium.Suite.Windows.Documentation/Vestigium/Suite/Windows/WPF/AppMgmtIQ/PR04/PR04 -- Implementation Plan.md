@@ -7,7 +7,7 @@
 **Date:** 19 October 2026  
 **Binding:** PR04 Requirements wins on behavior. This file wins on the slice.
 
-**Goal:** Add Repair/Modify launch, orphan detection, and simple version baseline comparison to the existing package inventory.
+**Goal:** Add Repair/Modify launch, orphan detection, and simple version baseline comparison to the existing package inventory. Update the Dashboard Packages section (or add a Lifecycle section) with cards and charts for orphans, action availability, and baseline status.
 
 **Not:** An auto-repair engine. Not a deployment system.
 
@@ -15,7 +15,7 @@
 
 ## Starting point
 
-Inventory grid and uninstall flow exist. ModifyPath and QuietUninstallString are already read in some projections.
+Inventory grid and uninstall flow exist. ModifyPath and QuietUninstallString are already read in some projections. Dashboard Packages section currently shows counts, publisher mix, install year, and size only.
 
 | Piece | Today | Required |
 |---|---|---|
@@ -23,6 +23,7 @@ Inventory grid and uninstall flow exist. ModifyPath and QuietUninstallString are
 | Orphan indicator | Missing | Detect missing install location. |
 | Version baseline | Missing | Simple expected-version comparison. |
 | Pending reboot | Missing | Surface when readable. |
+| Dashboard lifecycle signals | Missing | Cards/charts for orphans, Repair/Modify availability, baseline match/newer/older. |
 
 ---
 
@@ -33,6 +34,7 @@ Inventory grid and uninstall flow exist. ModifyPath and QuietUninstallString are
 | Reuse uninstall confirmation pattern | Consistent safety. |
 | Orphan = indicator only | No auto-cleanup. |
 | Baseline is local/simple | Lab-friendly. |
+| Extend existing Packages Dashboard section | Avoid a new radio for data that is a property of packages. Optional Lifecycle radio only if the section becomes crowded. |
 
 ---
 
@@ -56,7 +58,8 @@ Inventory grid and uninstall flow exist. ModifyPath and QuietUninstallString are
 | 4 | PR04.004 | Simple version baseline store and comparison column. | |
 | 5 | PR04.005 | Pending reboot / file-rename surface (read-only). | |
 | 6 | PR04.006 | Host tests for orphan logic and baseline comparison (no live registry). | |
-| 7 | PR04.007 | Owner runs against Requirements. | Owner |
+| 7 | PR04.007 | Dashboard: extend the Packages section (or add a Lifecycle radio if preferred at implementation time). Cards: orphans, packages with Repair available, packages with Modify available, baseline match / newer / older / none. Charts: orphan vs clean pie, baseline status breakdown, action availability. Story text updated to mention health. | |
+| 8 | PR04.008 | Owner runs against Requirements. | Owner |
 
 ---
 
@@ -69,6 +72,8 @@ src/Vestigium.Suite.Windows.AppMgmtIQ/ViewModels/BaselineStore.cs       [NEW]
 src/Vestigium.Suite.Windows.AppMgmtIQ/Views/AppMgmtIqView.xaml          [UPDATE]
 src/Vestigium.Suite.Windows.AppMgmtIQ/Views/AppMgmtIqView.xaml.cs       [UPDATE]
 src/Vestigium.Suite.Windows.AppMgmtIQ/DetailsWindow.xaml                [UPDATE]
+src/Vestigium.Suite.Windows.AppMgmtIQ/Views/DashboardView.xaml         [UPDATE]
+src/Vestigium.Suite.Windows.AppMgmtIQ/Views/DashboardView.xaml.cs      [UPDATE]
 ```
 
 When this plan finishes, move the whole `PR04/` folder to `Complete/PR04/`.
