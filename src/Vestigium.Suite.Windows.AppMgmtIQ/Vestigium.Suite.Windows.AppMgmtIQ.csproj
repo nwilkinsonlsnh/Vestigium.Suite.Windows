@@ -37,5 +37,15 @@
     <ProjectReference Include="..\Vestigium.Suite.Windows.AppMgmtIQ.Features\Vestigium.Suite.Windows.AppMgmtIQ.Features.csproj" />
     <ProjectReference Include="..\Vestigium.Suite.Windows.AppMgmtIQ.ActiveSetup\Vestigium.Suite.Windows.AppMgmtIQ.ActiveSetup.csproj" />
     <ProjectReference Include="..\Vestigium.Suite.Windows.AppMgmtIQ.Bloatware\Vestigium.Suite.Windows.AppMgmtIQ.Bloatware.csproj" />
+    <ProjectReference Include="..\Vestigium.Suite.Windows.AppMgmtIQ.Startup\Vestigium.Suite.Windows.AppMgmtIQ.Startup.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
   </ItemGroup>
+
+  <Target Name="CopyStartupExe" AfterTargets="Build">
+    <PropertyGroup>
+      <StartupExe>$(MSBuildProjectDirectory)\..\Vestigium.Suite.Windows.AppMgmtIQ.Startup\bin\$(Configuration)\net10.0-windows\AppMgmtIQ.Startup.exe</StartupExe>
+    </PropertyGroup>
+    <Copy SourceFiles="$(StartupExe)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" Condition="Exists('$(StartupExe)')" />
+  </Target>
 </Project>
