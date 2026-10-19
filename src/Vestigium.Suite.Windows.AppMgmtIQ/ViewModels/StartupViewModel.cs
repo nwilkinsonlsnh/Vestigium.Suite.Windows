@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Vestigium.Helpers.WinReg;
@@ -66,11 +67,27 @@ public sealed partial class StartupViewModel : ObservableObject
     [RelayCommand]
     private Task Refresh() => LoadAsync();
 
+    [RelayCommand]
+    private void CopyName()
+    {
+        if (Selected is not null)
+            Clipboard.SetText(Selected.Name);
+    }
+
+    [RelayCommand]
+    private void CopyCommand()
+    {
+        if (Selected is not null)
+            Clipboard.SetText(Selected.Command);
+    }
+
     private void Apply()
     {
+        var keep = Selected;
         Rows.Clear();
         foreach (var row in _all.OrderBy(row => row.Name, StringComparer.OrdinalIgnoreCase))
             Rows.Add(row);
+        Selected = keep is null ? null : Rows.FirstOrDefault(row => row.Name == keep.Name && row.Command == keep.Command && row.Source == keep.Source);
         Status = $"{Rows.Count} entries";
     }
 
