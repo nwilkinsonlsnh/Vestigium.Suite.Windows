@@ -36,7 +36,9 @@ public partial class App : Application
         MainWindow = CreateMainWindow(out var inventory, out var features, out var bloatware, out var setup, out var startup, out var chrome, out var dashboard);
         MainWindow.Show();
 
+        startup.Attach(inventory);
         await Task.WhenAll(inventory.LoadAsync(), features.LoadAsync(), bloatware.LoadAsync(), setup.LoadAsync(), startup.LoadAsync());
+        startup.Link(inventory.AllPackages);
         chrome.Status.Message = inventory.Status;
         dashboard.Bind(inventory, features, bloatware, setup);
         WireStatus(chrome, inventory, features, bloatware, setup, startup);
