@@ -118,7 +118,7 @@ Dashboard gains a **Startup** radio section (alongside Packages / Features / Blo
 | 1 | PR02.001 | Add Startup tab shell and empty ViewModel. Navigation only. | Done |
 | 2 | PR02.002 | Enumerate Run / RunOnce / RunOnceEx (HKLM + HKCU, both views). Project to StartupRow. | Done |
 | 3 | PR02.003 | Enumerate user and common Startup folders. Shortcuts resolved to targets where possible. | Done |
-| 4 | PR02.004 | Best-effort package linkage against existing inventory. | |
+| 4 | PR02.004 | Best-effort package linkage against existing inventory. | Done |
 | 5 | PR02.005 | Grid columns, selection, status count. Theme the grid. | |
 | 6 | PR02.006 | KQL catalog: add StartupCatalog, StartupFacts, StartupAdapter, and AppMgmtKql.Startup() in Vestigium.Helpers.Kql.AppMgmt. Fields match R02-05. | |
 | 7 | PR02.007 | Wire VestigiumQueryBar in StartupView (same bindings and events as AppMgmtIqView). ViewModel implements ApplyQuery / CommitQuery / Pin / QueryMru. | |
@@ -164,4 +164,4 @@ When this plan finishes, move the whole `PR02/` folder to `Complete/PR02/`.
 
 ## Next action
 
-PR02.004. Best-effort package linkage against existing inventory.
+PR02.005. Grid columns, selection, status count. Theme the grid.
