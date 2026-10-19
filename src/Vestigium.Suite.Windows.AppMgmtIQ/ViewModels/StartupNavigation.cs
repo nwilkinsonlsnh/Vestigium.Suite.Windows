@@ -3,12 +3,14 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using CommunityToolkit.Mvvm.Input;
 using Vestigium.Helpers.WinReg;
 
 namespace Vestigium.Suite.Windows.AppMgmtIQ.ViewModels;
 
 public sealed partial class StartupViewModel
 {
+    [RelayCommand(CanExecute = nameof(HasSelection))]
     private void OpenSource()
     {
         if (Selected is not { } row)
@@ -43,6 +45,7 @@ public sealed partial class StartupViewModel
         Process.Start(new ProcessStartInfo("regedit.exe") { UseShellExecute = true });
     }
 
+    [RelayCommand(CanExecute = nameof(CanJump))]
     private void JumpToPackage()
     {
         if (Selected is not { } row || string.IsNullOrWhiteSpace(row.Package) || _inventory is null)
