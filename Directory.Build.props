@@ -20,7 +20,7 @@
     <VestigiumKqlVersion>3.4.0</VestigiumKqlVersion>
     <VestigiumKqlAppMgmtVersion>1.1.0</VestigiumKqlAppMgmtVersion>
     <VestigiumKqlActiveSetupVersion>1.0.0</VestigiumKqlActiveSetupVersion>
-    <VestigiumQueryBarVersion>1.1.0</VestigiumQueryBarVersion>
+    <VestigiumQueryBarVersion>1.3.0</VestigiumQueryBarVersion>
     <VestigiumClosedXmlVersion>1.0.1</VestigiumClosedXmlVersion>
     <VestigiumAnalyticsVersion>1.0.4</VestigiumAnalyticsVersion>
     <VestigiumChartsVersion>1.0.10</VestigiumChartsVersion>
