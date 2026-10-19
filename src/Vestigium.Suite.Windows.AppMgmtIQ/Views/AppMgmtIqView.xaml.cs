@@ -54,6 +54,9 @@ public partial class AppMgmtIqView : UserControl
         var view = CollectionViewSource.GetDefaultView(PackageGrid.ItemsSource);
         if (view is not null && view.SortDescriptions.Count == 0)
             view.SortDescriptions.Add(new SortDescription(nameof(PackageRow.DisplayName), ListSortDirection.Ascending));
+
+        if (DataContext is MainViewModel host)
+            host.PackageSelected += package => PackageGrid.ScrollIntoView(package);
     }
 
     private void Grid_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
