@@ -89,7 +89,7 @@ New tab **Startup** in main navigation.
 
 ```
 QueryBar  (FilterRequested / Committed / PinRequested)
-grid  Name, Command, Source, Scope, Bit, Package
+grid  Name, Command, Source, Scope, Bit, State, Package
 status  count of entries
 ```
 
@@ -108,6 +108,7 @@ Dashboard gains a **Startup** radio section (alongside Packages / Features / Blo
 5. QueryBar live-filters via `ApplyQuery`. Commit records MRU only when the query binds.
 6. No writes.
 7. Dashboard Startup section reads the same collection and renders summary cards and charts.
+8. StartupApproved companion keys mark each Run and Startup folder entry Enabled or Disabled. Missing flag means Enabled. `startup.enabled` is searchable.
 
 ---
 
@@ -124,7 +125,8 @@ Dashboard gains a **Startup** radio section (alongside Packages / Features / Blo
 | 7 | PR02.007 | Wire VestigiumQueryBar in StartupView (same bindings and events as AppMgmtIqView). ViewModel implements ApplyQuery / CommitQuery / Pin / QueryMru. | Done |
 | 8 | PR02.008 | Host tests for row projection, linkage logic, and catalog field binding (no live registry). | Done |
 | 9 | PR02.009 | Dashboard: add Startup radio section. Bind to StartupViewModel. Cards: total entries, by source (Run / RunOnce / Startup folder), scope (HKLM vs HKCU), linked vs unlinked. Charts: source breakdown (Pareto or pie), scope pie, linked vs unlinked. Story text updated. | Done |
-| 10 | PR02.010 | Owner runs against Requirements. | Owner |
+| 10 | PR02.011 | Read StartupApproved. Show Enabled/Disabled. Searchable as startup.enabled. Dashboard counts. | Done |
+| 11 | PR02.010 | Owner runs against Requirements. | Owner |
 
 ---
 
@@ -164,4 +166,4 @@ When this plan finishes, move the whole `PR02/` folder to `Complete/PR02/`.
 
 ## Next action
 
-PR02.010. Owner runs against Requirements.
+Publish Vestigium.Helpers.Kql.AppMgmt 1.3.0, then PR02.010. Owner runs against Requirements.
