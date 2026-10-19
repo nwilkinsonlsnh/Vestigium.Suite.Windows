@@ -36,7 +36,7 @@ public partial class App : Application
         MainWindow = CreateMainWindow(out var inventory, out var features, out var bloatware, out var setup, out var startup, out var chrome, out var dashboard);
         MainWindow.Show();
 
-        await Task.WhenAll(inventory.LoadAsync(), features.LoadAsync(), bloatware.LoadAsync(), setup.LoadAsync());
+        await Task.WhenAll(inventory.LoadAsync(), features.LoadAsync(), bloatware.LoadAsync(), setup.LoadAsync(), startup.LoadAsync());
         chrome.Status.Message = inventory.Status;
         dashboard.Bind(inventory, features, bloatware, setup);
         WireStatus(chrome, inventory, features, bloatware, setup, startup);
@@ -163,7 +163,7 @@ public partial class App : Application
         featuresVm = new FeaturesViewModel { IsLoading = true };
         bloatware = new BloatwareViewModel { IsLoading = true };
         setup = new ActiveSetupViewModel { IsLoading = true };
-        startup = new StartupViewModel();
+        startup = new StartupViewModel { IsLoading = true };
         var store = new AppMgmtSettingsStore(AppMgmtSettingsStore.DefaultRoot);
         var settings = new SettingsViewModel(Themes, inventory, store);
         settings.BindMrus(featuresVm, bloatware, setup);
