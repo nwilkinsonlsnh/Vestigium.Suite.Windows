@@ -168,7 +168,7 @@ public partial class App : Application
         startup = new StartupViewModel { IsLoading = true };
         var store = new AppMgmtSettingsStore(AppMgmtSettingsStore.DefaultRoot);
         var settings = new SettingsViewModel(Themes, inventory, store);
-        settings.BindMrus(featuresVm, bloatware, setup);
+        settings.BindMrus(featuresVm, bloatware, setup, startup);
         settings.Load();
 
         var page = new AppMgmtIqView { DataContext = inventory };
