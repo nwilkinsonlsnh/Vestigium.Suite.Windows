@@ -40,7 +40,7 @@ public partial class App : Application
         await Task.WhenAll(inventory.LoadAsync(), features.LoadAsync(), bloatware.LoadAsync(), setup.LoadAsync(), startup.LoadAsync());
         startup.Link(inventory.AllPackages);
         chrome.Status.Message = inventory.Status;
-        dashboard.Bind(inventory, features, bloatware, setup);
+        dashboard.Bind(inventory, features, bloatware, setup, startup);
         WireStatus(chrome, inventory, features, bloatware, setup, startup);
 
         base.OnStartup(e);
