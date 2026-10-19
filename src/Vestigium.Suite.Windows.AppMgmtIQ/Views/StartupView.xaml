@@ -33,6 +33,7 @@
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,8">
       <Button Width="36" Height="36" Padding="0"
@@ -58,16 +59,53 @@
               Background="{DynamicResource Vestigium.Brushes.Surface.Window}"
               Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}"
               BorderBrush="{DynamicResource Vestigium.Brushes.Border.Subtle}">
+      <DataGrid.ContextMenu>
+        <ContextMenu Style="{StaticResource ContextMenu.Standard}">
+          <MenuItem Header="Refresh" Style="{StaticResource MenuItem.Standard}" Command="{Binding RefreshCommand}">
+            <MenuItem.Icon><TextBlock FontFamily="Segoe UI Symbol" FontSize="14" Text="&#x267B;" Foreground="#3DDC84" /></MenuItem.Icon>
+          </MenuItem>
+          <Separator Style="{StaticResource Separator.Standard}" />
+          <MenuItem Header="Copy" Style="{StaticResource MenuItem.Standard}">
+            <MenuItem Header="Name" Style="{StaticResource MenuItem.Standard}" Command="{Binding CopyNameCommand}" />
+            <MenuItem Header="Command" Style="{StaticResource MenuItem.Standard}" Command="{Binding CopyCommandCommand}" />
+          </MenuItem>
+        </ContextMenu>
+      </DataGrid.ContextMenu>
       <DataGrid.Columns>
         <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="220" ElementStyle="{StaticResource LeftCell}" />
         <DataGridTextColumn Header="Command" Binding="{Binding Command}" Width="*" ElementStyle="{StaticResource LeftCell}" />
-        <DataGridTextColumn Header="Source" Binding="{Binding Source}" Width="180" ElementStyle="{StaticResource LeftCell}" />
+        <DataGridTextColumn Header="Source" Binding="{Binding Source}" Width="140" ElementStyle="{StaticResource LeftCell}" />
         <DataGridTextColumn Header="Scope" Binding="{Binding Scope}" Width="90" ElementStyle="{StaticResource LeftCell}" />
         <DataGridTextColumn Header="Bit" Binding="{Binding Bit}" Width="60" ElementStyle="{StaticResource LeftCell}" />
         <DataGridTextColumn Header="Package" Binding="{Binding Package}" Width="200" ElementStyle="{StaticResource LeftCell}" />
       </DataGrid.Columns>
     </DataGrid>
-    <Border Grid.RowSpan="2"
+    <Border Grid.Row="2" Margin="0,8,0,0" Padding="12"
+            BorderBrush="{DynamicResource Vestigium.Brushes.Border.Subtle}"
+            BorderThickness="1"
+            Background="{DynamicResource Vestigium.Brushes.Surface.Panel}"
+            Visibility="{Binding Selected, Converter={StaticResource BoolToVis}}">
+      <StackPanel>
+        <TextBlock Style="{StaticResource TextBlock.Caption}" TextWrapping="Wrap">
+          <Run Text="{Binding Selected.Name, Mode=OneWay}" FontWeight="SemiBold" />
+          <Run Text="  ·  " />
+          <Run Text="{Binding Selected.Source, Mode=OneWay}" />
+          <Run Text="  ·  " />
+          <Run Text="{Binding Selected.Scope, Mode=OneWay}" />
+          <Run Text="  ·  " />
+          <Run Text="{Binding Selected.Bit, Mode=OneWay}" />
+        </TextBlock>
+        <TextBlock Margin="0,4,0,0"
+                   Style="{StaticResource TextBlock.Caption}"
+                   Text="{Binding Selected.Command, Mode=OneWay}"
+                   TextWrapping="Wrap" />
+        <TextBlock Margin="0,4,0,0"
+                   Style="{StaticResource TextBlock.Caption}"
+                   Text="{Binding Selected.Package, Mode=OneWay}"
+                   TextWrapping="Wrap" />
+      </StackPanel>
+    </Border>
+    <Border Grid.RowSpan="3"
             Background="{DynamicResource Vestigium.Brushes.Surface.Window}"
             Opacity="0.92"
             Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
