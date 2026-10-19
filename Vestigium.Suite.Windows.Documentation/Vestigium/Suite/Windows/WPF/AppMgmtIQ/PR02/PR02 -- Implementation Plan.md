@@ -116,7 +116,7 @@ Dashboard gains a **Startup** radio section (alongside Packages / Features / Blo
 | Order | ID | Do | State |
 | ---: | :--- | :--- | :--- |
 | 1 | PR02.001 | Add Startup tab shell and empty ViewModel. Navigation only. | Done |
-| 2 | PR02.002 | Enumerate Run / RunOnce / RunOnceEx (HKLM + HKCU, both views). Project to StartupRow. | |
+| 2 | PR02.002 | Enumerate Run / RunOnce / RunOnceEx (HKLM + HKCU, both views). Project to StartupRow. | Done |
 | 3 | PR02.003 | Enumerate user and common Startup folders. Shortcuts resolved to targets where possible. | |
 | 4 | PR02.004 | Best-effort package linkage against existing inventory. | |
 | 5 | PR02.005 | Grid columns, selection, status count. Theme the grid. | |
@@ -164,4 +164,4 @@ When this plan finishes, move the whole `PR02/` folder to `Complete/PR02/`.
 
 ## Next action
 
-PR02.002. Enumerate Run / RunOnce / RunOnceEx.
+PR02.003. Enumerate user and common Startup folders.
