@@ -144,7 +144,7 @@ public sealed partial class StartupViewModel : ObservableObject
     private Task DisableAll() => SetMany(false);
 
     [RelayCommand(CanExecute = nameof(HasSelection))]
-    private void Remove() => Later("Remove");
+    private Task Remove() => RemoveEntry();
 
     [RelayCommand(CanExecute = nameof(HasSelection))]
     private void OpenSource() => Later("Open source");
@@ -166,7 +166,7 @@ public sealed partial class StartupViewModel : ObservableObject
             return;
         if (row.Scope is "HKLM" or "Common")
         {
-            var outcome = await Elevate([row], enabled);
+            var outcome = await Elevate([row], enabled ? "Enable" : "Disable");
             Apply();
             Status = outcome is null
                 ? "Elevation cancelled."
@@ -219,7 +219,7 @@ public sealed partial class StartupViewModel : ObservableObject
 
         if (machine.Count > 0)
         {
-            var outcome = await Elevate(machine, enabled);
+            var outcome = await Elevate(machine, enabled ? "Enable" : "Disable");
             if (outcome is null)
             {
                 Apply();
@@ -232,6 +232,41 @@ public sealed partial class StartupViewModel : ObservableObject
 
         Apply();
         Status = $"{changed} changed. {denied} denied.";
+    }
+
+    private async Task RemoveEntry()
+    {
+        if (Selected is not { } row)
+            return;
+        if (row.Source == "RunOnceEx")
+        {
+            Status = "RunOnceEx is not removable from this view.";
+            return;
+        }
+
+        var message = $"Remove {row.Name}?\n\nThis deletes the startup entry. It does not uninstall the package.";
+        if (MessageBox.Show(message, "Remove", MessageBoxButton.OKCancel, MessageBoxImage.Warning) != MessageBoxResult.OK)
+        {
+            Status = "Cancelled.";
+            return;
+        }
+
+        if (row.Scope is "HKLM" or "Common")
+        {
+            var outcome = await Elevate([row], "Remove");
+            Apply();
+            Status = outcome is null
+                ? "Elevation cancelled."
+                : outcome.Value.Changed > 0 ? $"{row.Name} removed." : "Denied.";
+            return;
+        }
+
+        if (!RemoveUser(row))
+            return;
+        _all.Remove(row);
+        Apply();
+        HostLog.Information(AppMgmtCatalog.StartupChanged, "Startup", $"Startup {row.Name} removed.");
+        Status = $"{row.Name} removed.";
     }
 
     private bool WriteUser(StartupRow row, bool enabled)
@@ -249,14 +284,34 @@ public sealed partial class StartupViewModel : ObservableObject
         return false;
     }
 
-    private async Task<(int Changed, int Denied, int Failed)?> Elevate(IReadOnlyList<StartupRow> rows, bool enabled)
+    private bool RemoveUser(StartupRow row)
+    {
+        if (row.Source == "Startup folder")
+        {
+            var folder = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
+            var path = Path.Combine(folder, row.Key);
+            if (File.Exists(path))
+                File.Delete(path);
+            return true;
+        }
+
+        var key = row.Source == "RunOnce" ? UserRunOnce : UserRun;
+        var result = RegistryHelper.Local.DeleteValue(
+            RegistryHiveKind.CurrentUser, key, row.Key, RegistryViewKind.Registry64, confirm: true);
+        if (result.Status == RegistryWriteStatus.Ok)
+            return true;
+        HostLog.Warning(AppMgmtCatalog.StartupChanged, "Startup", $"Startup {row.Name} denied. {result.Reason}");
+        Status = $"Denied. {result.Reason}";
+        return false;
+    }
+
+    private async Task<(int Changed, int Denied, int Failed)?> Elevate(IReadOnlyList<StartupRow> rows, string action)
     {
         var id = Guid.NewGuid().ToString("N");
         var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Vestigium", "AppMgmtIQ", "Jobs");
         Directory.CreateDirectory(dir);
         var jobPath = Path.Combine(dir, id + ".json");
         var resultPath = Path.ChangeExtension(jobPath, ".result.json");
-        var verb = enabled ? "Enable" : "Disable";
         var job = new StartupLaunchJob
         {
             CorrelationId = id,
@@ -264,13 +319,14 @@ public sealed partial class StartupViewModel : ObservableObject
             {
                 Name = row.Name,
                 Key = row.Key,
+                Source = row.Source,
                 Branch = row.Source == "Startup folder" ? "StartupFolder" : row.Bit == "32" ? "Run32" : "Run",
-                Action = verb,
+                Action = action,
                 IsX64 = row.Bit != "32"
             }).ToList()
         };
         File.WriteAllText(jobPath, JsonSerializer.Serialize(job, Json));
-        HostLog.Information(AppMgmtCatalog.StartupRequested, "Startup", $"Startup change requested. {rows.Count} items.", id);
+        HostLog.Information(AppMgmtCatalog.StartupRequested, "Startup", $"Startup {action} requested. {rows.Count} items.", id);
 
         var exe = Path.Combine(AppContext.BaseDirectory, "AppMgmtIQ.Startup.exe");
         try
@@ -292,8 +348,14 @@ public sealed partial class StartupViewModel : ObservableObject
 
         var changed = new HashSet<string>(result.Changed, StringComparer.OrdinalIgnoreCase);
         foreach (var row in rows)
-            if (changed.Contains(row.Name))
-                row.Enabled = enabled;
+        {
+            if (!changed.Contains(row.Name))
+                continue;
+            if (action == "Remove")
+                _all.Remove(row);
+            else
+                row.Enabled = action == "Enable";
+        }
         HostLog.Information(AppMgmtCatalog.StartupCompleted, "Startup", $"Startup change completed. changed={result.Changed.Count} denied={result.Denied.Count} failed={result.Failed.Count}", id);
         return (result.Changed.Count, result.Denied.Count, result.Failed.Count);
     }
