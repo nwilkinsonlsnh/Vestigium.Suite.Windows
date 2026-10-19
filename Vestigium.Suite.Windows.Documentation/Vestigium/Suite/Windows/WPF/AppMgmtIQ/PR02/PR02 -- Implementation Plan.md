@@ -7,7 +7,7 @@
 **Date:** 19 October 2026  
 **Binding:** PR02 Requirements wins on behavior. Design v1.0 wins on types. WinReg (or temporary host walk) wins on the data. This file wins on the slice.
 
-**Goal:** Add a read-only Startup / Persistence view that lists Run, RunOnce, RunOnceEx, and Startup folder entries and links them to installed packages when possible.
+**Goal:** Add a read-only Startup / Persistence view that lists Run, RunOnce, RunOnceEx, and Startup folder entries and links them to installed packages when possible. Update the Dashboard with a Startup section that summarizes the new data.
 
 **Not:** A startup cleaner. Not Scheduled Tasks. Not services. Not any write path.
 
@@ -15,7 +15,7 @@
 
 ## Starting point (repo as of this plan)
 
-AppMgmtIQ has inventory, features, bloatware, and Active Setup tabs. No startup view.
+AppMgmtIQ has inventory, features, bloatware, and Active Setup tabs. No startup view. Dashboard has sections for Packages, Features, Bloatware, and Active Setup only.
 
 | Piece | Today | Required |
 |---|---|---|
@@ -23,13 +23,14 @@ AppMgmtIQ has inventory, features, bloatware, and Active Setup tabs. No startup 
 | Run enumeration | Missing | HKLM/HKCU, both views, Run/RunOnce/RunOnceEx. |
 | Startup folders | Missing | User and common Startup folders. |
 | Package link | Missing | Best-effort match to existing package inventory. |
+| Dashboard Startup section | Missing | Cards and charts for source, scope, and linkage. |
 | Tests | Host tests exist | New tests stay off live registry. |
 
 ---
 
 ## Decision
 
-One PR. Build slices plus owner gate.
+One PR. Build slices plus owner gate. Dashboard update is part of this PR so the summary stays in sync with the new tab.
 
 | Call | Why |
 |---|---|
@@ -37,6 +38,7 @@ One PR. Build slices plus owner gate.
 | Best-effort linkage | Useful without perfect matching. |
 | Temporary host walk acceptable | Until a Helper door owns Run enumeration. |
 | No write controls | Explicitly out. |
+| Dashboard section in this PR | Avoid lag between data and summary. |
 
 ### Rejected alternatives
 
@@ -45,13 +47,15 @@ One PR. Build slices plus owner gate.
 | Disable toggle | Out of release. |
 | Scheduled Tasks | Different PR. |
 | Host opens RegistryKey directly for long term | Prefer Helper door later. Temporary is allowed for this slice. |
+| Dedicated Dashboard PR later | Dashboard would lag the data. |
 
 ---
 
 ## Library doors this slice may call
 
 Pin: `Vestigium.Helpers.WinReg` (current).  
-Pin: existing package inventory from MainViewModel.
+Pin: existing package inventory from MainViewModel.  
+Pin: existing ChartView / ChartOptions from Vestigium.Helpers.Charts.
 
 **Debt:** Run enumeration may live in the host until a WinReg or new Helper door owns it.
 
@@ -79,6 +83,8 @@ status  count of entries
 
 Selection shows command and source path. No action buttons that modify state.
 
+Dashboard gains a **Startup** radio section (alongside Packages / Features / Bloatware / Active Setup) with cards and charts driven by the same StartupViewModel data.
+
 ---
 
 ## Behavior
@@ -88,6 +94,7 @@ Selection shows command and source path. No action buttons that modify state.
 3. For each row, attempt package match against current inventory.
 4. Grid binds. Single selection.
 5. No writes.
+6. Dashboard Startup section reads the same collection and renders summary cards and charts.
 
 ---
 
@@ -101,7 +108,8 @@ Selection shows command and source path. No action buttons that modify state.
 | 4 | PR02.004 | Best-effort package linkage against existing inventory. | |
 | 5 | PR02.005 | Grid columns, selection, status count. Theme the grid. | |
 | 6 | PR02.006 | Host tests for row projection and linkage logic (no live registry). | |
-| 7 | PR02.007 | Owner runs against Requirements. | Owner |
+| 7 | PR02.007 | Dashboard: add Startup radio section. Bind to StartupViewModel. Cards: total entries, by source (Run / RunOnce / Startup folder), scope (HKLM vs HKCU), linked vs unlinked. Charts: source breakdown (Pareto or pie), scope pie, linked vs unlinked. Story text updated. | |
+| 8 | PR02.008 | Owner runs against Requirements. | Owner |
 
 ---
 
@@ -114,6 +122,8 @@ src/Vestigium.Suite.Windows.AppMgmtIQ/Views/StartupView.xaml           [NEW]
 src/Vestigium.Suite.Windows.AppMgmtIQ/Views/StartupView.xaml.cs        [NEW]
 src/Vestigium.Suite.Windows.AppMgmtIQ/AppMgmtIqWindow.xaml             [UPDATE]
 src/Vestigium.Suite.Windows.AppMgmtIQ/App.xaml.cs                      [UPDATE]
+src/Vestigium.Suite.Windows.AppMgmtIQ/Views/DashboardView.xaml         [UPDATE]
+src/Vestigium.Suite.Windows.AppMgmtIQ/Views/DashboardView.xaml.cs      [UPDATE]
 ```
 
 When this plan finishes, move the whole `PR02/` folder to `Complete/PR02/`.
@@ -125,8 +135,8 @@ When this plan finishes, move the whole `PR02/` folder to `Complete/PR02/`.
 | Role | Watch |
 |---|---|
 | Alvin | No write paths. No façade that bypasses Helper long-term. |
-| Theodore | Missing keys or empty folders do not throw. Grid stays themed. |
-| Simon | Both views and both Startup folders are included. Package link is best-effort only. |
+| Theodore | Missing keys or empty folders do not throw. Grid stays themed. Dashboard section uses existing ChartView helpers. |
+| Simon | Both views and both Startup folders are included. Package link is best-effort only. Dashboard cards match the grid counts. |
 
 ---
 
