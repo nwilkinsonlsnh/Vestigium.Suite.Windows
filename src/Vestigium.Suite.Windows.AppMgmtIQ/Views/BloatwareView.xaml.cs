@@ -21,6 +21,12 @@ public partial class BloatwareView : UserControl
             host.ApplyQuery();
     }
 
+    private void OnCommit(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is BloatwareViewModel host)
+            host.CommitQuery();
+    }
+
     private void OnPin(object sender, VestigiumQueryRowEventArgs e)
     {
         if (DataContext is BloatwareViewModel host)
