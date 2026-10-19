@@ -29,13 +29,10 @@
       </Style.Triggers>
     </Style>
     <Style x:Key="Details" TargetType="Border">
-      <Setter Property="Visibility" Value="Collapsed" />
+      <Setter Property="Visibility" Value="Visible" />
       <Style.Triggers>
         <DataTrigger Binding="{Binding Selected}" Value="{x:Null}">
           <Setter Property="Visibility" Value="Collapsed" />
-        </DataTrigger>
-        <DataTrigger Binding="{Binding Selected, Converter={x:Null}}" Value="False">
-          <Setter Property="Visibility" Value="Visible" />
         </DataTrigger>
       </Style.Triggers>
     </Style>
