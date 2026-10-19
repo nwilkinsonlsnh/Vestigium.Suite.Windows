@@ -141,7 +141,7 @@ Elevated project has no shell of its own. It reads a job, applies the writes, wr
 | 8 | PR02.008 | Host tests for row projection, linkage logic, and catalog field binding (no live registry). | Done |
 | 9 | PR02.009 | Dashboard: add Startup radio section. Bind to StartupViewModel. Cards and charts. Story text updated. | Done |
 | 10 | PR02.011 | Read StartupApproved. Show Enabled/Disabled. Searchable as startup.enabled. Dashboard counts. | Done |
-| 11 | PR02.012 | Context menu shell: Enable, Disable, Enable All, Disable All, Remove, Open source, Jump to package. Commands no-op except Copy. | |
+| 11 | PR02.012 | Context menu shell: Enable, Disable, Enable All, Disable All, Remove, Open source, Jump to package. Commands no-op except Copy. | Done |
 | 12 | PR02.013 | StartupApproved write for one HKCU row. In process. Log. Refresh the row. | |
 | 13 | PR02.014 | Create `Vestigium.Suite.Windows.AppMgmtIQ.Startup`. WinExe, `requireAdministrator`, job/result contract matching Features. | |
 | 14 | PR02.015 | Host launches `AppMgmtIQ.Startup` for HKLM and common writes. One launch per batch. Cancelled UAC is a status. | |
@@ -195,4 +195,4 @@ When this plan finishes, move the whole `PR02/` folder to `Complete/PR02/`.
 
 ## Next action
 
-Publish Vestigium.Helpers.Kql.AppMgmt 1.3.0. Then PR02.012. Context menu shell.
+PR02.013. StartupApproved write for one HKCU row.
