@@ -8,4 +8,6 @@ public sealed class StartupRow
     public string Scope { get; init; } = "";
     public string Bit { get; init; } = "";
     public string Package { get; set; } = "";
+    public bool Enabled { get; set; } = true;
+    public string State => Enabled ? "Enabled" : "Disabled";
 }
