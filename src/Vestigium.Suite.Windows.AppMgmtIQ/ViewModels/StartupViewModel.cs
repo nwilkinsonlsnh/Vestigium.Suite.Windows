@@ -147,10 +147,10 @@ public sealed partial class StartupViewModel : ObservableObject
     private Task Remove() => RemoveEntry();
 
     [RelayCommand(CanExecute = nameof(HasSelection))]
-    private void OpenSource() => Later("Open source");
+    private void OpenSource() => OpenSourceEntry();
 
     [RelayCommand(CanExecute = nameof(CanJump))]
-    private void JumpToPackage() => Later("Jump to package");
+    private void JumpToPackage() => JumpToPackageEntry();
 
     private bool HasSelection() => Selected is not null;
 
