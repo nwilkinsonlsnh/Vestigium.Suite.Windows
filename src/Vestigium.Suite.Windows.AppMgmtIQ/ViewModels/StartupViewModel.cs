@@ -36,6 +36,11 @@ public sealed partial class StartupViewModel : ObservableObject
     private string _query = string.Empty;
 
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(EnableCommand))]
+    [NotifyCanExecuteChangedFor(nameof(DisableCommand))]
+    [NotifyCanExecuteChangedFor(nameof(RemoveCommand))]
+    [NotifyCanExecuteChangedFor(nameof(OpenSourceCommand))]
+    [NotifyCanExecuteChangedFor(nameof(JumpToPackageCommand))]
     private StartupRow? _selected;
 
     [ObservableProperty]
@@ -120,6 +125,35 @@ public sealed partial class StartupViewModel : ObservableObject
         if (Selected is not null)
             Clipboard.SetText(Selected.Command);
     }
+
+    [RelayCommand(CanExecute = nameof(CanToggle))]
+    private void Enable() => Later("Enable");
+
+    [RelayCommand(CanExecute = nameof(CanToggle))]
+    private void Disable() => Later("Disable");
+
+    [RelayCommand]
+    private void EnableAll() => Later("Enable All");
+
+    [RelayCommand]
+    private void DisableAll() => Later("Disable All");
+
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private void Remove() => Later("Remove");
+
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private void OpenSource() => Later("Open source");
+
+    [RelayCommand(CanExecute = nameof(CanJump))]
+    private void JumpToPackage() => Later("Jump to package");
+
+    private bool HasSelection() => Selected is not null;
+
+    private bool CanToggle() => Selected is not null && Selected.Source is not ("RunOnce" or "RunOnceEx");
+
+    private bool CanJump() => Selected is not null && !string.IsNullOrWhiteSpace(Selected.Package);
+
+    private void Later(string action) => Status = $"{action} is not wired yet.";
 
     private void Apply()
     {
