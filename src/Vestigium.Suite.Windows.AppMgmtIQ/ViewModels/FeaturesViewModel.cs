@@ -63,13 +63,18 @@ public sealed partial class FeaturesViewModel : ObservableObject
     {
         _bound = KqlHost.Compile(Query, _session, _bound, out var error);
         ApplyFilter();
-        if (string.IsNullOrEmpty(error))
+        if (!string.IsNullOrEmpty(error))
+            Status = error;
+    }
+
+    public void CommitQuery()
+    {
+        ApplyQuery();
+        if (_bound is not null)
         {
             QueryMru.Record(Queries, Query, MruLimit, StickyLimit);
             MruChanged?.Invoke();
         }
-        else
-            Status = error;
     }
 
     public void Pin(object? row)
