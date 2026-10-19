@@ -127,10 +127,10 @@ public sealed partial class StartupViewModel : ObservableObject
     }
 
     [RelayCommand(CanExecute = nameof(CanToggle))]
-    private void Enable() => Later("Enable");
+    private void Enable() => SetEnabled(true);
 
     [RelayCommand(CanExecute = nameof(CanToggle))]
-    private void Disable() => Later("Disable");
+    private void Disable() => SetEnabled(false);
 
     [RelayCommand]
     private void EnableAll() => Later("Enable All");
@@ -154,6 +154,36 @@ public sealed partial class StartupViewModel : ObservableObject
     private bool CanJump() => Selected is not null && !string.IsNullOrWhiteSpace(Selected.Package);
 
     private void Later(string action) => Status = $"{action} is not wired yet.";
+
+    private void SetEnabled(bool enabled)
+    {
+        if (Selected is not { } row)
+            return;
+        if (row.Scope is "HKLM" or "Common")
+        {
+            Status = "HKLM writes go through AppMgmtIQ.Startup. Not wired yet.";
+            return;
+        }
+
+        var branch = row.Source == "Startup folder" ? "StartupFolder" : row.Bit == "32" ? "Run32" : "Run";
+        var path = Approved + "\\" + branch;
+        var data = enabled ? StartupApproved.EnabledBytes() : StartupApproved.DisabledBytes();
+        var result = RegistryHelper.Local.SetValue(
+            RegistryHiveKind.CurrentUser, path, row.Key, data,
+            RegistryValueKind.Binary, RegistryViewKind.Registry64, confirm: true);
+        if (result.Status != RegistryWriteStatus.Ok)
+        {
+            HostLog.Warning(AppMgmtCatalog.StartupChanged, "Startup", $"Startup {row.Name} denied. {result.Reason}");
+            Status = $"Denied. {result.Reason}";
+            return;
+        }
+
+        row.Enabled = enabled;
+        Apply();
+        var verb = enabled ? "enabled" : "disabled";
+        HostLog.Information(AppMgmtCatalog.StartupChanged, "Startup", $"Startup {row.Name} {verb}.");
+        Status = $"{row.Name} {verb}.";
+    }
 
     private void Apply()
     {
@@ -242,7 +272,7 @@ public sealed partial class StartupViewModel : ObservableObject
             return;
         var branch = bit == "32" ? "Run32" : "Run";
         foreach (var value in key.Values)
-            Add(rows, value.Name, value.IsDefault, value.DataText, source, scope, bit, Flag(approved, scope, branch, value.Name));
+            Add(rows, value.Name, value.Name, value.IsDefault, value.DataText, source, scope, bit, Flag(approved, scope, branch, value.Name));
     }
 
     private static void ReadOnceEx(
@@ -271,7 +301,7 @@ public sealed partial class StartupViewModel : ObservableObject
                 var name = string.IsNullOrWhiteSpace(title)
                     ? $"{child.Name} / {value.Name}"
                     : $"{title} / {value.Name}";
-                Add(rows, name, false, value.DataText, "RunOnceEx", scope, bit, true);
+                Add(rows, name, value.Name, false, value.DataText, "RunOnceEx", scope, bit, true);
             }
         }
     }
@@ -292,7 +322,7 @@ public sealed partial class StartupViewModel : ObservableObject
             var command = string.Equals(Path.GetExtension(file), ".lnk", StringComparison.OrdinalIgnoreCase)
                 ? ResolveShortcut(file)
                 : file;
-            Add(rows, display, false, command, "Startup folder", scope, "", Flag(approved, hiveScope, "StartupFolder", name));
+            Add(rows, display, name, false, command, "Startup folder", scope, "", Flag(approved, hiveScope, "StartupFolder", name));
         }
     }
 
@@ -317,7 +347,7 @@ public sealed partial class StartupViewModel : ObservableObject
         }
     }
 
-    private static void Add(List<StartupRow> rows, string name, bool isDefault, string? command, string source, string scope, string bit, bool enabled)
+    private static void Add(List<StartupRow> rows, string name, string key, bool isDefault, string? command, string source, string scope, string bit, bool enabled)
     {
         var text = command?.Trim() ?? "";
         if (text.Length == 0)
@@ -325,6 +355,7 @@ public sealed partial class StartupViewModel : ObservableObject
         rows.Add(new StartupRow
         {
             Name = isDefault || string.IsNullOrWhiteSpace(name) ? "(Default)" : name,
+            Key = string.IsNullOrWhiteSpace(key) ? name : key,
             Command = text,
             Source = source,
             Scope = scope,
