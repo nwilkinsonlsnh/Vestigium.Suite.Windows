@@ -123,7 +123,7 @@ Dashboard gains a **Startup** radio section (alongside Packages / Features / Blo
 | 6 | PR02.006 | KQL catalog: add StartupCatalog, StartupFacts, StartupAdapter, and AppMgmtKql.Startup() in Vestigium.Helpers.Kql.AppMgmt. Fields match R02-05. | Done |
 | 7 | PR02.007 | Wire VestigiumQueryBar in StartupView (same bindings and events as AppMgmtIqView). ViewModel implements ApplyQuery / CommitQuery / Pin / QueryMru. | Done |
 | 8 | PR02.008 | Host tests for row projection, linkage logic, and catalog field binding (no live registry). | Done |
-| 9 | PR02.009 | Dashboard: add Startup radio section. Bind to StartupViewModel. Cards: total entries, by source (Run / RunOnce / Startup folder), scope (HKLM vs HKCU), linked vs unlinked. Charts: source breakdown (Pareto or pie), scope pie, linked vs unlinked. Story text updated. | |
+| 9 | PR02.009 | Dashboard: add Startup radio section. Bind to StartupViewModel. Cards: total entries, by source (Run / RunOnce / Startup folder), scope (HKLM vs HKCU), linked vs unlinked. Charts: source breakdown (Pareto or pie), scope pie, linked vs unlinked. Story text updated. | Done |
 | 10 | PR02.010 | Owner runs against Requirements. | Owner |
 
 ---
@@ -164,4 +164,4 @@ When this plan finishes, move the whole `PR02/` folder to `Complete/PR02/`.
 
 ## Next action
 
-PR02.009. Dashboard Startup section.
+PR02.010. Owner runs against Requirements.
