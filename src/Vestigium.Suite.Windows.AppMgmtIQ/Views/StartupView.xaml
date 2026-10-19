@@ -28,6 +28,17 @@
         </Trigger>
       </Style.Triggers>
     </Style>
+    <Style x:Key="Details" TargetType="Border">
+      <Setter Property="Visibility" Value="Collapsed" />
+      <Style.Triggers>
+        <DataTrigger Binding="{Binding Selected}" Value="{x:Null}">
+          <Setter Property="Visibility" Value="Collapsed" />
+        </DataTrigger>
+        <DataTrigger Binding="{Binding Selected, Converter={x:Null}}" Value="False">
+          <Setter Property="Visibility" Value="Visible" />
+        </DataTrigger>
+      </Style.Triggers>
+    </Style>
   </UserControl.Resources>
   <Grid Margin="12">
     <Grid.RowDefinitions>
@@ -81,10 +92,10 @@
       </DataGrid.Columns>
     </DataGrid>
     <Border Grid.Row="2" Margin="0,8,0,0" Padding="12"
+            Style="{StaticResource Details}"
             BorderBrush="{DynamicResource Vestigium.Brushes.Border.Subtle}"
             BorderThickness="1"
-            Background="{DynamicResource Vestigium.Brushes.Surface.Panel}"
-            Visibility="{Binding Selected, Converter={StaticResource BoolToVis}}">
+            Background="{DynamicResource Vestigium.Brushes.Surface.Panel}">
       <StackPanel>
         <TextBlock Style="{StaticResource TextBlock.Caption}" TextWrapping="Wrap">
           <Run Text="{Binding Selected.Name, Mode=OneWay}" FontWeight="SemiBold" />
