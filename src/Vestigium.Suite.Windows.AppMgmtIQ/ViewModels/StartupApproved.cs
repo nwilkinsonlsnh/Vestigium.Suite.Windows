@@ -4,6 +4,10 @@ namespace Vestigium.Suite.Windows.AppMgmtIQ.ViewModels;
 
 public static class StartupApproved
 {
+    public static byte[] EnabledBytes() => [0x02, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+    public static byte[] DisabledBytes() => [0x03, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
     public static bool IsEnabled(object? data)
     {
         if (data is byte[] bytes)
