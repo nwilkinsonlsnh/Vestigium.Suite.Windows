@@ -18,7 +18,7 @@
     <VestigiumConvertersVersion>1.0.0</VestigiumConvertersVersion>
     <VestigiumWinRegVersion>1.0.0</VestigiumWinRegVersion>
     <VestigiumKqlVersion>3.4.0</VestigiumKqlVersion>
-    <VestigiumKqlAppMgmtVersion>1.2.0</VestigiumKqlAppMgmtVersion>
+    <VestigiumKqlAppMgmtVersion>1.3.0</VestigiumKqlAppMgmtVersion>
     <VestigiumKqlActiveSetupVersion>1.0.0</VestigiumKqlActiveSetupVersion>
     <VestigiumQueryBarVersion>1.3.0</VestigiumQueryBarVersion>
     <VestigiumClosedXmlVersion>1.0.1</VestigiumClosedXmlVersion>
