@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Vestigium.Helpers.Kql;
 using Vestigium.Helpers.Kql.AppMgmt;
+using Vestigium.Helpers.FileSystemPaths;
 using Vestigium.Helpers.WinReg;
 
 namespace Vestigium.Suite.Windows.AppMgmtIQ.ViewModels;
