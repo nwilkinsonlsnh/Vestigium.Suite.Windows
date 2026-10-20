@@ -28,6 +28,7 @@ public sealed partial class MainViewModel : ObservableObject
     ];
 
     private readonly List<PackageRow> _all = [];
+    private readonly BaselineStore _baselines = new(AppMgmtSettingsStore.DefaultRoot);
     private readonly KqlSession _session = AppMgmtKql.Packages();
     private KqlBoundQuery? _bound;
     private int _orphan;
@@ -116,6 +117,8 @@ public sealed partial class MainViewModel : ObservableObject
             var rows = await Task.Run(ReadAll);
             _all.Clear();
             _all.AddRange(rows);
+            _baselines.Load();
+            ApplyBaselines();
             ApplyFilter();
             HostLog.Information(AppMgmtCatalog.InventoryLoaded, "Inventory", $"Inventory loaded. {_all.Count} packages.");
             _ = CheckOrphans();
@@ -174,6 +177,35 @@ public sealed partial class MainViewModel : ObservableObject
             }
         });
     }
+
+    public void SetBaseline(PackageRow package)
+    {
+        _baselines.Set(Key(package), package.DisplayVersion);
+        ApplyBaseline(package);
+        Status = $"Baseline set for {package.DisplayName}.";
+    }
+
+    public void ClearBaseline(PackageRow package)
+    {
+        _baselines.Clear(Key(package));
+        ApplyBaseline(package);
+        Status = $"Baseline cleared for {package.DisplayName}.";
+    }
+
+    private void ApplyBaselines()
+    {
+        foreach (var row in _all)
+            ApplyBaseline(row);
+    }
+
+    private void ApplyBaseline(PackageRow row)
+    {
+        var expected = _baselines.Expected(Key(row)) ?? "";
+        row.ExpectedVersion = expected;
+        row.BaselineStatus = BaselineCompare.Status(row.DisplayVersion, expected);
+    }
+
+    private static string Key(PackageRow row) => row.Hive + "\\" + row.KeyPath;
 
     [RelayCommand]
     private Task Refresh() => LoadAsync();
