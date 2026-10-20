@@ -61,8 +61,11 @@ public class DetailsViewModelTests
         var vm = new DetailsViewModel(Package("Contoso", "1.0", values));
         var uninstall = vm.Tabs.Single(t => t.Header == "Uninstall");
 
-        Assert.Equal(2, uninstall.Rows.Count);
+        Assert.Equal(5, uninstall.Rows.Count);
         Assert.DoesNotContain(uninstall.Rows, r => r.Name == "DisplayName");
+        Assert.Contains(uninstall.Rows, r => r.Name == "RepairCommand");
+        Assert.Contains(uninstall.Rows, r => r.Name == "HasModify");
+        Assert.Contains(uninstall.Rows, r => r.Name == "HasRepair");
     }
 
     private static PackageRow Package(
