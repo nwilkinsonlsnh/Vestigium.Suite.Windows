@@ -9,6 +9,7 @@ using CommunityToolkit.Mvvm.Input;
 using Vestigium.Helpers.Kql;
 using Vestigium.Helpers.Kql.AppMgmt;
 using Vestigium.Helpers.WinReg;
+using Vestigium.Suite.Windows.AppMgmtIQ;
 using Vestigium.Suite.Windows.AppMgmtIQ.Views;
 
 namespace Vestigium.Suite.Windows.AppMgmtIQ.ViewModels;
@@ -151,7 +152,7 @@ public sealed partial class MainViewModel : ObservableObject
             var result = OrphanCheck.Check(row);
             if (result is null)
                 continue;
-            var item = (row, result.Orphan, result.Reason);
+            var item = (Row: row, Orphan: result.Orphan, Reason: result.Reason);
             found.Add(item);
             batch.Add(item);
             if (batch.Count < 50)
