@@ -14,6 +14,8 @@ public sealed partial class FootprintsViewModel : ObservableObject
     private const string SharedDlls = @"SOFTWARE\Microsoft\Windows\CurrentVersion\SharedDLLs";
     private const string SharedDllsWow = @"SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\SharedDLLs";
     private const string UserData = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData";
+    private const string MachineClasses = @"SOFTWARE\Classes";
+    private const string UserClasses = @"Software\Classes";
 
     private readonly List<FootprintRow> _all = [];
 
@@ -73,6 +75,8 @@ public sealed partial class FootprintsViewModel : ObservableObject
         ReadShared(client, RegistryHiveKind.LocalMachine, RegistryViewKind.Registry64, SharedDlls, "HKLM", rows);
         ReadShared(client, RegistryHiveKind.LocalMachine, RegistryViewKind.Registry64, SharedDllsWow, "Wow", rows);
         ReadProducts(client, rows);
+        ReadAssociations(client, RegistryHiveKind.LocalMachine, MachineClasses, "HKLM", rows);
+        ReadAssociations(client, RegistryHiveKind.CurrentUser, UserClasses, "HKCU", rows);
         return rows;
     }
 
@@ -132,6 +136,59 @@ public sealed partial class FootprintsViewModel : ObservableObject
                     Scope = sid.Name.Equals("S-1-5-18", StringComparison.OrdinalIgnoreCase) ? "Machine" : "User"
                 });
             }
+        }
+    }
+
+    private static void ReadAssociations(RegistryClient client, RegistryHiveKind hive, string root, string scope, List<FootprintRow> rows)
+    {
+        var codes = rows.Where(row => row.Kind == "Product" && !string.IsNullOrWhiteSpace(row.Path))
+            .Select(row => row.Path)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var extensions = new List<(string Ext, string ProgId)>();
+        foreach (var child in client.ListSubKeys(hive, root, RegistryViewKind.Registry64, RegistryDetailLevel.Identity))
+        {
+            if (!child.Name.StartsWith('.', StringComparison.Ordinal))
+                continue;
+            var key = client.GetKey(hive, child.Path, RegistryViewKind.Registry64, RegistryDetailLevel.Full);
+            var progId = key?.Values.FirstOrDefault(value => value.IsDefault)?.DataText;
+            if (!string.IsNullOrWhiteSpace(progId))
+                extensions.Add((child.Name, progId));
+        }
+
+        var kept = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var progId in extensions.Select(item => item.ProgId).Distinct(StringComparer.OrdinalIgnoreCase))
+        {
+            var key = client.GetKey(hive, root + "\\" + progId, RegistryViewKind.Registry64, RegistryDetailLevel.Full);
+            if (key is null)
+                continue;
+            var source = Text(key, "InstallSource");
+            if (string.IsNullOrWhiteSpace(source))
+                source = Text(key, "ProductCode");
+            if (string.IsNullOrWhiteSpace(source))
+                source = codes.FirstOrDefault(code => key.Values.Any(value => (value.DataText ?? "").Contains(code, StringComparison.OrdinalIgnoreCase))) ?? "";
+            if (string.IsNullOrWhiteSpace(source))
+                continue;
+            kept[progId] = source;
+            rows.Add(new FootprintRow
+            {
+                Kind = "Association",
+                Name = progId,
+                Path = source,
+                Scope = scope
+            });
+        }
+
+        foreach (var (ext, progId) in extensions)
+        {
+            if (!kept.ContainsKey(progId))
+                continue;
+            rows.Add(new FootprintRow
+            {
+                Kind = "Association",
+                Name = ext,
+                Path = progId,
+                Scope = scope
+            });
         }
     }
 
