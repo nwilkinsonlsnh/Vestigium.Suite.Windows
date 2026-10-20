@@ -154,7 +154,7 @@ public sealed partial class MainViewModel : ObservableObject
         {
             if (generation != _orphan)
                 return found;
-            var result = OrphanCheck.Check(row);
+            var result = CheckOrphan(row);
             if (result is null)
                 continue;
             var item = (Row: row, Orphan: result.Orphan, Reason: result.Reason);
@@ -168,6 +168,75 @@ public sealed partial class MainViewModel : ObservableObject
         Publish(batch);
         return found;
     }
+
+    private static (bool Orphan, string Reason)? CheckOrphan(PackageRow row)
+    {
+        var location = Text(row, "InstallLocation");
+        if (LooksLikePath(location))
+        {
+            try
+            {
+                if (!Directory.Exists(location))
+                    return (true, "Install location missing");
+            }
+            catch (Exception)
+            {
+                return (true, "Install location missing");
+            }
+        }
+
+        var file = KeyFile(row);
+        if (LooksLikePath(file))
+        {
+            try
+            {
+                if (!File.Exists(file))
+                    return (true, "Key file missing");
+            }
+            catch (Exception)
+            {
+                return (true, "Key file missing");
+            }
+        }
+
+        if (LooksLikePath(location) || LooksLikePath(file))
+            return (false, "");
+        return null;
+    }
+
+    private static string? KeyFile(PackageRow row)
+    {
+        foreach (var name in new[] { "DisplayIcon", "UninstallString", "ModifyPath" })
+        {
+            var raw = Text(row, name);
+            var file = FirstPath(raw);
+            if (LooksLikePath(file))
+                return file;
+        }
+        return null;
+    }
+
+    private static string FirstPath(string raw)
+    {
+        var text = raw.Trim().Trim('"');
+        var comma = text.IndexOf(',');
+        if (comma > 0 && text[..comma].Contains('\\'))
+            text = text[..comma];
+        foreach (var extension in new[] { ".exe", ".dll", ".msi" })
+        {
+            var at = text.IndexOf(extension, StringComparison.OrdinalIgnoreCase);
+            if (at < 0)
+                continue;
+            return text[..(at + extension.Length)].Trim('"');
+        }
+        return text;
+    }
+
+    private static string Text(PackageRow row, string name)
+        => row.Values.FirstOrDefault(v => v.Name.Equals(name, StringComparison.OrdinalIgnoreCase))?.DataText ?? "";
+
+    private static bool LooksLikePath(string? path)
+        => !string.IsNullOrWhiteSpace(path) && (path.Contains('\\') || path.Contains(':'));
 
     private static void Publish(List<(PackageRow Row, bool Orphan, string Reason)> batch)
     {
