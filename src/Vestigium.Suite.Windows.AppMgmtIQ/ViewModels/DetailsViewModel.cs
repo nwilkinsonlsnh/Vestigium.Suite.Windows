@@ -98,6 +98,7 @@ public sealed partial class DetailsViewModel : ObservableObject
             rows.Add(new ValueRow { Name = "OrphanReason", Type = "string", Data = package.OrphanReason });
             rows.Add(new ValueRow { Name = "Baseline", Type = "string", Data = package.BaselineStatus });
             rows.Add(new ValueRow { Name = "ExpectedVersion", Type = "string", Data = package.ExpectedVersion });
+            rows.Add(new ValueRow { Name = "PendingReboot", Type = "bool", Data = package.PendingText });
         }
         if (header == "Uninstall")
         {
