@@ -33,6 +33,15 @@ public sealed partial class PackageRow : ObservableObject
     public ImageSource? Icon { get; init; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(OrphanText))]
+    private bool? _isOrphan;
+
+    [ObservableProperty]
+    private string _orphanReason = "";
+
+    public string OrphanText => IsOrphan switch { true => "Yes", false => "No", _ => "" };
+
+    [ObservableProperty]
     private string _displayInstallDate = "";
 
     [ObservableProperty]
