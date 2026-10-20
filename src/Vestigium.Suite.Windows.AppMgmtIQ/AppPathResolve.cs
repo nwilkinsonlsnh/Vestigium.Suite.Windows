@@ -1,3 +1,5 @@
+using System.IO;
+
 namespace Vestigium.Suite.Windows.AppMgmtIQ;
 
 public static class AppPathResolve
