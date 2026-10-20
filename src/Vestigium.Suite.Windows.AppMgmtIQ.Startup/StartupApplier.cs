@@ -1,3 +1,4 @@
+using System.IO;
 using Microsoft.Win32;
 
 namespace Vestigium.Suite.Windows.AppMgmtIQ.Startup;
@@ -60,18 +61,18 @@ internal static class StartupApplier
         if (item.Source.Equals("Startup folder", StringComparison.OrdinalIgnoreCase))
         {
             var folder = Environment.GetFolderPath(Environment.SpecialFolder.CommonStartup);
-            var path = Path.Combine(folder, item.Key);
-            if (File.Exists(path))
-                File.Delete(path);
+            var file = Path.Combine(folder, item.Key);
+            if (File.Exists(file))
+                File.Delete(file);
             result.Changed.Add(name);
             StartupLog.Information(StartupLog.Changed, $"Removed {name} from the common Startup folder.", result.CorrelationId);
             return;
         }
 
         var view = item.IsX64 ? RegistryView.Registry64 : RegistryView.Registry32;
-        var path = item.Source.Equals("RunOnce", StringComparison.OrdinalIgnoreCase) ? RunOnce : Run;
+        var keyPath = item.Source.Equals("RunOnce", StringComparison.OrdinalIgnoreCase) ? RunOnce : Run;
         using var root = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, view);
-        using var key = root.OpenSubKey(path, writable: true);
+        using var key = root.OpenSubKey(keyPath, writable: true);
         if (key is null)
         {
             result.Denied.Add(name);
