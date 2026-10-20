@@ -68,7 +68,7 @@ Inventory grid and uninstall flow exist. ModifyPath and QuietUninstallString are
 | 9 | PR04.009 | Owner runs against Requirements. | Owner |
 | 10 | PR04.010 | App Path resolution. For an empty default, read the Path value and join it to the key name. If still empty, search System32, SysWOW64, and PATH. Answer Exists from the hit. | Done |
 | 11 | PR04.011 | Product resolution. Look up Installer UserData InstallProperties for InstallLocation and LocalPackage. Answer Exists from the first real path. | Done |
-| 12 | PR04.012 | SharedDll retry. One Wow64 redirection retry (System32 to SysWOW64). Optional WinSxS check for side-by-side names. A miss after that stays No. | |
+| 12 | PR04.012 | SharedDll retry. One Wow64 redirection retry (System32 to SysWOW64). Optional WinSxS check for side-by-side names. A miss after that stays No. | Done |
 | 13 | PR04.013 | Owner re-runs Exists and orphan counts against the resolved paths. | Owner |
 
 ---
@@ -98,4 +98,4 @@ When this plan finishes, move the whole `PR04/` folder to `Complete/PR04/`.
 
 ## Next action
 
-PR04.012. SharedDll retry.
+PR04.013. Owner re-runs the counts.
