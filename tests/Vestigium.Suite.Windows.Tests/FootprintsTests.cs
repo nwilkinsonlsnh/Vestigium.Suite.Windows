@@ -64,7 +64,7 @@ public class FootprintsTests
 
         Assert.Equal("SharedDll", row.Get("footprint.kind").Raw);
         Assert.Equal(@"C:\Program Files\Contoso\contoso.dll", row.Get("footprint.path").Raw);
-        Assert.Equal(3, row.Get("footprint.refcount").Raw);
+        Assert.Equal(3L, row.Get("footprint.refcount").Raw);
         Assert.Equal("Contoso", row.Get("footprint.package").Raw);
     }
 
