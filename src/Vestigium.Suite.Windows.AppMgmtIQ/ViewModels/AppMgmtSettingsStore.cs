@@ -26,7 +26,15 @@ public sealed class AppMgmtSettings
     public bool ExportFeatures { get; set; } = true;
     public bool ExportBloatware { get; set; } = true;
     public bool ExportActiveSetup { get; set; } = true;
+    public bool ExportStartup { get; set; } = true;
+    public bool ExportFootprints { get; set; } = true;
     public bool ExportCurrentView { get; set; } = true;
+    public bool ExportPackagesCurrent { get; set; } = true;
+    public bool ExportFeaturesCurrent { get; set; } = true;
+    public bool ExportBloatwareCurrent { get; set; } = true;
+    public bool ExportActiveSetupCurrent { get; set; } = true;
+    public bool ExportStartupCurrent { get; set; } = true;
+    public bool ExportFootprintsCurrent { get; set; } = true;
     public bool ExportDetails { get; set; }
     public bool ExportOpenFile { get; set; }
     public bool ExportOpenFolder { get; set; }
