@@ -201,6 +201,7 @@
         <DataGridCheckBoxColumn Header="NoRepair" Binding="{Binding NoRepair}" Width="*" MinWidth="70" />
         <DataGridTextColumn Header="Orphan" Binding="{Binding OrphanText}" Width="*" MinWidth="70" ElementStyle="{StaticResource LeftCell}" />
         <DataGridTextColumn Header="Baseline" Binding="{Binding BaselineStatus}" Width="*" MinWidth="80" ElementStyle="{StaticResource LeftCell}" />
+        <DataGridTextColumn Header="Pending" Binding="{Binding PendingText}" Width="*" MinWidth="70" ElementStyle="{StaticResource LeftCell}" />
       </DataGrid.Columns>
     </DataGrid>
 
