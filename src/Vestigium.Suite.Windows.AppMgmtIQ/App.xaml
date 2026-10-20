@@ -36,9 +36,9 @@
       </Setter>
     </Style>
 
-    <!-- Themes 1.0.6 Separator.Menu is a 1px line that snaps away on this display,
-         and Stroke.Subtle matches the dark menu surface. This one does not. -->
-    <Style x:Key="Separator.MenuHost" TargetType="Separator">
+    <!-- Themes 1.1.0 ContextMenu.Standard does BasedOn Separator.Menu inside its
+         template, and that StaticResource cannot see the theme dictionary. -->
+    <Style x:Key="Separator.Menu" TargetType="Separator">
       <Setter Property="Height" Value="11" />
       <Setter Property="Margin" Value="0" />
       <Setter Property="HorizontalAlignment" Value="Stretch" />
@@ -58,5 +58,6 @@
         </Setter.Value>
       </Setter>
     </Style>
+    <Style x:Key="Separator.MenuHost" TargetType="Separator" BasedOn="{StaticResource Separator.Menu}" />
   </Application.Resources>
 </Application>
