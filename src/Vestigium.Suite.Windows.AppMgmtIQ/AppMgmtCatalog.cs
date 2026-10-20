@@ -33,13 +33,14 @@ public static class AppMgmtCatalog
     public const int StartupRequested = 17115;
     public const int StartupCompleted = 17120;
     public const int StartupCancelled = 17125;
+    public const int FootprintsLoaded = 17130;
 
     public static void Register(VestigiumLoggerOptions cfg)
     {
         ArgumentNullException.ThrowIfNull(cfg);
         var taxonomy = new VestigiumTaxonomy();
         taxonomy.Register(Category, HostIds.AppMgmtIQ);
-        taxonomy.Register(Category, "Lifecycle", "Inventory", "Settings", "Features", "Export", "Bloatware", "Uninstall", "ActiveSetup", "Startup");
+        taxonomy.Register(Category, "Lifecycle", "Inventory", "Settings", "Features", "Export", "Bloatware", "Uninstall", "ActiveSetup", "Startup", "Footprints");
         cfg.RegisterTaxonomy(taxonomy);
         cfg.RegisterEvent("AppStarted", "Vestigium.Suite.Windows.AppMgmtIQ.Events.AppStarted", Category, Subcategory, AppStarted, "Information", "host started");
         cfg.RegisterEvent("InventoryLoaded", "Vestigium.Suite.Windows.AppMgmtIQ.Events.InventoryLoaded", Category, Subcategory, InventoryLoaded, "Information", "inventory loaded");
@@ -67,5 +68,6 @@ public static class AppMgmtCatalog
         cfg.RegisterEvent("StartupRequested", "Vestigium.Suite.Windows.AppMgmtIQ.Events.StartupRequested", Category, "Startup", StartupRequested, "Information", "startup change requested");
         cfg.RegisterEvent("StartupCompleted", "Vestigium.Suite.Windows.AppMgmtIQ.Events.StartupCompleted", Category, "Startup", StartupCompleted, "Information", "startup change completed");
         cfg.RegisterEvent("StartupCancelled", "Vestigium.Suite.Windows.AppMgmtIQ.Events.StartupCancelled", Category, "Startup", StartupCancelled, "Information", "startup change cancelled");
+        cfg.RegisterEvent("FootprintsLoaded", "Vestigium.Suite.Windows.AppMgmtIQ.Events.FootprintsLoaded", Category, "Footprints", FootprintsLoaded, "Information", "footprints loaded");
     }
 }
