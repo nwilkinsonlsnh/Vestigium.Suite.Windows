@@ -35,5 +35,28 @@
         </Setter.Value>
       </Setter>
     </Style>
+
+    <!-- Themes 1.0.6 Separator.Menu is a 1px line that snaps away on this display,
+         and Stroke.Subtle matches the dark menu surface. This one does not. -->
+    <Style x:Key="Separator.MenuHost" TargetType="Separator">
+      <Setter Property="Height" Value="11" />
+      <Setter Property="Margin" Value="0" />
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="OverridesDefaultStyle" Value="True" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Separator">
+            <Border Height="11" HorizontalAlignment="Stretch" Background="Transparent">
+              <Border Height="1.5"
+                      Margin="8,0"
+                      VerticalAlignment="Center"
+                      HorizontalAlignment="Stretch"
+                      Background="#9AA8B8"
+                      UseLayoutRounding="True" />
+            </Border>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
   </Application.Resources>
 </Application>
