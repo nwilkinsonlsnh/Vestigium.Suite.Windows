@@ -58,7 +58,7 @@ Inventory grid and uninstall flow exist. ModifyPath and QuietUninstallString are
 | Order | ID | Do | State |
 | ---: | :--- | :--- | :--- |
 | 1 | PR04.001 | Surface ModifyPath and build Repair command when product code is known. | Done |
-| 2 | PR04.002 | Add confirmed Modify and Repair actions (reuse uninstall confirmation). | |
+| 2 | PR04.002 | Add confirmed Modify and Repair actions (reuse uninstall confirmation). | Done |
 | 3 | PR04.003 | Orphan detection (missing InstallLocation or key file). Indicator in grid and details. | |
 | 4 | PR04.004 | Simple version baseline store and comparison column. | |
 | 5 | PR04.005 | Pending reboot / file-rename surface (read-only). | |
@@ -94,4 +94,4 @@ When this plan finishes, move the whole `PR04/` folder to `Complete/PR04/`.
 
 ## Next action
 
-PR04.002. Confirmed Modify and Repair actions.
+PR04.003. Orphan detection.
