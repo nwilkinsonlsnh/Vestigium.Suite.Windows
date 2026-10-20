@@ -176,7 +176,7 @@ public static class InventoryExport
     {
         var table = SheetTable.Create(
             ["Kind", "Name", "Path", "Scope", "Ref count", "Exists", "Package"],
-            rows.Select(row => (IReadOnlyList<object?>)[row.Kind, row.Name, row.Path, row.Scope, row.RefCountText, row.ExistsText, row.Package]),
+            rows.Select(row => (IReadOnlyList<object?>)[row.Kind, row.Name, PathResolve.Clean(row.Path), row.Scope, row.RefCountText, row.ExistsText, row.Package]),
             "Footprints");
         book.Sheet("Footprints").WriteTable(table, new SheetWriteOptions { TabColor = "B45309" });
     }
