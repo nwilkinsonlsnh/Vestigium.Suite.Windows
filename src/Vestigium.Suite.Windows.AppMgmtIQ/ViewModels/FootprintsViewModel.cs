@@ -2,6 +2,8 @@ using System.Collections.ObjectModel;
 using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Vestigium.Helpers.Kql;
+using Vestigium.Helpers.Kql.AppMgmt;
 using Vestigium.Helpers.WinReg;
 
 namespace Vestigium.Suite.Windows.AppMgmtIQ.ViewModels;
@@ -18,9 +20,20 @@ public sealed partial class FootprintsViewModel : ObservableObject
     private const string UserClasses = @"Software\Classes";
 
     private readonly List<FootprintRow> _all = [];
+    private readonly KqlSession _session = AppMgmtKql.Footprints();
+    private KqlBoundQuery? _bound;
 
     public ObservableCollection<FootprintRow> Rows { get; } = [];
     public IReadOnlyList<FootprintRow> All => _all;
+    public ObservableCollection<QueryMruRow> Queries { get; } = [];
+    public KqlSession Session => _session;
+
+    public int MruLimit { get; set; } = 10;
+    public int StickyLimit { get; set; } = 3;
+    public event Action? MruChanged;
+
+    [ObservableProperty]
+    private string _query = string.Empty;
 
     [ObservableProperty]
     private FootprintRow? _selected;
@@ -33,6 +46,33 @@ public sealed partial class FootprintsViewModel : ObservableObject
 
     [ObservableProperty]
     private string _loadingMessage = "Reading footprints\u2026";
+
+    public void ApplyQuery()
+    {
+        _bound = KqlHost.Compile(Query, _session, _bound, out var error);
+        Apply();
+        if (!string.IsNullOrEmpty(error))
+            Status = error;
+    }
+
+    public void CommitQuery()
+    {
+        ApplyQuery();
+        if (_bound is not null)
+        {
+            QueryMru.Record(Queries, Query, MruLimit, StickyLimit);
+            MruChanged?.Invoke();
+        }
+    }
+
+    public void Pin(object? row)
+    {
+        if (row is not QueryMruRow mru)
+            return;
+        if (!QueryMru.ToggleSticky(Queries, mru, StickyLimit))
+            Status = $"Sticky limit is {StickyLimit}.";
+        MruChanged?.Invoke();
+    }
 
     public async Task LoadAsync()
     {
@@ -66,10 +106,26 @@ public sealed partial class FootprintsViewModel : ObservableObject
     {
         var keep = Selected;
         Rows.Clear();
-        foreach (var row in _all.OrderBy(row => row.Kind, StringComparer.OrdinalIgnoreCase).ThenBy(row => row.Name, StringComparer.OrdinalIgnoreCase))
+        foreach (var row in _all.Where(Matches).OrderBy(row => row.Kind, StringComparer.OrdinalIgnoreCase).ThenBy(row => row.Name, StringComparer.OrdinalIgnoreCase))
             Rows.Add(row);
         Selected = keep is null ? null : Rows.FirstOrDefault(row => row.Kind == keep.Kind && row.Name == keep.Name && row.Scope == keep.Scope && row.Path == keep.Path);
-        Status = $"{Rows.Count} entries";
+        if (string.IsNullOrWhiteSpace(Query) || _bound is not null)
+            Status = $"{Rows.Count} entries";
+    }
+
+    private bool Matches(FootprintRow row)
+    {
+        if (_bound is null)
+            return true;
+        return _bound.Matches(FootprintsAdapter.ToRow(_session, new FootprintsFacts
+        {
+            Kind = row.Kind,
+            Name = row.Name,
+            Path = row.Path,
+            Scope = row.Scope,
+            RefCount = row.RefCount,
+            Package = row.Package
+        }));
     }
 
     private static List<FootprintRow> ReadAll()
