@@ -129,6 +129,13 @@
             <MenuItem.Icon><TextBlock Text="&#xE72C;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
           </MenuItem>
           <Separator Style="{StaticResource Separator.MenuHost}" />
+          <MenuItem x:Name="SetBaselineItem" Header="Set baseline" Style="{StaticResource MenuItem.Standard}" Click="SetBaseline_Click" ToolTip="Remember this version as the expected version.">
+            <MenuItem.Icon><TextBlock Text="&#xE73E;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
+          </MenuItem>
+          <MenuItem x:Name="ClearBaselineItem" Header="Clear baseline" Style="{StaticResource MenuItem.Standard}" Click="ClearBaseline_Click">
+            <MenuItem.Icon><TextBlock Text="&#xE74D;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
+          </MenuItem>
+          <Separator Style="{StaticResource Separator.MenuHost}" />
           <MenuItem Header="Filter" Style="{StaticResource MenuItem.Standard}">
             <MenuItem.Icon><TextBlock Text="&#xE71C;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
             <MenuItem x:Name="GlobalItem" Checked="FilterCheck_Changed" Unchecked="FilterCheck_Changed" Style="{StaticResource MenuItem.Standard}" Header="Global packages" IsCheckable="True" IsChecked="{Binding DataContext.ShowGlobal, RelativeSource={RelativeSource AncestorType=ContextMenu}, Mode=TwoWay}" StaysOpenOnClick="True">
@@ -193,6 +200,7 @@
         <DataGridCheckBoxColumn Header="NoRemove" Binding="{Binding NoRemove}" Width="*" MinWidth="70" />
         <DataGridCheckBoxColumn Header="NoRepair" Binding="{Binding NoRepair}" Width="*" MinWidth="70" />
         <DataGridTextColumn Header="Orphan" Binding="{Binding OrphanText}" Width="*" MinWidth="70" ElementStyle="{StaticResource LeftCell}" />
+        <DataGridTextColumn Header="Baseline" Binding="{Binding BaselineStatus}" Width="*" MinWidth="80" ElementStyle="{StaticResource LeftCell}" />
       </DataGrid.Columns>
     </DataGrid>
 
