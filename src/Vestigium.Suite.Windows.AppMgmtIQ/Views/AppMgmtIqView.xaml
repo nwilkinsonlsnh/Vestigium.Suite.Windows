@@ -122,7 +122,7 @@
               <MenuItem.Icon><TextBlock Text="&#xE7E8;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
             </MenuItem>
           </MenuItem>
-          <Separator Style="{StaticResource Separator.Menu}" />
+          <Separator Style="{StaticResource Separator.MenuHost}" />
           <MenuItem Header="Filter" Style="{StaticResource MenuItem.Standard}">
             <MenuItem.Icon><TextBlock Text="&#xE71C;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
             <MenuItem x:Name="GlobalItem" Checked="FilterCheck_Changed" Unchecked="FilterCheck_Changed" Style="{StaticResource MenuItem.Standard}" Header="Global packages" IsCheckable="True" IsChecked="{Binding DataContext.ShowGlobal, RelativeSource={RelativeSource AncestorType=ContextMenu}, Mode=TwoWay}" StaysOpenOnClick="True">
@@ -131,18 +131,18 @@
             <MenuItem x:Name="PerUserItem" Checked="FilterCheck_Changed" Unchecked="FilterCheck_Changed" Style="{StaticResource MenuItem.Standard}" Header="Per-user packages" IsCheckable="True" IsChecked="{Binding DataContext.ShowPerUser, RelativeSource={RelativeSource AncestorType=ContextMenu}, Mode=TwoWay}" StaysOpenOnClick="True">
               <MenuItem.Icon><TextBlock x:Name="PerUserCheck" FontFamily="Segoe MDL2 Assets" FontSize="16" Text="&#xE739;" Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}" /></MenuItem.Icon>
             </MenuItem>
-            <Separator Style="{StaticResource Separator.Menu}" />
+            <Separator Style="{StaticResource Separator.MenuHost}" />
             <MenuItem x:Name="X64Item" Checked="FilterCheck_Changed" Unchecked="FilterCheck_Changed" Style="{StaticResource MenuItem.Standard}" Header="x64" IsCheckable="True" IsChecked="{Binding DataContext.ShowX64, RelativeSource={RelativeSource AncestorType=ContextMenu}, Mode=TwoWay}" StaysOpenOnClick="True">
               <MenuItem.Icon><TextBlock x:Name="X64Check" FontFamily="Segoe MDL2 Assets" FontSize="16" Text="&#xE739;" Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}" /></MenuItem.Icon>
             </MenuItem>
             <MenuItem x:Name="X86Item" Checked="FilterCheck_Changed" Unchecked="FilterCheck_Changed" Style="{StaticResource MenuItem.Standard}" Header="x86" IsCheckable="True" IsChecked="{Binding DataContext.ShowX86, RelativeSource={RelativeSource AncestorType=ContextMenu}, Mode=TwoWay}" StaysOpenOnClick="True">
               <MenuItem.Icon><TextBlock x:Name="X86Check" FontFamily="Segoe MDL2 Assets" FontSize="16" Text="&#xE739;" Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}" /></MenuItem.Icon>
             </MenuItem>
-            <Separator Style="{StaticResource Separator.Menu}" />
+            <Separator Style="{StaticResource Separator.MenuHost}" />
             <MenuItem x:Name="SystemItem" Checked="FilterCheck_Changed" Unchecked="FilterCheck_Changed" Style="{StaticResource MenuItem.Standard}" Header="System components" IsCheckable="True" IsChecked="{Binding DataContext.ShowSystemComponents, RelativeSource={RelativeSource AncestorType=ContextMenu}, Mode=TwoWay}" StaysOpenOnClick="True">
               <MenuItem.Icon><TextBlock x:Name="SystemCheck" FontFamily="Segoe MDL2 Assets" FontSize="16" Text="&#xE739;" Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}" /></MenuItem.Icon>
             </MenuItem>
-            <Separator Style="{StaticResource Separator.Menu}" />
+            <Separator Style="{StaticResource Separator.MenuHost}" />
             <MenuItem x:Name="InstallerItem" Checked="FilterCheck_Changed" Unchecked="FilterCheck_Changed" Style="{StaticResource MenuItem.Standard}" Header="Windows Installer" IsCheckable="True" IsChecked="{Binding DataContext.ShowWindowsInstaller, RelativeSource={RelativeSource AncestorType=ContextMenu}, Mode=TwoWay}" StaysOpenOnClick="True">
               <MenuItem.Icon><TextBlock x:Name="InstallerCheck" FontFamily="Segoe MDL2 Assets" FontSize="16" Text="&#xE739;" Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}" /></MenuItem.Icon>
             </MenuItem>
@@ -150,7 +150,7 @@
               <MenuItem.Icon><TextBlock x:Name="OtherCheck" FontFamily="Segoe MDL2 Assets" FontSize="16" Text="&#xE739;" Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}" /></MenuItem.Icon>
             </MenuItem>
           </MenuItem>
-          <Separator Style="{StaticResource Separator.Menu}" />
+          <Separator Style="{StaticResource Separator.MenuHost}" />
           <MenuItem Header="Export" Style="{StaticResource MenuItem.Standard}">
             <MenuItem.Icon><TextBlock Text="&#xE898;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
             <MenuItem Style="{StaticResource MenuItem.Standard}" Header="Export grid\u2026" IsEnabled="False" ToolTip="Vestigium.Helpers.ClosedXml is not published yet.">
@@ -160,7 +160,7 @@
               <MenuItem.Icon><TextBlock Text="&#xE8A7;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
             </MenuItem>
           </MenuItem>
-          <Separator Style="{StaticResource Separator.Menu}" />
+          <Separator Style="{StaticResource Separator.MenuHost}" />
           <MenuItem Header="Refresh" Style="{StaticResource MenuItem.Standard}" Command="{Binding Host.RefreshCommand}">
             <MenuItem.Icon><TextBlock FontFamily="Segoe UI Symbol" FontSize="14" Text="&#x267B;" Foreground="#3DDC84" /></MenuItem.Icon>
           </MenuItem>
