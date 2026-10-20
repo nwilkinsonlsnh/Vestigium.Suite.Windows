@@ -20,7 +20,7 @@ PR02 (Startup) may or may not be complete. Footprints is independent. Dashboard 
 | Piece | Today | Required |
 |---|---|---|
 | Footprints tab | Shell | New tab with sections. |
-| App Paths | Missing | Enumerate three locations. |
+| App Paths | Done | Enumerate three locations. |
 | Associations | Missing | Installer-linked ProgIDs / extensions only. |
 | Installer products | Missing | Product codes when present. |
 | SharedDLLs | Missing | Name + ref count. |
@@ -62,7 +62,7 @@ PR02 (Startup) may or may not be complete. Footprints is independent. Dashboard 
 | Order | ID | Do | State |
 | ---: | :--- | :--- | :--- |
 | 1 | PR03.001 | Add Footprints tab shell and empty ViewModel. | Done |
-| 2 | PR03.002 | Enumerate App Paths (HKLM, Wow, HKCU). Project to FootprintRow. | |
+| 2 | PR03.002 | Enumerate App Paths (HKLM, Wow, HKCU). Project to FootprintRow. | Done |
 | 3 | PR03.003 | Enumerate SharedDLLs with reference counts. | |
 | 4 | PR03.004 | Surface Windows Installer product codes when present. | |
 | 5 | PR03.005 | Installer-linked associations / ProgIDs (best-effort). | |
@@ -100,4 +100,4 @@ When this plan finishes, move the whole `PR03/` folder to `Complete/PR03/`.
 
 ## Next action
 
-PR03.002. Enumerate App Paths.
+PR03.003. Enumerate SharedDLLs.
