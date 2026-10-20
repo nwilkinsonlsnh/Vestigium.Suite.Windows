@@ -77,11 +77,11 @@
           <MenuItem Header="Refresh" Style="{StaticResource MenuItem.Standard}" Command="{Binding RefreshCommand}">
             <MenuItem.Icon><TextBlock FontFamily="Segoe UI Symbol" FontSize="14" Text="&#x267B;" Foreground="#3DDC84" /></MenuItem.Icon>
           </MenuItem>
-          <Separator Style="{StaticResource Separator.Menu}" />
+          <Separator Style="{StaticResource Separator.MenuHost}" />
           <MenuItem Header="Add..." Style="{StaticResource MenuItem.Standard}" Click="Add_Click" />
           <MenuItem Header="Delete..." Style="{StaticResource MenuItem.Standard}" Click="Delete_Click" />
           <MenuItem Header="Clear StubPath" Style="{StaticResource MenuItem.Standard}" Click="Clear_Click" />
-          <Separator Style="{StaticResource Separator.Menu}" />
+          <Separator Style="{StaticResource Separator.MenuHost}" />
           <MenuItem Header="Copy" Style="{StaticResource MenuItem.Standard}">
             <MenuItem Header="Component" Style="{StaticResource MenuItem.Standard}" Click="CopyComponent_Click" />
             <MenuItem Header="StubPath" Style="{StaticResource MenuItem.Standard}" Click="CopyStub_Click" />
