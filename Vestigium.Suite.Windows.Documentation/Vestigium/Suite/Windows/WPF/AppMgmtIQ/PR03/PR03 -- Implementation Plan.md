@@ -24,7 +24,7 @@ PR02 (Startup) may or may not be complete. Footprints is independent. Dashboard 
 | Associations | Done | Installer-linked ProgIDs / extensions only. |
 | Installer products | Done | Product codes when present. |
 | SharedDLLs | Done | Name + ref count. |
-| Footprints KQL catalog | Missing | Catalog + session in Helpers.Kql.AppMgmt (or sibling). |
+| Footprints KQL catalog | Done | Catalog + session in Helpers.Kql.AppMgmt (or sibling). |
 | QueryBar on Footprints | Missing | Same wiring as existing tabs. |
 | Dashboard Footprints section | Missing | Cards and charts for App Paths, SharedDLLs, and installer products. |
 
@@ -67,7 +67,7 @@ PR02 (Startup) may or may not be complete. Footprints is independent. Dashboard 
 | 4 | PR03.004 | Surface Windows Installer product codes when present. | Done |
 | 5 | PR03.005 | Installer-linked associations / ProgIDs (best-effort). | Done |
 | 6 | PR03.006 | Package linkage and themed grid. Columns per R03-02. | Done |
-| 7 | PR03.007 | KQL catalog: add FootprintsCatalog, FootprintsFacts, FootprintsAdapter, and AppMgmtKql.Footprints() in Vestigium.Helpers.Kql.AppMgmt. Fields match R03-04. | |
+| 7 | PR03.007 | KQL catalog: add FootprintsCatalog, FootprintsFacts, FootprintsAdapter, and AppMgmtKql.Footprints() in Vestigium.Helpers.Kql.AppMgmt. Fields match R03-04. | Done |
 | 8 | PR03.008 | Wire VestigiumQueryBar in FootprintsView (same bindings and events as AppMgmtIqView). ViewModel implements ApplyQuery / CommitQuery / Pin / QueryMru. | |
 | 9 | PR03.009 | Host tests for projection and catalog field binding (no live registry). | |
 | 10 | PR03.010 | Dashboard: add Footprints radio section. Bind to FootprintsViewModel. Cards: App Paths count, SharedDLLs with refcount > 1, installer products found, total footprint rows. Charts: breakdown by type (App Paths / SharedDLLs / Products / Associations), SharedDLL refcount distribution or top shared, product presence. Story text updated. | |
@@ -100,4 +100,4 @@ When this plan finishes, move the whole `PR03/` folder to `Complete/PR03/`.
 
 ## Next action
 
-PR03.007. Footprints KQL catalog.
+PR03.008. Wire the QueryBar. Publish Vestigium.Helpers.Kql.AppMgmt 1.4.0 first.
