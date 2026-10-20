@@ -96,6 +96,8 @@ public sealed partial class DetailsViewModel : ObservableObject
             rows.Add(new ValueRow { Name = "KeyPath", Type = "string", Data = package.KeyPath });
             rows.Add(new ValueRow { Name = "Orphan", Type = "bool", Data = package.OrphanText });
             rows.Add(new ValueRow { Name = "OrphanReason", Type = "string", Data = package.OrphanReason });
+            rows.Add(new ValueRow { Name = "Baseline", Type = "string", Data = package.BaselineStatus });
+            rows.Add(new ValueRow { Name = "ExpectedVersion", Type = "string", Data = package.ExpectedVersion });
         }
         if (header == "Uninstall")
         {
