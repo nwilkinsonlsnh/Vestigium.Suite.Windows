@@ -13,6 +13,7 @@ public partial class DashboardView : UserControl
     private BloatwareViewModel? _bloat;
     private ActiveSetupViewModel? _setup;
     private StartupViewModel? _startup;
+    private FootprintsViewModel? _footprints;
     private List<(string Title, UIElement Chart)> _charts = [];
 
     public DashboardView()
@@ -20,13 +21,14 @@ public partial class DashboardView : UserControl
         InitializeComponent();
     }
 
-    public void Bind(MainViewModel packages, FeaturesViewModel features, BloatwareViewModel bloat, ActiveSetupViewModel setup, StartupViewModel startup)
+    public void Bind(MainViewModel packages, FeaturesViewModel features, BloatwareViewModel bloat, ActiveSetupViewModel setup, StartupViewModel startup, FootprintsViewModel footprints)
     {
         _packages = packages;
         _features = features;
         _bloat = bloat;
         _setup = setup;
         _startup = startup;
+        _footprints = footprints;
         Refresh();
     }
 
@@ -36,7 +38,7 @@ public partial class DashboardView : UserControl
 
     private void Refresh()
     {
-        if (_packages is null || _features is null || _bloat is null || _setup is null || _startup is null || PackagesTab is null)
+        if (_packages is null || _features is null || _bloat is null || _setup is null || _startup is null || _footprints is null || PackagesTab is null)
             return;
         if (PackagesTab.IsChecked == true)
             ShowPackages();
@@ -46,8 +48,10 @@ public partial class DashboardView : UserControl
             ShowBloat();
         else if (SetupTab.IsChecked == true)
             ShowSetup();
-        else
+        else if (StartupTab.IsChecked == true)
             ShowStartup();
+        else
+            ShowFootprints();
     }
 
     private void ShowPackages()
@@ -138,6 +142,27 @@ public partial class DashboardView : UserControl
             ("Source", Chart(TopSlices(rows.Select(row => Blank(row.Source)), 6), "Source", true)),
             ("Scope", Chart([Slice("HKLM", rows.Count(row => row.Scope == "HKLM")), Slice("HKCU", rows.Count(row => row.Scope == "HKCU")), Slice("Common", rows.Count(row => row.Scope == "Common")), Slice("User", rows.Count(row => row.Scope == "User"))], "Scope")),
             ("Linked", Chart([Slice("Linked", linked), Slice("Unlinked", rows.Count - linked)], "Linked"))
+        ]);
+    }
+
+    private void ShowFootprints()
+    {
+        var rows = _footprints!.All;
+        var shared = rows.Where(row => row.Kind == "SharedDll").ToList();
+        var sharedMany = shared.Count(row => (row.RefCount ?? 0) > 1);
+        var products = rows.Count(row => row.Kind == "Product");
+        Story.Text = "App Paths, associations, installer products, and shared DLLs left behind by installers.";
+        SetCards(
+            ("Entries", rows.Count.ToString()),
+            ("App Paths", rows.Count(row => row.Kind == "AppPath").ToString()),
+            ("Shared > 1", sharedMany.ToString()),
+            ("Products", products.ToString()));
+        ShowCharts(
+        [
+            ("Type", Chart([Slice("App Paths", rows.Count(row => row.Kind == "AppPath")), Slice("Shared DLLs", shared.Count), Slice("Products", products), Slice("Associations", rows.Count(row => row.Kind == "Association"))], "By type")),
+            ("Ref count", Chart([Slice("1", shared.Count(row => row.RefCount == 1)), Slice("2", shared.Count(row => row.RefCount == 2)), Slice("3-5", shared.Count(row => row.RefCount is >= 3 and <= 5)), Slice("6+", shared.Count(row => (row.RefCount ?? 0) >= 6))], "SharedDLL ref count")),
+            ("Products", Chart([Slice("Products", products), Slice("Other", rows.Count - products)], "Product presence")),
+            ("Linked", Chart([Slice("Linked", rows.Count(row => !string.IsNullOrWhiteSpace(row.Package))), Slice("Unlinked", rows.Count(row => string.IsNullOrWhiteSpace(row.Package)))], "Linked"))
         ]);
     }
 
