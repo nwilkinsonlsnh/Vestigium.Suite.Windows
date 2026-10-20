@@ -38,7 +38,7 @@ Create `Vestigium.Helpers.FileSystemPaths` and publish it. It is a path meaning 
 | Date and time | `{datetime}` `{date}` `{time}` |
 | Special folders | `{desktop}` `{favorites}` `{userprofile}` `{appdata}` `{localappdata}` `{temp}` `{programfiles}` `{programfilesx86}` `{programdata}` `{windir}` `{systemdrive}` `{public}` |
 | Identity | `{username}` `{computername}` |
-| Counters | `{#}` `{##}` `{A#}` `{AA#}` `{a#}` `{aa#}` and any width |
+| Counters | `{#}` `{##}` `{A}` `{AAA}` `{A#}` `{AA##}` `{a}` `{aaa}` and any width |
 
 `{datetime}`, `{date}`, and `{time}` use a sortable form (`yyyyMMdd-HHmmss`, `yyyyMMdd`, `HHmmss`). Special folders come from `Environment.SpecialFolder` or the matching environment variable. Identity comes from the environment.
 
@@ -46,7 +46,9 @@ Create `Vestigium.Helpers.FileSystemPaths` and publish it. It is a path meaning 
 
 - `{#}` is one digit, `0` to `9`. `{##}` is two, `00` to `99`. The width is however many `#` the caller writes. Zero-padded.
 - A value that does not fit the width throws. `{##}` at `100` throws. It does not become `00`.
-- A letter prefix is a fixed-width letter counter of that case. `{A#}` is one capital letter plus the digits. `{AA##}` is two capitals plus two digits. `{a#}` and `{aa#}` are the lower-case forms. Letters run `A` to `Z` (or `a` to `z`) and throw past `Z`. They do not roll into the digits, and the digits do not roll into the letters.
+- A letter run is a fixed-width base-26 counter of that case, as deep as the caller writes it. `{A}` is one letter. `{AAA}` is three. It counts on the right: `AAA`, `AAB`, `AAZ`, `ABA`, `AZZ`, `BAA`, and on to `ZZZ`. `{a}` and `{aaa}` are the lower-case forms.
+- A letter run may be followed by a `#` run. `{A#}` is one capital plus one digit. `{AAA##}` is three capitals plus two digits. The two parts count separately. Letters do not roll into the digits, and the digits do not roll into the letters.
+- A letter run throws when it would pass the last value. `{A}` at `Z` throws on the next. `{AA}` at `ZZ` throws on the next. No rollover to a wider run.
 - The caller owns the sequence. The token only formats and rejects.
 
 **Long paths.** A conservative plan. When a built path would exceed the classic 260 limit, prefix it with `\\\\?\\` so the call succeeds. Do not prefix a path that is already long-form. Do not change a path that fits.
