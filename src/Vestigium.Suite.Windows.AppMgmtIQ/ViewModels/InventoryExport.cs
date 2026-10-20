@@ -13,11 +13,20 @@ public sealed record ExportRequest(
     FeaturesViewModel Features,
     BloatwareViewModel Bloatware,
     ActiveSetupViewModel Setup,
+    StartupViewModel Startup,
+    FootprintsViewModel Footprints,
     bool IncludePackages,
+    bool PackagesCurrent,
     bool IncludeFeatures,
+    bool FeaturesCurrent,
     bool IncludeBloatware,
+    bool BloatwareCurrent,
     bool IncludeActiveSetup,
-    ExportRows Rows,
+    bool ActiveSetupCurrent,
+    bool IncludeStartup,
+    bool StartupCurrent,
+    bool IncludeFootprints,
+    bool FootprintsCurrent,
     bool Details);
 
 public static class InventoryExport
@@ -25,18 +34,24 @@ public static class InventoryExport
     public static string Write(ExportRequest request)
     {
         var packageRows = request.IncludePackages
-            ? request.Rows == ExportRows.Current ? request.Packages.Packages.ToArray() : request.Packages.AllPackages.ToArray()
+            ? request.PackagesCurrent ? request.Packages.Packages.ToArray() : request.Packages.AllPackages.ToArray()
             : [];
-        var featureRows = request.IncludeFeatures ? FeatureRows(request.Features, request.Rows) : [];
+        var featureRows = request.IncludeFeatures ? FeatureRows(request.Features, request.FeaturesCurrent) : [];
         var bloatRows = request.IncludeBloatware
-            ? request.Rows == ExportRows.Current ? request.Bloatware.Rows.ToArray() : request.Bloatware.All.ToArray()
+            ? request.BloatwareCurrent ? request.Bloatware.Rows.ToArray() : request.Bloatware.All.ToArray()
             : [];
         var setupRows = request.IncludeActiveSetup
-            ? request.Rows == ExportRows.Current ? request.Setup.Rows.ToArray() : request.Setup.All.ToArray()
+            ? request.ActiveSetupCurrent ? request.Setup.Rows.ToArray() : request.Setup.All.ToArray()
+            : [];
+        var startupRows = request.IncludeStartup
+            ? request.StartupCurrent ? request.Startup.Rows.ToArray() : request.Startup.All.ToArray()
+            : [];
+        var footprintRows = request.IncludeFootprints
+            ? request.FootprintsCurrent ? request.Footprints.Rows.ToArray() : request.Footprints.All.ToArray()
             : [];
 
         using var book = WorkbookHelper.Create("Summary", HostIds.AppMgmtIQ);
-        WriteSummary(book, request, packageRows.Length, featureRows.Count, bloatRows.Length, setupRows.Length);
+        WriteSummary(book, request, packageRows.Length, featureRows.Count, bloatRows.Length, setupRows.Length, startupRows.Length, footprintRows.Length);
         if (request.IncludePackages)
             WritePackages(book, packageRows);
         if (request.IncludePackages && request.Details)
@@ -47,28 +62,35 @@ public static class InventoryExport
             WriteBloatware(book, bloatRows);
         if (request.IncludeActiveSetup)
             WriteActiveSetup(book, setupRows);
+        if (request.IncludeStartup)
+            WriteStartup(book, startupRows);
+        if (request.IncludeFootprints)
+            WriteFootprints(book, footprintRows);
 
         var path = book.SaveAs(WorkbookHelper.NewExportPath(HostIds.AppMgmtIQ, "inventory"));
         HostLog.Information(AppMgmtCatalog.ExportWritten, "Export", $"Workbook written. {path}");
         return path;
     }
 
-    private static void WriteSummary(WorkbookSession book, ExportRequest request, int packageCount, int featureCount, int bloatCount, int setupCount)
+    private static void WriteSummary(WorkbookSession book, ExportRequest request, int packageCount, int featureCount, int bloatCount, int setupCount, int startupCount, int footprintCount)
     {
         var table = SheetTable.KeyValue("Item", "Value",
         [
             ("Machine", Environment.MachineName),
             ("When", DateTime.Now.ToString("dd MMM yyyy HH:mm")),
-            ("Rows", request.Rows == ExportRows.Current ? "Current view" : "Everything loaded"),
-            ("AppMgmtIQ", request.IncludePackages ? "Yes" : "No"),
-            ("Windows Features", request.IncludeFeatures ? "Yes" : "No"),
-            ("Bloatware", request.IncludeBloatware ? "Yes" : "No"),
-            ("Active Setup", request.IncludeActiveSetup ? "Yes" : "No"),
+            ("AppMgmtIQ", request.IncludePackages ? (request.PackagesCurrent ? "Current view" : "Everything") : "No"),
+            ("Windows Features", request.IncludeFeatures ? (request.FeaturesCurrent ? "Current view" : "Everything") : "No"),
+            ("Bloatware", request.IncludeBloatware ? (request.BloatwareCurrent ? "Current view" : "Everything") : "No"),
+            ("Active Setup", request.IncludeActiveSetup ? (request.ActiveSetupCurrent ? "Current view" : "Everything") : "No"),
+            ("Startup", request.IncludeStartup ? (request.StartupCurrent ? "Current view" : "Everything") : "No"),
+            ("Footprints", request.IncludeFootprints ? (request.FootprintsCurrent ? "Current view" : "Everything") : "No"),
             ("Package details", request.Details ? "Yes" : "No"),
             ("Packages", packageCount),
             ("Features", featureCount),
             ("Bloatware rows", bloatCount),
-            ("Active Setup rows", setupCount)
+            ("Active Setup rows", setupCount),
+            ("Startup rows", startupCount),
+            ("Footprint rows", footprintCount)
         ], "Summary");
         book.Sheet("Summary").WriteTable(table, new SheetWriteOptions { TabColor = "4C8DFF" });
     }
@@ -109,9 +131,9 @@ public static class InventoryExport
         book.Sheet("Features").WriteTable(table, new SheetWriteOptions { TabColor = "1F8A4C" });
     }
 
-    private static List<(string Caption, string Name, string State, string Parent, string Description)> FeatureRows(FeaturesViewModel features, ExportRows rows)
+    private static List<(string Caption, string Name, string State, string Parent, string Description)> FeatureRows(FeaturesViewModel features, bool current)
     {
-        if (rows == ExportRows.Current)
+        if (current)
         {
             return features.VisibleNodes()
                 .Select(node => (node.Caption, node.Name, node.State, node.Parent, node.Feature?.Description ?? ""))
@@ -139,5 +161,23 @@ public static class InventoryExport
             rows.Select(row => (IReadOnlyList<object?>)[row.DisplayName, row.Component, row.StubPath, row.Version, row.Scope, row.Bit, row.Pending, row.Installed]),
             "ActiveSetup");
         book.Sheet("Active Setup").WriteTable(table, new SheetWriteOptions { TabColor = "8B5CF6" });
+    }
+
+    private static void WriteStartup(WorkbookSession book, IReadOnlyList<StartupRow> rows)
+    {
+        var table = SheetTable.Create(
+            ["Name", "Source", "Scope", "Bit", "State", "Command", "Package"],
+            rows.Select(row => (IReadOnlyList<object?>)[row.Name, row.Source, row.Scope, row.Bit, row.State, row.Command, row.Package]),
+            "Startup");
+        book.Sheet("Startup").WriteTable(table, new SheetWriteOptions { TabColor = "0E7C86" });
+    }
+
+    private static void WriteFootprints(WorkbookSession book, IReadOnlyList<FootprintRow> rows)
+    {
+        var table = SheetTable.Create(
+            ["Kind", "Name", "Path", "Scope", "Ref count", "Exists", "Package"],
+            rows.Select(row => (IReadOnlyList<object?>)[row.Kind, row.Name, row.Path, row.Scope, row.RefCountText, row.ExistsText, row.Package]),
+            "Footprints");
+        book.Sheet("Footprints").WriteTable(table, new SheetWriteOptions { TabColor = "B45309" });
     }
 }
