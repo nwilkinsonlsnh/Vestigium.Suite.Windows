@@ -7,17 +7,17 @@ public static class OrphanRules
 {
     public static (bool Orphan, string Reason)? Check(PackageRow row, Func<string, bool> exists)
     {
-        var location = Text(row, "InstallLocation");
+        var location = PathResolve.Clean(Text(row, "InstallLocation"));
         if (LooksLikePath(location))
         {
             if (!exists(location))
                 return (true, "Install location missing");
         }
 
-        var file = KeyFile(row);
+        var file = PathResolve.Clean(KeyFile(row));
         if (LooksLikePath(file))
         {
-            if (!exists(file!))
+            if (!exists(file))
                 return (true, "Key file missing");
         }
 
@@ -26,7 +26,7 @@ public static class OrphanRules
         return null;
     }
 
-    private static string? KeyFile(PackageRow row)
+    private static string KeyFile(PackageRow row)
     {
         foreach (var name in new[] { "DisplayIcon", "UninstallString", "ModifyPath" })
         {
@@ -35,7 +35,7 @@ public static class OrphanRules
             if (LooksLikePath(file))
                 return file;
         }
-        return null;
+        return "";
     }
 
     private static string FirstPath(string raw)
