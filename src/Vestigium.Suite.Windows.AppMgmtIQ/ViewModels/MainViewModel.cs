@@ -180,6 +180,88 @@ public sealed partial class MainViewModel : ObservableObject
         new ActiveSetupSummaryWindow("Uninstall", code is 0 or 3010 or null ? $"{package.DisplayName} was uninstalled." : $"{package.DisplayName} exited {code}.", plan.Display, code is null ? "The process did not report an exit code." : $"Exit code {code}.") { Owner = owner }.ShowDialog();
     }
 
+    public Task ModifyAsync(PackageRow package, Window owner)
+    {
+        if (!package.HasModify)
+        {
+            MessageBox.Show(owner, $"{package.DisplayName} has no ModifyPath.", "Modify", MessageBoxButton.OK, MessageBoxImage.Information);
+            return Task.CompletedTask;
+        }
+        var (file, args) = Split(package.ModifyPath);
+        return LaunchAsync(package, owner, "Modify", file, args, package.ModifyPath);
+    }
+
+    public Task RepairAsync(PackageRow package, Window owner)
+    {
+        var plan = RepairPlan.Build(package);
+        if (plan is null)
+        {
+            MessageBox.Show(owner, $"{package.DisplayName} has no repair command.", "Repair", MessageBoxButton.OK, MessageBoxImage.Information);
+            return Task.CompletedTask;
+        }
+        return LaunchAsync(package, owner, "Repair", plan.FileName, plan.Arguments, plan.Display);
+    }
+
+    private async Task LaunchAsync(PackageRow package, Window owner, string verb, string file, string args, string display)
+    {
+        var actor = WindowsIdentity.GetCurrent().Name;
+        var confirm = new UninstallConfirmWindow(package.DisplayName, display, actor, null, verb) { Owner = owner };
+        if (confirm.ShowDialog() != true)
+            return;
+
+        HostLog.Information(
+            AppMgmtCatalog.LifecycleRequested,
+            "Lifecycle",
+            $"{verb} started. package={package.DisplayName} command={display} actor={actor}");
+        Status = $"{verb} {package.DisplayName}\u2026";
+        int? code = null;
+        try
+        {
+            var process = Process.Start(new ProcessStartInfo(file, args) { UseShellExecute = true });
+            if (process is not null)
+            {
+                await process.WaitForExitAsync();
+                code = process.ExitCode;
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(owner, ex.Message, verb, MessageBoxButton.OK, MessageBoxImage.Error);
+            return;
+        }
+
+        HostLog.Information(
+            AppMgmtCatalog.LifecycleCompleted,
+            "Lifecycle",
+            $"{verb} finished. package={package.DisplayName} code={code}");
+        Status = $"{verb} finished for {package.DisplayName}. Refreshing\u2026";
+        await LoadAsync();
+        var summary = code is 0 or 3010 or null ? $"{package.DisplayName} {verb.ToLower()} finished." : $"{package.DisplayName} exited {code}.";
+        var detail = code is null ? "The process did not report an exit code." : $"Exit code {code}.";
+        new ActiveSetupSummaryWindow(verb, summary, display, detail) { Owner = owner }.ShowDialog();
+    }
+
+    private static (string File, string Args) Split(string command)
+    {
+        var text = command.Trim();
+        if (text.StartsWith('"'))
+        {
+            var end = text.IndexOf('"', 1);
+            if (end > 1)
+                return (text[1..end], text[(end + 1)..].Trim());
+        }
+        foreach (var extension in new[] { ".exe", ".bat", ".cmd", ".com", ".msi" })
+        {
+            var at = text.IndexOf(extension, StringComparison.OrdinalIgnoreCase);
+            if (at < 0)
+                continue;
+            var end = at + extension.Length;
+            return (text[..end], text[end..].Trim());
+        }
+        var space = text.IndexOf(' ');
+        return space < 0 ? (text, string.Empty) : (text[..space], text[(space + 1)..].Trim());
+    }
+
     private static bool ClearNoRemove(PackageRow package, string actor)
     {
         if (!Enum.TryParse<RegistryHiveKind>(package.Hive, out var hive))
