@@ -1,0 +1,112 @@
+# PR05 — Requirements
+
+**Document ID:** VEST-SUITE-WINDOWS-APPMGMTIQ-PR05-REQ
+**Host:** `Vestigium.Suite.Windows.AppMgmtIQ`
+**Status:** Draft
+**Date:** 20 October 2026
+**Product papers:** [Requirements_v1.0.md](../Requirements_v1.0.md), [Design_v1.0.md](../Design_v1.0.md)
+
+This file is the **definition of done for PR05**. It moves domain work out of the host and into published Helpers. The host becomes a skeleton: it binds, confirms, and shows. The libraries read, resolve, decide, and plan.
+
+**One sentence:** Extract path resolution, package rules, inventory walks, startup logic, the bloatware catalog, and pending-reboot detection into published Helpers so AppMgmtIQ holds only the UI and the calls.
+
+**This version is not** a behavior change. Not a new tab. Not a new action. The grid, the Exists column, the menus, and the export come back the same.
+
+---
+
+## Must change
+
+### R05-01 FileSystemPaths
+
+Create `Vestigium.Helpers.FileSystemPaths` and publish it.
+
+- `PathResolve`: strip quotes, drop a `\\??\\` prefix, drop a trailing comma index, expand environment variables.
+- `AppPathResolve`: for an empty App Path default, read the `Path` value and join it to the key name; if still empty, search System32, SysWOW64, and PATH.
+- Wow64 retry: a `System32` path is retried under `SysWOW64`.
+- WinSxS name search for a side-by-side copy.
+
+The host calls these. It does not own the rules.
+
+### R05-02 AppMgmt domain
+
+Create `Vestigium.Helpers.AppMgmt` and publish it.
+
+- Orphan rules. A package is orphaned when the install location or key file is missing.
+- Repair and uninstall plans. Build the command. Do not launch it.
+- Baseline compare. match / newer / older / unknown / none. The store stays in the host.
+- Inventory walks. ARP, App Paths, SharedDLLs, Installer products, associations.
+- Footprint to package link.
+
+The host projects rows and binds them.
+
+### R05-03 Startup domain
+
+Create `Vestigium.Helpers.Startup` and publish it.
+
+- Approved-state read.
+- Launch classification.
+- Package link.
+- Navigation target.
+
+The host shows the grid and calls the elevated applier. The applier stays in the host.
+
+### R05-04 Bloatware catalog
+
+Move `BloatwareCatalog` to `Vestigium.Helpers.Bloatware` and publish it. The host reads the catalog. It does not own the list.
+
+### R05-05 Pending reboot
+
+Move the pending-reboot and pending-file-rename read to `Vestigium.Helpers.SystemInfo`. It is machine state, not package state.
+
+---
+
+## Must not change in PR05
+
+- Grid columns, Exists answers, menu actions, and export output
+- Confirmation dialogs and elevated appliers
+- Settings, MRU, and theme
+- Features and DISM (parked)
+- Automatic cleanup of any footprint
+
+---
+
+## Acceptance
+
+1. `Vestigium.Helpers.FileSystemPaths` is published and the host no longer owns path rules.
+2. `Vestigium.Helpers.AppMgmt` is published and the host no longer owns orphan, repair, uninstall, baseline compare, or the inventory walks.
+3. `Vestigium.Helpers.Startup` is published and the host no longer owns approved, launch, link, or navigation logic.
+4. `Vestigium.Helpers.Bloatware` is published and owns the catalog.
+5. Pending reboot is read from `Vestigium.Helpers.SystemInfo`.
+6. An export of the same machine matches the PR04 export for Footprints Exists, package counts, and startup rows.
+7. No new tab, action, or cleanup.
+
+---
+
+## Decision
+
+| Call | Why |
+|---|---|
+| Host is a skeleton | Rules belong in libraries so other hosts can use them. |
+| New FileSystemPaths | FileIo is file jobs. This is path meaning. |
+| New AppMgmt | Package domain is smeared across the host today. |
+| New Startup | Same shape as AppMgmt. Applier stays elevated in the host. |
+| New Bloatware | The catalog has no UI. |
+| Pending reboot to SystemInfo | It is machine state. |
+| No behavior change | The test is a matching export. |
+
+### Rejected
+
+| Idea | Why out |
+|---|---|
+| Put path rules in WinReg | WinReg reads keys. It does not resolve files. |
+| Put path rules in FileIo | FileIo runs file jobs. |
+| Move elevated appliers | They are host processes with a manifest. |
+| Move Features and DISM | Different domain. Bigger move. Parked. |
+
+---
+
+## Parked
+
+- Features and DISM helper
+- Moving the export column lists
+- Moving settings and MRU
