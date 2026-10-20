@@ -24,7 +24,7 @@ public sealed partial class PackageRow : ObservableObject
     public required bool NoRepair { get; init; }
     public required string UninstallString { get; init; }
     public string ModifyPath { get; init; } = "";
-    public string RepairCommand { get; init; } = "";
+    public string RepairCommand { get; set; } = "";
     public bool HasModify => !NoModify && !string.IsNullOrWhiteSpace(ModifyPath);
     public bool HasRepair => !string.IsNullOrWhiteSpace(RepairCommand);
     public required string KeyPath { get; init; }
