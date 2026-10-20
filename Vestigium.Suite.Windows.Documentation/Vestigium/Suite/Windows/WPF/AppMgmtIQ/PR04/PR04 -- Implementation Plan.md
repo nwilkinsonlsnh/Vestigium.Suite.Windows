@@ -61,7 +61,7 @@ Inventory grid and uninstall flow exist. ModifyPath and QuietUninstallString are
 | 2 | PR04.002 | Add confirmed Modify and Repair actions (reuse uninstall confirmation). | Done |
 | 3 | PR04.003 | Orphan detection (missing InstallLocation or key file). Indicator in grid and details. | Done |
 | 4 | PR04.004 | Simple version baseline store and comparison column. | Done |
-| 5 | PR04.005 | Pending reboot / file-rename surface (read-only). | |
+| 5 | PR04.005 | Pending reboot / file-rename surface (read-only). | Done |
 | 6 | PR04.006 | Extend PackageCatalog, PackageFacts, and PackageAdapter with the new fields from R04-05. Existing QueryBar picks them up through the existing session. | |
 | 7 | PR04.007 | Host tests for orphan logic, baseline comparison, and new catalog field binding (no live registry). | |
 | 8 | PR04.008 | Dashboard: extend the Packages section (or add a Lifecycle radio if preferred at implementation time). Cards: orphans, packages with Repair available, packages with Modify available, baseline match / newer / older / none. Charts: orphan vs clean pie, baseline status breakdown, action availability. Story text updated to mention health. | |
@@ -94,4 +94,4 @@ When this plan finishes, move the whole `PR04/` folder to `Complete/PR04/`.
 
 ## Next action
 
-PR04.005. Pending reboot surface.
+PR04.006. Extend the Package catalog.
