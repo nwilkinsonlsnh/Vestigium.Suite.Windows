@@ -90,13 +90,13 @@
         <ContextMenu Grid.IsSharedSizeScope="True" Style="{StaticResource ContextMenu.Standard}" Opened="Menu_Opened">
           <MenuItem x:Name="AddItem" Header="Add" Style="{StaticResource MenuItem.Standard}" Click="Add_Click" />
           <MenuItem x:Name="RemoveItem" Header="Remove" Style="{StaticResource MenuItem.Standard}" Click="Remove_Click" />
-          <Separator Style="{StaticResource Separator.Standard}" />
+          <Separator Style="{StaticResource Separator.Menu}" />
           <MenuItem Header="Copy" Style="{StaticResource MenuItem.Standard}">
             <MenuItem Header="Name" Style="{StaticResource MenuItem.Standard}" Click="CopyName_Click" />
             <MenuItem Header="Family" Style="{StaticResource MenuItem.Standard}" Click="CopyFamily_Click" />
             <MenuItem Header="Package" Style="{StaticResource MenuItem.Standard}" Click="CopyPackage_Click" />
           </MenuItem>
-          <Separator Style="{StaticResource Separator.Standard}" />
+          <Separator Style="{StaticResource Separator.Menu}" />
           <MenuItem Header="Refresh" Style="{StaticResource MenuItem.Standard}" Command="{Binding RefreshCommand}">
             <MenuItem.Icon><TextBlock FontFamily="Segoe UI Symbol" FontSize="14" Text="&#x267B;" Foreground="#3DDC84" /></MenuItem.Icon>
           </MenuItem>
