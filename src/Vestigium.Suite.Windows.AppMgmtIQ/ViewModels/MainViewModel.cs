@@ -139,7 +139,11 @@ public sealed partial class MainViewModel : ObservableObject
         if (generation != _orphan)
             return;
         var orphans = found.Count(item => item.Orphan);
-        Status = $"{Packages.Count} packages. {orphans} orphans.";
+        var pending = _all.Count(row => row.PendingReboot);
+        var status = $"{Packages.Count} packages. {orphans} orphans.";
+        if (pending > 0)
+            status += $" {pending} pending reboot.";
+        Status = status;
     }
 
     private List<(PackageRow Row, bool Orphan, string Reason)> Probe(IReadOnlyList<PackageRow> rows, int generation)
