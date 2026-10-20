@@ -79,6 +79,8 @@ public partial class AppMgmtIqView : UserControl
         var force = package is not null && UninstallPlan.CanForce(package);
         UninstallQuiet.Visibility = force ? Visibility.Visible : Visibility.Collapsed;
         UninstallBasic.Visibility = force ? Visibility.Visible : Visibility.Collapsed;
+        ModifyItem.IsEnabled = package?.HasModify == true;
+        RepairItem.IsEnabled = package?.HasRepair == true;
     }
 
     private void UninstallRegistered_Click(object sender, RoutedEventArgs e) => RunUninstall(UninstallMode.Registered);
@@ -92,6 +94,20 @@ public partial class AppMgmtIqView : UserControl
         if (DataContext is not MainViewModel host || host.SelectedPackage is not { } package)
             return;
         await host.UninstallAsync(package, Window.GetWindow(this), mode);
+    }
+
+    private async void Modify_Click(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is not MainViewModel host || host.SelectedPackage is not { } package)
+            return;
+        await host.ModifyAsync(package, Window.GetWindow(this));
+    }
+
+    private async void Repair_Click(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is not MainViewModel host || host.SelectedPackage is not { } package)
+            return;
+        await host.RepairAsync(package, Window.GetWindow(this));
     }
 
     private void Grid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
