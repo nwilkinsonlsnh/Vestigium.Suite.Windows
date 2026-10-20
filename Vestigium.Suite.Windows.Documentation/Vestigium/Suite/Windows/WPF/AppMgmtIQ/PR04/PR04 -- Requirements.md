@@ -62,6 +62,16 @@ Charts (minimum): orphan vs clean, baseline status breakdown, action availabilit
 
 Story text updated to mention health. Cards match the grid counts.
 
+### R04-07 Resolve footprint paths before Exists and orphan checks
+
+`PathResolve` already strips quotes, drops a comma index and a `\??\` prefix, and expands environment variables. That is not enough. An export of this machine showed three gaps.
+
+- **App Path blanks.** About 20 App Path keys have an empty default value. The key name is the executable (`cmmgr32.exe`, `dfshim.dll`, `Snagit`). Read the `Path` value on the same key and join it to the key name. If that is still empty, search `System32`, `SysWOW64`, and PATH for the key name. An empty default means search normally, so a hit is a resolution.
+- **Product blanks.** About 405 Product rows carry a product code, not a file. Look up `Installer\UserData\...\InstallProperties` for `InstallLocation` and `LocalPackage`. If either is a real path, answer Exists from it.
+- **SharedDll No.** About 8 SharedDll rows resolved and `File.Exists` said no. Retry once under Wow64 redirection (`System32` to `SysWOW64`). Optionally check WinSxS for side-by-side names (`d3d11*sdklayers`, `d3d11ref`). A row that still misses is a genuine leftover.
+
+Blank stays blank only when no path can be built. No means a path was built and the file is not there. Do not write No for a product code or an empty App Path that was never searched.
+
 ---
 
 ## Must not change in PR04
@@ -69,7 +79,8 @@ Story text updated to mention health. Cards match the grid counts.
 - Automatic repair or cleanup of orphans
 - Full software deployment or update orchestration
 - Vulnerability database integration
-- Changes to Startup (PR02) or Footprints (PR03) behavior beyond shared package linkage
+- Changes to Startup (PR02) behavior beyond shared package linkage
+- Footprints (PR03) behavior other than path resolution for Exists and the shared orphan check
 
 ---
 
@@ -83,6 +94,9 @@ Story text updated to mention health. Cards match the grid counts.
 6. Dashboard shows orphan, action, and baseline cards/charts that match the grid.
 7. No automatic destructive actions.
 8. Existing uninstall flow remains unchanged.
+9. App Path rows with an empty default are resolved from the Path value or a System32 / SysWOW64 / PATH search before Exists is left blank.
+10. Product rows answer Exists from InstallLocation or LocalPackage when one is present.
+11. SharedDll No rows are retried under Wow64 redirection before they stay No.
 
 ---
 
