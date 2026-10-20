@@ -17,6 +17,7 @@
     <VestigiumUnderConstructionVersion>1.0.1</VestigiumUnderConstructionVersion>
     <VestigiumConvertersVersion>1.0.0</VestigiumConvertersVersion>
     <VestigiumWinRegVersion>1.0.0</VestigiumWinRegVersion>
+    <VestigiumFileSystemPathsVersion>1.0.0</VestigiumFileSystemPathsVersion>
     <VestigiumKqlVersion>3.4.0</VestigiumKqlVersion>
     <VestigiumKqlAppMgmtVersion>1.5.0</VestigiumKqlAppMgmtVersion>
     <VestigiumKqlActiveSetupVersion>1.0.0</VestigiumKqlActiveSetupVersion>
