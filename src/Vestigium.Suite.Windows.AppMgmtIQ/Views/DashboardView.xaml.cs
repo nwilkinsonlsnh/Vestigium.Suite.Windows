@@ -57,18 +57,26 @@ public partial class DashboardView : UserControl
     private void ShowPackages()
     {
         var rows = _packages!.AllPackages;
-        Story.Text = "What is installed, who published it, and how large it is.";
+        var orphans = rows.Count(row => row.IsOrphan == true);
+        var repair = rows.Count(row => row.HasRepair);
+        var modify = rows.Count(row => row.HasModify);
+        Story.Text = "What is installed, and how healthy it is: orphans, repair, modify, and baseline.";
         SetCards(
             ("Packages", rows.Count.ToString()),
-            ("Global", rows.Count(row => row.IsGlobal).ToString()),
-            ("Per user", rows.Count(row => !row.IsGlobal).ToString()),
-            ("x64", Percent(rows.Count(row => row.IsX64), rows.Count)));
+            ("Orphans", orphans.ToString()),
+            ("Repair", repair.ToString()),
+            ("Modify", modify.ToString()));
         ShowCharts(
         [
-            ("Publishers", Chart(TopSlices(rows.Select(row => Blank(row.Publisher)), 8), "Publishers", true)),
-            ("Mix", Chart([Slice("Global", rows.Count(row => row.IsGlobal)), Slice("Per user", rows.Count(row => !row.IsGlobal)), Slice("System", rows.Count(row => row.SystemComponent)), Slice("x86", rows.Count(row => !row.IsX64))], "Package mix")),
-            ("Install year", Chart(TopSlices(rows.Select(Year), 10), "Install year", true)),
-            ("Size", SizeChart(rows))
+            ("Orphans", Chart([Slice("Orphan", orphans), Slice("Clean", rows.Count - orphans)], "Orphans")),
+            ("Baseline", Chart([
+                Slice("Match", rows.Count(row => row.BaselineStatus == "match")),
+                Slice("Newer", rows.Count(row => row.BaselineStatus == "newer")),
+                Slice("Older", rows.Count(row => row.BaselineStatus == "older")),
+                Slice("None", rows.Count(row => row.BaselineStatus == "none"))
+            ], "Baseline")),
+            ("Actions", Chart([Slice("Repair", repair), Slice("Modify", modify), Slice("Neither", rows.Count(row => !row.HasRepair && !row.HasModify))], "Actions")),
+            ("Publishers", Chart(TopSlices(rows.Select(row => Blank(row.Publisher)), 8), "Publishers", true))
         ]);
     }
 
