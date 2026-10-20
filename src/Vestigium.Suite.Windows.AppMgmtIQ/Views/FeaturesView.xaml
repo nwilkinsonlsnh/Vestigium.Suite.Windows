@@ -127,7 +127,7 @@
               </StackPanel>
             </MenuItem.Icon>
           </MenuItem>
-          <Separator Style="{StaticResource Separator.Menu}" />
+          <Separator Style="{StaticResource Separator.MenuHost}" />
           <MenuItem Header="Filter" Style="{StaticResource MenuItem.Standard}">
             <MenuItem.Icon><TextBlock Text="&#xE71C;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
             <MenuItem x:Name="EnabledItem" Checked="FilterCheck_Changed" Unchecked="FilterCheck_Changed" Header="Enabled" Style="{StaticResource MenuItem.Standard}" IsCheckable="True" IsChecked="{Binding PlacementTarget.DataContext.ShowEnabledFlag, RelativeSource={RelativeSource AncestorType=ContextMenu}}" StaysOpenOnClick="True">
@@ -140,7 +140,7 @@
               <MenuItem.Icon><TextBlock x:Name="AbsentCheck" FontFamily="Segoe MDL2 Assets" FontSize="16" Text="&#xE739;" /></MenuItem.Icon>
             </MenuItem>
           </MenuItem>
-          <Separator Style="{StaticResource Separator.Menu}" />
+          <Separator Style="{StaticResource Separator.MenuHost}" />
           <MenuItem Header="Apply changes" Style="{StaticResource MenuItem.Standard}" Click="Apply_Click"
                     IsEnabled="{Binding PlacementTarget.DataContext.HasPlan, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
             <MenuItem.Icon><TextBlock Text="&#xE73E;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
