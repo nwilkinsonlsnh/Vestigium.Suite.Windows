@@ -33,14 +33,16 @@ public static class AppMgmtCatalog
     public const int StartupRequested = 17115;
     public const int StartupCompleted = 17120;
     public const int StartupCancelled = 17125;
-    public const int FootprintsLoaded = 17130;\n    public const int LifecycleRequested = 17135;\n    public const int LifecycleCompleted = 17140;
+    public const int FootprintsLoaded = 17130;
+    public const int LifecycleRequested = 17135;
+    public const int LifecycleCompleted = 17140;
 
     public static void Register(VestigiumLoggerOptions cfg)
     {
         ArgumentNullException.ThrowIfNull(cfg);
         var taxonomy = new VestigiumTaxonomy();
         taxonomy.Register(Category, HostIds.AppMgmtIQ);
-        taxonomy.Register(Category, "Lifecycle", "Inventory", "Settings", "Features", "Export", "Bloatware", "Uninstall", "ActiveSetup", "Startup", "Footprints", "Lifecycle");
+        taxonomy.Register(Category, "Lifecycle", "Inventory", "Settings", "Features", "Export", "Bloatware", "Uninstall", "ActiveSetup", "Startup", "Footprints");
         cfg.RegisterTaxonomy(taxonomy);
         cfg.RegisterEvent("AppStarted", "Vestigium.Suite.Windows.AppMgmtIQ.Events.AppStarted", Category, Subcategory, AppStarted, "Information", "host started");
         cfg.RegisterEvent("InventoryLoaded", "Vestigium.Suite.Windows.AppMgmtIQ.Events.InventoryLoaded", Category, Subcategory, InventoryLoaded, "Information", "inventory loaded");
@@ -68,6 +70,8 @@ public static class AppMgmtCatalog
         cfg.RegisterEvent("StartupRequested", "Vestigium.Suite.Windows.AppMgmtIQ.Events.StartupRequested", Category, "Startup", StartupRequested, "Information", "startup change requested");
         cfg.RegisterEvent("StartupCompleted", "Vestigium.Suite.Windows.AppMgmtIQ.Events.StartupCompleted", Category, "Startup", StartupCompleted, "Information", "startup change completed");
         cfg.RegisterEvent("StartupCancelled", "Vestigium.Suite.Windows.AppMgmtIQ.Events.StartupCancelled", Category, "Startup", StartupCancelled, "Information", "startup change cancelled");
-        cfg.RegisterEvent("FootprintsLoaded", "Vestigium.Suite.Windows.AppMgmtIQ.Events.FootprintsLoaded", Category, "Footprints", FootprintsLoaded, "Information", "footprints loaded");\n        cfg.RegisterEvent("LifecycleRequested", "Vestigium.Suite.Windows.AppMgmtIQ.Events.LifecycleRequested", Category, "Lifecycle", LifecycleRequested, "Information", "modify or repair started");\n        cfg.RegisterEvent("LifecycleCompleted", "Vestigium.Suite.Windows.AppMgmtIQ.Events.LifecycleCompleted", Category, "Lifecycle", LifecycleCompleted, "Information", "modify or repair finished");
+        cfg.RegisterEvent("FootprintsLoaded", "Vestigium.Suite.Windows.AppMgmtIQ.Events.FootprintsLoaded", Category, "Footprints", FootprintsLoaded, "Information", "footprints loaded");
+        cfg.RegisterEvent("LifecycleRequested", "Vestigium.Suite.Windows.AppMgmtIQ.Events.LifecycleRequested", Category, "Lifecycle", LifecycleRequested, "Information", "modify or repair started");
+        cfg.RegisterEvent("LifecycleCompleted", "Vestigium.Suite.Windows.AppMgmtIQ.Events.LifecycleCompleted", Category, "Lifecycle", LifecycleCompleted, "Information", "modify or repair finished");
     }
 }
