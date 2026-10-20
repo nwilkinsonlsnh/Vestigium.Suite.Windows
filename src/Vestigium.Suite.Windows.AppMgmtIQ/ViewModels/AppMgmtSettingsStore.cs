@@ -37,6 +37,7 @@ public sealed class AppMgmtSettings
     public List<QueryMruEntry> BloatwareMrus { get; set; } = [];
     public List<QueryMruEntry> ActiveSetupMrus { get; set; } = [];
     public List<QueryMruEntry> StartupMrus { get; set; } = [];
+    public List<QueryMruEntry> FootprintsMrus { get; set; } = [];
 }
 
 public sealed class AppMgmtSettingsStore
