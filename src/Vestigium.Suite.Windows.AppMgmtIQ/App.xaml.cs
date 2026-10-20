@@ -180,7 +180,7 @@ public partial class App : Application
         footprints = new FootprintsViewModel { IsLoading = true };
         var store = new AppMgmtSettingsStore(AppMgmtSettingsStore.DefaultRoot);
         var settings = new SettingsViewModel(Themes, inventory, store);
-        settings.BindMrus(featuresVm, bloatware, setup, startup);
+        settings.BindMrus(featuresVm, bloatware, setup, startup, footprints);
         settings.Load();
 
         var page = new AppMgmtIqView { DataContext = inventory };
