@@ -136,6 +136,8 @@ public partial class DetailsWindow : Window
             NoRemove = _package.NoRemove,
             NoRepair = _package.NoRepair,
             UninstallString = _package.UninstallString,
+            ModifyPath = _package.ModifyPath,
+            RepairCommand = _package.RepairCommand,
             KeyPath = _package.KeyPath,
             Hive = _package.Hive,
             Values = key.Values,
