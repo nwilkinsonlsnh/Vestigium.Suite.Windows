@@ -120,6 +120,7 @@ public sealed partial class MainViewModel : ObservableObject
             _all.AddRange(rows);
             _baselines.Load();
             ApplyBaselines();
+            ApplyPending();
             ApplyFilter();
             HostLog.Information(AppMgmtCatalog.InventoryLoaded, "Inventory", $"Inventory loaded. {_all.Count} packages.");
             _ = CheckOrphans();
@@ -177,6 +178,22 @@ public sealed partial class MainViewModel : ObservableObject
                 row.OrphanReason = reason;
             }
         });
+    }
+
+    private void ApplyPending()
+    {
+        var state = PendingRebootState.Read();
+        var hits = 0;
+        foreach (var row in _all)
+        {
+            row.PendingReboot = state.Mentions(row);
+            if (row.PendingReboot)
+                hits++;
+        }
+        if (state.Pending)
+            Status = hits == 0
+                ? "A reboot is pending."
+                : $"A reboot is pending. {hits} packages are named in a file rename.";
     }
 
     public void SetBaseline(PackageRow package)
