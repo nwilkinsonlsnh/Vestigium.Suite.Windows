@@ -31,6 +31,7 @@
     <PackageReference Include="Vestigium.Helpers.Kql.AppMgmt" Version="$(VestigiumKqlAppMgmtVersion)" />
     <PackageReference Include="Vestigium.Helpers.Kql.ActiveSetup" Version="$(VestigiumKqlActiveSetupVersion)" />
     <PackageReference Include="Vestigium.Helpers.WinReg" Version="$(VestigiumWinRegVersion)" />
+    <PackageReference Include="Vestigium.Helpers.FileSystemPaths" Version="$(VestigiumFileSystemPathsVersion)" />
   </ItemGroup>
 
   <ItemGroup>
