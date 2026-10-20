@@ -49,7 +49,7 @@ The host owns path resolution, orphan rules, repair and uninstall plans, baselin
 | 1 | PR05.001 | Create `Vestigium.Helpers.FileSystemPaths`. Move `PathResolve` and `AppPathResolve`. Host calls it. Publish and pin. | |
 | 2 | PR05.002 | Move the Wow64 retry and the WinSxS name search into FileSystemPaths. | |
 | 2b | PR05.002b | Add `PathSanitize`. Rejected characters become one safe character. Never empty. | |
-| 2c | PR05.002c | Add the token expander. Categories: date and time (`{datetime}` `{date}` `{time}`), special folders (desktop, favorites, userprofile, appdata, localappdata, temp, programfiles, programfilesx86, programdata, windir, systemdrive, public), identity (`{username}` `{computername}`). Unknown tokens stay as written. | |
+| 2c | PR05.002c | Add the token expander. Categories: date and time (`{datetime}` `{date}` `{time}`), special folders (desktop, favorites, userprofile, appdata, localappdata, temp, programfiles, programfilesx86, programdata, windir, systemdrive, public), identity (`{username}` `{computername}`), counters (`{#}` `{##}` `{A#}` `{AA#}` `{a#}` `{aa#}`, any width). Counters format a caller-supplied value, zero-pad, and throw on overflow. No rollover. Unknown tokens stay as written. | |
 | 2d | PR05.002d | Long paths, conservative. Prefix `\\\\?\\` only when a built path would exceed 260. Leave short paths and already-long paths alone. | |
 | 3 | PR05.003 | Create `Vestigium.Helpers.AppMgmt`. Move orphan rules, repair plan, uninstall plan, and baseline compare. The baseline store stays in the host. | |
 | 4 | PR05.004 | Move the inventory walks (ARP, App Paths, SharedDLLs, products, associations) and the footprint link into AppMgmt. Host projects rows only. | |
