@@ -125,7 +125,7 @@ public sealed partial class FootprintsViewModel : ObservableObject
             if (generation != _check)
                 return found;
             bool exists;
-            try { exists = File.Exists(row.Path); }
+            try { exists = File.Exists(PathResolve.Clean(row.Path)); }
             catch (Exception) { exists = false; }
             var item = (row, exists);
             found.Add(item);
