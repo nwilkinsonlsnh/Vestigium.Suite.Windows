@@ -33,15 +33,15 @@ public partial class App : Application
         Services = services.BuildServiceProvider();
 
         ShutdownMode = ShutdownMode.OnMainWindowClose;
-        MainWindow = CreateMainWindow(out var inventory, out var features, out var bloatware, out var setup, out var startup, out var chrome, out var dashboard);
+        MainWindow = CreateMainWindow(out var inventory, out var features, out var bloatware, out var setup, out var startup, out var footprints, out var chrome, out var dashboard);
         MainWindow.Show();
 
         startup.Attach(inventory);
-        await Task.WhenAll(inventory.LoadAsync(), features.LoadAsync(), bloatware.LoadAsync(), setup.LoadAsync(), startup.LoadAsync());
+        await Task.WhenAll(inventory.LoadAsync(), features.LoadAsync(), bloatware.LoadAsync(), setup.LoadAsync(), startup.LoadAsync(), footprints.LoadAsync());
         startup.Link(inventory.AllPackages);
         chrome.Status.Message = inventory.Status;
         dashboard.Bind(inventory, features, bloatware, setup, startup);
-        WireStatus(chrome, inventory, features, bloatware, setup, startup);
+        WireStatus(chrome, inventory, features, bloatware, setup, startup, footprints);
 
         base.OnStartup(e);
     }
@@ -52,7 +52,8 @@ public partial class App : Application
         FeaturesViewModel features,
         BloatwareViewModel bloatware,
         ActiveSetupViewModel setup,
-        StartupViewModel startup)
+        StartupViewModel startup,
+        FootprintsViewModel footprints)
     {
         chrome.Status.Engine.Columns.Add(new StatusBarColumn
         {
@@ -71,6 +72,7 @@ public partial class App : Application
                 "Bloatware" => bloatware.Status,
                 "Active Setup" => setup.Status,
                 "Startup" => startup.Status,
+                "Footprints" => footprints.Status,
                 _ => ""
             };
             chrome.Status.Engine.PostImmediate("summary", new StatusBarUpdate { Text = text });
@@ -81,6 +83,7 @@ public partial class App : Application
         bloatware.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(BloatwareViewModel.Status)) Update(); };
         setup.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(ActiveSetupViewModel.Status)) Update(); };
         startup.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(StartupViewModel.Status)) Update(); };
+        footprints.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(FootprintsViewModel.Status)) Update(); };
         if (Shell is not null)
             DependencyPropertyDescriptor.FromProperty(VestigiumShell.SelectedItemProperty, typeof(VestigiumShell))
                 .AddValueChanged(Shell, (_, _) => Update());
@@ -93,6 +96,7 @@ public partial class App : Application
         out BloatwareViewModel bloatware,
         out ActiveSetupViewModel setup,
         out StartupViewModel startup,
+        out FootprintsViewModel footprints,
         out VestigiumDefaultWindowViewModel chrome,
         out DashboardView dashboard)
     {
@@ -134,6 +138,12 @@ public partial class App : Application
                     Subject = "Persistence",
                     Description = "Run, RunOnce, RunOnceEx, and Startup folder entries."
                 },
+                new VestigiumNavItemSpec("Footprints")
+                {
+                    Title = "Footprints",
+                    Subject = "Installer side effects",
+                    Description = "App Paths, associations, installer products, and SharedDLLs."
+                },
                 new VestigiumNavItemSpec("Dashboard")
                 {
                     Title = "Dashboard",
@@ -166,6 +176,7 @@ public partial class App : Application
         bloatware = new BloatwareViewModel { IsLoading = true };
         setup = new ActiveSetupViewModel { IsLoading = true };
         startup = new StartupViewModel { IsLoading = true };
+        footprints = new FootprintsViewModel { IsLoading = true };
         var store = new AppMgmtSettingsStore(AppMgmtSettingsStore.DefaultRoot);
         var settings = new SettingsViewModel(Themes, inventory, store);
         settings.BindMrus(featuresVm, bloatware, setup, startup);
@@ -200,6 +211,10 @@ public partial class App : Application
         var start = window.HostShell["Startup"];
         if (start is not null)
             start.Content = new StartupView { DataContext = startup };
+
+        var foot = window.HostShell["Footprints"];
+        if (foot is not null)
+            foot.Content = new FootprintsView { DataContext = footprints };
 
         var export = window.HostShell["Export"];
         if (export is not null)
