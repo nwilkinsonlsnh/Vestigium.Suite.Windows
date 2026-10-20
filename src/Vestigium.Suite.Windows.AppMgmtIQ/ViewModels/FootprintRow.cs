@@ -10,6 +10,8 @@ public sealed partial class FootprintRow : ObservableObject
     public string Scope { get; init; } = "";
     public int? RefCount { get; init; }
     public string Package { get; set; } = "";
+    public string Resolved { get; init; } = "";
+    public bool ResolvedIsDirectory { get; init; }
     public string RefCountText => RefCount?.ToString() ?? "";
 
     [ObservableProperty]
