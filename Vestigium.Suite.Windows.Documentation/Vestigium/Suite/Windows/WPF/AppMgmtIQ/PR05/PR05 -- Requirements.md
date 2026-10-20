@@ -18,12 +18,30 @@ This file is the **definition of done for PR05**. It moves domain work out of th
 
 ### R05-01 FileSystemPaths
 
-Create `Vestigium.Helpers.FileSystemPaths` and publish it.
+Create `Vestigium.Helpers.FileSystemPaths` and publish it. It is a path meaning library: resolve, sanitize, tokenize, and keep long paths safe.
+
+**Resolve.**
 
 - `PathResolve`: strip quotes, drop a `\\??\\` prefix, drop a trailing comma index, expand environment variables.
 - `AppPathResolve`: for an empty App Path default, read the `Path` value and join it to the key name; if still empty, search System32, SysWOW64, and PATH.
 - Wow64 retry: a `System32` path is retried under `SysWOW64`.
 - WinSxS name search for a side-by-side copy.
+
+**Sanitize.**
+
+- `PathSanitize`: make a string safe as a file or folder name. Replace characters Windows rejects (`<>:"/\\|?*` and control characters) with a single safe character. Trim trailing dots and spaces. Collapse repeats. Never return empty.
+
+**Tokens.** A small set, in categories, for building unique file and folder paths. Unknown tokens are left as written.
+
+| Category | Tokens |
+|---|---|
+| Date and time | `{datetime}` `{date}` `{time}` |
+| Special folders | `{desktop}` `{favorites}` `{userprofile}` `{appdata}` `{localappdata}` `{temp}` `{programfiles}` `{programfilesx86}` `{programdata}` `{windir}` `{systemdrive}` `{public}` |
+| Identity | `{username}` `{computername}` |
+
+`{datetime}`, `{date}`, and `{time}` use a sortable form (`yyyyMMdd-HHmmss`, `yyyyMMdd`, `HHmmss`). Special folders come from `Environment.SpecialFolder` or the matching environment variable. Identity comes from the environment.
+
+**Long paths.** A conservative plan. When a built path would exceed the classic 260 limit, prefix it with `\\\\?\\` so the call succeeds. Do not prefix a path that is already long-form. Do not change a path that fits.
 
 The host calls these. It does not own the rules.
 
@@ -72,7 +90,7 @@ Move the pending-reboot and pending-file-rename read to `Vestigium.Helpers.Syste
 
 ## Acceptance
 
-1. `Vestigium.Helpers.FileSystemPaths` is published and the host no longer owns path rules.
+1. `Vestigium.Helpers.FileSystemPaths` is published and the host no longer owns path rules. It resolves, sanitizes, expands the token set, and applies the long-path prefix only when a path would exceed 260.
 2. `Vestigium.Helpers.AppMgmt` is published and the host no longer owns orphan, repair, uninstall, baseline compare, or the inventory walks.
 3. `Vestigium.Helpers.Startup` is published and the host no longer owns approved, launch, link, or navigation logic.
 4. `Vestigium.Helpers.Bloatware` is published and owns the catalog.
