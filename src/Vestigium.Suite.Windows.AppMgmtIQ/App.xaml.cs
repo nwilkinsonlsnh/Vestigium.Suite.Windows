@@ -41,7 +41,7 @@ public partial class App : Application
         startup.Link(inventory.AllPackages);
         footprints.Link(inventory.AllPackages);
         chrome.Status.Message = inventory.Status;
-        dashboard.Bind(inventory, features, bloatware, setup, startup);
+        dashboard.Bind(inventory, features, bloatware, setup, startup, footprints);
         WireStatus(chrome, inventory, features, bloatware, setup, startup, footprints);
 
         base.OnStartup(e);
