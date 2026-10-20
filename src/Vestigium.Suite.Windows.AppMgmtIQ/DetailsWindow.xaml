@@ -53,11 +53,11 @@
           <MenuItem Header="Refresh" Style="{StaticResource MenuItem.Standard}" Click="Refresh_Click">
             <MenuItem.Icon><TextBlock FontFamily="Segoe UI Symbol" FontSize="14" Text="&#x267B;" Foreground="#3DDC84" /></MenuItem.Icon>
           </MenuItem>
-          <Separator Style="{StaticResource Separator.Menu}" />
+          <Separator Style="{StaticResource Separator.MenuHost}" />
           <MenuItem x:Name="CopyItem" Header="Copy" Style="{StaticResource MenuItem.Standard}">
             <MenuItem.Icon><TextBlock FontFamily="Segoe MDL2 Assets" FontSize="14" Text="&#xE8C8;" /></MenuItem.Icon>
             <MenuItem x:Name="CopyDataItem" Header="Value Data" Style="{StaticResource MenuItem.Standard}" Click="CopyData_Click" />
-            <Separator Style="{StaticResource Separator.Menu}" />
+            <Separator Style="{StaticResource Separator.MenuHost}" />
             <MenuItem Header="Value Information" Style="{StaticResource MenuItem.Standard}" Click="CopyInfo_Click" />
           </MenuItem>
         </ContextMenu>
