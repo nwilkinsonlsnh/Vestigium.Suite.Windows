@@ -77,6 +77,7 @@
         <DataGridTextColumn Header="Path" Binding="{Binding Path}" Width="*" ElementStyle="{StaticResource LeftCell}" />
         <DataGridTextColumn Header="Scope" Binding="{Binding Scope}" Width="90" ElementStyle="{StaticResource LeftCell}" />
         <DataGridTextColumn Header="Ref count" Binding="{Binding RefCountText}" Width="90" ElementStyle="{StaticResource LeftCell}" />
+        <DataGridTextColumn Header="Exists" Binding="{Binding ExistsText}" Width="70" ElementStyle="{StaticResource LeftCell}" />
         <DataGridTextColumn Header="Package" Binding="{Binding Package}" Width="200" ElementStyle="{StaticResource LeftCell}" />
       </DataGrid.Columns>
     </DataGrid>
