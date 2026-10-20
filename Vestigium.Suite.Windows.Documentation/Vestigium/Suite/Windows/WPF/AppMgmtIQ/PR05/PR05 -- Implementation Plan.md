@@ -46,7 +46,7 @@ The host owns path resolution, orphan rules, repair and uninstall plans, baselin
 
 | Order | ID | Do | State |
 | ---: | :--- | :--- | :--- |
-| 1 | PR05.001 | Create `Vestigium.Helpers.FileSystemPaths`. Move `PathResolve` and `AppPathResolve`. Host calls it. Publish and pin. | |
+| 1 | PR05.001 | Create `Vestigium.Helpers.FileSystemPaths`. Move `PathResolve` and `AppPathResolve`. Host calls it. Publish and pin. | Done |
 | 2 | PR05.002 | Move the Wow64 retry and the WinSxS name search into FileSystemPaths. | |
 | 2b | PR05.002b | Add `PathSanitize`. Rejected characters become one safe character. Never empty. | |
 | 2c | PR05.002c | Add the token expander. Categories: date and time (`{datetime}` `{date}` `{time}`), special folders (desktop, favorites, userprofile, appdata, localappdata, temp, programfiles, programfilesx86, programdata, windir, systemdrive, public), identity (`{username}` `{computername}`), counters (`{#}` `{##}` `{A}` `{AAA}` `{A#}` `{AA##}` `{a}` `{aaa}`, any width). Number runs zero-pad and throw when the value does not fit. Letter runs are base-26, rightmost first (`AAA`, `AAB`, `AAZ`, `ABA`), and throw past the last value. The two parts count separately. No rollover. Unknown tokens stay as written. | |
@@ -93,4 +93,4 @@ When this plan finishes, move the whole `PR05/` folder to `Completed/PR05/`.
 
 ## Next action
 
-PR05.001. Create `Vestigium.Helpers.FileSystemPaths` and move the path rules.
+PR05.002. Wow64 and WinSxS.
