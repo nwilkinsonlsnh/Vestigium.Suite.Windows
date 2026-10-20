@@ -81,17 +81,17 @@
               Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}"
               BorderBrush="{DynamicResource Vestigium.Brushes.Border.Subtle}">
       <DataGrid.ContextMenu>
-        <ContextMenu Style="{StaticResource ContextMenu.Standard}">
+        <ContextMenu Style="{StaticResource ContextMenu.Standard}" Grid.IsSharedSizeScope="True">
           <MenuItem Header="Enable" Style="{StaticResource MenuItem.Standard}" Command="{Binding EnableCommand}" />
           <MenuItem Header="Disable" Style="{StaticResource MenuItem.Standard}" Command="{Binding DisableCommand}" />
-          <Separator Style="{StaticResource Separator.Standard}" />
+          <Separator Style="{StaticResource Separator.Menu}" />
           <MenuItem Header="Enable All" Style="{StaticResource MenuItem.Standard}" Command="{Binding EnableAllCommand}" />
           <MenuItem Header="Disable All" Style="{StaticResource MenuItem.Standard}" Command="{Binding DisableAllCommand}" />
-          <Separator Style="{StaticResource Separator.Standard}" />
+          <Separator Style="{StaticResource Separator.Menu}" />
           <MenuItem Header="Remove" Style="{StaticResource MenuItem.Standard}" Command="{Binding RemoveCommand}" />
           <MenuItem Header="Open source" Style="{StaticResource MenuItem.Standard}" Command="{Binding OpenSourceCommand}" />
           <MenuItem Header="Jump to package" Style="{StaticResource MenuItem.Standard}" Command="{Binding JumpToPackageCommand}" />
-          <Separator Style="{StaticResource Separator.Standard}" />
+          <Separator Style="{StaticResource Separator.Menu}" />
           <MenuItem Header="Refresh" Style="{StaticResource MenuItem.Standard}" Command="{Binding RefreshCommand}">
             <MenuItem.Icon><TextBlock FontFamily="Segoe UI Symbol" FontSize="14" Text="&#x267B;" Foreground="#3DDC84" /></MenuItem.Icon>
           </MenuItem>
@@ -119,13 +119,13 @@
       <StackPanel>
         <TextBlock Style="{StaticResource TextBlock.Caption}" TextWrapping="Wrap">
           <Run Text="{Binding Selected.Name, Mode=OneWay}" FontWeight="SemiBold" />
-          <Run Text="  ·  " />
+          <Run Text="  \u00b7  " />
           <Run Text="{Binding Selected.State, Mode=OneWay}" />
-          <Run Text="  ·  " />
+          <Run Text="  \u00b7  " />
           <Run Text="{Binding Selected.Source, Mode=OneWay}" />
-          <Run Text="  ·  " />
+          <Run Text="  \u00b7  " />
           <Run Text="{Binding Selected.Scope, Mode=OneWay}" />
-          <Run Text="  ·  " />
+          <Run Text="  \u00b7  " />
           <Run Text="{Binding Selected.Bit, Mode=OneWay}" />
         </TextBlock>
         <TextBlock Margin="0,4,0,0"
