@@ -203,6 +203,11 @@ public sealed partial class FootprintsViewModel : ObservableObject
             if (key is null)
                 continue;
             var target = key.Values.FirstOrDefault(value => value.IsDefault)?.DataText ?? "";
+            if (string.IsNullOrWhiteSpace(target))
+            {
+                var pathValue = key.Values.FirstOrDefault(value => value.Name.Equals("Path", StringComparison.OrdinalIgnoreCase))?.DataText;
+                target = AppPathResolve.From(child.Name, pathValue, scope);
+            }
             rows.Add(new FootprintRow
             {
                 Kind = "AppPath",
