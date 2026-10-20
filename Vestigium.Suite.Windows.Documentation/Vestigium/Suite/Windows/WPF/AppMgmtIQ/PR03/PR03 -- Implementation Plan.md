@@ -66,7 +66,7 @@ PR02 (Startup) may or may not be complete. Footprints is independent. Dashboard 
 | 3 | PR03.003 | Enumerate SharedDLLs with reference counts. | Done |
 | 4 | PR03.004 | Surface Windows Installer product codes when present. | Done |
 | 5 | PR03.005 | Installer-linked associations / ProgIDs (best-effort). | Done |
-| 6 | PR03.006 | Package linkage and themed grid. Columns per R03-02. | |
+| 6 | PR03.006 | Package linkage and themed grid. Columns per R03-02. | Done |
 | 7 | PR03.007 | KQL catalog: add FootprintsCatalog, FootprintsFacts, FootprintsAdapter, and AppMgmtKql.Footprints() in Vestigium.Helpers.Kql.AppMgmt. Fields match R03-04. | |
 | 8 | PR03.008 | Wire VestigiumQueryBar in FootprintsView (same bindings and events as AppMgmtIqView). ViewModel implements ApplyQuery / CommitQuery / Pin / QueryMru. | |
 | 9 | PR03.009 | Host tests for projection and catalog field binding (no live registry). | |
@@ -100,4 +100,4 @@ When this plan finishes, move the whole `PR03/` folder to `Complete/PR03/`.
 
 ## Next action
 
-PR03.006. Package linkage and themed grid.
+PR03.007. Footprints KQL catalog.
