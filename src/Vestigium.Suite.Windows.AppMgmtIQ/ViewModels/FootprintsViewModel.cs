@@ -13,6 +13,7 @@ public sealed partial class FootprintsViewModel : ObservableObject
     private const string UserAppPaths = @"Software\Microsoft\Windows\CurrentVersion\App Paths";
     private const string SharedDlls = @"SOFTWARE\Microsoft\Windows\CurrentVersion\SharedDLLs";
     private const string SharedDllsWow = @"SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\SharedDLLs";
+    private const string UserData = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData";
 
     private readonly List<FootprintRow> _all = [];
 
@@ -71,6 +72,7 @@ public sealed partial class FootprintsViewModel : ObservableObject
         ReadAppPaths(client, RegistryHiveKind.CurrentUser, RegistryViewKind.Registry64, UserAppPaths, "HKCU", rows);
         ReadShared(client, RegistryHiveKind.LocalMachine, RegistryViewKind.Registry64, SharedDlls, "HKLM", rows);
         ReadShared(client, RegistryHiveKind.LocalMachine, RegistryViewKind.Registry64, SharedDllsWow, "Wow", rows);
+        ReadProducts(client, rows);
         return rows;
     }
 
@@ -110,6 +112,49 @@ public sealed partial class FootprintsViewModel : ObservableObject
                 RefCount = Count(value)
             });
         }
+    }
+
+    private static void ReadProducts(RegistryClient client, List<FootprintRow> rows)
+    {
+        foreach (var sid in client.ListSubKeys(RegistryHiveKind.LocalMachine, UserData, RegistryViewKind.Registry64, RegistryDetailLevel.Identity))
+        {
+            var products = sid.Path + "\\Products";
+            foreach (var product in client.ListSubKeys(RegistryHiveKind.LocalMachine, products, RegistryViewKind.Registry64, RegistryDetailLevel.Identity))
+            {
+                var props = client.GetKey(RegistryHiveKind.LocalMachine, product.Path + "\\InstallProperties", RegistryViewKind.Registry64, RegistryDetailLevel.Full);
+                var display = Text(props, "DisplayName");
+                var code = Unpack(product.Name);
+                rows.Add(new FootprintRow
+                {
+                    Kind = "Product",
+                    Name = string.IsNullOrWhiteSpace(display) ? code : display,
+                    Path = code,
+                    Scope = sid.Name.Equals("S-1-5-18", StringComparison.OrdinalIgnoreCase) ? "Machine" : "User"
+                });
+            }
+        }
+    }
+
+    private static string Text(RegistryKeyInfo? key, string name)
+        => key?.Values.FirstOrDefault(value => value.Name.Equals(name, StringComparison.OrdinalIgnoreCase))?.DataText ?? "";
+
+    private static string Unpack(string packed)
+    {
+        if (packed.Length != 32)
+            return packed;
+        var a = Reverse(packed, 0, 8);
+        var b = Reverse(packed, 8, 4);
+        var c = Reverse(packed, 12, 4);
+        var d = Reverse(packed, 16, 2) + Reverse(packed, 18, 2);
+        var e = Reverse(packed, 20, 2) + Reverse(packed, 22, 2) + Reverse(packed, 24, 2) + Reverse(packed, 26, 2) + Reverse(packed, 28, 2) + Reverse(packed, 30, 2);
+        return "{" + a + "-" + b + "-" + c + "-" + d + "-" + e + "}";
+    }
+
+    private static string Reverse(string text, int start, int length)
+    {
+        var chars = text.Substring(start, length).ToCharArray();
+        Array.Reverse(chars);
+        return new string(chars);
     }
 
     private static string SafeName(string path)
