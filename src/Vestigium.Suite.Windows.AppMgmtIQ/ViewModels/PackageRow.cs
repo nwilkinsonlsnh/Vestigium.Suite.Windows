@@ -42,6 +42,12 @@ public sealed partial class PackageRow : ObservableObject
     public string OrphanText => IsOrphan switch { true => "Yes", false => "No", _ => "" };
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PendingText))]
+    private bool _pendingReboot;
+
+    public string PendingText => PendingReboot ? "Yes" : "";
+
+    [ObservableProperty]
     private string _baselineStatus = "none";
 
     [ObservableProperty]
