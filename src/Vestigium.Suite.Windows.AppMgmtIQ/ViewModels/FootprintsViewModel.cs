@@ -52,6 +52,13 @@ public sealed partial class FootprintsViewModel : ObservableObject
         }
     }
 
+    public void Link(IReadOnlyList<PackageRow> packages)
+    {
+        foreach (var row in _all)
+            row.Package = FootprintLink.Match(row, packages);
+        Apply();
+    }
+
     [RelayCommand]
     private Task Refresh() => LoadAsync();
 
