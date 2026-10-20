@@ -1,3 +1,4 @@
+using Vestigium.Helpers.FileSystemPaths;
 using Vestigium.Helpers.WinReg;
 using Vestigium.Suite.Windows.AppMgmtIQ.ViewModels;
 
