@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Vestigium.Helpers.Kql;
@@ -22,6 +23,7 @@ public sealed partial class FootprintsViewModel : ObservableObject
     private readonly List<FootprintRow> _all = [];
     private readonly KqlSession _session = AppMgmtKql.Footprints();
     private KqlBoundQuery? _bound;
+    private int _check;
 
     public ObservableCollection<FootprintRow> Rows { get; } = [];
     public IReadOnlyList<FootprintRow> All => _all;
@@ -85,6 +87,7 @@ public sealed partial class FootprintsViewModel : ObservableObject
             _all.AddRange(found);
             Apply();
             HostLog.Information(AppMgmtCatalog.FootprintsLoaded, "Footprints", $"Footprints loaded. {_all.Count} entries.");
+            _ = CheckFiles();
         }
         finally
         {
@@ -101,6 +104,55 @@ public sealed partial class FootprintsViewModel : ObservableObject
 
     [RelayCommand]
     private Task Refresh() => LoadAsync();
+
+    private async Task CheckFiles()
+    {
+        var generation = Interlocked.Increment(ref _check);
+        var candidates = _all.Where(row => LooksLikePath(row.Path)).ToList();
+        var found = await Task.Run(() => Probe(candidates, generation));
+        if (generation != _check)
+            return;
+        var missing = found.Count(item => !item.Exists);
+        Status = $"{Rows.Count} entries. {missing} missing.";
+    }
+
+    private List<(FootprintRow Row, bool Exists)> Probe(IReadOnlyList<FootprintRow> candidates, int generation)
+    {
+        var found = new List<(FootprintRow Row, bool Exists)>();
+        var batch = new List<(FootprintRow Row, bool Exists)>();
+        foreach (var row in candidates)
+        {
+            if (generation != _check)
+                return found;
+            bool exists;
+            try { exists = File.Exists(row.Path); }
+            catch (Exception) { exists = false; }
+            var item = (row, exists);
+            found.Add(item);
+            batch.Add(item);
+            if (batch.Count < 50)
+                continue;
+            Publish(batch, generation);
+            batch = [];
+        }
+        Publish(batch, generation);
+        return found;
+    }
+
+    private static void Publish(List<(FootprintRow Row, bool Exists)> batch, int generation)
+    {
+        if (batch.Count == 0)
+            return;
+        var snapshot = batch.ToArray();
+        Application.Current?.Dispatcher.Invoke(() =>
+        {
+            foreach (var (row, exists) in snapshot)
+                row.Exists = exists;
+        });
+    }
+
+    private static bool LooksLikePath(string path)
+        => path.Contains('\\') || path.Contains(':');
 
     private void Apply()
     {
