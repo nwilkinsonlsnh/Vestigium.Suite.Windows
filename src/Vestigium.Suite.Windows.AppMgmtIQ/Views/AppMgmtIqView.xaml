@@ -192,6 +192,7 @@
         <DataGridCheckBoxColumn Header="NoModify" Binding="{Binding NoModify}" Width="*" MinWidth="70" />
         <DataGridCheckBoxColumn Header="NoRemove" Binding="{Binding NoRemove}" Width="*" MinWidth="70" />
         <DataGridCheckBoxColumn Header="NoRepair" Binding="{Binding NoRepair}" Width="*" MinWidth="70" />
+        <DataGridTextColumn Header="Orphan" Binding="{Binding OrphanText}" Width="*" MinWidth="70" ElementStyle="{StaticResource LeftCell}" />
       </DataGrid.Columns>
     </DataGrid>
 
