@@ -3,22 +3,85 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Background="{DynamicResource Vestigium.Brushes.Surface.Window}">
   <ScrollViewer VerticalScrollBarVisibility="Auto">
-    <StackPanel Margin="24" MaxWidth="640" HorizontalAlignment="Left">
+    <StackPanel Margin="24" MaxWidth="720" HorizontalAlignment="Left">
       <TextBlock Style="{StaticResource TextBlock.Heading}" Text="Export" />
       <TextBlock Style="{StaticResource TextBlock.Caption}" TextWrapping="Wrap" Margin="0,8,0,20"
                  Text="One workbook. Summary is the first sheet. A sheet is added for each inventory you include." />
 
-      <TextBlock Style="{StaticResource TextBlock.Caption}" Text="Inventories" Margin="0,0,0,8" />
-      <CheckBox Style="{StaticResource CheckBox.Standard}" Content="AppMgmtIQ" IsChecked="{Binding IncludePackages}" Margin="0,0,0,6" />
-      <CheckBox Style="{StaticResource CheckBox.Standard}" Content="Windows Features" IsChecked="{Binding IncludeFeatures}" Margin="0,0,0,6" />
-      <CheckBox Style="{StaticResource CheckBox.Standard}" Content="Bloatware" IsChecked="{Binding IncludeBloatware}" Margin="0,0,0,6" />
-      <CheckBox Style="{StaticResource CheckBox.Standard}" Content="Active Setup" IsChecked="{Binding IncludeActiveSetup}" Margin="0,0,0,18" />
+      <Grid Margin="0,0,0,6">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="220" />
+          <ColumnDefinition Width="140" />
+          <ColumnDefinition Width="160" />
+        </Grid.ColumnDefinitions>
+        <TextBlock Grid.Column="0" Style="{StaticResource TextBlock.Caption}" Text="Inventory" />
+        <TextBlock Grid.Column="1" Style="{StaticResource TextBlock.Caption}" Text="Current view" />
+        <TextBlock Grid.Column="2" Style="{StaticResource TextBlock.Caption}" Text="Everything loaded" />
+      </Grid>
 
-      <TextBlock Style="{StaticResource TextBlock.Caption}" Text="Rows" Margin="0,0,0,8" />
-      <RadioButton Style="{StaticResource RadioButton.UnderlineTab}" Content="Current view" IsChecked="{Binding CurrentView}" GroupName="ExportRows" Margin="0,0,0,4" />
-      <TextBlock Style="{StaticResource TextBlock.Caption}" Margin="24,0,0,8" TextWrapping="Wrap"
-                 Text="Uses the query bar and the filter menus on each page." />
-      <RadioButton Style="{StaticResource RadioButton.UnderlineTab}" Content="Everything loaded" IsChecked="{Binding Everything}" GroupName="ExportRows" Margin="0,0,0,18" />
+      <Grid Margin="0,0,0,4">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="220" />
+          <ColumnDefinition Width="140" />
+          <ColumnDefinition Width="160" />
+        </Grid.ColumnDefinitions>
+        <CheckBox Grid.Column="0" Style="{StaticResource CheckBox.Standard}" Content="AppMgmtIQ" IsChecked="{Binding IncludePackages}" />
+        <RadioButton Grid.Column="1" Style="{StaticResource RadioButton.UnderlineTab}" GroupName="PackagesRows" IsChecked="{Binding PackagesCurrent}" IsEnabled="{Binding IncludePackages}" />
+        <RadioButton Grid.Column="2" Style="{StaticResource RadioButton.UnderlineTab}" GroupName="PackagesRows" IsChecked="{Binding PackagesEverything}" IsEnabled="{Binding IncludePackages}" />
+      </Grid>
+      <Grid Margin="0,0,0,4">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="220" />
+          <ColumnDefinition Width="140" />
+          <ColumnDefinition Width="160" />
+        </Grid.ColumnDefinitions>
+        <CheckBox Grid.Column="0" Style="{StaticResource CheckBox.Standard}" Content="Windows Features" IsChecked="{Binding IncludeFeatures}" />
+        <RadioButton Grid.Column="1" Style="{StaticResource RadioButton.UnderlineTab}" GroupName="FeaturesRows" IsChecked="{Binding FeaturesCurrent}" IsEnabled="{Binding IncludeFeatures}" />
+        <RadioButton Grid.Column="2" Style="{StaticResource RadioButton.UnderlineTab}" GroupName="FeaturesRows" IsChecked="{Binding FeaturesEverything}" IsEnabled="{Binding IncludeFeatures}" />
+      </Grid>
+      <Grid Margin="0,0,0,4">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="220" />
+          <ColumnDefinition Width="140" />
+          <ColumnDefinition Width="160" />
+        </Grid.ColumnDefinitions>
+        <CheckBox Grid.Column="0" Style="{StaticResource CheckBox.Standard}" Content="Bloatware" IsChecked="{Binding IncludeBloatware}" />
+        <RadioButton Grid.Column="1" Style="{StaticResource RadioButton.UnderlineTab}" GroupName="BloatRows" IsChecked="{Binding BloatwareCurrent}" IsEnabled="{Binding IncludeBloatware}" />
+        <RadioButton Grid.Column="2" Style="{StaticResource RadioButton.UnderlineTab}" GroupName="BloatRows" IsChecked="{Binding BloatwareEverything}" IsEnabled="{Binding IncludeBloatware}" />
+      </Grid>
+      <Grid Margin="0,0,0,4">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="220" />
+          <ColumnDefinition Width="140" />
+          <ColumnDefinition Width="160" />
+        </Grid.ColumnDefinitions>
+        <CheckBox Grid.Column="0" Style="{StaticResource CheckBox.Standard}" Content="Active Setup" IsChecked="{Binding IncludeActiveSetup}" />
+        <RadioButton Grid.Column="1" Style="{StaticResource RadioButton.UnderlineTab}" GroupName="SetupRows" IsChecked="{Binding ActiveSetupCurrent}" IsEnabled="{Binding IncludeActiveSetup}" />
+        <RadioButton Grid.Column="2" Style="{StaticResource RadioButton.UnderlineTab}" GroupName="SetupRows" IsChecked="{Binding ActiveSetupEverything}" IsEnabled="{Binding IncludeActiveSetup}" />
+      </Grid>
+      <Grid Margin="0,0,0,4">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="220" />
+          <ColumnDefinition Width="140" />
+          <ColumnDefinition Width="160" />
+        </Grid.ColumnDefinitions>
+        <CheckBox Grid.Column="0" Style="{StaticResource CheckBox.Standard}" Content="Startup" IsChecked="{Binding IncludeStartup}" />
+        <RadioButton Grid.Column="1" Style="{StaticResource RadioButton.UnderlineTab}" GroupName="StartupRows" IsChecked="{Binding StartupCurrent}" IsEnabled="{Binding IncludeStartup}" />
+        <RadioButton Grid.Column="2" Style="{StaticResource RadioButton.UnderlineTab}" GroupName="StartupRows" IsChecked="{Binding StartupEverything}" IsEnabled="{Binding IncludeStartup}" />
+      </Grid>
+      <Grid Margin="0,0,0,16">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="220" />
+          <ColumnDefinition Width="140" />
+          <ColumnDefinition Width="160" />
+        </Grid.ColumnDefinitions>
+        <CheckBox Grid.Column="0" Style="{StaticResource CheckBox.Standard}" Content="Footprints" IsChecked="{Binding IncludeFootprints}" />
+        <RadioButton Grid.Column="1" Style="{StaticResource RadioButton.UnderlineTab}" GroupName="FootRows" IsChecked="{Binding FootprintsCurrent}" IsEnabled="{Binding IncludeFootprints}" />
+        <RadioButton Grid.Column="2" Style="{StaticResource RadioButton.UnderlineTab}" GroupName="FootRows" IsChecked="{Binding FootprintsEverything}" IsEnabled="{Binding IncludeFootprints}" />
+      </Grid>
+
+      <TextBlock Style="{StaticResource TextBlock.Caption}" TextWrapping="Wrap" Margin="0,0,0,16"
+                 Text="Current view uses the query bar and the filter menus on that tab. Everything loaded ignores them." />
 
       <CheckBox Style="{StaticResource CheckBox.Standard}" Content="Include package registry values"
                 IsChecked="{Binding IncludeDetails}" IsEnabled="{Binding IncludePackages}" Margin="0,0,0,18" />
