@@ -108,7 +108,7 @@ public sealed partial class FootprintsViewModel : ObservableObject
     private async Task CheckFiles()
     {
         var generation = Interlocked.Increment(ref _check);
-        var candidates = _all.Where(row => LooksLikePath(row.Path)).ToList();
+        var candidates = _all.Where(row => LooksLikePath(row.Path) || LooksLikePath(row.Resolved)).ToList();
         var found = await Task.Run(() => Probe(candidates, generation));
         if (generation != _check)
             return;
@@ -125,7 +125,7 @@ public sealed partial class FootprintsViewModel : ObservableObject
             if (generation != _check)
                 return found;
             bool exists;
-            try { exists = File.Exists(PathResolve.Clean(row.Path)); }
+            try { exists = TargetExists(row); }
             catch (Exception) { exists = false; }
             var item = (row, exists);
             found.Add(item);
@@ -149,6 +149,13 @@ public sealed partial class FootprintsViewModel : ObservableObject
             foreach (var (row, exists) in snapshot)
                 row.Exists = exists;
         });
+    }
+
+    private static bool TargetExists(FootprintRow row)
+    {
+        if (LooksLikePath(row.Resolved))
+            return row.ResolvedIsDirectory ? Directory.Exists(row.Resolved) : File.Exists(row.Resolved);
+        return File.Exists(PathResolve.Clean(row.Path));
     }
 
     private static bool LooksLikePath(string path)
@@ -248,12 +255,17 @@ public sealed partial class FootprintsViewModel : ObservableObject
                 var props = client.GetKey(RegistryHiveKind.LocalMachine, product.Path + "\\InstallProperties", RegistryViewKind.Registry64, RegistryDetailLevel.Full);
                 var display = Text(props, "DisplayName");
                 var code = Unpack(product.Name);
+                var location = PathResolve.Clean(Text(props, "InstallLocation"));
+                var local = PathResolve.Clean(Text(props, "LocalPackage"));
+                var resolved = LooksLikePath(location) ? location : LooksLikePath(local) ? local : "";
                 rows.Add(new FootprintRow
                 {
                     Kind = "Product",
                     Name = string.IsNullOrWhiteSpace(display) ? code : display,
                     Path = code,
-                    Scope = sid.Name.Equals("S-1-5-18", StringComparison.OrdinalIgnoreCase) ? "Machine" : "User"
+                    Scope = sid.Name.Equals("S-1-5-18", StringComparison.OrdinalIgnoreCase) ? "Machine" : "User",
+                    Resolved = resolved,
+                    ResolvedIsDirectory = resolved == location && resolved.Length > 0
                 });
             }
         }
