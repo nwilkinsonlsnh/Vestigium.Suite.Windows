@@ -95,6 +95,12 @@ public sealed partial class DetailsViewModel : ObservableObject
             rows.Add(new ValueRow { Name = "Hive", Type = "string", Data = package.Hive });
             rows.Add(new ValueRow { Name = "KeyPath", Type = "string", Data = package.KeyPath });
         }
+        if (header == "Uninstall")
+        {
+            rows.Add(new ValueRow { Name = "RepairCommand", Type = "string", Data = package.RepairCommand });
+            rows.Add(new ValueRow { Name = "HasModify", Type = "bool", Data = package.HasModify.ToString() });
+            rows.Add(new ValueRow { Name = "HasRepair", Type = "bool", Data = package.HasRepair.ToString() });
+        }
 
         var source = names is null
             ? package.Values
