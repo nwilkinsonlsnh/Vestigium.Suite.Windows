@@ -155,9 +155,9 @@ public sealed partial class MainViewModel : ObservableObject
             if (generation != _orphan)
                 return found;
             var result = CheckOrphan(row);
-            if (result is null)
+            if (result is not { } hit)
                 continue;
-            var item = (Row: row, Orphan: result.Orphan, Reason: result.Reason);
+            var item = (Row: row, Orphan: hit.Orphan, Reason: hit.Reason);
             found.Add(item);
             batch.Add(item);
             if (batch.Count < 50)
