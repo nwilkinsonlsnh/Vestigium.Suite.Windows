@@ -10,6 +10,7 @@ internal static class HelpCopy
             Features(),
             Bloatware(),
             ActiveSetup(),
+            Startup(),
             Dashboard(),
             Exports(),
             Settings(),
@@ -22,7 +23,7 @@ internal static class HelpCopy
         => new("Overview",
         [
             "AppMgmtIQ is a modern, unified management suite designed to give administrators and IT professionals complete visibility into a Windows environment. Traditionally, Windows fragments its ecosystem across multiple distinct interfaces: Add or Remove Programs for the registry, Turn Windows features on or off for the component store, PowerShell for AppX packages, and the registry for Active Setup.",
-            "AppMgmtIQ consolidates these four critical inventories into a single, cohesive application. It uses a standardized query bar, consistent data grids, and a unified method for executing changes, so the same habits apply on every tab. Reading is performed locally and does not require elevation. A modification, such as a feature change or a package removal, is handed to a purpose-built elevated worker. The worker performs the task, writes a result, and exits. The suite shows that result and does not stay elevated.",
+            "AppMgmtIQ consolidates these inventories into a single, cohesive application. It uses a standardized query bar, consistent data grids, and a unified method for executing changes, so the same habits apply on every tab. Reading is performed locally and does not require elevation. A modification, such as a feature change or a package removal, is handed to a purpose-built elevated worker. The worker performs the task, writes a result, and exits. The suite shows that result and does not stay elevated.",
             Head("AppMgmtIQ"),
             "This is a modernization of Add or Remove Programs. It reads the Windows uninstall registry, which is the list an installer writes when it wants to appear in that classic dialog.",
             "Windows keeps four of these trees. Two are for the machine, under HKEY_LOCAL_MACHINE: one for native 64-bit software and one for 32-bit software under WOW6432Node. Two are for the current user, under HKEY_CURRENT_USER, with the same split. A key in the machine tree is global and applies to every user. A key in the user tree belongs to that profile. A key under WOW6432Node is 32-bit. The others are 64-bit.",
@@ -38,14 +39,16 @@ internal static class HelpCopy
             "This tab starts from a catalog, not from an inventory. The catalog is a known list of inbox and Store packages: the Bing apps, the Xbox components, the games that ship on a new image, Teams, and the packages Microsoft has since retired. Every catalog entry is shown. Installed and Provisioned say whether this machine has it. A row that is not installed is a package we know about, not a package that is here.",
             "Installed means the package is registered for this user and can be launched. Provisioned means the machine holds a copy for new users. Removing only the user registration leaves the provisioned copy, and the next person who logs on receives it again. A real removal takes both.",
             "Remove is elevated. It removes the package for every user by its full package name, then removes the provisioned copy when the row is provisioned. Add looks for an AppxManifest.xml already on the disk, from a provisioned package or from another user's copy, and registers that. If there is no local manifest, it asks winget to fetch the package, preferring the Store match that is not a classic or a plugin. If the package is already installed, that is a success. If Microsoft has retired it, the window says so.",
+            Head("Startup"),
+            "Startup is the set of things registered to run when the user logs on. It is the Run and RunOnce keys, RunOnceEx, and the two Startup folders. Disable is a Windows flag next to the entry, not a deletion, so a disabled item stays in the grid.",
             Head("Active Setup"),
             "Active Setup is a logon mechanism, and it is rarely audited. It is not an installer and it is not a scheduled task. At logon, Windows compares a machine key with a per-user key. If the machine version is higher, or the user has no key, Windows runs the command in StubPath and then writes the version into the user's key so it does not run again.",
             "The keys live under SOFTWARE\\Microsoft\\Active Setup\\Installed Components, in HKEY_LOCAL_MACHINE and HKEY_CURRENT_USER, and again under WOW6432Node for 32-bit. The key name is the component, usually a GUID. The values that matter are the display name, StubPath, Version, and IsInstalled. Version is compared as comma-separated numbers, not as text.",
             "Pending means the machine copy is ahead of this user's copy, so the command will run at the next logon. A component with no StubPath has nothing to run. That is normal for a component that only records a version.",
             "A StubPath is an arbitrary command. Replacing one, or adding a new component, is a way to run code for every user at logon. That is why the tab exists. Add, Delete, and Clear command are on the menu. A user-key change is written directly. A machine-key change is handed to an elevated worker. Delete removes the key. Clear command removes StubPath and leaves the version, so the component stays but will not run.",
             Head("Dashboard and Exports"),
-            "The dashboard is a reading of the four inventories, not a fifth one. Each section is one inventory, with the counts that describe it and the charts that break it down.",
-            "AppMgmtIQ shows who published the software, how it splits between machine and user, when it was installed, and how large it is. Windows Features shows how many are on and which parents own them. Bloatware shows how much of the catalog is actually present. Active Setup shows how much is armed to run, and whether it is a machine or a user component. A section with two charts shows them together. A section with more than two gets a vertical list, and the area shows the one you pick.",
+            "The dashboard is a reading of the inventories, not another one. Each section is one inventory, with the counts that describe it and the charts that break it down.",
+            "AppMgmtIQ shows who published the software, how it splits between machine and user, when it was installed, and how large it is. Windows Features shows how many are on and which parents own them. Bloatware shows how much of the catalog is actually present. Active Setup shows how much is armed to run, and whether it is a machine or a user component. Startup shows how many entries are on, how many are off, and how many are linked to a package. A section with two charts shows them together. A section with more than two gets a vertical list, and the area shows the one you pick.",
             "Export writes a workbook from those same inventories. The first sheet is a summary and is the sheet Excel opens on. Further sheets are added for the inventories you include: the package grid, the package details, and the feature tree. Current filters exports what the grid is showing. All exports the inventory regardless of the query."
         ]);
 
@@ -125,10 +128,39 @@ internal static class HelpCopy
             "The query bar is tailored specifically for the Active Setup catalog. Administrators can quickly isolate executable components by typing setup.stubpath IS NOT NULL, or filter for dormant keys by querying setup.stubpath IS NULL."
         ]);
 
+
+    private static Draft Startup()
+        => new("Startup",
+        [
+            "The Startup tab is the persistence view. It lists what is registered to run when a user logs on, links each entry to an installed package when a match exists, and lets an administrator turn those entries on or off. It is not a scheduled-task editor and it is not a service controller.",
+            Head("What is read"),
+            "The scan covers the locations Windows itself uses for logon.",
+            Term("Run", "HKLM and HKCU under CurrentVersion\\Run. HKLM is read in both the 64-bit and 32-bit views."),
+            Term("RunOnce", "The same split. These run once and then Windows removes them."),
+            Term("RunOnceEx", "The HKLM key and its subkeys, in both views. Used by installers that need an ordered pass."),
+            Term("Startup folder", "The per-user Startup folder and the common Startup folder under ProgramData. A shortcut is resolved to its target when that is possible."),
+            "A row with no display name uses the value name, or the file name, as the fallback. The Package column is a best-effort match against the inventory, by path or name. A blank package means no confident match.",
+            Head("Enabled and disabled"),
+            "Windows does not delete a Run value to turn it off. It writes a flag next to it, under Explorer\\StartupApproved, in the Run, Run32, or StartupFolder branch. The first byte of that value is the state. 02 or 06 means Enabled. Anything else means Disabled. A missing flag means Enabled, which is how Task Manager and Settings treat it.",
+            "Disable and Enable write that flag. The Run value stays, the row stays in the grid, and the package link stays. That is the same flag Task Manager uses, so other tools agree with the result.",
+            "RunOnce and RunOnceEx have no flag. They always show as Enabled, and Enable and Disable skip them. Remove is the only write for those.",
+            "This tab does not use AutorunsDisabled. That is a Sysinternals convention. Windows does not read it, and a tool that moves a value there makes the entry look deleted rather than disabled.",
+            Head("Changing an entry"),
+            "The menu is on the row.",
+            Term("Enable and Disable", "Write the StartupApproved flag for the selected row."),
+            Term("Enable All and Disable All", "Do the same for every row in the current filtered view, after a confirm that shows the count and the HKCU / HKLM split. A filter of startup.source == 'Run' does not touch Startup folder entries."),
+            Term("Remove", "Deletes the registry value or the Startup folder item. It does not uninstall the package. Confirm first."),
+            Term("Open source", "Opens the registry key in Regedit, or the folder in Explorer."),
+            Term("Jump to package", "Selects the linked package on the inventory tab. Disabled when the row is not linked."),
+            "A user write, HKCU Run or the per-user Startup folder, is done in this process. No elevation. A machine write, HKLM or the common Startup folder, is handed to AppMgmtIQ.Startup, an elevated worker, the same pattern as Features and Bloatware. A mixed bulk action does the user writes here and the machine writes in one elevated launch. Cancelling the prompt leaves the user writes as they are and reports the machine writes as cancelled.",
+            Head("Search"),
+            "The query bar filters the grid against the Startup catalog. A word searches the columns. Named fields are startup.name, startup.command, startup.source, startup.scope, startup.isX64, startup.package, and startup.enabled. startup.enabled == false is the disabled set."
+        ]);
+
     private static Draft Dashboard()
         => new("Dashboard",
         [
-            "The Dashboard serves as a unified visual reading of the application's four core inventories. Rather than running new scans, it synthesizes the data already loaded into the suite's memory. Clicking Refresh instantly rebuilds all summary figures and charts to reflect the current state of the machine.",
+            "The Dashboard serves as a unified visual reading of the application's inventories. Rather than running new scans, it synthesizes the data already loaded into the suite's memory. Clicking Refresh instantly rebuilds all summary figures and charts to reflect the current state of the machine.",
             "The interface adapts its layout based on the data. When a section features exactly two charts, they are displayed side by side. For sections containing more than two, a vertical selection menu on the left allows the reader to toggle between views. Ranked charts overlay a cumulative line, making the concentration of the inventory visible at a glance.",
             Head("AppMgmtIQ"),
             "This section visualizes the primary software inventory, detailing what is installed, who published it, and its footprint on the disk.",
@@ -219,6 +251,16 @@ internal static class HelpCopy
                     Term("Version", "Comma-separated numbers. A higher machine version runs again."),
                     Term("Pending", "This user does not yet have the machine version."),
                     Term("IsInstalled", "The component is marked ready. It is not proof the command succeeded.")
+                ]),
+                new("Startup",
+                [
+                    Term("Run", "A value that runs at every logon."),
+                    Term("RunOnce", "A value that runs once. No disable flag."),
+                    Term("StartupApproved", "The Windows on/off flag. The Run value stays."),
+                    Term("Enabled", "Flag first byte is 02 or 06, or the flag is missing."),
+                    Term("Disabled", "Flag is present and is not enabled."),
+                    Term("Scope", "HKLM, HKCU, Common, or User."),
+                    Term("Package", "Best-effort link to an installed package. Blank when unmatched.")
                 ])
             ]);
 
