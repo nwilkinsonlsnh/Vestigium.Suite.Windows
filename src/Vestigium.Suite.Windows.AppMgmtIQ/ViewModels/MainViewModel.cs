@@ -563,7 +563,12 @@ public sealed partial class MainViewModel : ObservableObject
             NoModify = row.NoModify,
             NoRemove = row.NoRemove,
             NoRepair = row.NoRepair,
-            HasIcon = row.Icon is not null
+            HasIcon = row.Icon is not null,
+            HasModify = row.HasModify,
+            HasRepair = row.HasRepair,
+            IsOrphan = row.IsOrphan == true,
+            BaselineStatus = row.BaselineStatus,
+            PendingReboot = row.PendingReboot
         };
     }
 
