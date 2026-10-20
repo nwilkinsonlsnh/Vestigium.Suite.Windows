@@ -156,43 +156,7 @@ public sealed partial class FootprintsViewModel : ObservableObject
     {
         if (LooksLikePath(row.Resolved))
             return row.ResolvedIsDirectory ? Directory.Exists(row.Resolved) : File.Exists(row.Resolved);
-        var path = PathResolve.Clean(row.Path);
-        if (File.Exists(path))
-            return true;
-        var redirected = Wow64(path);
-        if (redirected.Length > 0 && File.Exists(redirected))
-            return true;
-        return InWinSxS(Path.GetFileName(path));
-    }
-
-    private static string Wow64(string path)
-    {
-        var system = Environment.GetFolderPath(Environment.SpecialFolder.System);
-        var windows = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
-        var system32 = Path.Combine(windows, "System32");
-        var wow = Path.Combine(windows, "SysWOW64");
-        if (path.StartsWith(system32, StringComparison.OrdinalIgnoreCase))
-            return wow + path[system32.Length..];
-        if (path.StartsWith(system, StringComparison.OrdinalIgnoreCase))
-            return wow + path[system.Length..];
-        return "";
-    }
-
-    private static bool InWinSxS(string file)
-    {
-        if (string.IsNullOrWhiteSpace(file))
-            return false;
-        var sxs = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "WinSxS");
-        if (!Directory.Exists(sxs))
-            return false;
-        try
-        {
-            return Directory.EnumerateFiles(sxs, file, SearchOption.AllDirectories).Any();
-        }
-        catch (Exception)
-        {
-            return false;
-        }
+        return PathLocate.Exists(row.Path);
     }
 
     private static bool LooksLikePath(string path)
