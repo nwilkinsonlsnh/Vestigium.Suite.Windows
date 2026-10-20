@@ -38,8 +38,16 @@ Create `Vestigium.Helpers.FileSystemPaths` and publish it. It is a path meaning 
 | Date and time | `{datetime}` `{date}` `{time}` |
 | Special folders | `{desktop}` `{favorites}` `{userprofile}` `{appdata}` `{localappdata}` `{temp}` `{programfiles}` `{programfilesx86}` `{programdata}` `{windir}` `{systemdrive}` `{public}` |
 | Identity | `{username}` `{computername}` |
+| Counters | `{#}` `{##}` `{A#}` `{AA#}` `{a#}` `{aa#}` and any width |
 
 `{datetime}`, `{date}`, and `{time}` use a sortable form (`yyyyMMdd-HHmmss`, `yyyyMMdd`, `HHmmss`). Special folders come from `Environment.SpecialFolder` or the matching environment variable. Identity comes from the environment.
+
+**Counters.** A counter token is a run of `#` with an optional letter prefix. The caller passes the current value. The token formats it. It does not roll over.
+
+- `{#}` is one digit, `0` to `9`. `{##}` is two, `00` to `99`. The width is however many `#` the caller writes. Zero-padded.
+- A value that does not fit the width throws. `{##}` at `100` throws. It does not become `00`.
+- A letter prefix is a fixed-width letter counter of that case. `{A#}` is one capital letter plus the digits. `{AA##}` is two capitals plus two digits. `{a#}` and `{aa#}` are the lower-case forms. Letters run `A` to `Z` (or `a` to `z`) and throw past `Z`. They do not roll into the digits, and the digits do not roll into the letters.
+- The caller owns the sequence. The token only formats and rejects.
 
 **Long paths.** A conservative plan. When a built path would exceed the classic 260 limit, prefix it with `\\\\?\\` so the call succeeds. Do not prefix a path that is already long-form. Do not change a path that fits.
 
