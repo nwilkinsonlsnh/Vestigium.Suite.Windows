@@ -23,6 +23,10 @@ public sealed partial class PackageRow : ObservableObject
     public required bool NoRemove { get; init; }
     public required bool NoRepair { get; init; }
     public required string UninstallString { get; init; }
+    public string ModifyPath { get; init; } = "";
+    public string RepairCommand { get; init; } = "";
+    public bool HasModify => !NoModify && !string.IsNullOrWhiteSpace(ModifyPath);
+    public bool HasRepair => !string.IsNullOrWhiteSpace(RepairCommand);
     public required string KeyPath { get; init; }
     public required string Hive { get; init; }
     public required IReadOnlyList<RegistryValueInfo> Values { get; init; }
