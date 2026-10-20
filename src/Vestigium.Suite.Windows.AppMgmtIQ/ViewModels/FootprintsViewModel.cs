@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Vestigium.Helpers.WinReg;
@@ -10,6 +11,8 @@ public sealed partial class FootprintsViewModel : ObservableObject
     private const string AppPaths = @"SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths";
     private const string AppPathsWow = @"SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\App Paths";
     private const string UserAppPaths = @"Software\Microsoft\Windows\CurrentVersion\App Paths";
+    private const string SharedDlls = @"SOFTWARE\Microsoft\Windows\CurrentVersion\SharedDLLs";
+    private const string SharedDllsWow = @"SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\SharedDLLs";
 
     private readonly List<FootprintRow> _all = [];
 
@@ -31,14 +34,14 @@ public sealed partial class FootprintsViewModel : ObservableObject
     public async Task LoadAsync()
     {
         IsLoading = true;
-        Status = "Reading App Paths\u2026";
+        Status = "Reading footprints\u2026";
         try
         {
-            var found = await Task.Run(ReadAppPaths);
+            var found = await Task.Run(ReadAll);
             _all.Clear();
             _all.AddRange(found);
             Apply();
-            HostLog.Information(AppMgmtCatalog.FootprintsLoaded, "Footprints", $"Footprints loaded. {_all.Count} App Paths.");
+            HostLog.Information(AppMgmtCatalog.FootprintsLoaded, "Footprints", $"Footprints loaded. {_all.Count} entries.");
         }
         finally
         {
@@ -53,23 +56,25 @@ public sealed partial class FootprintsViewModel : ObservableObject
     {
         var keep = Selected;
         Rows.Clear();
-        foreach (var row in _all.OrderBy(row => row.Name, StringComparer.OrdinalIgnoreCase))
+        foreach (var row in _all.OrderBy(row => row.Kind, StringComparer.OrdinalIgnoreCase).ThenBy(row => row.Name, StringComparer.OrdinalIgnoreCase))
             Rows.Add(row);
-        Selected = keep is null ? null : Rows.FirstOrDefault(row => row.Kind == keep.Kind && row.Name == keep.Name && row.Scope == keep.Scope);
+        Selected = keep is null ? null : Rows.FirstOrDefault(row => row.Kind == keep.Kind && row.Name == keep.Name && row.Scope == keep.Scope && row.Path == keep.Path);
         Status = $"{Rows.Count} entries";
     }
 
-    private static List<FootprintRow> ReadAppPaths()
+    private static List<FootprintRow> ReadAll()
     {
         var client = RegistryHelper.Local;
         var rows = new List<FootprintRow>();
-        Read(client, RegistryHiveKind.LocalMachine, RegistryViewKind.Registry64, AppPaths, "HKLM", rows);
-        Read(client, RegistryHiveKind.LocalMachine, RegistryViewKind.Registry64, AppPathsWow, "Wow", rows);
-        Read(client, RegistryHiveKind.CurrentUser, RegistryViewKind.Registry64, UserAppPaths, "HKCU", rows);
+        ReadAppPaths(client, RegistryHiveKind.LocalMachine, RegistryViewKind.Registry64, AppPaths, "HKLM", rows);
+        ReadAppPaths(client, RegistryHiveKind.LocalMachine, RegistryViewKind.Registry64, AppPathsWow, "Wow", rows);
+        ReadAppPaths(client, RegistryHiveKind.CurrentUser, RegistryViewKind.Registry64, UserAppPaths, "HKCU", rows);
+        ReadShared(client, RegistryHiveKind.LocalMachine, RegistryViewKind.Registry64, SharedDlls, "HKLM", rows);
+        ReadShared(client, RegistryHiveKind.LocalMachine, RegistryViewKind.Registry64, SharedDllsWow, "Wow", rows);
         return rows;
     }
 
-    private static void Read(RegistryClient client, RegistryHiveKind hive, RegistryViewKind view, string path, string scope, List<FootprintRow> rows)
+    private static void ReadAppPaths(RegistryClient client, RegistryHiveKind hive, RegistryViewKind view, string path, string scope, List<FootprintRow> rows)
     {
         foreach (var child in client.ListSubKeys(hive, path, view, RegistryDetailLevel.Identity))
         {
@@ -85,5 +90,40 @@ public sealed partial class FootprintsViewModel : ObservableObject
                 Scope = scope
             });
         }
+    }
+
+    private static void ReadShared(RegistryClient client, RegistryHiveKind hive, RegistryViewKind view, string path, string scope, List<FootprintRow> rows)
+    {
+        var key = client.GetKey(hive, path, view, RegistryDetailLevel.Full);
+        if (key is null)
+            return;
+        foreach (var value in key.Values)
+        {
+            if (value.IsDefault || string.IsNullOrWhiteSpace(value.Name))
+                continue;
+            rows.Add(new FootprintRow
+            {
+                Kind = "SharedDll",
+                Name = SafeName(value.Name),
+                Path = value.Name,
+                Scope = scope,
+                RefCount = Count(value)
+            });
+        }
+    }
+
+    private static string SafeName(string path)
+    {
+        try { return Path.GetFileName(path); }
+        catch (ArgumentException) { return path; }
+    }
+
+    private static int? Count(RegistryValueInfo value)
+    {
+        if (value.Data is int number)
+            return number;
+        if (value.Data is long wide)
+            return wide > int.MaxValue ? int.MaxValue : (int)wide;
+        return int.TryParse(value.DataText, out var parsed) ? parsed : null;
     }
 }
