@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Diagnostics;
 using System.Globalization;
 using System.Security.Principal;
@@ -29,6 +30,7 @@ public sealed partial class MainViewModel : ObservableObject
     private readonly List<PackageRow> _all = [];
     private readonly KqlSession _session = AppMgmtKql.Packages();
     private KqlBoundQuery? _bound;
+    private int _orphan;
     [ObservableProperty]
     private bool _showGlobal = true;
 
@@ -116,11 +118,61 @@ public sealed partial class MainViewModel : ObservableObject
             _all.AddRange(rows);
             ApplyFilter();
             HostLog.Information(AppMgmtCatalog.InventoryLoaded, "Inventory", $"Inventory loaded. {_all.Count} packages.");
+            _ = CheckOrphans();
         }
         finally
         {
             IsLoading = false;
         }
+    }
+
+    private async Task CheckOrphans()
+    {
+        var generation = Interlocked.Increment(ref _orphan);
+        var rows = _all.ToList();
+        var found = await Task.Run(() => Probe(rows, generation));
+        if (generation != _orphan)
+            return;
+        var orphans = found.Count(item => item.Orphan);
+        Status = $"{Packages.Count} packages. {orphans} orphans.";
+    }
+
+    private List<(PackageRow Row, bool Orphan, string Reason)> Probe(IReadOnlyList<PackageRow> rows, int generation)
+    {
+        var found = new List<(PackageRow Row, bool Orphan, string Reason)>();
+        var batch = new List<(PackageRow Row, bool Orphan, string Reason)>();
+        foreach (var row in rows)
+        {
+            if (generation != _orphan)
+                return found;
+            var result = OrphanCheck.Check(row);
+            if (result is null)
+                continue;
+            var item = (row, result.Orphan, result.Reason);
+            found.Add(item);
+            batch.Add(item);
+            if (batch.Count < 50)
+                continue;
+            Publish(batch);
+            batch = [];
+        }
+        Publish(batch);
+        return found;
+    }
+
+    private static void Publish(List<(PackageRow Row, bool Orphan, string Reason)> batch)
+    {
+        if (batch.Count == 0)
+            return;
+        var snapshot = batch.ToArray();
+        Application.Current?.Dispatcher.Invoke(() =>
+        {
+            foreach (var (row, orphan, reason) in snapshot)
+            {
+                row.IsOrphan = orphan;
+                row.OrphanReason = reason;
+            }
+        });
     }
 
     [RelayCommand]
