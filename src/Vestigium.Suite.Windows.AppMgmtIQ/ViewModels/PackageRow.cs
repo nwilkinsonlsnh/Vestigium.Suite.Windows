@@ -42,6 +42,12 @@ public sealed partial class PackageRow : ObservableObject
     public string OrphanText => IsOrphan switch { true => "Yes", false => "No", _ => "" };
 
     [ObservableProperty]
+    private string _baselineStatus = "none";
+
+    [ObservableProperty]
+    private string _expectedVersion = "";
+
+    [ObservableProperty]
     private string _displayInstallDate = "";
 
     [ObservableProperty]
