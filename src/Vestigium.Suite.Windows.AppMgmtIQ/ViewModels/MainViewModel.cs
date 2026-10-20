@@ -359,7 +359,7 @@ public sealed partial class MainViewModel : ObservableObject
 
         var product = key.Name.StartsWith('{') ? key.Name : Value("ProductCode");
 
-        return new PackageRow
+        var row = new PackageRow
         {
             DisplayName = display,
             Publisher = Value("Publisher"),
@@ -374,6 +374,7 @@ public sealed partial class MainViewModel : ObservableObject
             NoRemove = Flag("NoRemove"),
             NoRepair = Flag("NoRepair"),
             UninstallString = Value("UninstallString"),
+            ModifyPath = Value("ModifyPath"),
             KeyPath = key.Path,
             Hive = key.Hive.ToString(),
             Values = key.Values,
@@ -386,5 +387,7 @@ public sealed partial class MainViewModel : ObservableObject
                 display,
                 product)
         };
+        row.RepairCommand = RepairPlan.Build(row)?.Display ?? "";
+        return row;
     }
 }
