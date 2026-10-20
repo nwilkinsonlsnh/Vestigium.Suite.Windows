@@ -157,8 +157,12 @@ public partial class DashboardView : UserControl
             ("App Paths", rows.Count(row => row.Kind == "AppPath").ToString()),
             ("Shared > 1", sharedMany.ToString()),
             ("Products", products.ToString()));
+        var exists = rows.Count(row => row.Exists == true);
+        var missing = rows.Count(row => row.Exists == false);
+        var pending = rows.Count - exists - missing;
         ShowCharts(
         [
+            ("Exists", Chart([Slice("Exists", exists), Slice("Missing", missing), Slice("No status", pending)], "File status")),
             ("Type", Chart([Slice("App Paths", rows.Count(row => row.Kind == "AppPath")), Slice("Shared DLLs", shared.Count), Slice("Products", products), Slice("Associations", rows.Count(row => row.Kind == "Association"))], "By type")),
             ("Ref count", Chart([Slice("1", shared.Count(row => row.RefCount == 1)), Slice("2", shared.Count(row => row.RefCount == 2)), Slice("3-5", shared.Count(row => row.RefCount is >= 3 and <= 5)), Slice("6+", shared.Count(row => (row.RefCount ?? 0) >= 6))], "SharedDLL ref count")),
             ("Products", Chart([Slice("Products", products), Slice("Other", rows.Count - products)], "Product presence")),
