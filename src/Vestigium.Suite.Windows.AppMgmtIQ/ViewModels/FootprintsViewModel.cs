@@ -210,7 +210,7 @@ public sealed partial class FootprintsViewModel : ObservableObject
         var extensions = new List<(string Ext, string ProgId)>();
         foreach (var child in client.ListSubKeys(hive, root, RegistryViewKind.Registry64, RegistryDetailLevel.Identity))
         {
-            if (!child.Name.StartsWith('.', StringComparison.Ordinal))
+            if (!child.Name.StartsWith('.'))
                 continue;
             var key = client.GetKey(hive, child.Path, RegistryViewKind.Registry64, RegistryDetailLevel.Full);
             var progId = key?.Values.FirstOrDefault(value => value.IsDefault)?.DataText;
