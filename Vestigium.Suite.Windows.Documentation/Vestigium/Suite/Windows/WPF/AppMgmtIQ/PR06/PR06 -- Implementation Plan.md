@@ -56,7 +56,10 @@
 ## Files this plan expects to touch
 
 ```
-src/Vestigium.Suite.Windows.AppMgmtIQ/ViewModels/BaselineStore.cs        [REPLACE]
+src/Vestigium.Suite.Windows.AppMgmtIQ/ViewModels/SnapshotStore.cs      [NEW]
+src/Vestigium.Suite.Windows.AppMgmtIQ/ViewModels/SnapshotCompare.cs      [NEW]
+src/Vestigium.Suite.Windows.AppMgmtIQ/ViewModels/BaselineApply.cs        [NEW]
+src/Vestigium.Suite.Windows.AppMgmtIQ/ViewModels/BaselineStore.cs        [RETIRE in 007]
 src/Vestigium.Suite.Windows.AppMgmtIQ/ViewModels/MainViewModel.cs        [UPDATE]
 src/Vestigium.Suite.Windows.AppMgmtIQ/ViewModels/FeaturesViewModel.cs    [UPDATE]
 src/Vestigium.Suite.Windows.AppMgmtIQ/ViewModels/BloatwareViewModel.cs   [UPDATE]
