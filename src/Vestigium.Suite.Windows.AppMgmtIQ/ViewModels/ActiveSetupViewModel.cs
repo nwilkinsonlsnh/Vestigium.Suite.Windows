@@ -217,7 +217,6 @@ public sealed partial class ActiveSetupViewModel : ObservableObject
         public int GetHashCode((bool IsX64, string Component) obj)
             => HashCode.Combine(obj.IsX64, StringComparer.OrdinalIgnoreCase.GetHashCode(obj.Component));
     }
-}
 
     private void ApplyBaseline()
     {
@@ -228,3 +227,4 @@ public sealed partial class ActiveSetupViewModel : ObservableObject
         foreach (var row in _all)
             row.BaselineStatus = byKey.TryGetValue(row.ComponentId, out var status) ? status : "none";
     }
+}
