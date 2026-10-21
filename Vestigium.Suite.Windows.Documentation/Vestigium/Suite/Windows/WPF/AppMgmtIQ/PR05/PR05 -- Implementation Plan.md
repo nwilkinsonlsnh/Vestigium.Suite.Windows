@@ -54,10 +54,8 @@ The host owns path resolution, install health, repair and uninstall plans, basel
 | 2d | PR05.002d | Long paths, conservative. Prefix `\\\\?\\` only when a built path would exceed 260. Leave short paths and already-long paths alone. | Done |
 | 2e | PR05.002e | `PathCheck.IsValid`. A `{...}` pair must be a known token. `{{` and `}}` are literal braces. Overflow and illegal path characters are invalid. Does not check that the file exists. | Done |
 | 3 | PR05.003 | Move `BaselineCompare` to `Vestigium.Helpers.SystemInfo` as `VersionCompare`. The baseline store stays in the host. Install health, repair, uninstall, and the inventory walks stay in the host. | Done |
-| 4 | PR05.004 | Elevated projects stay with the application. `AppMgmtIQ.Startup`, `.Features`, `.Bloatware`, and `.ActiveSetup` are separate only so the host elevates when it must. No helper is created for them. | Parked |
-| 5 | PR05.005 | `BloatwareCatalog` stays with the application. It feeds the elevated bloatware project. | Parked |
-| 6 | PR05.006 | Move the pending-reboot read to `Vestigium.Helpers.SystemInfo`. | |
-| 7 | PR05.007 | Owner runs. Export matches the PR04 export for Footprints Exists, package counts, and startup rows. | Owner |
+| 4 | PR05.006 | Move the pending-reboot read to `Vestigium.Helpers.SystemInfo`. The package mention check stays in the host. | Done |
+| 5 | PR05.007 | Owner runs. Export matches the PR04 export for Footprints Exists, package counts, and startup rows. | Owner |
 
 ---
 
@@ -88,4 +86,4 @@ When this plan finishes, move the whole `PR05/` folder to `Completed/PR05/`.
 
 ## Next action
 
-PR05.006. Pending reboot to SystemInfo.
+PR05.007. Owner runs.
