@@ -428,11 +428,8 @@ public sealed partial class FeaturesViewModel : ObservableObject
         node.Reason = reason;
         Disables.Add(new FeatureChange(node.Caption, node.Name, reason, false));
     }
-}
 
-public sealed record FeatureChange(string Caption, string Name, string Reason, bool IsAbsent);
-
-    private void ApplyBaseline()
+private void ApplyBaseline()
     {
         var saved = BaselineApply.Latest()?.Features ?? [];
         var current = _all.Select(row => new SnapshotRow { Key = row.Name, Value = row.IsEnabled ? "enabled" : "disabled" }).ToList();
@@ -447,3 +444,6 @@ public sealed record FeatureChange(string Caption, string Name, string Reason, b
         foreach (var root in Roots)
             Mark(root);
     }
+}
+
+public sealed record FeatureChange(string Caption, string Name, string Reason, bool IsAbsent);
