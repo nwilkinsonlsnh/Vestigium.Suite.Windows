@@ -93,4 +93,4 @@ When this plan finishes, move the whole `PR05/` folder to `Completed/PR05/`.
 
 ## Next action
 
-PR05.002d. Long-path prefix.
+PR05.003. AppMgmt rules and plans.
