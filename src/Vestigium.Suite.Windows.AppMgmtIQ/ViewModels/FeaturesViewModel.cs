@@ -22,6 +22,7 @@ public sealed partial class FeaturesViewModel : ObservableObject
     private bool _showAbsent;
 
     public ObservableCollection<FeatureNode> Roots { get; } = [];
+    public IReadOnlyList<FeatureRow> All => _all;
     public ObservableCollection<QueryMruRow> Queries { get; } = [];
     public KqlSession Session => _session;
 
