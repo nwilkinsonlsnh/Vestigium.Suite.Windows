@@ -199,9 +199,65 @@ public partial class DashboardView : UserControl
 
     private void ShowSnapshots()
     {
-        Story.Text = "Snapshots. Placeholder.";
-        SetCards(("Snapshots", new SnapshotStore().List().Count.ToString()), ("", ""), ("", ""), ("", ""));
-        ShowCharts([]);
+        var store = new SnapshotStore();
+        var names = store.List();
+        var chosen = BaselineApply.Selected;
+        var name = chosen is not null && names.Contains(chosen) ? chosen : names.FirstOrDefault();
+        var snapshot = name is null ? null : store.Load(name);
+        var inventories = snapshot is null ? [] : Present(snapshot);
+        Story.Text = snapshot is null
+            ? "No snapshot captured yet."
+            : "Selected snapshot " + snapshot.Name + ", taken " + snapshot.Taken.ToLocalTime().ToString("g") + ".";
+        SetCards(
+            ("Snapshots", names.Count.ToString()),
+            ("Selected", name ?? "none"),
+            ("Inventories", inventories.Count.ToString()),
+            ("Rows", inventories.Sum(pair => pair.Rows).ToString()));
+        if (snapshot is null)
+        {
+            ShowCharts([("Coverage", Empty("Nothing to chart"))]);
+            return;
+        }
+        ShowCharts(
+        [
+            ("Coverage", Chart(inventories.Select(pair => Slice(pair.Name, pair.Rows)).ToList(), "Rows per inventory", true)),
+            ("Drift", Chart(DriftSlices(snapshot), "Drift across inventories"))
+        ]);
+    }
+
+    private static List<(string Name, int Rows)> Present(Snapshot snapshot)
+        => new (string Name, List<SnapshotRow> Rows)[]
+        {
+            ("Packages", snapshot.Packages),
+            ("Features", snapshot.Features),
+            ("Built-In", snapshot.BuiltIn),
+            ("Active Setup", snapshot.ActiveSetup),
+            ("Startup", snapshot.Startup),
+            ("Footprints", snapshot.Footprints)
+        }
+        .Where(pair => pair.Rows.Count > 0)
+        .Select(pair => (pair.Name, pair.Rows.Count))
+        .ToList();
+
+    private List<ChartSlice> DriftSlices(Snapshot snapshot)
+    {
+        var pairs = new (List<SnapshotRow> Saved, List<SnapshotRow> Current)[]
+        {
+            (snapshot.Packages, _packages!.All.Select(row => new SnapshotRow { Key = row.Hive + "|" + row.KeyPath, Value = row.DisplayVersion }).ToList()),
+            (snapshot.Features, _features!.All.Select(row => new SnapshotRow { Key = row.Name, Value = row.IsEnabled ? "enabled" : "disabled" }).ToList()),
+            (snapshot.BuiltIn, _bloat!.All.Select(row => new SnapshotRow { Key = row.Family, Value = (row.Installed ? "installed" : "absent") + "|" + (row.Provisioned ? "provisioned" : "not") }).ToList()),
+            (snapshot.ActiveSetup, _setup!.All.Select(row => new SnapshotRow { Key = row.ComponentId, Value = row.Version + "|" + (row.Installed ? "installed" : "absent") }).ToList()),
+            (snapshot.Startup, _startup!.All.Select(row => new SnapshotRow { Key = row.Scope + "|" + row.Key, Value = (row.Enabled ? "enabled" : "disabled") + "|" + row.Command }).ToList()),
+            (snapshot.Footprints, _footprints!.All.Select(row => new SnapshotRow { Key = row.Kind + "|" + row.Scope + "|" + row.Path, Value = row.Exists switch { true => "yes", false => "no", _ => "" } }).ToList())
+        };
+        var drifts = pairs.SelectMany(pair => SnapshotCompare.Compare(pair.Saved, pair.Current)).ToList();
+        return
+        [
+            Slice("Match", drifts.Count(drift => drift.Status == "match")),
+            Slice("Changed", drifts.Count(drift => drift.Status == "changed")),
+            Slice("Added", drifts.Count(drift => drift.Status == "added")),
+            Slice("Removed", drifts.Count(drift => drift.Status == "removed"))
+        ];
     }
 
     private void ShowCharts(IReadOnlyList<(string Title, UIElement Chart)> charts)
