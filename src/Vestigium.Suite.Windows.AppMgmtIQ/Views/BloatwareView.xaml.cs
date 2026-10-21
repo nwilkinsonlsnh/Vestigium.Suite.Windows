@@ -60,7 +60,7 @@ public partial class BloatwareView : UserControl
             return;
         var owner = Window.GetWindow(this);
         var correlationId = Guid.NewGuid().ToString("N");
-        var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Vestigium", "AppMgmtIQ", "Jobs");
+        var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Vestigium", "Jobs", "AppMgmtIQ");
         Directory.CreateDirectory(dir);
         var jobPath = Path.Combine(dir, correlationId + ".json");
         var resultPath = Path.ChangeExtension(jobPath, ".result.json");
