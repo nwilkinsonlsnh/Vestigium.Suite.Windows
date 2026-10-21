@@ -74,12 +74,12 @@ public sealed partial class ExportViewModel : ObservableObject
     [ObservableProperty] private string _status = "Writes to Desktop\\Vestigium\\Exports\\AppMgmtIQ.";
     [ObservableProperty] private string _lastPath = "";
 
-    public bool PackagesEverything { get => !PackagesCurrent; set { if (value) PackagesCurrent = false; } }
-    public bool FeaturesEverything { get => !FeaturesCurrent; set { if (value) FeaturesCurrent = false; } }
-    public bool BloatwareEverything { get => !BloatwareCurrent; set { if (value) BloatwareCurrent = false; } }
-    public bool ActiveSetupEverything { get => !ActiveSetupCurrent; set { if (value) ActiveSetupCurrent = false; } }
-    public bool StartupEverything { get => !StartupCurrent; set { if (value) StartupCurrent = false; } }
-    public bool FootprintsEverything { get => !FootprintsCurrent; set { if (value) FootprintsCurrent = false; } }
+    public bool PackagesEverything { get => !PackagesCurrent; set => PackagesCurrent = !value; }
+    public bool FeaturesEverything { get => !FeaturesCurrent; set => FeaturesCurrent = !value; }
+    public bool BloatwareEverything { get => !BloatwareCurrent; set => BloatwareCurrent = !value; }
+    public bool ActiveSetupEverything { get => !ActiveSetupCurrent; set => ActiveSetupCurrent = !value; }
+    public bool StartupEverything { get => !StartupCurrent; set => StartupCurrent = !value; }
+    public bool FootprintsEverything { get => !FootprintsCurrent; set => FootprintsCurrent = !value; }
 
     partial void OnIncludePackagesChanged(bool value) => Persist();
     partial void OnIncludeFeaturesChanged(bool value) => Persist();
