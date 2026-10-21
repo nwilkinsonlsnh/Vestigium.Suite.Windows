@@ -8,7 +8,7 @@
                Text="Choose which inventories a capture includes. Files are written to the desktop, under Vestigium\Snapshots\AppMgmtIQ." />
 
     <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-      <ComboBox x:Name="Snapshots" Width="260" Margin="0,0,8,0" SelectionChanged="Snapshot_Changed" />
+      <ComboBox x:Name="Snapshots" Style="{StaticResource ComboBox.Standard}" Width="260" Margin="0,0,8,0" SelectionChanged="Snapshot_Changed" />
       <Button Style="{StaticResource Button.Secondary}" Content="Refresh" Click="Refresh_Click" Padding="14,4" Margin="0,0,8,0" />
       <Button Style="{StaticResource Button.Secondary}" Content="Delete" Click="Delete_Click" Padding="14,4" Margin="0,0,8,0" />
       <Button Style="{StaticResource Button.Primary}" Content="Capture" Click="Capture_Click" Padding="14,4" />
