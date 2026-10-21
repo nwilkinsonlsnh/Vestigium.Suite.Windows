@@ -93,7 +93,6 @@
           <MenuItem Header="Copy" Style="{StaticResource MenuItem.Standard}">
             <MenuItem Header="Name" Style="{StaticResource MenuItem.Standard}" Click="CopyName_Click" />
             <MenuItem Header="Family" Style="{StaticResource MenuItem.Standard}" Click="CopyFamily_Click" />
-        <DataGridTextColumn Header="Baseline" Binding="{Binding BaselineStatus}" Width="90" ElementStyle="{StaticResource LeftCell}" />
             <MenuItem Header="Package" Style="{StaticResource MenuItem.Standard}" Click="CopyPackage_Click" />
           </MenuItem>
           <Separator Style="{StaticResource Separator.MenuHost}" />
