@@ -152,7 +152,7 @@ public static class InventoryExport
             ["Name", "Family", "Category", "Installed", "Provisioned", "Package"],
             rows.Select(row => (IReadOnlyList<object?>)[row.Name, row.Family, row.Category, row.Installed, row.Provisioned, row.Package]),
             "Bloatware");
-        book.Sheet("Bloatware").WriteTable(table, new SheetWriteOptions { TabColor = "C47B2B" });
+        book.Sheet("Built-In (Packages)").WriteTable(table, new SheetWriteOptions { TabColor = "C47B2B" });
     }
 
     private static void WriteActiveSetup(WorkbookSession book, IReadOnlyList<ActiveSetupRow> rows)
