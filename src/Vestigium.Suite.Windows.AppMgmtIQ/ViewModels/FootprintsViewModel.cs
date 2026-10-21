@@ -362,7 +362,6 @@ public sealed partial class FootprintsViewModel : ObservableObject
             return wide > int.MaxValue ? int.MaxValue : (int)wide;
         return int.TryParse(value.DataText, out var parsed) ? parsed : null;
     }
-}
 
     private void ApplyBaseline()
     {
@@ -373,3 +372,4 @@ public sealed partial class FootprintsViewModel : ObservableObject
         foreach (var row in _all)
             row.BaselineStatus = byKey.TryGetValue(row.Kind + "|" + row.Scope + "|" + row.Path, out var status) ? status : "none";
     }
+}
