@@ -5,6 +5,8 @@
   <DockPanel Margin="16">
     <DockPanel DockPanel.Dock="Top" Margin="0,0,0,12">
       <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+        <ComboBox x:Name="Snapshots" Width="220" Margin="0,0,8,0" SelectionChanged="Snapshot_Changed" />
+        <Button Style="{StaticResource Button.Standard}" Content="Delete" Click="Delete_Click" Padding="14,4" Margin="0,0,8,0" />
         <Button Style="{StaticResource Button.Standard}" Content="Capture Baseline" Click="Capture_Click" Padding="14,4" Margin="0,0,8,0" />
         <Button Style="{StaticResource Button.Primary}" Content="Refresh" Click="Refresh_Click" Padding="14,4" />
       </StackPanel>
