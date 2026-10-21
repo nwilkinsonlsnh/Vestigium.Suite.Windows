@@ -108,7 +108,6 @@
         <DataGridTextColumn Header="Scope" Binding="{Binding Scope}" Width="90" ElementStyle="{StaticResource LeftCell}" />
         <DataGridTextColumn Header="Bit" Binding="{Binding Bit}" Width="60" ElementStyle="{StaticResource LeftCell}" />
         <DataGridTextColumn Header="State" Binding="{Binding State}" Width="90" ElementStyle="{StaticResource LeftCell}" />
-        <DataGridTextColumn Header="Baseline" Binding="{Binding BaselineStatus}" Width="90" ElementStyle="{StaticResource LeftCell}" />
         <DataGridTextColumn Header="Package" Binding="{Binding Package}" Width="200" ElementStyle="{StaticResource LeftCell}" />
       </DataGrid.Columns>
     </DataGrid>
