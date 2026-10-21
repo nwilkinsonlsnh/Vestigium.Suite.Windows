@@ -30,6 +30,7 @@ public partial class DashboardView : UserControl
         _startup = startup;
         _footprints = footprints;
         BaselineApply.Changed += (_, _) => Dispatcher.Invoke(Refresh);
+        App.Themes.ThemeChanged += (_, _) => Dispatcher.Invoke(Refresh);
         Refresh();
     }
 
@@ -302,7 +303,7 @@ public partial class DashboardView : UserControl
         var sizes = packages.Select(Megabytes).Where(value => value > 0).ToArray();
         if (sizes.Length < 2)
             return Empty("Not enough sizes");
-        return ChartView.Histogram(NumericSeries.From(sizes, "size-mb"), new ChartOptions { Title = "Size, MB", ShowBellCurve = true });
+        return ChartView.Histogram(NumericSeries.From(sizes, "size-mb"), ChartTheme.Apply(new ChartOptions { Title = "Size, MB", ShowBellCurve = true }));
     }
 
     private static UIElement Chart(IReadOnlyList<ChartSlice> slices, string title, bool pareto = false)
@@ -310,7 +311,7 @@ public partial class DashboardView : UserControl
         var kept = slices.Where(slice => slice.Value > 0).ToArray();
         if (kept.Length == 0)
             return Empty("Nothing to chart");
-        var options = new ChartOptions { Title = title };
+        var options = ChartTheme.Apply(new ChartOptions { Title = title });
         return pareto ? ChartView.Pareto(kept, options) : ChartView.Pie(kept, options);
     }
 
