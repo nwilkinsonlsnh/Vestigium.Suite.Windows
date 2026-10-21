@@ -97,6 +97,7 @@ public sealed partial class BloatwareViewModel : ObservableObject
         var present = _all.Count(row => row.Installed);
         if (string.IsNullOrWhiteSpace(Query) || _bound is not null)
             Status = $"{Rows.Count} shown. {present} present of {_all.Count} catalog entries";
+            ApplyBaseline();
     }
 
     private bool Matches(BloatwareRow row)
@@ -166,3 +167,13 @@ public sealed partial class BloatwareViewModel : ObservableObject
         return at > 0 ? fullName[..at] : fullName;
     }
 }
+
+    private void ApplyBaseline()
+    {
+        var saved = BaselineApply.Latest()?.BuiltIn ?? [];
+        var current = _all.Select(row => new SnapshotRow { Key = row.Family, Value = (row.Installed ? "installed" : "absent") + "|" + (row.Provisioned ? "provisioned" : "not") }).ToList();
+        var drifts = saved.Count == 0 ? [] : SnapshotCompare.Compare(saved, current);
+        var byKey = drifts.ToDictionary(drift => drift.Key, drift => drift.Status, StringComparer.OrdinalIgnoreCase);
+        foreach (var row in _all)
+            row.BaselineStatus = byKey.TryGetValue(row.Family, out var status) ? status : "none";
+    }
