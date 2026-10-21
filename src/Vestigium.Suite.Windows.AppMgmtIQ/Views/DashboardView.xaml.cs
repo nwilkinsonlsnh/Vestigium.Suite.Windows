@@ -63,18 +63,19 @@ public partial class DashboardView : UserControl
     {
         if (_packages is null || _features is null || _bloat is null || _setup is null || _startup is null || _footprints is null)
             return;
+        var choice = SnapshotChoice.Load();
         var taken = DateTime.Now;
         var snapshot = new Snapshot
         {
             Name = SnapshotStore.NameFor(taken),
             Machine = Environment.MachineName,
             Taken = taken,
-            Packages = _packages.All.Select(row => new SnapshotRow { Key = row.Hive + "|" + row.KeyPath, Value = row.DisplayVersion }).ToList(),
-            Features = _features.All.Select(row => new SnapshotRow { Key = row.Name, Value = row.IsEnabled ? "enabled" : "disabled" }).ToList(),
-            BuiltIn = _bloat.All.Select(row => new SnapshotRow { Key = row.Family, Value = (row.Installed ? "installed" : "absent") + "|" + (row.Provisioned ? "provisioned" : "not") }).ToList(),
-            ActiveSetup = _setup.All.Select(row => new SnapshotRow { Key = row.ComponentId, Value = row.Version + "|" + (row.Installed ? "installed" : "absent") }).ToList(),
-            Startup = _startup.All.Select(row => new SnapshotRow { Key = row.Scope + "|" + row.Key, Value = (row.Enabled ? "enabled" : "disabled") + "|" + row.Command }).ToList(),
-            Footprints = _footprints.All.Select(row => new SnapshotRow { Key = row.Kind + "|" + row.Scope + "|" + row.Path, Value = row.Exists switch { true => "yes", false => "no", _ => "" } }).ToList()
+            Packages = choice.Packages ? _packages.All.Select(row => new SnapshotRow { Key = row.Hive + "|" + row.KeyPath, Value = row.DisplayVersion }).ToList() : [],
+            Features = choice.Features ? _features.All.Select(row => new SnapshotRow { Key = row.Name, Value = row.IsEnabled ? "enabled" : "disabled" }).ToList() : [],
+            BuiltIn = choice.BuiltIn ? _bloat.All.Select(row => new SnapshotRow { Key = row.Family, Value = (row.Installed ? "installed" : "absent") + "|" + (row.Provisioned ? "provisioned" : "not") }).ToList() : [],
+            ActiveSetup = choice.ActiveSetup ? _setup.All.Select(row => new SnapshotRow { Key = row.ComponentId, Value = row.Version + "|" + (row.Installed ? "installed" : "absent") }).ToList() : [],
+            Startup = choice.Startup ? _startup.All.Select(row => new SnapshotRow { Key = row.Scope + "|" + row.Key, Value = (row.Enabled ? "enabled" : "disabled") + "|" + row.Command }).ToList() : [],
+            Footprints = choice.Footprints ? _footprints.All.Select(row => new SnapshotRow { Key = row.Kind + "|" + row.Scope + "|" + row.Path, Value = row.Exists switch { true => "yes", false => "no", _ => "" } }).ToList() : []
         };
         new SnapshotStore().Save(snapshot);
         BaselineApply.Selected = snapshot.Name;
@@ -98,8 +99,10 @@ public partial class DashboardView : UserControl
             ShowSetup();
         else if (StartupTab.IsChecked == true)
             ShowStartup();
-        else
+        else if (FootprintsTab.IsChecked == true)
             ShowFootprints();
+        else
+            ShowSnapshots();
     }
 
     private void ShowPackages()
@@ -241,6 +244,13 @@ public partial class DashboardView : UserControl
             Slice("Added", drifts.Count(drift => drift.Status == "added")),
             Slice("Removed", drifts.Count(drift => drift.Status == "removed"))
         ], "Baseline");
+    }
+
+    private void ShowSnapshots()
+    {
+        Story.Text = "Snapshots. Placeholder.";
+        SetCards(("Snapshots", new SnapshotStore().List().Count.ToString()), ("", ""), ("", ""), ("", ""));
+        ShowCharts([]);
     }
 
     private void ShowCharts(IReadOnlyList<(string Title, UIElement Chart)> charts)
