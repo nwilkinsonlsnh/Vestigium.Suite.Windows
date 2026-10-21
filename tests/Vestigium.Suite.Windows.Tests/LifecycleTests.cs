@@ -1,3 +1,4 @@
+using Vestigium.Helpers.SystemInfo;
 using Vestigium.Helpers.Kql.AppMgmt;
 using Vestigium.Helpers.WinReg;
 using Vestigium.Suite.Windows.AppMgmtIQ;
@@ -10,23 +11,23 @@ public class LifecycleTests
 {
     [Fact]
     public void Baseline_is_none_without_an_expected_version()
-        => Assert.Equal("none", BaselineCompare.Status("1.0", null));
+        => Assert.Equal("none", VersionCompare.Status("1.0", null));
 
     [Fact]
     public void Baseline_matches_equal_versions()
-        => Assert.Equal("match", BaselineCompare.Status("1.2.3", "1.2.3"));
+        => Assert.Equal("match", VersionCompare.Status("1.2.3", "1.2.3"));
 
     [Fact]
     public void Baseline_is_newer_when_installed_is_higher()
-        => Assert.Equal("newer", BaselineCompare.Status("2.0", "1.9"));
+        => Assert.Equal("newer", VersionCompare.Status("2.0", "1.9"));
 
     [Fact]
     public void Baseline_is_older_when_installed_is_lower()
-        => Assert.Equal("older", BaselineCompare.Status("1.0", "1.1"));
+        => Assert.Equal("older", VersionCompare.Status("1.0", "1.1"));
 
     [Fact]
     public void Baseline_is_unknown_when_versions_cannot_be_ordered()
-        => Assert.Equal("unknown", BaselineCompare.Status("beta", "alpha"));
+        => Assert.Equal("unknown", VersionCompare.Status("beta", "alpha"));
 
     [Fact]
     public void Missing_install_location_is_an_orphan()
