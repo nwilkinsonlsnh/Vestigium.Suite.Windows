@@ -29,10 +29,35 @@ public partial class DashboardView : UserControl
         _setup = setup;
         _startup = startup;
         _footprints = footprints;
+        LoadSnapshots();
         Refresh();
     }
 
     private void Refresh_Click(object sender, RoutedEventArgs e) => Refresh();
+
+    private void LoadSnapshots()
+    {
+        var names = new SnapshotStore(AppMgmtSettingsStore.DefaultRoot).List();
+        Snapshots.SelectionChanged -= Snapshot_Changed;
+        Snapshots.ItemsSource = names;
+        var chosen = BaselineApply.Selected;
+        Snapshots.SelectedItem = chosen is not null && names.Contains(chosen) ? chosen : names.FirstOrDefault();
+        Snapshots.SelectionChanged += Snapshot_Changed;
+    }
+
+    private void Snapshot_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        if (Snapshots.SelectedItem is string name)
+            BaselineApply.Selected = name;
+        Refresh();
+    }
+
+    private void Delete_Click(object sender, RoutedEventArgs e)
+    {
+        BaselineApply.DeleteSelected();
+        LoadSnapshots();
+        Refresh();
+    }
 
     private void Capture_Click(object sender, RoutedEventArgs e)
     {
@@ -52,6 +77,8 @@ public partial class DashboardView : UserControl
             Footprints = _footprints.All.Select(row => new SnapshotRow { Key = row.Kind + "|" + row.Scope + "|" + row.Path, Value = row.Exists switch { true => "yes", false => "no", _ => "" } }).ToList()
         };
         new SnapshotStore(AppMgmtSettingsStore.DefaultRoot).Save(snapshot);
+        BaselineApply.Selected = snapshot.Name;
+        LoadSnapshots();
         Story.Text = "Baseline captured. " + snapshot.Name;
     }
 
