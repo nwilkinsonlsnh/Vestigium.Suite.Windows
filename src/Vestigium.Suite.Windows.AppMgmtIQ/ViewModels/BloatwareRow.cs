@@ -2,6 +2,7 @@ namespace Vestigium.Suite.Windows.AppMgmtIQ.ViewModels;
 
 public sealed class BloatwareRow
 {
+    public string BaselineStatus { get; set; } = "";
     public required string Name { get; init; }
     public required string Family { get; init; }
     public required string Category { get; init; }
