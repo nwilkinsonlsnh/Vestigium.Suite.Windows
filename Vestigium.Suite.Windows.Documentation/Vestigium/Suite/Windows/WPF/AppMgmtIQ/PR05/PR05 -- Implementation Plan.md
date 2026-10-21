@@ -51,7 +51,8 @@ The host owns path resolution, install health, repair and uninstall plans, basel
 | 2 | PR05.002 | Move the Wow64 retry and the WinSxS name search into FileSystemPaths. | Done |
 | 2b | PR05.002b | Add `PathSanitize`. Rejected characters become one safe character. Never empty. | Done |
 | 2c | PR05.002c | Add the token expander. Categories: date and time (`{datetime}` `{date}` `{time}`), special folders (desktop, favorites, userprofile, appdata, localappdata, temp, programfiles, programfilesx86, programdata, windir, systemdrive, public), identity (`{username}` `{computername}`), counters (`{#}` `{##}` `{A}` `{AAA}` `{A#}` `{AA##}` `{a}` `{aaa}`, any width). Number runs zero-pad and throw when the value does not fit. Letter runs are base-26, rightmost first (`AAA`, `AAB`, `AAZ`, `ABA`), and throw past the last value. The two parts count separately. No rollover. Unknown tokens stay as written. | Done |
-| 2d | PR05.002d | Long paths, conservative. Prefix `\\\\?\\` only when a built path would exceed 260. Leave short paths and already-long paths alone. | |
+| 2d | PR05.002d | Long paths, conservative. Prefix `\\\\?\\` only when a built path would exceed 260. Leave short paths and already-long paths alone. | Done |
+| 2e | PR05.002e | `PathCheck.IsValid`. A `{...}` pair must be a known token. `{{` and `}}` are literal braces. Overflow and illegal path characters are invalid. Does not check that the file exists. | Done |
 | 3 | PR05.003 | Move `BaselineCompare` to `Vestigium.Helpers.SystemInfo`. The baseline store stays in the host. Install health, repair, uninstall, and the inventory walks stay in the host. | |
 | 4 | PR05.004 | Create `Vestigium.Helpers.Startup`. Move approved, launch, link, and navigation. Applier stays in the host. | |
 | 5 | PR05.005 | Create `Vestigium.Helpers.Bloatware`. Move `BloatwareCatalog`. | |
