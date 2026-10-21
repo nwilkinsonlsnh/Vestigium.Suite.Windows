@@ -308,7 +308,7 @@ public sealed partial class StartupViewModel : ObservableObject
     private async Task<(int Changed, int Denied, int Failed)?> Elevate(IReadOnlyList<StartupRow> rows, string action)
     {
         var id = Guid.NewGuid().ToString("N");
-        var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Vestigium", "AppMgmtIQ", "Jobs");
+        var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Vestigium", "Jobs", "AppMgmtIQ");
         Directory.CreateDirectory(dir);
         var jobPath = Path.Combine(dir, id + ".json");
         var resultPath = Path.ChangeExtension(jobPath, ".result.json");
