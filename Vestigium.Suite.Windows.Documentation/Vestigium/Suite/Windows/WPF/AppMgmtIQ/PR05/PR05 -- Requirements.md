@@ -72,7 +72,7 @@ Install health, repair, and uninstall take `PackageRow`, which is a view model. 
 - `UninstallPlan`. Splits the uninstall string and rewrites the quiet flags. Stays in the host.
 - Inventory walks and the footprint link stay in the host. They produce host rows.
 
-`BaselineCompare` is the exception. It takes two version strings and returns match, newer, older, unknown, or none. It moves to `Vestigium.Helpers.SystemInfo`. The baseline store stays in the host.
+`BaselineCompare` is the exception. It takes two version strings and returns match, newer, older, unknown, or none. It moves to `Vestigium.Helpers.SystemInfo` as `VersionCompare`. The baseline store stays in the host.
 
 ### R05-03 Startup domain
 
@@ -83,11 +83,11 @@ Create `Vestigium.Helpers.Startup` and publish it.
 - Package link.
 - Navigation target.
 
-The host shows the grid and calls the elevated applier. The applier stays in the host.
+The elevated projects (`AppMgmtIQ.Startup`, `.Features`, `.Bloatware`, `.ActiveSetup`) stay with the application. They are separate projects only so the host elevates when it must. No helper is created for them. Approved, launch, link, and navigation stay in the host.
 
 ### R05-04 Bloatware catalog
 
-Move `BloatwareCatalog` to `Vestigium.Helpers.Bloatware` and publish it. The host reads the catalog. It does not own the list.
+`BloatwareCatalog` stays with the application. It feeds the elevated bloatware project. No helper is created.
 
 ### R05-05 Pending reboot
 
