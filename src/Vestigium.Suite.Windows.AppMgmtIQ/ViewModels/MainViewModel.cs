@@ -8,6 +8,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Vestigium.Helpers.Kql;
 using Vestigium.Helpers.Kql.AppMgmt;
+using Vestigium.Helpers.SystemInfo;
 using Vestigium.Helpers.WinReg;
 using Vestigium.Suite.Windows.AppMgmtIQ;
 using Vestigium.Suite.Windows.AppMgmtIQ.Views;
@@ -243,7 +244,7 @@ public sealed partial class MainViewModel : ObservableObject
     {
         var expected = _baselines.Expected(Key(row)) ?? "";
         row.ExpectedVersion = expected;
-        row.BaselineStatus = BaselineCompare.Status(row.DisplayVersion, expected);
+        row.BaselineStatus = VersionCompare.Status(row.DisplayVersion, expected);
     }
 
     private static string Key(PackageRow row) => row.Hive + "\\" + row.KeyPath;
