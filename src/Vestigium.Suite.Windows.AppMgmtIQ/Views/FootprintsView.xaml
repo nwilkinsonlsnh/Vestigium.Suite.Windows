@@ -80,7 +80,6 @@
         <DataGridTextColumn Header="Scope" Binding="{Binding Scope}" Width="80" MinWidth="64" ElementStyle="{StaticResource LeftCell}" />
         <DataGridTextColumn Header="Ref count" Binding="{Binding RefCountText}" Width="80" MinWidth="72" ElementStyle="{StaticResource LeftCell}" />
         <DataGridTextColumn Header="Exists" Binding="{Binding ExistsText}" Width="70" MinWidth="60" ElementStyle="{StaticResource LeftCell}" />
-        <DataGridTextColumn Header="Baseline" Binding="{Binding BaselineStatus}" Width="90" ElementStyle="{StaticResource LeftCell}" />
         <DataGridTextColumn Header="Package" Binding="{Binding Package}" Width="1.5*" MinWidth="140" ElementStyle="{StaticResource LeftCell}" />
       </DataGrid.Columns>
     </DataGrid>
