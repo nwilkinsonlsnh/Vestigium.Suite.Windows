@@ -16,7 +16,8 @@
         <RadioButton x:Name="BloatTab" Content="Built-In (Packages)" GroupName="Dashboard" Style="{StaticResource RadioButton.HorizontalTab}" Checked="Section_Checked" Margin="0,0,8,0" />
         <RadioButton x:Name="SetupTab" Content="Active Setup" GroupName="Dashboard" Style="{StaticResource RadioButton.HorizontalTab}" Checked="Section_Checked" Margin="0,0,8,0" />
         <RadioButton x:Name="StartupTab" Content="Startup" GroupName="Dashboard" Style="{StaticResource RadioButton.HorizontalTab}" Checked="Section_Checked" Margin="0,0,8,0" />
-        <RadioButton x:Name="FootprintsTab" Content="Footprints" GroupName="Dashboard" Style="{StaticResource RadioButton.HorizontalTab}" Checked="Section_Checked" />
+        <RadioButton x:Name="FootprintsTab" Content="Footprints" GroupName="Dashboard" Style="{StaticResource RadioButton.HorizontalTab}" Checked="Section_Checked" Margin="0,0,8,0" />
+        <RadioButton x:Name="SnapshotsTab" Content="Snapshots" GroupName="Dashboard" Style="{StaticResource RadioButton.HorizontalTab}" Checked="Section_Checked" />
       </StackPanel>
     </DockPanel>
 
