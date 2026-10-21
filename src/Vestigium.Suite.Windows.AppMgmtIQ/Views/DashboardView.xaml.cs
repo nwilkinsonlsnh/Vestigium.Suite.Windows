@@ -29,6 +29,7 @@ public partial class DashboardView : UserControl
         _setup = setup;
         _startup = startup;
         _footprints = footprints;
+        BaselineApply.Changed += (_, _) => Dispatcher.Invoke(Refresh);
         Refresh();
     }
 
