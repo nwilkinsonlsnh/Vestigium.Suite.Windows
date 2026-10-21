@@ -62,6 +62,7 @@ public sealed partial class MainViewModel : ObservableObject
     private int _decimals = 4;
 
     public ObservableCollection<PackageRow> Packages { get; } = [];
+    public IReadOnlyList<PackageRow> All => _all;
     public ObservableCollection<QueryMruRow> Queries { get; } = [];
     public KqlSession Session => _session;
 
