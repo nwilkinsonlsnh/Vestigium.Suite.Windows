@@ -37,7 +37,7 @@ public partial class DashboardView : UserControl
 
     private void LoadSnapshots()
     {
-        var names = new SnapshotStore(AppMgmtSettingsStore.DefaultRoot).List();
+        var names = new SnapshotStore().List();
         Snapshots.SelectionChanged -= Snapshot_Changed;
         Snapshots.ItemsSource = names;
         var chosen = BaselineApply.Selected;
@@ -76,7 +76,7 @@ public partial class DashboardView : UserControl
             Startup = _startup.All.Select(row => new SnapshotRow { Key = row.Scope + "|" + row.Key, Value = (row.Enabled ? "enabled" : "disabled") + "|" + row.Command }).ToList(),
             Footprints = _footprints.All.Select(row => new SnapshotRow { Key = row.Kind + "|" + row.Scope + "|" + row.Path, Value = row.Exists switch { true => "yes", false => "no", _ => "" } }).ToList()
         };
-        new SnapshotStore(AppMgmtSettingsStore.DefaultRoot).Save(snapshot);
+        new SnapshotStore().Save(snapshot);
         BaselineApply.Selected = snapshot.Name;
         LoadSnapshots();
         Story.Text = "Baseline captured. " + snapshot.Name;
@@ -229,7 +229,7 @@ public partial class DashboardView : UserControl
 
     private UIElement BaselineChart(IEnumerable<SnapshotRow> current, Func<Snapshot, List<SnapshotRow>> pick)
     {
-        var store = new SnapshotStore(AppMgmtSettingsStore.DefaultRoot);
+        var store = new SnapshotStore();
         var name = store.List().FirstOrDefault();
         var saved = name is null ? null : store.Load(name);
         if (saved is null)
