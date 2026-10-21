@@ -4,6 +4,7 @@ namespace Vestigium.Suite.Windows.AppMgmtIQ.ViewModels;
 
 public sealed partial class FootprintRow : ObservableObject
 {
+    public string BaselineStatus { get; set; } = "";
     public string Kind { get; init; } = "";
     public string Name { get; init; } = "";
     public string Path { get; init; } = "";
