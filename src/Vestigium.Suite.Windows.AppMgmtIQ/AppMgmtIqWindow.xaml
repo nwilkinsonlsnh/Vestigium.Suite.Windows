@@ -20,7 +20,7 @@
                      Style="{StaticResource RadioButton.UnderlineTab}"
                      GroupName="AppMgmtMainNav"
                      Checked="MainNav_Checked" />
-        <RadioButton Content="Bloatware"
+        <RadioButton Content="Built-In (Packages)"
                      Style="{StaticResource RadioButton.UnderlineTab}"
                      GroupName="AppMgmtMainNav"
                      Checked="MainNav_Checked" />
