@@ -1,0 +1,17 @@
+<UserControl x:Class="Vestigium.Suite.Windows.AppMgmtIQ.Views.SnapshotView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{DynamicResource Vestigium.Brushes.Surface.Window}">
+  <StackPanel Margin="24" MaxWidth="480" HorizontalAlignment="Left">
+    <TextBlock Style="{StaticResource TextBlock.Heading}" Text="Snapshot" />
+    <TextBlock Style="{StaticResource TextBlock.Caption}" TextWrapping="Wrap" Margin="0,8,0,20"
+               Text="Choose which inventories a capture includes. Files are written to the desktop, under Vestigium\Snapshots\AppMgmtIQ." />
+
+    <CheckBox x:Name="Packages" Style="{StaticResource CheckBox.ToggleSwitch}" Content="AppMgmtIQ" Margin="0,0,0,8" Checked="Choice_Changed" Unchecked="Choice_Changed" />
+    <CheckBox x:Name="Features" Style="{StaticResource CheckBox.ToggleSwitch}" Content="Windows Features" Margin="0,0,0,8" Checked="Choice_Changed" Unchecked="Choice_Changed" />
+    <CheckBox x:Name="BuiltIn" Style="{StaticResource CheckBox.ToggleSwitch}" Content="Built-In (Packages)" Margin="0,0,0,8" Checked="Choice_Changed" Unchecked="Choice_Changed" />
+    <CheckBox x:Name="Setup" Style="{StaticResource CheckBox.ToggleSwitch}" Content="Active Setup" Margin="0,0,0,8" Checked="Choice_Changed" Unchecked="Choice_Changed" />
+    <CheckBox x:Name="Startup" Style="{StaticResource CheckBox.ToggleSwitch}" Content="Startup" Margin="0,0,0,8" Checked="Choice_Changed" Unchecked="Choice_Changed" />
+    <CheckBox x:Name="Footprints" Style="{StaticResource CheckBox.ToggleSwitch}" Content="Footprints" Margin="0,0,0,8" Checked="Choice_Changed" Unchecked="Choice_Changed" />
+  </StackPanel>
+</UserControl>
