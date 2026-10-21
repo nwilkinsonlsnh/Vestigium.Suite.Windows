@@ -28,7 +28,7 @@ public sealed class SnapshotStore
         new() { WriteIndented = true, PropertyNameCaseInsensitive = true };
 
     public static string Root => Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+        Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
         "Vestigium", "Snapshots", "AppMgmtIQ");
 
     public SnapshotStore()
