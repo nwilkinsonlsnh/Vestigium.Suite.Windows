@@ -34,6 +34,27 @@ public partial class DashboardView : UserControl
 
     private void Refresh_Click(object sender, RoutedEventArgs e) => Refresh();
 
+    private void Capture_Click(object sender, RoutedEventArgs e)
+    {
+        if (_packages is null || _features is null || _bloat is null || _setup is null || _startup is null || _footprints is null)
+            return;
+        var taken = DateTime.Now;
+        var snapshot = new Snapshot
+        {
+            Name = SnapshotStore.NameFor(taken),
+            Machine = Environment.MachineName,
+            Taken = taken,
+            Packages = _packages.All.Select(row => new SnapshotRow { Key = row.Hive + "|" + row.KeyPath, Value = row.DisplayVersion }).ToList(),
+            Features = _features.All.Select(row => new SnapshotRow { Key = row.Name, Value = row.IsEnabled ? "enabled" : "disabled" }).ToList(),
+            BuiltIn = _bloat.All.Select(row => new SnapshotRow { Key = row.Family, Value = (row.Installed ? "installed" : "absent") + "|" + (row.Provisioned ? "provisioned" : "not") }).ToList(),
+            ActiveSetup = _setup.All.Select(row => new SnapshotRow { Key = row.ComponentId, Value = row.Version + "|" + (row.Installed ? "installed" : "absent") }).ToList(),
+            Startup = _startup.All.Select(row => new SnapshotRow { Key = row.Scope + "|" + row.Key, Value = (row.Enabled ? "enabled" : "disabled") + "|" + row.Command }).ToList(),
+            Footprints = _footprints.All.Select(row => new SnapshotRow { Key = row.Kind + "|" + row.Scope + "|" + row.Path, Value = row.Exists switch { true => "yes", false => "no", _ => "" } }).ToList()
+        };
+        new SnapshotStore(AppMgmtSettingsStore.DefaultRoot).Save(snapshot);
+        Story.Text = "Baseline captured. " + snapshot.Name;
+    }
+
     private void Section_Checked(object sender, RoutedEventArgs e) => Refresh();
 
     private void Refresh()
