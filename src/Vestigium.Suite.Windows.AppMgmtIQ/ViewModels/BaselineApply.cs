@@ -7,6 +7,8 @@ public static class BaselineApply
 {
     private static readonly JsonSerializerOptions Json = new() { WriteIndented = true };
 
+    public static event EventHandler? Changed;
+
     public static void Run(IReadOnlyList<SnapshotRow> current, List<SnapshotRow> saved, Action<string, string> set)
     {
         var drifts = saved.Count == 0
@@ -30,6 +32,7 @@ public static class BaselineApply
             var path = ChoicePath();
             Directory.CreateDirectory(Path.GetDirectoryName(path)!);
             File.WriteAllText(path, System.Text.Json.JsonSerializer.Serialize(value ?? "", Json));
+            Changed?.Invoke(null, EventArgs.Empty);
         }
     }
 
