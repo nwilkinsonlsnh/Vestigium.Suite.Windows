@@ -35,7 +35,7 @@ internal static class HelpCopy
             "A feature has a state. Enabled means it is on. Disabled means it is installed and off. Absent means it is not on the machine. A feature also has a parent, and the tree is that relationship. A group such as WCF Services contains children, and the parent is a summary of them.",
             "The checkbox on a parent is tri-state for that reason. Checked means the feature and everything under it are on. The middle state means some children are on. Clear means none are. A leaf is only ever checked or clear. Checking a child that requires its parent selects the parent too, so the summary that follows is not a surprise.",
             "Nothing is written while you check and clear. Apply Feature Changes opens an elevated worker, centered on this window, and lists exactly what will be enabled and what will be disabled. On continue it applies those states and suppresses a reboot where Windows allows it. The summary lists each feature and any error.",
-            Head("Bloatware"),
+            Head("Built-In (Packages)"),
             "Inbox applications and Microsoft Store packages are AppX packages. They are not in the uninstall registry. They are registered with the AppX deployment service, and a provisioned copy can be kept on the machine so that every new user profile receives the package at first logon.",
             "This tab starts from a catalog, not from an inventory. The catalog is a known list of inbox and Store packages: the Bing apps, the Xbox components, the games that ship on a new image, Teams, and the packages Microsoft has since retired. Every catalog entry is shown. Installed and Provisioned say whether this machine has it. A row that is not installed is a package we know about, not a package that is here.",
             "Installed means the package is registered for this user and can be launched. Provisioned means the machine holds a copy for new users. Removing only the user registration leaves the provisioned copy, and the next person who logs on receives it again. A real removal takes both.",
@@ -96,9 +96,9 @@ internal static class HelpCopy
         ]);
 
     private static Draft Bloatware()
-        => new("Bloatware",
+        => new("Built-In (Packages)",
         [
-            "This module specializes in managing AppX packages, commonly referred to as inbox applications or bloatware. Because these applications do not reside in the standard Windows uninstall registry, they must be managed through the AppX deployment service.",
+            "This module manages AppX packages that ship with Windows or are staged for new users. Because these applications do not reside in the standard Windows uninstall registry, they must be managed through the AppX deployment service.",
             Head("A Catalog-First Approach"),
             "Unlike the other inventories that strictly read what is present on the machine, the Bloatware tab operates from a predefined catalog of known inbox and Microsoft Store packages. This extensive list includes Bing applications, Xbox components, pre-installed games such as Candy Crush, modern utilities like Dev Home and Copilot, and even legacy applications that Microsoft has since retired. Because every catalog entry is shown, a row indicating that it is not installed simply means it is a tracked package missing from the current machine.",
             Head("Package States: Installed vs. Provisioned"),
@@ -204,7 +204,7 @@ internal static class HelpCopy
             Term("Counts", "The total number of features tracked, broken down into how many are enabled, disabled, and absent."),
             Term("Feature state", "The proportion of enabled features against disabled ones."),
             Term("Feature parents", "A ranked view of which parent groups own the most features, with a cumulative line. Root features, those with no parent, are reported separately."),
-            Head("Bloatware"),
+            Head("Built-In (Packages)"),
             "This section analyzes the curated catalog of inbox and Microsoft Store apps against what is actually present on the local machine.",
             Term("Counts", "The total catalog size alongside the number of packages that are installed, provisioned for new users, or missing."),
             Term("Category", "The catalog across System, Productivity, Xbox, Store, Media, and Games."),
@@ -281,7 +281,7 @@ internal static class HelpCopy
                     Term("Parent", "The feature this one sits under. A parent checkbox summarizes its children."),
                     Term("Tri-state", "Checked, partial, or clear. Only a parent can be partial.")
                 ]),
-                new("Bloatware",
+                new("Built-In (Packages)",
                 [
                     Term("Catalog", "The known list. A row is not proof the package is installed."),
                     Term("Installed", "Registered for this user with the AppX service."),
