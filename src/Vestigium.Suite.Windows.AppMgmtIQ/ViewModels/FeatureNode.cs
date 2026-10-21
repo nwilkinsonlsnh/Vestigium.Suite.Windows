@@ -10,6 +10,7 @@ public sealed class FeatureNode : INotifyPropertyChanged
     public required string State { get; init; }
     public required bool IsEnabled { get; init; }
     public string Parent { get; init; } = "";
+    public string BaselineStatus { get; set; } = "";
     public FeatureRow? Feature { get; init; }
     public ObservableCollection<FeatureNode> Children { get; } = [];
 
