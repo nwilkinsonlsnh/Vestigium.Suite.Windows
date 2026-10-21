@@ -226,9 +226,11 @@ public partial class App : Application
         var export = window.HostShell["Export"];
         var snapshot = window.HostShell["Snapshot"];
         if (snapshot is not null)
+        {
             var snapshotView = new SnapshotView();
             snapshotView.Bind(inventory, featuresVm, bloatware, setup, startup, footprints);
             snapshot.Content = snapshotView;
+        }
         if (export is not null)
             export.Content = new ExportView { DataContext = new ExportViewModel(inventory, featuresVm, bloatware, setup, startup, footprints, store) };
 
