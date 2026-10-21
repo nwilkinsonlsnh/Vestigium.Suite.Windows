@@ -136,7 +136,7 @@ public sealed partial class SettingsViewModel : ObservableObject
     public ObservableCollection<QueryMruRow> CurrentMrus => SelectedMruTab switch
     {
         "Features" => _features?.Queries ?? [],
-        "Bloatware" => _bloatware?.Queries ?? [],
+        "Built-In (Packages)" => _bloatware?.Queries ?? [],
         "Active Setup" => _setup?.Queries ?? [],
         "Startup" => _startup?.Queries ?? [],
         "Footprints" => _footprints?.Queries ?? [],
