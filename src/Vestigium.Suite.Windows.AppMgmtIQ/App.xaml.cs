@@ -123,9 +123,9 @@ public partial class App : Application
                 },
                 new VestigiumNavItemSpec("Bloatware")
                 {
-                    Title = "Bloatware",
-                    Subject = "AppX catalog",
-                    Description = "Known consumer packages matched against what is installed."
+                    Title = "Built-In (Packages)",
+                    Subject = "Built-in packages",
+                    Description = "Known package families matched against what is installed or provisioned."
                 },
                 new VestigiumNavItemSpec("Active Setup")
                 {
