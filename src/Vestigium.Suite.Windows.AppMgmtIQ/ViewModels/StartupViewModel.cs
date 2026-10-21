@@ -555,7 +555,6 @@ public sealed partial class StartupViewModel : ObservableObject
             Enabled = enabled
         });
     }
-}
 
     private void ApplyBaseline()
     {
@@ -566,3 +565,4 @@ public sealed partial class StartupViewModel : ObservableObject
         foreach (var row in _all)
             row.BaselineStatus = byKey.TryGetValue(row.Scope + "|" + row.Key, out var status) ? status : "none";
     }
+}
