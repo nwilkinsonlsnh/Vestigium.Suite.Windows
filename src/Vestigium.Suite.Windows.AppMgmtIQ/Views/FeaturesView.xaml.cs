@@ -30,7 +30,7 @@ public partial class FeaturesView : UserControl
         if (DataContext is not FeaturesViewModel host)
             return;
         var correlationId = Guid.NewGuid().ToString("N");
-        var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Vestigium", "AppMgmtIQ", "Jobs");
+        var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Vestigium", "Jobs", "AppMgmtIQ");
         Directory.CreateDirectory(dir);
         var jobPath = Path.Combine(dir, correlationId + ".json");
         var resultPath = Path.ChangeExtension(jobPath, ".result.json");
