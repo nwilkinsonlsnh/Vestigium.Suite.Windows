@@ -70,7 +70,7 @@ public partial class App : Application
             {
                 "AppMgmtIQ" => inventory.Status,
                 "Windows Features" => features.Status,
-                "Bloatware" => bloatware.Status,
+                "Built-In (Packages)" => bloatware.Status,
                 "Active Setup" => setup.Status,
                 "Startup" => startup.Status,
                 "Footprints" => footprints.Status,
@@ -121,7 +121,7 @@ public partial class App : Application
                     Subject = "Optional features",
                     Description = "Tree of Win32_OptionalFeature."
                 },
-                new VestigiumNavItemSpec("Bloatware")
+                new VestigiumNavItemSpec("Built-In (Packages)")
                 {
                     Title = "Built-In (Packages)",
                     Subject = "Built-in packages",
@@ -201,7 +201,7 @@ public partial class App : Application
             features.Content = featuresView;
         }
 
-        var bloat = window.HostShell["Bloatware"];
+        var bloat = window.HostShell["Built-In (Packages)"];
         if (bloat is not null)
             bloat.Content = new BloatwareView { DataContext = bloatware };
 
