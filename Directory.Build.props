@@ -19,7 +19,7 @@
     <VestigiumWinRegVersion>1.0.0</VestigiumWinRegVersion>
     <VestigiumFileSystemPathsVersion>1.4.0</VestigiumFileSystemPathsVersion>
     <VestigiumSystemInfoVersion>1.4.0</VestigiumSystemInfoVersion>
-    <VestigiumKqlVersion>3.4.0</VestigiumKqlVersion>
+    <VestigiumKqlVersion>3.4.1</VestigiumKqlVersion>
     <VestigiumKqlAppMgmtVersion>1.5.0</VestigiumKqlAppMgmtVersion>
     <VestigiumKqlActiveSetupVersion>1.0.0</VestigiumKqlActiveSetupVersion>
     <VestigiumQueryBarVersion>1.3.0</VestigiumQueryBarVersion>
