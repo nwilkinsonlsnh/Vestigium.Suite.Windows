@@ -95,6 +95,7 @@ public sealed partial class ActiveSetupViewModel : ObservableObject
         var pending = _all.Count(row => row.Pending);
         if (string.IsNullOrWhiteSpace(Query) || _bound is not null)
             Status = $"{Rows.Count} shown. {pending} pending of {_all.Count}";
+            ApplyBaseline();
     }
 
     private bool Matches(ActiveSetupRow row)
@@ -217,3 +218,13 @@ public sealed partial class ActiveSetupViewModel : ObservableObject
             => HashCode.Combine(obj.IsX64, StringComparer.OrdinalIgnoreCase.GetHashCode(obj.Component));
     }
 }
+
+    private void ApplyBaseline()
+    {
+        var saved = BaselineApply.Latest()?.ActiveSetup ?? [];
+        var current = _all.Select(row => new SnapshotRow { Key = row.ComponentId, Value = row.Version + "|" + (row.Installed ? "installed" : "absent") }).ToList();
+        var drifts = saved.Count == 0 ? [] : SnapshotCompare.Compare(saved, current);
+        var byKey = drifts.ToDictionary(drift => drift.Key, drift => drift.Status, StringComparer.OrdinalIgnoreCase);
+        foreach (var row in _all)
+            row.BaselineStatus = byKey.TryGetValue(row.ComponentId, out var status) ? status : "none";
+    }
