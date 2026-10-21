@@ -32,8 +32,6 @@ public partial class DashboardView : UserControl
         Refresh();
     }
 
-    private void Refresh_Click(object sender, RoutedEventArgs e) => Refresh();
-
     private void Section_Checked(object sender, RoutedEventArgs e) => Refresh();
 
     private void Refresh()
