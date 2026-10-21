@@ -34,6 +34,21 @@ public sealed class SnapshotStore
     public SnapshotStore()
     {
         DirectoryPath = Root;
+        MoveFromDesktop();
+    }
+
+    private static void MoveFromDesktop()
+    {
+        var old = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Vestigium", "Snapshots", "AppMgmtIQ");
+        if (!Directory.Exists(old))
+            return;
+        Directory.CreateDirectory(Root);
+        foreach (var file in Directory.GetFiles(old, "*.json"))
+        {
+            var target = Path.Combine(Root, Path.GetFileName(file));
+            if (!File.Exists(target))
+                File.Copy(file, target);
+        }
     }
 
     public SnapshotStore(string rootDirectory)
