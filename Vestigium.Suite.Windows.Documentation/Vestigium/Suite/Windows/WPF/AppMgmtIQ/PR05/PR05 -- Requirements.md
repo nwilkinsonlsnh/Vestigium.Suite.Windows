@@ -8,7 +8,7 @@
 
 This file is the **definition of done for PR05**. It moves domain work out of the host and into published Helpers. The host becomes a skeleton: it binds, confirms, and shows. The libraries read, resolve, decide, and plan.
 
-**One sentence:** Extract path resolution, package rules, inventory walks, startup logic, the bloatware catalog, and pending-reboot detection into published Helpers so AppMgmtIQ holds only the UI and the calls.
+**One sentence:** Extract path meaning, startup logic, the bloatware catalog, and machine-state reads into published Helpers. Uninstall decisions stay in the host.
 
 **This version is not** a behavior change. Not a new tab. Not a new action. The grid, the Exists column, the menus, and the export come back the same.
 
@@ -63,17 +63,16 @@ Create `Vestigium.Helpers.FileSystemPaths` and publish it. It is a path meaning 
 
 The host calls these. It does not own the rules.
 
-### R05-02 AppMgmt domain
+### R05-02 Uninstall decisions stay in the host
 
-Create `Vestigium.Helpers.AppMgmt` and publish it.
+Install health, repair, and uninstall take `PackageRow`, which is a view model. They are rules for this screen, not a library.
 
-- Orphan rules. A package is orphaned when the install location or key file is missing.
-- Repair and uninstall plans. Build the command. Do not launch it.
-- Baseline compare. match / newer / older / unknown / none. The store stays in the host.
-- Inventory walks. ARP, App Paths, SharedDLLs, Installer products, associations.
-- Footprint to package link.
+- Install health (today named `OrphanRules`). Given an uninstall row, is the install location missing, or is the file named in `DisplayIcon`, `UninstallString`, or `ModifyPath` missing? Stays in the host.
+- `RepairPlan`. Builds `msiexec /fa {GUID}` when the row is a Windows Installer product. Stays in the host.
+- `UninstallPlan`. Splits the uninstall string and rewrites the quiet flags. Stays in the host.
+- Inventory walks and the footprint link stay in the host. They produce host rows.
 
-The host projects rows and binds them.
+`BaselineCompare` is the exception. It takes two version strings and returns match, newer, older, unknown, or none. It moves to `Vestigium.Helpers.SystemInfo`. The baseline store stays in the host.
 
 ### R05-03 Startup domain
 
@@ -109,7 +108,7 @@ Move the pending-reboot and pending-file-rename read to `Vestigium.Helpers.Syste
 ## Acceptance
 
 1. `Vestigium.Helpers.FileSystemPaths` is published and the host no longer owns path rules. It resolves, sanitizes, expands the token set, and applies the long-path prefix only when a path would exceed 260.
-2. `Vestigium.Helpers.AppMgmt` is published and the host no longer owns orphan, repair, uninstall, baseline compare, or the inventory walks.
+2. Install health, repair, uninstall, the inventory walks, and the footprint link remain in the host. `BaselineCompare` is read from `Vestigium.Helpers.SystemInfo`.
 3. `Vestigium.Helpers.Startup` is published and the host no longer owns approved, launch, link, or navigation logic.
 4. `Vestigium.Helpers.Bloatware` is published and owns the catalog.
 5. Pending reboot is read from `Vestigium.Helpers.SystemInfo`.
@@ -124,8 +123,9 @@ Move the pending-reboot and pending-file-rename read to `Vestigium.Helpers.Syste
 |---|---|
 | Host is a skeleton | Rules belong in libraries so other hosts can use them. |
 | New FileSystemPaths | FileIo is file jobs. This is path meaning. |
-| New AppMgmt | Package domain is smeared across the host today. |
-| New Startup | Same shape as AppMgmt. Applier stays elevated in the host. |
+| Uninstall rules stay in the host | They take `PackageRow`. A helper named after the host would only serve this host. |
+| Baseline compare to SystemInfo | It takes two strings. It is not a package rule. |
+| New Startup | Applier stays elevated in the host. |
 | New Bloatware | The catalog has no UI. |
 | Pending reboot to SystemInfo | It is machine state. |
 | No behavior change | The test is a matching export. |
@@ -138,11 +138,14 @@ Move the pending-reboot and pending-file-rename read to `Vestigium.Helpers.Syste
 | Put path rules in FileIo | FileIo runs file jobs. |
 | Move elevated appliers | They are host processes with a manifest. |
 | Move Features and DISM | Different domain. Bigger move. Parked. |
+| `Vestigium.Helpers.Installer` | Build it when a second host needs to build an msiexec command from a plain uninstall entry. |
 
 ---
 
 ## Parked
 
 - Features and DISM helper
+- `Vestigium.Helpers.Installer`, with a plain `UninstallEntry` and install-health, repair, and uninstall plans
+- Moving the inventory walks
 - Moving the export column lists
 - Moving settings and MRU
