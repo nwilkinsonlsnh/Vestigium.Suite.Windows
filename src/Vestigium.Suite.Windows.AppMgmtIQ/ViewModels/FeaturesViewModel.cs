@@ -175,6 +175,7 @@ public sealed partial class FeaturesViewModel : ObservableObject
         }
         if (string.IsNullOrWhiteSpace(Query) || _bound is not null)
             Status = $"{Roots.Count} groups, {_all.Count} features ({_source})";
+            ApplyBaseline();
     }
 
     private FeatureNode? Build(FeatureRow row, Dictionary<string, List<FeatureRow>> children)
@@ -430,3 +431,19 @@ public sealed partial class FeaturesViewModel : ObservableObject
 }
 
 public sealed record FeatureChange(string Caption, string Name, string Reason, bool IsAbsent);
+
+    private void ApplyBaseline()
+    {
+        var saved = BaselineApply.Latest()?.Features ?? [];
+        var current = _all.Select(row => new SnapshotRow { Key = row.Name, Value = row.IsEnabled ? "enabled" : "disabled" }).ToList();
+        var drifts = saved.Count == 0 ? [] : SnapshotCompare.Compare(saved, current);
+        var byKey = drifts.ToDictionary(drift => drift.Key, drift => drift.Status, StringComparer.OrdinalIgnoreCase);
+        void Mark(FeatureNode node)
+        {
+            node.BaselineStatus = byKey.TryGetValue(node.Name, out var status) ? status : "none";
+            foreach (var child in node.Children)
+                Mark(child);
+        }
+        foreach (var root in Roots)
+            Mark(root);
+    }
