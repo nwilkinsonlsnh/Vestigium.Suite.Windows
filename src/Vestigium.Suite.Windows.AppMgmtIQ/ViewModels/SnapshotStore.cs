@@ -27,9 +27,18 @@ public sealed class SnapshotStore
     private static readonly JsonSerializerOptions Json =
         new() { WriteIndented = true, PropertyNameCaseInsensitive = true };
 
+    public static string Root => Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+        "Vestigium", "Snapshots", "AppMgmtIQ");
+
+    public SnapshotStore()
+    {
+        DirectoryPath = Root;
+    }
+
     public SnapshotStore(string rootDirectory)
     {
-        DirectoryPath = Path.Combine(rootDirectory, "snapshots");
+        DirectoryPath = string.IsNullOrWhiteSpace(rootDirectory) ? Root : rootDirectory;
     }
 
     public string DirectoryPath { get; }
