@@ -1,7 +1,7 @@
 <Window x:Class="Vestigium.Suite.Windows.AppMgmtIQ.Views.BloatwareProgressWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Add Bloatware"
+        Title="Add Built-In Package"
         Height="420" Width="640"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
