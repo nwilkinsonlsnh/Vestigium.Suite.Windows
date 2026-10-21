@@ -1,5 +1,4 @@
 using Vestigium.Helpers.FileSystemPaths;
-using Vestigium.Helpers.WinReg;
 using Vestigium.Suite.Windows.AppMgmtIQ.ViewModels;
 
 namespace Vestigium.Suite.Windows.AppMgmtIQ;
@@ -8,35 +7,30 @@ public static class OrphanRules
 {
     public static (bool Orphan, string Reason)? Check(PackageRow row, Func<string, bool> exists)
     {
-        var location = PathResolve.Clean(Text(row, "InstallLocation"));
-        if (LooksLikePath(location))
-        {
-            if (!exists(location))
-                return (true, "Install location missing");
-        }
+        var candidates = Candidates(row).ToArray();
+        if (candidates.Length == 0)
+            return null;
 
-        var file = PathResolve.Clean(KeyFile(row));
-        if (LooksLikePath(file))
-        {
-            if (!exists(file))
-                return (true, "Key file missing");
-        }
-
-        if (LooksLikePath(location) || LooksLikePath(file))
+        if (candidates.Any(exists))
             return (false, "");
-        return null;
+
+        var location = PathResolve.Clean(Text(row, "InstallLocation"));
+        var reason = LooksLikePath(location) ? "Install location missing" : "Key file missing";
+        return (true, reason);
     }
 
-    private static string KeyFile(PackageRow row)
+    private static IEnumerable<string> Candidates(PackageRow row)
     {
+        var location = PathResolve.Clean(Text(row, "InstallLocation"));
+        if (LooksLikePath(location))
+            yield return location;
+
         foreach (var name in new[] { "DisplayIcon", "UninstallString", "ModifyPath" })
         {
-            var raw = Text(row, name);
-            var file = FirstPath(raw);
+            var file = PathResolve.Clean(FirstPath(Text(row, name)));
             if (LooksLikePath(file))
-                return file;
+                yield return file;
         }
-        return "";
     }
 
     private static string FirstPath(string raw)
