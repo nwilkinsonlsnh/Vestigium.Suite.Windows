@@ -46,7 +46,7 @@
 | 2 | PR06.002 | Capture action on the Dashboard. Writes all six from the loaded grids. | Done |
 | 3 | PR06.003 | Compare. match, changed, added, removed, none. Packages by version. Features by enabled. Built-In by installed and provisioned. Active Setup by version and installed. Startup by enabled and command. Footprints by exists. | Done |
 | 4 | PR06.004 | Dashboard Baseline chart splits by the compare result for the selected inventory. | Done |
-| 5 | PR06.005 | Baseline column on each inventory grid. | |
+| 5 | PR06.005 | Baseline column on each inventory grid. | Done |
 | 6 | PR06.006 | Select a snapshot and delete a snapshot. | |
 | 7 | PR06.007 | Retire `baselines.json` and the per-package `SetBaseline`. | |
 | 8 | PR06.008 | Owner runs. Capture, change one row, compare, see the drift. | Owner |
@@ -73,4 +73,4 @@ When this plan finishes, move the whole `PR06/` folder to `Completed/PR06/`.
 
 ## Next action
 
-PR06.005. Baseline column.
+PR06.006. Select and delete a snapshot.
