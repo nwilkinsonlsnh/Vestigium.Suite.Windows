@@ -118,7 +118,7 @@ public partial class ActiveSetupView : UserControl
     private async Task RunWorker(ActiveSetupViewModel host, string correlationId, string action, string name, string component, string stub, string version, bool x64, bool installed)
     {
         var owner = Window.GetWindow(this);
-        var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Vestigium", "AppMgmtIQ", "Jobs");
+        var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Vestigium", "Jobs", "AppMgmtIQ");
         Directory.CreateDirectory(dir);
         var jobPath = Path.Combine(dir, correlationId + ".json");
         var resultPath = Path.ChangeExtension(jobPath, ".result.json");
