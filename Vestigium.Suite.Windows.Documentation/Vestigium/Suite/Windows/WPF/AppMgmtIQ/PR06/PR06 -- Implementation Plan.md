@@ -43,7 +43,7 @@
 | Order | ID | Do | State |
 | ---: | :--- | :--- | :--- |
 | 1 | PR06.001 | New snapshot store. One file per capture, six inventories, named with machine and time. | Done |
-| 2 | PR06.002 | Capture action on the Dashboard. Writes all six from the loaded grids. | |
+| 2 | PR06.002 | Capture action on the Dashboard. Writes all six from the loaded grids. | Done |
 | 3 | PR06.003 | Compare. match, changed, added, removed, none. Packages by version. Features by enabled. Built-In by installed and provisioned. Active Setup by version and installed. Startup by enabled and command. Footprints by exists. | |
 | 4 | PR06.004 | Dashboard Baseline chart splits by the compare result for the selected inventory. | |
 | 5 | PR06.005 | Baseline column on each inventory grid. | |
@@ -73,4 +73,4 @@ When this plan finishes, move the whole `PR06/` folder to `Completed/PR06/`.
 
 ## Next action
 
-PR06.002. Capture action on the Dashboard.
+PR06.003. Compare.
