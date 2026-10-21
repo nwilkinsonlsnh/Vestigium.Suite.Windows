@@ -15,15 +15,16 @@
 
 ## Starting point
 
-The host owns path resolution, orphan rules, repair and uninstall plans, baseline compare, the inventory walks, startup classification, the bloatware catalog, and the pending-reboot read. Helpers already cover registry reads (`WinReg`), the package query catalog (`Kql.AppMgmt`), workbook writing (`ClosedXml`), and machine info (`SystemInfo`).
+The host owns path resolution, install health, repair and uninstall plans, baseline compare, the inventory walks, startup classification, the bloatware catalog, and the pending-reboot read. Helpers already cover registry reads (`WinReg`), the package query catalog (`Kql.AppMgmt`), workbook writing (`ClosedXml`), and machine info (`SystemInfo`).
 
 | Piece | Today | Required |
 |---|---|---|
 | Path rules | Host: `PathResolve`, `AppPathResolve` | `Vestigium.Helpers.FileSystemPaths` |
 | Sanitize, tokens, long paths | Missing | Same package |
 | Wow64 / WinSxS | Host: `FootprintsViewModel` | Same package |
-| Orphan, repair, uninstall, baseline compare | Host | `Vestigium.Helpers.AppMgmt` |
-| Inventory walks | Host: `MainViewModel`, `FootprintsViewModel` | Same package |
+| Install health, repair, uninstall | Host, takes `PackageRow` | Stays in the host |
+| Inventory walks | Host: `MainViewModel`, `FootprintsViewModel` | Stays in the host |
+| Baseline compare | Host: `BaselineCompare` | `Vestigium.Helpers.SystemInfo` |
 | Startup rules | Host: `StartupApproved`, `StartupLaunch`, `StartupLink`, `StartupNavigation` | `Vestigium.Helpers.Startup` |
 | Bloatware catalog | Host: `BloatwareCatalog` | `Vestigium.Helpers.Bloatware` |
 | Pending reboot | Host: `PendingReboot` | `Vestigium.Helpers.SystemInfo` |
@@ -51,12 +52,11 @@ The host owns path resolution, orphan rules, repair and uninstall plans, baselin
 | 2b | PR05.002b | Add `PathSanitize`. Rejected characters become one safe character. Never empty. | Done |
 | 2c | PR05.002c | Add the token expander. Categories: date and time (`{datetime}` `{date}` `{time}`), special folders (desktop, favorites, userprofile, appdata, localappdata, temp, programfiles, programfilesx86, programdata, windir, systemdrive, public), identity (`{username}` `{computername}`), counters (`{#}` `{##}` `{A}` `{AAA}` `{A#}` `{AA##}` `{a}` `{aaa}`, any width). Number runs zero-pad and throw when the value does not fit. Letter runs are base-26, rightmost first (`AAA`, `AAB`, `AAZ`, `ABA`), and throw past the last value. The two parts count separately. No rollover. Unknown tokens stay as written. | Done |
 | 2d | PR05.002d | Long paths, conservative. Prefix `\\\\?\\` only when a built path would exceed 260. Leave short paths and already-long paths alone. | |
-| 3 | PR05.003 | Create `Vestigium.Helpers.AppMgmt`. Move orphan rules, repair plan, uninstall plan, and baseline compare. The baseline store stays in the host. | |
-| 4 | PR05.004 | Move the inventory walks (ARP, App Paths, SharedDLLs, products, associations) and the footprint link into AppMgmt. Host projects rows only. | |
-| 5 | PR05.005 | Create `Vestigium.Helpers.Startup`. Move approved, launch, link, and navigation. Applier stays in the host. | |
-| 6 | PR05.006 | Create `Vestigium.Helpers.Bloatware`. Move `BloatwareCatalog`. | |
-| 7 | PR05.007 | Move the pending-reboot read to `Vestigium.Helpers.SystemInfo`. | |
-| 8 | PR05.008 | Owner runs. Export matches the PR04 export for Footprints Exists, package counts, and startup rows. | Owner |
+| 3 | PR05.003 | Move `BaselineCompare` to `Vestigium.Helpers.SystemInfo`. The baseline store stays in the host. Install health, repair, uninstall, and the inventory walks stay in the host. | |
+| 4 | PR05.004 | Create `Vestigium.Helpers.Startup`. Move approved, launch, link, and navigation. Applier stays in the host. | |
+| 5 | PR05.005 | Create `Vestigium.Helpers.Bloatware`. Move `BloatwareCatalog`. | |
+| 6 | PR05.006 | Move the pending-reboot read to `Vestigium.Helpers.SystemInfo`. | |
+| 7 | PR05.007 | Owner runs. Export matches the PR04 export for Footprints Exists, package counts, and startup rows. | Owner |
 
 ---
 
@@ -65,7 +65,6 @@ The host owns path resolution, orphan rules, repair and uninstall plans, baselin
 ```
 # Vestigium.Helpers (new)
 src/Vestigium.Helpers.FileSystemPaths/                       [NEW]
-src/Vestigium.Helpers.AppMgmt/                               [NEW]
 src/Vestigium.Helpers.Startup/                               [NEW]
 src/Vestigium.Helpers.Bloatware/                             [NEW]
 
@@ -75,9 +74,6 @@ src/Vestigium.Helpers.SystemInfo/                            [UPDATE]
 # Vestigium.Suite.Windows
 src/Vestigium.Suite.Windows.AppMgmtIQ/PathResolve.cs                    [DELETE]
 src/Vestigium.Suite.Windows.AppMgmtIQ/AppPathResolve.cs                 [DELETE]
-src/Vestigium.Suite.Windows.AppMgmtIQ/OrphanRules.cs                    [DELETE]
-src/Vestigium.Suite.Windows.AppMgmtIQ/RepairPlan.cs                     [DELETE]
-src/Vestigium.Suite.Windows.AppMgmtIQ/UninstallPlan.cs                  [DELETE]
 src/Vestigium.Suite.Windows.AppMgmtIQ/BaselineCompare.cs                [DELETE]
 src/Vestigium.Suite.Windows.AppMgmtIQ/PendingReboot.cs                  [DELETE]
 src/Vestigium.Suite.Windows.AppMgmtIQ/ViewModels/MainViewModel.cs       [UPDATE]
@@ -93,4 +89,4 @@ When this plan finishes, move the whole `PR05/` folder to `Completed/PR05/`.
 
 ## Next action
 
-PR05.003. AppMgmt rules and plans.
+PR05.003. Move BaselineCompare to SystemInfo.
