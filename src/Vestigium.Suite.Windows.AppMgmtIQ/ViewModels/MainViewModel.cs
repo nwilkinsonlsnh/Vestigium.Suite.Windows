@@ -210,7 +210,7 @@ public sealed partial class MainViewModel : ObservableObject
         var hits = 0;
         foreach (var row in _all)
         {
-            row.PendingReboot = state.Mentions(row);
+            row.PendingReboot = PendingReboot.Mentions(state, row);
             if (row.PendingReboot)
                 hits++;
         }
