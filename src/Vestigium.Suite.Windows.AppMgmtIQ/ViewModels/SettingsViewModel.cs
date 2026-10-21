@@ -59,7 +59,7 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     public IReadOnlyList<DateFormatOption> DateFormats => DisplayFormats.DateFormats;
 
-    public IReadOnlyList<string> MruTabs { get; } = ["Packages", "Features", "Bloatware", "Active Setup", "Startup", "Footprints"];
+    public IReadOnlyList<string> MruTabs { get; } = ["Packages", "Features", "Built-In (Packages)", "Active Setup", "Startup", "Footprints"];
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(AppMgmtPageOpen))]
