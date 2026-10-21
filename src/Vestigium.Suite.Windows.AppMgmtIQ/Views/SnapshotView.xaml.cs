@@ -83,6 +83,46 @@ public partial class SnapshotView : UserControl
         LoadSnapshots();
     }
 
+    private void Export_Click(object sender, RoutedEventArgs e)
+    {
+        if (Snapshots.SelectedItem is not string name)
+            return;
+        var source = Path.Combine(SnapshotStore.Root, name + ".json");
+        if (!File.Exists(source))
+            return;
+        var dialog = new Microsoft.Win32.SaveFileDialog
+        {
+            FileName = name + ".json",
+            Filter = "Snapshot (*.json)|*.json",
+            Title = "Export snapshot"
+        };
+        if (dialog.ShowDialog() != true)
+            return;
+        File.Copy(source, dialog.FileName, true);
+        Story.Text = "Exported " + name;
+    }
+
+    private void Import_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new Microsoft.Win32.OpenFileDialog
+        {
+            Filter = "Snapshot (*.json)|*.json",
+            Title = "Import snapshot"
+        };
+        if (dialog.ShowDialog() != true)
+            return;
+        var snapshot = System.Text.Json.JsonSerializer.Deserialize<Snapshot>(File.ReadAllText(dialog.FileName));
+        if (snapshot is null || string.IsNullOrWhiteSpace(snapshot.Name))
+        {
+            Story.Text = "That file is not a snapshot.";
+            return;
+        }
+        new SnapshotStore().Save(snapshot);
+        BaselineApply.Selected = snapshot.Name;
+        LoadSnapshots();
+        Story.Text = "Imported " + snapshot.Name;
+    }
+
     private void Capture_Click(object sender, RoutedEventArgs e)
     {
         if (_packages is null || _features is null || _bloat is null || _setup is null || _startup is null || _footprints is null)
