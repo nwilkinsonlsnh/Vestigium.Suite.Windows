@@ -237,15 +237,14 @@ public sealed partial class MainViewModel : ObservableObject
 
     private void ApplyBaselines()
     {
+        var saved = BaselineApply.Latest()?.Packages ?? [];
+        var current = _all.Select(row => new SnapshotRow { Key = row.Hive + "|" + row.KeyPath, Value = row.DisplayVersion }).ToList();
+        var drifts = saved.Count == 0
+            ? current.Select(row => new SnapshotDrift(row.Key, "none", "", row.Value)).ToList()
+            : SnapshotCompare.Compare(saved, current);
+        var byKey = drifts.ToDictionary(drift => drift.Key, drift => drift.Status, StringComparer.OrdinalIgnoreCase);
         foreach (var row in _all)
-            ApplyBaseline(row);
-    }
-
-    private void ApplyBaseline(PackageRow row)
-    {
-        var expected = _baselines.Expected(Key(row)) ?? "";
-        row.ExpectedVersion = expected;
-        row.BaselineStatus = VersionCompare.Status(row.DisplayVersion, expected);
+            row.BaselineStatus = byKey.TryGetValue(row.Hive + "|" + row.KeyPath, out var status) ? status : "none";
     }
 
     private static string Key(PackageRow row) => row.Hive + "\\" + row.KeyPath;
