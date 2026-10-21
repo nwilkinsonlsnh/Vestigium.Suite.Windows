@@ -8,7 +8,7 @@
       <StackPanel Orientation="Horizontal">
         <RadioButton x:Name="PackagesTab" Content="AppMgmtIQ" GroupName="Dashboard" IsChecked="True" Style="{StaticResource RadioButton.HorizontalTab}" Checked="Section_Checked" Margin="0,0,8,0" />
         <RadioButton x:Name="FeaturesTab" Content="Windows Features" GroupName="Dashboard" Style="{StaticResource RadioButton.HorizontalTab}" Checked="Section_Checked" Margin="0,0,8,0" />
-        <RadioButton x:Name="BloatTab" Content="Bloatware" GroupName="Dashboard" Style="{StaticResource RadioButton.HorizontalTab}" Checked="Section_Checked" Margin="0,0,8,0" />
+        <RadioButton x:Name="BloatTab" Content="Built-In (Packages)" GroupName="Dashboard" Style="{StaticResource RadioButton.HorizontalTab}" Checked="Section_Checked" Margin="0,0,8,0" />
         <RadioButton x:Name="SetupTab" Content="Active Setup" GroupName="Dashboard" Style="{StaticResource RadioButton.HorizontalTab}" Checked="Section_Checked" Margin="0,0,8,0" />
         <RadioButton x:Name="StartupTab" Content="Startup" GroupName="Dashboard" Style="{StaticResource RadioButton.HorizontalTab}" Checked="Section_Checked" Margin="0,0,8,0" />
         <RadioButton x:Name="FootprintsTab" Content="Footprints" GroupName="Dashboard" Style="{StaticResource RadioButton.HorizontalTab}" Checked="Section_Checked" />
