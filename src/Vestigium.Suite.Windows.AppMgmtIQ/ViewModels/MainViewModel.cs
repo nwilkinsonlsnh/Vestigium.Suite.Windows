@@ -224,14 +224,14 @@ public sealed partial class MainViewModel : ObservableObject
     public void SetBaseline(PackageRow package)
     {
         _baselines.Set(Key(package), package.DisplayVersion);
-        ApplyBaseline(package);
+        ApplyBaselines();
         Status = $"Baseline set for {package.DisplayName}.";
     }
 
     public void ClearBaseline(PackageRow package)
     {
         _baselines.Clear(Key(package));
-        ApplyBaseline(package);
+        ApplyBaselines();
         Status = $"Baseline cleared for {package.DisplayName}.";
     }
 
