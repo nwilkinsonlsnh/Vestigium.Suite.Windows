@@ -384,6 +384,7 @@ public sealed partial class StartupViewModel : ObservableObject
         Selected = keep is null ? null : Rows.FirstOrDefault(row => row.Name == keep.Name && row.Command == keep.Command && row.Source == keep.Source);
         if (string.IsNullOrWhiteSpace(Query) || _bound is not null)
             Status = $"{Rows.Count} entries";
+            ApplyBaseline();
     }
 
     private bool Matches(StartupRow row)
@@ -555,3 +556,13 @@ public sealed partial class StartupViewModel : ObservableObject
         });
     }
 }
+
+    private void ApplyBaseline()
+    {
+        var saved = BaselineApply.Latest()?.Startup ?? [];
+        var current = _all.Select(row => new SnapshotRow { Key = row.Scope + "|" + row.Key, Value = (row.Enabled ? "enabled" : "disabled") + "|" + row.Command }).ToList();
+        var drifts = saved.Count == 0 ? [] : SnapshotCompare.Compare(saved, current);
+        var byKey = drifts.ToDictionary(drift => drift.Key, drift => drift.Status, StringComparer.OrdinalIgnoreCase);
+        foreach (var row in _all)
+            row.BaselineStatus = byKey.TryGetValue(row.Scope + "|" + row.Key, out var status) ? status : "none";
+    }
