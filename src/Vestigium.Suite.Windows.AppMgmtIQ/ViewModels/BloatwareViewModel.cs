@@ -166,7 +166,6 @@ public sealed partial class BloatwareViewModel : ObservableObject
         var at = fullName.IndexOf('_');
         return at > 0 ? fullName[..at] : fullName;
     }
-}
 
     private void ApplyBaseline()
     {
@@ -177,3 +176,4 @@ public sealed partial class BloatwareViewModel : ObservableObject
         foreach (var row in _all)
             row.BaselineStatus = byKey.TryGetValue(row.Family, out var status) ? status : "none";
     }
+}
