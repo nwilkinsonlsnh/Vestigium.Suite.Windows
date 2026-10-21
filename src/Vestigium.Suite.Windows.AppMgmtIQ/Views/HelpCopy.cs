@@ -15,6 +15,7 @@ internal static class HelpCopy
             Dashboard(),
             Snapshot(),
             Exports(),
+            Kql(),
             Settings(),
             new("License", license.Count == 0 ? ["The license file was empty."] : license),
             Glossary(),
@@ -279,6 +280,104 @@ internal static class HelpCopy
             "Include package registry values adds a Package Details sheet. It is the same set of values the details window shows for each package, and it is only available when AppMgmtIQ is included.",
             Head("What is remembered"),
             "The choices on this page are saved with the application settings, under C:\\ProgramData\\Vestigium\\Settings\\AppMgmtIQ. Which inventories are included, Current view or Everything loaded, and whether package details are included all survive a restart."
+        ]);
+
+
+    private static Draft Kql()
+        => new("KQL",
+        [
+            "The query bar on each inventory speaks KQL. A bare word searches every text column. A named field searches that field. The catalogs below are the fields each tab accepts.",
+            "Comparison is ==, !=, >, <, >=, <=. Text can use has, startswith, and endswith. Combine with and, or, and not. A field name is case insensitive, and most fields have a short alias."
+        ],
+        [
+            new("AppMgmtIQ",
+            [
+                "Prefix app. A bare word searches display name, publisher, and version.",
+                Term("app.displayname", "Display name. Alias displayname."),
+                Term("app.publisher", "Publisher. Alias publisher."),
+                Term("app.version", "Display version. Alias version."),
+                Term("app.MajorVersion", "The first number of the version."),
+                Term("app.MinorVersion", "The second number of the version."),
+                Term("app.InstallDate", "Install date."),
+                Term("app.size.kb", "Estimated size in kilobytes."),
+                Term("app.size.mb", "Estimated size in megabytes."),
+                Term("app.size.gb", "Estimated size in gigabytes."),
+                Term("app.IsX64", "True for a 64-bit package. Alias IsX64."),
+                Term("app.IsX86", "True for a 32-bit package. Alias IsX86."),
+                Term("app.IsGlobal", "True for a machine-wide package. Alias IsGlobal."),
+                Term("app.IsSystemComponent", "True when flagged as a system component."),
+                Term("app.WindowsInstaller", "True for a Windows Installer package."),
+                Term("app.NoModify", "The installer forbids modify."),
+                Term("app.NoRemove", "The installer forbids remove."),
+                Term("app.NoRepair", "The installer forbids repair."),
+                Term("app.HasIcon", "A display icon is present."),
+                Term("app.HasModify", "A modify command is present."),
+                Term("app.HasRepair", "A repair command is present."),
+                Term("app.IsOrphan", "True when every candidate path is missing."),
+                Term("app.BaselineStatus", "match, changed, added, removed, or none. The column is hidden. The field is still queryable."),
+                Term("app.PendingReboot", "True when a pending reboot names this package."),
+                "Example: app.IsOrphan == true and app.publisher has \"Adobe\""
+            ]),
+            new("Windows Features",
+            [
+                "Prefix feature.",
+                Term("feature.caption", "The display name. Alias caption."),
+                Term("feature.name", "The feature name, such as NetFx3. Alias name."),
+                Term("feature.state", "Enabled as a boolean. Alias state."),
+                Term("feature.IsEnabled", "True when the feature is on. Alias IsEnabled."),
+                Term("feature.parent", "The parent feature name. Alias parent."),
+                "Example: feature.IsEnabled == false and feature.parent == \"NetFx3\""
+            ]),
+            new("Built-In (Packages)",
+            [
+                "Prefix bloat.",
+                Term("bloat.name", "Display name. Alias name."),
+                Term("bloat.family", "Package family. Alias family."),
+                Term("bloat.category", "System, Store, Games, Media, Productivity. Alias category."),
+                Term("bloat.installed", "True when a package for the family is installed. Alias installed."),
+                Term("bloat.provisioned", "True when the family is provisioned for new users. Alias provisioned."),
+                Term("bloat.package", "The full package name when one is present. Alias package."),
+                "Example: bloat.category == \"Games\" and bloat.installed == false"
+            ]),
+            new("Active Setup",
+            [
+                "Prefix setup.",
+                Term("setup.displayname", "Display name. Aliases displayname, name."),
+                Term("setup.component", "The component key. Aliases component, id."),
+                Term("setup.stubpath", "The command that runs at logon. Alias stubpath."),
+                Term("setup.version", "The component version. Alias version."),
+                Term("setup.locale", "Locale. Alias locale."),
+                Term("setup.componentId", "Component id. Alias componentId."),
+                Term("setup.installed", "True when marked installed. Alias installed."),
+                Term("setup.isGlobal", "True for a machine component. Alias isGlobal."),
+                Term("setup.isX64", "True for a 64-bit component. Alias isX64."),
+                Term("setup.pending", "True when the machine copy is ahead of this user. Alias pending."),
+                "Example: setup.pending == true and setup.stubpath != \"\""
+            ]),
+            new("Startup",
+            [
+                "Prefix startup.",
+                Term("startup.name", "Entry name. Alias name."),
+                Term("startup.command", "The command or target. Alias command."),
+                Term("startup.source", "Run, RunOnce, RunOnceEx, or a Startup folder. Alias source."),
+                Term("startup.scope", "HKLM, HKCU, Common, or User. Alias scope."),
+                Term("startup.isX64", "True for a 64-bit entry. Alias isX64."),
+                Term("startup.isX86", "True for a 32-bit entry. Alias isX86."),
+                Term("startup.package", "The linked package, when one matched. Alias package."),
+                Term("startup.enabled", "True when the entry will run. Alias enabled."),
+                "Example: startup.enabled == true and startup.scope == \"HKLM\""
+            ]),
+            new("Footprints",
+            [
+                "Prefix footprint.",
+                Term("footprint.kind", "AppPath, SharedDll, Product, or Association. Alias kind."),
+                Term("footprint.name", "The key or file name. Alias name."),
+                Term("footprint.path", "The path or product code. Alias path."),
+                Term("footprint.scope", "HKLM, HKCU, Machine, User, or Wow. Alias scope."),
+                Term("footprint.refcount", "The SharedDLL reference count. Alias refcount."),
+                Term("footprint.package", "The linked package, when one matched. Alias package."),
+                "Example: footprint.kind == \"SharedDll\" and footprint.refcount > 1"
+            ])
         ]);
 
     private static Draft Settings()
