@@ -2,6 +2,7 @@ namespace Vestigium.Suite.Windows.AppMgmtIQ.ViewModels;
 
 public sealed class ActiveSetupRow
 {
+    public string BaselineStatus { get; set; } = "";
     public required string DisplayName { get; init; }
     public required string Component { get; init; }
     public string StubPath { get; init; } = "";
