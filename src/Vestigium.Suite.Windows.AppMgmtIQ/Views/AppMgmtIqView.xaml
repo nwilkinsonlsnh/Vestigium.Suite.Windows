@@ -129,12 +129,6 @@
             <MenuItem.Icon><TextBlock Text="&#xE72C;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
           </MenuItem>
           <Separator Style="{StaticResource Separator.MenuHost}" />
-          <MenuItem x:Name="SetBaselineItem" Header="Set baseline" Style="{StaticResource MenuItem.Standard}" Click="SetBaseline_Click" ToolTip="Remember this version as the expected version.">
-            <MenuItem.Icon><TextBlock Text="&#xE73E;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
-          </MenuItem>
-          <MenuItem x:Name="ClearBaselineItem" Header="Clear baseline" Style="{StaticResource MenuItem.Standard}" Click="ClearBaseline_Click">
-            <MenuItem.Icon><TextBlock Text="&#xE74D;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
-          </MenuItem>
           <Separator Style="{StaticResource Separator.MenuHost}" />
           <MenuItem Header="Filter" Style="{StaticResource MenuItem.Standard}">
             <MenuItem.Icon><TextBlock Text="&#xE71C;" Style="{StaticResource MenuIcon}" /></MenuItem.Icon>
