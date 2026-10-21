@@ -13,6 +13,7 @@ internal static class HelpCopy
             Startup(),
             Footprints(),
             Dashboard(),
+            Snapshot(),
             Exports(),
             Settings(),
             new("License", license.Count == 0 ? ["The license file was empty."] : license),
@@ -51,7 +52,7 @@ internal static class HelpCopy
             "A StubPath is an arbitrary command. Replacing one, or adding a new component, is a way to run code for every user at logon. That is why the tab exists. Add, Delete, and Clear command are on the menu. A user-key change is written directly. A machine-key change is handed to an elevated worker. Delete removes the key. Clear command removes StubPath and leaves the version, so the component stays but will not run.",
             Head("Dashboard and Exports"),
             "The dashboard is a reading of the inventories, not another one. Each section is one inventory, with the counts that describe it and the charts that break it down.",
-            "AppMgmtIQ shows who published the software, how many entries are orphaned, which packages can be repaired or modified, and how the installed version compares with a baseline. Windows Features shows how many are on and which parents own them. Bloatware shows how much of the catalog is actually present. Active Setup shows how much is armed to run, and whether it is a machine or a user component. Startup shows how many entries are on, how many are off, and how many are linked to a package. Footprints shows App Paths, shared DLLs, installer products, and how many of the file paths still exist. A section with two charts shows them together. A section with more than two gets a vertical list, and the area shows the one you pick.",
+            "AppMgmtIQ shows who published the software, how many entries are orphaned, and which packages can be repaired or modified. Windows Features shows how many are on and which parents own them. Bloatware shows how much of the catalog is actually present. Active Setup shows how much is armed to run, and whether it is a machine or a user component. Startup shows how many entries are on, how many are off, and how many are linked to a package. Footprints shows App Paths, shared DLLs, installer products, and how many of the file paths still exist. A section with two charts shows them together. A section with more than two gets a vertical list, and the area shows the one you pick.",
             "Export writes a workbook from those same inventories. The first sheet is a summary and is the sheet Excel opens on. Further sheets are added for the inventories you include: the package grid, the package details, and the feature tree. Current filters exports what the grid is showing. All exports the inventory regardless of the query."
         ]);
 
@@ -190,7 +191,7 @@ internal static class HelpCopy
     private static Draft Dashboard()
         => new("Dashboard",
         [
-            "The Dashboard serves as a unified visual reading of the application's inventories. Rather than running new scans, it synthesizes the data already loaded into the suite's memory. Clicking Refresh instantly rebuilds all summary figures and charts to reflect the current state of the machine.",
+            "The Dashboard is a visual reading of the inventories already loaded. It does not run a new scan, and it has no refresh of its own. Opening it, or switching its section, redraws the cards and charts from what the other tabs hold.",
             "The interface adapts its layout based on the data. When a section features exactly two charts, they are displayed side by side. For sections containing more than two, a vertical selection menu on the left allows the reader to toggle between views. Ranked charts overlay a cumulative line, making the concentration of the inventory visible at a glance.",
             Head("AppMgmtIQ"),
             "This section visualizes the primary software inventory, detailing what is installed, who published it, and its footprint on the disk.",
@@ -230,7 +231,36 @@ internal static class HelpCopy
             Term("Type", "App Paths, Shared DLLs, Products, and Associations."),
             Term("Exists", "Paths that still exist, paths that do not, and rows with no status yet. No status is a product code, a ProgID, or a file check that has not finished."),
             Term("Ref count", "SharedDLL reference counts in buckets of 1, 2, 3 to 5, and 6 or more."),
-            Term("Linked", "Rows that matched a package against those that did not.")
+            Term("Linked", "Rows that matched a package against those that did not."),
+            Head("Snapshots"),
+            "This section reads the selected snapshot. It does not capture one.",
+            Term("Counts", "How many snapshots are on disk, which one is selected, how many of the six inventories it holds, and how many rows it contains."),
+            Term("Coverage", "Rows per inventory in the selected snapshot."),
+            Term("Drift", "Match, changed, added, and removed across all six inventories, compared with what is loaded now.")
+        ]);
+
+    private static Draft Snapshot()
+        => new("Snapshot",
+        [
+            "A snapshot is a saved reading of the inventories. Capture writes what is loaded. A later read is compared against it. The result on each row is match, changed, added, removed, or none.",
+            "Files are written to C:\\ProgramData\\Vestigium\\Snapshots\\AppMgmtIQ. One file is one capture, named with the machine and the time.",
+            Head("What is captured"),
+            "The toggles choose which inventories a capture includes. All six start on.",
+            Term("AppMgmtIQ", "Hive and key, compared by version."),
+            Term("Windows Features", "Feature name, compared by enabled or disabled."),
+            Term("Built-In (Packages)", "Package family, compared by installed and provisioned."),
+            Term("Active Setup", "Component id, compared by version and installed."),
+            Term("Startup", "Scope and key, compared by enabled and command."),
+            Term("Footprints", "Kind, scope, and path, compared by whether the file exists."),
+            Head("Actions"),
+            Term("Capture", "Writes a new snapshot from the inventories that are toggled on."),
+            Term("Import", "Reads a snapshot file from another machine and selects it."),
+            Term("Export", "Writes the selected snapshot to a file you choose, so it can be compared elsewhere."),
+            Term("Delete", "Removes the selected snapshot."),
+            Term("Refresh", "Reloads the list. It sits beside the dropdown."),
+            "The dropdown picks which snapshot the grids and the Dashboard compare against. The choice is remembered.",
+            Head("Jobs"),
+            "A change that needs elevation is written as a job under C:\\ProgramData\\Vestigium\\Jobs\\AppMgmtIQ and handed to a worker. The suite does not stay elevated."
         ]);
 
     private static Draft Exports()
@@ -241,7 +271,7 @@ internal static class HelpCopy
             "The four inventories are independent, and each is a checkbox. Include any combination. At least one is required. On a new installation all four are checked.",
             Term("AppMgmtIQ", "The package grid. One row per uninstall registry key, with display name, publisher, version, install date, size, architecture, scope, and the operational flags."),
             Term("Windows Features", "The component store. Display name, feature name, state, parent, and description."),
-            Term("Bloatware", "The catalog. Name, family, category, whether it is installed, whether it is provisioned, and the package name."),
+            Term("Built-In (Packages)", "The catalog. Name, family, category, whether it is installed, whether it is provisioned, and the package name."),
             Term("Active Setup", "The logon components. Display name, component, StubPath, version, scope, architecture, pending, and installed."),
             Head("Rows"),
             "Current view respects the query bar and the filter menus on each page, so the workbook matches what is on screen. Everything loaded ignores those filters and writes the full inventory for each included section.",
