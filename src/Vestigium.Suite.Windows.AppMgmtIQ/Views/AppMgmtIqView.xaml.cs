@@ -81,8 +81,6 @@ public partial class AppMgmtIqView : UserControl
         UninstallBasic.Visibility = force ? Visibility.Visible : Visibility.Collapsed;
         ModifyItem.IsEnabled = package?.HasModify == true;
         RepairItem.IsEnabled = package?.HasRepair == true;
-        SetBaselineItem.IsEnabled = package is not null;
-        ClearBaselineItem.IsEnabled = package is not null && package.BaselineStatus != "none";
     }
 
     private void UninstallRegistered_Click(object sender, RoutedEventArgs e) => RunUninstall(UninstallMode.Registered);
@@ -110,18 +108,6 @@ public partial class AppMgmtIqView : UserControl
         if (DataContext is not MainViewModel host || host.SelectedPackage is not { } package)
             return;
         await host.RepairAsync(package, Window.GetWindow(this));
-    }
-
-    private void SetBaseline_Click(object sender, RoutedEventArgs e)
-    {
-        if (DataContext is MainViewModel { SelectedPackage: { } package } host)
-            host.SetBaseline(package);
-    }
-
-    private void ClearBaseline_Click(object sender, RoutedEventArgs e)
-    {
-        if (DataContext is MainViewModel { SelectedPackage: { } package } host)
-            host.ClearBaseline(package);
     }
 
     private void Grid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
