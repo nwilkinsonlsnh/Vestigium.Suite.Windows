@@ -115,6 +115,7 @@ public sealed partial class FootprintsViewModel : ObservableObject
             return;
         var missing = found.Count(item => !item.Exists);
         Status = $"{Rows.Count} entries. {missing} missing.";
+        ApplyBaseline();
     }
 
     private List<(FootprintRow Row, bool Exists)> Probe(IReadOnlyList<FootprintRow> candidates, int generation)
@@ -362,3 +363,13 @@ public sealed partial class FootprintsViewModel : ObservableObject
         return int.TryParse(value.DataText, out var parsed) ? parsed : null;
     }
 }
+
+    private void ApplyBaseline()
+    {
+        var saved = BaselineApply.Latest()?.Footprints ?? [];
+        var current = _all.Select(row => new SnapshotRow { Key = row.Kind + "|" + row.Scope + "|" + row.Path, Value = row.Exists switch { true => "yes", false => "no", _ => "" } }).ToList();
+        var drifts = saved.Count == 0 ? [] : SnapshotCompare.Compare(saved, current);
+        var byKey = drifts.ToDictionary(drift => drift.Key, drift => drift.Status, StringComparer.OrdinalIgnoreCase);
+        foreach (var row in _all)
+            row.BaselineStatus = byKey.TryGetValue(row.Kind + "|" + row.Scope + "|" + row.Path, out var status) ? status : "none";
+    }
