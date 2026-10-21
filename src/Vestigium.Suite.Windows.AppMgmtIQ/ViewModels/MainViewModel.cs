@@ -30,7 +30,6 @@ public sealed partial class MainViewModel : ObservableObject
     ];
 
     private readonly List<PackageRow> _all = [];
-    private readonly BaselineStore _baselines = new(AppMgmtSettingsStore.DefaultRoot);
     private readonly KqlSession _session = AppMgmtKql.Packages();
     private KqlBoundQuery? _bound;
     private int _orphan;
@@ -120,7 +119,6 @@ public sealed partial class MainViewModel : ObservableObject
             var rows = await Task.Run(ReadAll);
             _all.Clear();
             _all.AddRange(rows);
-            _baselines.Load();
             ApplyBaselines();
             ApplyPending();
             ApplyFilter();
@@ -219,20 +217,6 @@ public sealed partial class MainViewModel : ObservableObject
             Status = hits == 0
                 ? "A reboot is pending."
                 : $"A reboot is pending. {hits} packages are named in a file rename.";
-    }
-
-    public void SetBaseline(PackageRow package)
-    {
-        _baselines.Set(Key(package), package.DisplayVersion);
-        ApplyBaselines();
-        Status = $"Baseline set for {package.DisplayName}.";
-    }
-
-    public void ClearBaseline(PackageRow package)
-    {
-        _baselines.Clear(Key(package));
-        ApplyBaselines();
-        Status = $"Baseline cleared for {package.DisplayName}.";
     }
 
     private void ApplyBaselines()
