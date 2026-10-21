@@ -7,7 +7,7 @@ public partial class BloatwareProgressWindow : Window
     public BloatwareProgressWindow(string action, string name)
     {
         InitializeComponent();
-        Title = action + " Bloatware";
+        Title = action + " Built-In Package";
         Heading.Text = Title;
         NameText.Text = name;
         StatusText.Text = action == "Remove" ? "Removing the package…" : "Looking for a local package, then fetching it if needed…";
