@@ -157,6 +157,12 @@ public partial class App : Application
                     Subject = "Workbook",
                     Description = "Write packages and features to Excel."
                 },
+                new VestigiumNavItemSpec("Snapshot")
+                {
+                    Title = "Snapshot",
+                    Subject = "Baseline",
+                    Description = "Choose which inventories a capture includes."
+                },
                 new VestigiumNavItemSpec("Settings")
                 {
                     Title = "Settings",
@@ -218,6 +224,9 @@ public partial class App : Application
             foot.Content = new FootprintsView { DataContext = footprints };
 
         var export = window.HostShell["Export"];
+        var snapshot = window.HostShell["Snapshot"];
+        if (snapshot is not null)
+            snapshot.Content = new SnapshotView();
         if (export is not null)
             export.Content = new ExportView { DataContext = new ExportViewModel(inventory, featuresVm, bloatware, setup, startup, footprints, store) };
 
