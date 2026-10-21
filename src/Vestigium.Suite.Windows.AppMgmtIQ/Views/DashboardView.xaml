@@ -4,7 +4,6 @@
              Background="{DynamicResource Vestigium.Brushes.Surface.Window}">
   <DockPanel Margin="16">
     <DockPanel DockPanel.Dock="Top" Margin="0,0,0,12">
-      <Button DockPanel.Dock="Right" Style="{StaticResource Button.Primary}" Content="Refresh" Click="Refresh_Click" Padding="14,4" />
       <StackPanel Orientation="Horizontal">
         <RadioButton x:Name="PackagesTab" Content="AppMgmtIQ" GroupName="Dashboard" IsChecked="True" Style="{StaticResource RadioButton.HorizontalTab}" Checked="Section_Checked" Margin="0,0,8,0" />
         <RadioButton x:Name="FeaturesTab" Content="Windows Features" GroupName="Dashboard" Style="{StaticResource RadioButton.HorizontalTab}" Checked="Section_Checked" Margin="0,0,8,0" />
