@@ -77,7 +77,7 @@ public partial class DashboardView : UserControl
 
     private void ShowPackages()
     {
-        var rows = _packages!.AllPackages;
+        var rows = _packages!.All;
         var orphans = rows.Count(row => row.IsOrphan == true);
         var repair = rows.Count(row => row.HasRepair);
         var modify = rows.Count(row => row.HasModify);
@@ -90,12 +90,7 @@ public partial class DashboardView : UserControl
         ShowCharts(
         [
             ("Orphans", Chart([Slice("Orphan", orphans), Slice("Clean", rows.Count - orphans)], "Orphans")),
-            ("Baseline", Chart([
-                Slice("Match", rows.Count(row => row.BaselineStatus == "match")),
-                Slice("Newer", rows.Count(row => row.BaselineStatus == "newer")),
-                Slice("Older", rows.Count(row => row.BaselineStatus == "older")),
-                Slice("None", rows.Count(row => row.BaselineStatus == "none"))
-            ], "Baseline")),
+            ("Baseline", BaselineChart(_packages.All.Select(row => new SnapshotRow { Key = row.Hive + "|" + row.KeyPath, Value = row.DisplayVersion }), snap => snap.Packages)),
             ("Actions", Chart([Slice("Repair", repair), Slice("Modify", modify), Slice("Neither", rows.Count(row => !row.HasRepair && !row.HasModify))], "Actions")),
             ("Publishers", Chart(TopSlices(rows.Select(row => Blank(row.Publisher)), 8), "Publishers", true))
         ]);
@@ -103,7 +98,7 @@ public partial class DashboardView : UserControl
 
     private void ShowFeatures()
     {
-        var rows = _features!.AllFeatures;
+        var rows = _features!.All;
         var enabled = rows.Count(row => row.IsEnabled);
         Story.Text = "Which Windows features are on, and which parents own them.";
         SetCards(
@@ -113,6 +108,7 @@ public partial class DashboardView : UserControl
             ("Absent", rows.Count(row => row.State == "Absent").ToString()));
         ShowCharts(
         [
+            ("Baseline", BaselineChart(_features.All.Select(row => new SnapshotRow { Key = row.Name, Value = row.IsEnabled ? "enabled" : "disabled" }), snap => snap.Features)),
             ("State", Chart([Slice("Enabled", enabled), Slice("Disabled", rows.Count(row => row.State == "Disabled")), Slice("Absent", rows.Count(row => row.State == "Absent"))], "Feature state")),
             ("Parents", Chart(TopSlices(rows.Select(row => Blank(_features.ParentOf(row.Name), "(root)")), 8), "Feature parents", true))
         ]);
@@ -131,6 +127,7 @@ public partial class DashboardView : UserControl
         ShowCharts(
         [
             ("Category", Chart(TopSlices(rows.Select(row => row.Category), 8), "By category", true)),
+            ("Baseline", BaselineChart(_bloat.All.Select(row => new SnapshotRow { Key = row.Family, Value = (row.Installed ? "installed" : "absent") + "|" + (row.Provisioned ? "provisioned" : "not") }), snap => snap.BuiltIn)),
             ("Presence", Chart([Slice("Installed", installed), Slice("Not installed", rows.Count - installed)], "Presence")),
             ("Provisioned", Chart([Slice("Provisioned", rows.Count(row => row.Provisioned)), Slice("Not provisioned", rows.Count(row => !row.Provisioned))], "Provisioned"))
         ]);
@@ -147,6 +144,7 @@ public partial class DashboardView : UserControl
             ("Machine", rows.Count(row => row.IsGlobal).ToString()));
         ShowCharts(
         [
+            ("Baseline", BaselineChart(_setup.All.Select(row => new SnapshotRow { Key = row.ComponentId, Value = row.Version + "|" + (row.Installed ? "installed" : "absent") }), snap => snap.ActiveSetup)),
             ("Pending", Chart([Slice("Pending", rows.Count(row => row.Pending)), Slice("Current", rows.Count(row => !row.Pending))], "Pending")),
             ("Scope", Chart([Slice("Machine", rows.Count(row => row.IsGlobal)), Slice("User", rows.Count(row => !row.IsGlobal))], "Scope")),
             ("Architecture", Chart([Slice("x64", rows.Count(row => row.IsX64)), Slice("x86", rows.Count(row => !row.IsX64))], "Architecture")),
@@ -167,6 +165,7 @@ public partial class DashboardView : UserControl
             ("Linked", Percent(linked, rows.Count)));
         ShowCharts(
         [
+            ("Baseline", BaselineChart(_startup.All.Select(row => new SnapshotRow { Key = row.Scope + "|" + row.Key, Value = (row.Enabled ? "enabled" : "disabled") + "|" + row.Command }), snap => snap.Startup)),
             ("State", Chart([Slice("Enabled", enabled), Slice("Disabled", rows.Count - enabled)], "State")),
             ("Source", Chart(TopSlices(rows.Select(row => Blank(row.Source)), 6), "Source", true)),
             ("Scope", Chart([Slice("HKLM", rows.Count(row => row.Scope == "HKLM")), Slice("HKCU", rows.Count(row => row.Scope == "HKCU")), Slice("Common", rows.Count(row => row.Scope == "Common")), Slice("User", rows.Count(row => row.Scope == "User"))], "Scope")),
@@ -191,12 +190,30 @@ public partial class DashboardView : UserControl
         var pending = rows.Count - exists - missing;
         ShowCharts(
         [
+            ("Baseline", BaselineChart(_footprints.All.Select(row => new SnapshotRow { Key = row.Kind + "|" + row.Scope + "|" + row.Path, Value = row.Exists switch { true => "yes", false => "no", _ => "" } }), snap => snap.Footprints)),
             ("Exists", Chart([Slice("Exists", exists), Slice("Missing", missing), Slice("No status", pending)], "File status")),
             ("Type", Chart([Slice("App Paths", rows.Count(row => row.Kind == "AppPath")), Slice("Shared DLLs", shared.Count), Slice("Products", products), Slice("Associations", rows.Count(row => row.Kind == "Association"))], "By type")),
             ("Ref count", Chart([Slice("1", shared.Count(row => row.RefCount == 1)), Slice("2", shared.Count(row => row.RefCount == 2)), Slice("3-5", shared.Count(row => row.RefCount is >= 3 and <= 5)), Slice("6+", shared.Count(row => (row.RefCount ?? 0) >= 6))], "SharedDLL ref count")),
             ("Products", Chart([Slice("Products", products), Slice("Other", rows.Count - products)], "Product presence")),
             ("Linked", Chart([Slice("Linked", rows.Count(row => !string.IsNullOrWhiteSpace(row.Package))), Slice("Unlinked", rows.Count(row => string.IsNullOrWhiteSpace(row.Package)))], "Linked"))
         ]);
+    }
+
+
+    private UIElement BaselineChart(IEnumerable<SnapshotRow> current, Func<Snapshot, List<SnapshotRow>> pick)
+    {
+        var store = new SnapshotStore(AppMgmtSettingsStore.DefaultRoot);
+        var name = store.List().FirstOrDefault();
+        var saved = name is null ? null : store.Load(name);
+        if (saved is null)
+            return Chart([Slice("None", current.Count())], "Baseline");
+        var drifts = SnapshotCompare.Compare(pick(saved), current.ToList());
+        return Chart([
+            Slice("Match", drifts.Count(drift => drift.Status == "match")),
+            Slice("Changed", drifts.Count(drift => drift.Status == "changed")),
+            Slice("Added", drifts.Count(drift => drift.Status == "added")),
+            Slice("Removed", drifts.Count(drift => drift.Status == "removed"))
+        ], "Baseline");
     }
 
     private void ShowCharts(IReadOnlyList<(string Title, UIElement Chart)> charts)
