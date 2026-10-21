@@ -53,6 +53,14 @@ Create `Vestigium.Helpers.FileSystemPaths` and publish it. It is a path meaning 
 
 **Long paths.** A conservative plan. When a built path would exceed the classic 260 limit, prefix it with `\\\\?\\` so the call succeeds. Do not prefix a path that is already long-form. Do not change a path that fits.
 
+**Valid path.** `PathCheck.IsValid` answers whether a template is a legal path, not whether the file exists.
+
+- Any text between `{` and `}` is a token and must be known. An unknown token makes the template invalid.
+- `{{` is a literal `{`. `}}` is a literal `}`. The doubled brace is not a token.
+- A counter that would overflow is invalid.
+- After expansion the path must contain no character Windows rejects in a path or a file name.
+- An unbalanced brace is invalid.
+
 The host calls these. It does not own the rules.
 
 ### R05-02 AppMgmt domain
