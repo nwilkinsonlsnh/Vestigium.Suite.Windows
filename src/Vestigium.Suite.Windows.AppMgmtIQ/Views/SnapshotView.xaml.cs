@@ -7,14 +7,30 @@ namespace Vestigium.Suite.Windows.AppMgmtIQ.Views;
 public partial class SnapshotView : UserControl
 {
     private bool _loading;
+    private MainViewModel? _packages;
+    private FeaturesViewModel? _features;
+    private BloatwareViewModel? _bloat;
+    private ActiveSetupViewModel? _setup;
+    private StartupViewModel? _startup;
+    private FootprintsViewModel? _footprints;
 
     public SnapshotView()
     {
         InitializeComponent();
-        Loaded += (_, _) => Load();
+        Loaded += (_, _) => { LoadChoice(); LoadSnapshots(); };
     }
 
-    private void Load()
+    public void Bind(MainViewModel packages, FeaturesViewModel features, BloatwareViewModel bloat, ActiveSetupViewModel setup, StartupViewModel startup, FootprintsViewModel footprints)
+    {
+        _packages = packages;
+        _features = features;
+        _bloat = bloat;
+        _setup = setup;
+        _startup = startup;
+        _footprints = footprints;
+    }
+
+    private void LoadChoice()
     {
         _loading = true;
         var choice = SnapshotChoice.Load();
@@ -40,5 +56,54 @@ public partial class SnapshotView : UserControl
             Startup = Startup.IsChecked == true,
             Footprints = Footprints.IsChecked == true
         });
+    }
+
+    private void Refresh_Click(object sender, RoutedEventArgs e) => LoadSnapshots();
+
+    private void LoadSnapshots()
+    {
+        var names = new SnapshotStore().List();
+        Snapshots.SelectionChanged -= Snapshot_Changed;
+        Snapshots.ItemsSource = names;
+        var chosen = BaselineApply.Selected;
+        Snapshots.SelectedItem = chosen is not null && names.Contains(chosen) ? chosen : names.FirstOrDefault();
+        Snapshots.SelectionChanged += Snapshot_Changed;
+        Story.Text = names.Count + " snapshots.";
+    }
+
+    private void Snapshot_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        if (Snapshots.SelectedItem is string name)
+            BaselineApply.Selected = name;
+    }
+
+    private void Delete_Click(object sender, RoutedEventArgs e)
+    {
+        BaselineApply.DeleteSelected();
+        LoadSnapshots();
+    }
+
+    private void Capture_Click(object sender, RoutedEventArgs e)
+    {
+        if (_packages is null || _features is null || _bloat is null || _setup is null || _startup is null || _footprints is null)
+            return;
+        var choice = SnapshotChoice.Load();
+        var taken = DateTime.Now;
+        var snapshot = new Snapshot
+        {
+            Name = SnapshotStore.NameFor(taken),
+            Machine = Environment.MachineName,
+            Taken = taken,
+            Packages = choice.Packages ? _packages.All.Select(row => new SnapshotRow { Key = row.Hive + "|" + row.KeyPath, Value = row.DisplayVersion }).ToList() : [],
+            Features = choice.Features ? _features.All.Select(row => new SnapshotRow { Key = row.Name, Value = row.IsEnabled ? "enabled" : "disabled" }).ToList() : [],
+            BuiltIn = choice.BuiltIn ? _bloat.All.Select(row => new SnapshotRow { Key = row.Family, Value = (row.Installed ? "installed" : "absent") + "|" + (row.Provisioned ? "provisioned" : "not") }).ToList() : [],
+            ActiveSetup = choice.ActiveSetup ? _setup.All.Select(row => new SnapshotRow { Key = row.ComponentId, Value = row.Version + "|" + (row.Installed ? "installed" : "absent") }).ToList() : [],
+            Startup = choice.Startup ? _startup.All.Select(row => new SnapshotRow { Key = row.Scope + "|" + row.Key, Value = (row.Enabled ? "enabled" : "disabled") + "|" + row.Command }).ToList() : [],
+            Footprints = choice.Footprints ? _footprints.All.Select(row => new SnapshotRow { Key = row.Kind + "|" + row.Scope + "|" + row.Path, Value = row.Exists switch { true => "yes", false => "no", _ => "" } }).ToList() : []
+        };
+        new SnapshotStore().Save(snapshot);
+        BaselineApply.Selected = snapshot.Name;
+        LoadSnapshots();
+        Story.Text = "Captured " + snapshot.Name;
     }
 }
