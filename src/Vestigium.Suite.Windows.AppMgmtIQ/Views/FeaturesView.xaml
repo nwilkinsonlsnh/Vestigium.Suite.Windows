@@ -26,6 +26,7 @@
           <ColumnDefinition Width="240" MinWidth="140" SharedSizeGroup="FeatureName" />
           <ColumnDefinition Width="200" MinWidth="120" SharedSizeGroup="FeatureParent" />
           <ColumnDefinition Width="100" MinWidth="72" SharedSizeGroup="FeatureState" />
+          <ColumnDefinition Width="90" MinWidth="72" SharedSizeGroup="FeatureBaseline" />
         </Grid.ColumnDefinitions>
         <CheckBox Grid.Column="0" Style="{StaticResource CheckBox.Standard}" IsThreeState="{Binding HasChildren}" IsChecked="{Binding CheckState, Mode=OneWay}" Click="Plan_Click" VerticalAlignment="Center" />
         <TextBlock Grid.Column="1" Text="{Binding Caption}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="4,0">
@@ -42,6 +43,7 @@
         </TextBlock>
         <TextBlock Grid.Column="2" Text="{Binding Name}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="4,0" Foreground="{DynamicResource Vestigium.Brushes.Text.Secondary}" />
         <TextBlock Grid.Column="3" Text="{Binding Parent}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="4,0" Foreground="{DynamicResource Vestigium.Brushes.Text.Secondary}" />
+        <TextBlock Grid.Column="5" Text="{Binding BaselineStatus}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="4,0" />
         <TextBlock Grid.Column="4" Text="{Binding State}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="4,0" Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}" />
       </Grid>
     </HierarchicalDataTemplate>
