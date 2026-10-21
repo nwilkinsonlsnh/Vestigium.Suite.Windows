@@ -35,7 +35,7 @@ public static class BaselineApply
 
     public static Snapshot? Latest()
     {
-        var store = new SnapshotStore(AppMgmtSettingsStore.DefaultRoot);
+        var store = new SnapshotStore();
         var names = store.List();
         var chosen = Selected;
         var name = chosen is not null && names.Contains(chosen) ? chosen : names.FirstOrDefault();
@@ -44,10 +44,10 @@ public static class BaselineApply
 
     public static void DeleteSelected()
     {
-        var name = Selected ?? new SnapshotStore(AppMgmtSettingsStore.DefaultRoot).List().FirstOrDefault();
+        var name = Selected ?? new SnapshotStore().List().FirstOrDefault();
         if (name is null)
             return;
-        new SnapshotStore(AppMgmtSettingsStore.DefaultRoot).Delete(name);
+        new SnapshotStore().Delete(name);
         Selected = null;
     }
 
