@@ -1,16 +1,24 @@
 <UserControl x:Class="Vestigium.Suite.Windows.FXplorerIQ.SettingsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:nud="clr-namespace:Vestigium.Controls.NumericUpDown;assembly=Vestigium.Controls.NumericUpDown"
              Background="{DynamicResource Vestigium.Brushes.Surface.Window}">
   <DockPanel Margin="12">
     <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" HorizontalAlignment="Left" Margin="8,0,0,12">
       <RadioButton Style="{StaticResource RadioButton.UnderlineTab}"
                    Content="Themes"
                    GroupName="FXplorerSettings"
-                   IsChecked="True" />
+                   IsChecked="True"
+                   Checked="Page_Checked"
+                   Tag="Themes" />
+      <RadioButton Style="{StaticResource RadioButton.UnderlineTab}"
+                   Content="Columns"
+                   GroupName="FXplorerSettings"
+                   Checked="Page_Checked"
+                   Tag="Columns" />
     </StackPanel>
 
-    <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Width="420" Margin="8,0,0,0">
+    <StackPanel x:Name="ThemesPage" HorizontalAlignment="Left" VerticalAlignment="Top" Width="420" Margin="8,0,0,0">
       <TextBlock Style="{StaticResource TextBlock.Caption}"
                  Margin="0,0,0,16"
                  TextWrapping="Wrap"
@@ -25,6 +33,42 @@
                 Width="220"
                 HorizontalAlignment="Left"
                 SelectionChanged="ThemeBox_SelectionChanged" />
+    </StackPanel>
+
+    <StackPanel x:Name="ColumnsPage"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Width="420"
+                Margin="8,0,0,0"
+                Visibility="Collapsed">
+      <TextBlock Style="{StaticResource TextBlock.Caption}"
+                 Margin="0,0,0,16"
+                 TextWrapping="Wrap"
+                 Text="Column widths in pixels. Dragging a header in the grid writes the same numbers." />
+
+      <Label Style="{StaticResource Label.Standard}" Content="Name" />
+      <nud:VestigiumNumericUpDown x:Name="NameWidth" SignMode="Unsigned" Minimum="40" Maximum="800" Increment="1" DecimalPlaces="0" Width="120" HorizontalAlignment="Left" Margin="0,0,0,8" ValueChanged="Width_Changed" Tag="Name" />
+
+      <Label Style="{StaticResource Label.Standard}" Content="Date Modified" />
+      <nud:VestigiumNumericUpDown x:Name="DateModifiedWidth" SignMode="Unsigned" Minimum="40" Maximum="800" Increment="1" DecimalPlaces="0" Width="120" HorizontalAlignment="Left" Margin="0,0,0,8" ValueChanged="Width_Changed" Tag="Date Modified" />
+
+      <Label Style="{StaticResource Label.Standard}" Content="Type" />
+      <nud:VestigiumNumericUpDown x:Name="TypeWidth" SignMode="Unsigned" Minimum="40" Maximum="800" Increment="1" DecimalPlaces="0" Width="120" HorizontalAlignment="Left" Margin="0,0,0,8" ValueChanged="Width_Changed" Tag="Type" />
+
+      <Label Style="{StaticResource Label.Standard}" Content="Size" />
+      <nud:VestigiumNumericUpDown x:Name="SizeWidth" SignMode="Unsigned" Minimum="40" Maximum="800" Increment="1" DecimalPlaces="0" Width="120" HorizontalAlignment="Left" Margin="0,0,0,8" ValueChanged="Width_Changed" Tag="Size" />
+
+      <Label Style="{StaticResource Label.Standard}" Content="Category" />
+      <nud:VestigiumNumericUpDown x:Name="CategoryWidth" SignMode="Unsigned" Minimum="40" Maximum="800" Increment="1" DecimalPlaces="0" Width="120" HorizontalAlignment="Left" Margin="0,0,0,8" ValueChanged="Width_Changed" Tag="Category" />
+
+      <Label Style="{StaticResource Label.Standard}" Content="Tag" />
+      <nud:VestigiumNumericUpDown x:Name="TagWidth" SignMode="Unsigned" Minimum="40" Maximum="800" Increment="1" DecimalPlaces="0" Width="120" HorizontalAlignment="Left" Margin="0,0,0,16" ValueChanged="Width_Changed" Tag="Tag" />
+
+      <Button Content="Defaults"
+              Style="{StaticResource Button.Secondary}"
+              HorizontalAlignment="Left"
+              MinWidth="120"
+              Click="Defaults_Click" />
     </StackPanel>
   </DockPanel>
 </UserControl>
