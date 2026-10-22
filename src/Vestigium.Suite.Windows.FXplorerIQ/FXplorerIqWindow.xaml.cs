@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using System.Windows.Threading;
 using Vestigium.Controls.Shell;
 
 namespace Vestigium.Suite.Windows.FXplorerIQ;
@@ -140,8 +141,8 @@ public partial class FXplorerIqWindow : Window
     {
         if (sender is not RadioButton { Tag: ExplorerSlot slot })
             return;
-        OpenRename(slot);
         e.Handled = true;
+        Dispatcher.BeginInvoke(() => OpenRename(slot), DispatcherPriority.Background);
     }
 
     private void OpenRename(ExplorerSlot slot)
@@ -158,7 +159,7 @@ public partial class FXplorerIqWindow : Window
         {
             PlacementTarget = slot.Tab,
             Placement = PlacementMode.Bottom,
-            StaysOpen = false,
+            StaysOpen = true,
             AllowsTransparency = true
         };
         var panel = new StackPanel { Margin = new Thickness(8) };
@@ -184,6 +185,7 @@ public partial class FXplorerIqWindow : Window
                 args.Handled = true;
             }
         };
+        box.LostKeyboardFocus += (_, _) => popup.IsOpen = false;
         popup.IsOpen = true;
         box.Focus();
         box.SelectAll();
