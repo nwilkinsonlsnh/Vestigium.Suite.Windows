@@ -1,42 +1,71 @@
 <UserControl x:Class="Vestigium.Suite.Windows.FXplorerIQ.ExplorerPane"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-  <DockPanel Margin="12">
-    <Grid DockPanel.Dock="Top" Margin="0,0,0,8">
-      <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="Auto" />
-        <ColumnDefinition Width="*" />
-        <ColumnDefinition Width="Auto" />
-      </Grid.ColumnDefinitions>
-      <Button x:Name="UpButton"
-              Content="Up"
-              Style="{StaticResource Button.Primary}"
-              MinWidth="72"
+  <Grid Margin="12">
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="Auto" />
+      <ColumnDefinition Width="*" />
+    </Grid.ColumnDefinitions>
+
+    <Expander x:Name="TreePane"
+              Grid.Column="0"
+              Style="{StaticResource Expander.Standard}"
+              ExpandDirection="Left"
+              IsExpanded="True"
+              Header="Folders"
+              Width="280"
               Margin="0,0,8,0"
-              Click="Up_Click" />
-      <TextBox x:Name="PathBox"
-               Grid.Column="1"
-               Style="{StaticResource TextBox.Standard}"
-               KeyDown="PathBox_KeyDown" />
-      <Button Content="Go"
-              Grid.Column="2"
-              Style="{StaticResource Button.Primary}"
-              MinWidth="72"
-              Margin="8,0,0,0"
-              Click="Go_Click" />
-    </Grid>
-    <DataGrid x:Name="Listing"
-              Style="{StaticResource DataGrid.Standard}"
-              AutoGenerateColumns="False"
-              IsReadOnly="True"
-              SelectionMode="Single"
-              SelectionUnit="FullRow"
-              MouseDoubleClick="Listing_MouseDoubleClick">
-      <DataGrid.Columns>
-        <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" />
-        <DataGridTextColumn Header="Size" Binding="{Binding SizeText}" Width="140" />
-        <DataGridTextColumn Header="Last write" Binding="{Binding LastWriteText}" Width="180" />
-      </DataGrid.Columns>
-    </DataGrid>
-  </DockPanel>
+              VerticalAlignment="Stretch">
+      <TreeView x:Name="Folders"
+                Style="{StaticResource TreeView.Standard}"
+                ItemContainerStyle="{StaticResource TreeViewItem.Standard}"
+                SelectedItemChanged="Folders_SelectedItemChanged">
+        <TreeView.ItemTemplate>
+          <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+            <TextBlock Text="{Binding Name}" />
+          </HierarchicalDataTemplate>
+        </TreeView.ItemTemplate>
+      </TreeView>
+    </Expander>
+
+    <DockPanel Grid.Column="1">
+      <Grid DockPanel.Dock="Top" Margin="0,0,0,8">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="Auto" />
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <Button x:Name="UpButton"
+                Content="Up"
+                Style="{StaticResource Button.Primary}"
+                MinWidth="72"
+                Margin="0,0,8,0"
+                Click="Up_Click" />
+        <TextBox x:Name="PathBox"
+                 Grid.Column="1"
+                 Style="{StaticResource TextBox.Standard}"
+                 KeyDown="PathBox_KeyDown" />
+        <Button Content="Go"
+                Grid.Column="2"
+                Style="{StaticResource Button.Primary}"
+                MinWidth="72"
+                Margin="8,0,0,0"
+                Click="Go_Click" />
+      </Grid>
+      <DataGrid x:Name="Listing"
+                Style="{StaticResource DataGrid.Standard}"
+                AutoGenerateColumns="False"
+                IsReadOnly="True"
+                SelectionMode="Single"
+                SelectionUnit="FullRow"
+                PreviewMouseWheel="Listing_PreviewMouseWheel"
+                MouseDoubleClick="Listing_MouseDoubleClick">
+        <DataGrid.Columns>
+          <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" />
+          <DataGridTextColumn Header="Size" Binding="{Binding SizeText}" Width="140" />
+          <DataGridTextColumn Header="Last write" Binding="{Binding LastWriteText}" Width="180" />
+        </DataGrid.Columns>
+      </DataGrid>
+    </DockPanel>
+  </Grid>
 </UserControl>
