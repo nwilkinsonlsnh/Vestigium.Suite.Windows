@@ -44,7 +44,10 @@
       <TextBlock Style="{StaticResource TextBlock.Caption}"
                  Margin="0,0,0,16"
                  TextWrapping="Wrap"
-                 Text="Column widths in pixels. Dragging a header in the grid writes the same numbers." />
+                 Text="Widths in pixels. Dragging the folder splitter or a column header writes the same numbers." />
+
+      <Label Style="{StaticResource Label.Standard}" Content="Folders pane" />
+      <nud:VestigiumNumericUpDown x:Name="FoldersWidth" SignMode="Unsigned" Minimum="160" Maximum="800" Increment="1" DecimalPlaces="0" Width="120" HorizontalAlignment="Left" Margin="0,0,0,12" ValueChanged="Width_Changed" Tag="Folders" />
 
       <Label Style="{StaticResource Label.Standard}" Content="Name" />
       <nud:VestigiumNumericUpDown x:Name="NameWidth" SignMode="Unsigned" Minimum="40" Maximum="800" Increment="1" DecimalPlaces="0" Width="120" HorizontalAlignment="Left" Margin="0,0,0,8" ValueChanged="Width_Changed" Tag="Name" />
