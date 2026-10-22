@@ -8,9 +8,13 @@ public sealed class ExplorerHost : DockPanel
 {
     private readonly Grid _body = new();
     private readonly GridSplitter _split = new();
+    private readonly StackPanel _jobBar;
+    private readonly TextBlock _sourceText;
+    private readonly TextBlock _destinationText;
     private readonly Button _splitButton;
     private readonly Button _verticalButton;
     private readonly Button _horizontalButton;
+    private readonly Button _swapButton;
     private bool _applying;
 
     public ExplorerHost(Action<string> status)
@@ -20,6 +24,8 @@ public sealed class ExplorerHost : DockPanel
         Second = new ExplorerPane { Status = status };
         First.FillCell = true;
         Second.FillCell = true;
+        First.Navigated += _ => RefreshMarks();
+        Second.Navigated += _ => RefreshMarks();
 
         var bar = new StackPanel
         {
@@ -29,11 +35,26 @@ public sealed class ExplorerHost : DockPanel
         _splitButton = Command("Split", "Open a second pane", Split_Click);
         _verticalButton = Command("Vertical", "Side by side", () => SetVertical(true));
         _horizontalButton = Command("Horizontal", "Stacked", () => SetVertical(false));
+        _swapButton = Command("Swap", "Swap source and destination", Swap_Click);
         bar.Children.Add(_splitButton);
         bar.Children.Add(_verticalButton);
         bar.Children.Add(_horizontalButton);
+        bar.Children.Add(_swapButton);
         Children.Add(bar);
         DockPanel.SetDock(bar, Dock.Top);
+
+        _sourceText = Mark("Source");
+        _destinationText = Mark("Destination");
+        _jobBar = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Margin = new Thickness(12, 6, 12, 0),
+            Visibility = Visibility.Collapsed
+        };
+        _jobBar.Children.Add(_sourceText);
+        _jobBar.Children.Add(_destinationText);
+        Children.Add(_jobBar);
+        DockPanel.SetDock(_jobBar, Dock.Top);
 
         _split.Width = 8;
         _split.HorizontalAlignment = HorizontalAlignment.Stretch;
@@ -56,9 +77,15 @@ public sealed class ExplorerHost : DockPanel
 
     public double Ratio { get; private set; } = 0.5;
 
+    public bool SourceIsFirst { get; private set; } = true;
+
+    public string SourcePath => (SourceIsFirst ? First : Second).Folder;
+
+    public string DestinationPath => (SourceIsFirst ? Second : First).Folder;
+
     public event Action? Changed;
 
-    public void Apply(bool split, FXplorerSettings settings, string? secondPath = null)
+    public void Apply(bool split, FXplorerSettings settings, string? secondPath = null, bool? sourceIsFirst = null)
     {
         _applying = true;
         try
@@ -66,9 +93,12 @@ public sealed class ExplorerHost : DockPanel
             Vertical = settings.SplitVertical;
             Ratio = settings.SplitRatio is > 0.1 and < 0.9 ? settings.SplitRatio : 0.5;
             IsSplit = split;
+            if (sourceIsFirst is not null)
+                SourceIsFirst = sourceIsFirst.Value;
             if (!string.IsNullOrWhiteSpace(secondPath))
                 Second.Seed(secondPath);
             Layout();
+            RefreshMarks();
         }
         finally
         {
@@ -82,10 +112,31 @@ public sealed class ExplorerHost : DockPanel
         if (IsSplit && string.IsNullOrWhiteSpace(Second.Folder))
             Second.Seed(First.Folder);
         Layout();
+        RefreshMarks();
         Save();
         HostLog.Information(IsSplit ? FXplorerCatalog.SplitOpened : FXplorerCatalog.SplitClosed, "Lifecycle", IsSplit ? "Split opened." : "Split closed.");
         Changed?.Invoke();
     }
+
+    private void Swap_Click()
+    {
+        if (!IsSplit)
+            return;
+        SourceIsFirst = !SourceIsFirst;
+        RefreshMarks();
+        Changed?.Invoke();
+    }
+
+    private void RefreshMarks()
+    {
+        var show = IsSplit;
+        _jobBar.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
+        _swapButton.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
+        _sourceText.Text = "Source  " + OrNone(SourcePath);
+        _destinationText.Text = "Destination  " + OrNone(DestinationPath);
+    }
+
+    private static string OrNone(string path) => string.IsNullOrWhiteSpace(path) ? "(none)" : path;
 
     private void SetVertical(bool vertical)
     {
@@ -191,4 +242,13 @@ public sealed class ExplorerHost : DockPanel
         button.Click += (_, _) => click();
         return button;
     }
+
+    private TextBlock Mark(string caption)
+        => new()
+        {
+            Text = caption,
+            Style = (Style)Application.Current.FindResource("TextBlock.Caption"),
+            Margin = new Thickness(0, 0, 24, 0),
+            VerticalAlignment = VerticalAlignment.Center
+        };
 }
