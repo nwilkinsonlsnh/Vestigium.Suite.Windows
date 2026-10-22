@@ -8,6 +8,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using Vestigium.Helpers.FileSystemPaths;
+using Vestigium.Helpers.Hashing;
 
 namespace Vestigium.Suite.Windows.FXplorerIQ;
 
@@ -17,6 +18,7 @@ public partial class ExplorerPane : UserControl
 
     private readonly ObservableCollection<FolderNode> _roots = [];
     private string _folder = "";
+    private string _algorithm = HashingAlgorithm.Sha256.ToString();
     private bool _fromTree;
     private bool _treeOpen = true;
     private bool _applying;
@@ -59,7 +61,14 @@ public partial class ExplorerPane : UserControl
     {
         if (_applying)
             return;
-        Dispatcher.Invoke(() => ApplyLayout(App.Settings.Load()));
+        Dispatcher.Invoke(() =>
+        {
+            var settings = App.Settings.Load();
+            var algorithm = settings.Algorithm().ToString();
+            ApplyLayout(settings);
+            if (!string.Equals(algorithm, _algorithm, StringComparison.OrdinalIgnoreCase) && _folder.Length > 0)
+                Open(_folder);
+        });
     }
 
     private void ApplyLayout(FXplorerSettings settings)
@@ -194,6 +203,8 @@ public partial class ExplorerPane : UserControl
 
         try
         {
+            var algorithm = App.Settings.Load().Algorithm();
+            _algorithm = algorithm.ToString();
             var full = Path.GetFullPath(path);
             var rows = new List<PaneEntry>();
             foreach (var dir in Directory.EnumerateDirectories(full))
@@ -205,7 +216,7 @@ public partial class ExplorerPane : UserControl
             foreach (var file in Directory.EnumerateFiles(full))
             {
                 var info = new FileInfo(file);
-                rows.Add(new PaneEntry(info.Name, info.FullName, false, Write(info.LastWriteTime), Kind(info.Extension), Size(info.Length)));
+                rows.Add(new PaneEntry(info.Name, info.FullName, false, Write(info.LastWriteTime), Kind(info.Extension), Size(info.Length), Hash(info.FullName, algorithm)));
             }
 
             rows.Sort(static (a, b) =>
@@ -218,7 +229,7 @@ public partial class ExplorerPane : UserControl
             PathBox.Text = full;
             Listing.ItemsSource = rows;
             UpButton.IsEnabled = Path.GetDirectoryName(full) is not null;
-            Say(rows.Count + " item" + (rows.Count == 1 ? "" : "s"));
+            Say(rows.Count + " item" + (rows.Count == 1 ? "" : "s") + " · " + HashingHelper.AlgorithmName(algorithm));
         }
         catch (Exception ex)
         {
@@ -406,6 +417,18 @@ public partial class ExplorerPane : UserControl
         if (string.IsNullOrWhiteSpace(extension))
             return "File";
         return extension.TrimStart('.').ToUpperInvariant() + " File";
+    }
+
+    private static string Hash(string path, HashingAlgorithm algorithm)
+    {
+        try
+        {
+            return HashingHelper.HashFile(path, algorithm);
+        }
+        catch
+        {
+            return "";
+        }
     }
 
     private static string Size(long bytes)
