@@ -4,28 +4,31 @@
              VerticalAlignment="Top">
   <Grid x:Name="Root" Margin="12">
     <Grid.ColumnDefinitions>
-      <ColumnDefinition x:Name="TreeColumn" Width="308" />
+      <ColumnDefinition x:Name="TreeColumn" Width="280" />
       <ColumnDefinition Width="*" />
     </Grid.ColumnDefinitions>
 
-    <Grid Grid.Column="0">
-      <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="28" />
-        <ColumnDefinition Width="*" />
-      </Grid.ColumnDefinitions>
-
-      <Button x:Name="TreeToggle"
-              Content="◀"
-              Style="{StaticResource Button.Primary}"
-              ToolTip="Hide folders"
-              VerticalAlignment="Stretch"
-              Padding="0"
-              Click="TreeToggle_Click" />
-
-      <Border Grid.Column="1"
-              x:Name="TreeHost"
-              Margin="4,0,8,0"
-              BorderBrush="{DynamicResource Vestigium.Brushes.Stroke.Default}"
+    <DockPanel Grid.Column="0" x:Name="TreeHost" Margin="0,0,8,0">
+      <Grid DockPanel.Dock="Top" Height="32" Margin="0,0,0,4">
+        <TextBlock Text="Folders"
+                   VerticalAlignment="Center"
+                   FontWeight="SemiBold"
+                   Foreground="{DynamicResource Vestigium.Brushes.Text.Primary}" />
+        <Button x:Name="TreeToggle"
+                Style="{StaticResource Button.Utility}"
+                Content="◀"
+                ToolTip="Hide folders"
+                Width="28"
+                Height="28"
+                MinWidth="28"
+                MinHeight="28"
+                Padding="0"
+                FontSize="12"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                Click="TreeToggle_Click" />
+      </Grid>
+      <Border BorderBrush="{DynamicResource Vestigium.Brushes.Stroke.Default}"
               BorderThickness="1"
               CornerRadius="6">
         <TreeView x:Name="Folders"
@@ -42,7 +45,23 @@
           </TreeView.ItemTemplate>
         </TreeView>
       </Border>
-    </Grid>
+    </DockPanel>
+
+    <Button x:Name="TreeOpen"
+            Grid.Column="0"
+            Style="{StaticResource Button.Utility}"
+            Content="▶"
+            ToolTip="Show folders"
+            Width="28"
+            Height="28"
+            MinWidth="28"
+            MinHeight="28"
+            Padding="0"
+            FontSize="12"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Visibility="Collapsed"
+            Click="TreeToggle_Click" />
 
     <DockPanel Grid.Column="1">
       <Grid DockPanel.Dock="Top" Margin="0,0,0,8">
