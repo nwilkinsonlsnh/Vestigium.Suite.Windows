@@ -4,6 +4,7 @@
     <RootNamespace>Vestigium.Suite.Windows.FXplorerIQ</RootNamespace>
     <AssemblyName>FXplorerIQ</AssemblyName>
     <ApplicationTitle>FXplorerIQ</ApplicationTitle>
+    <ApplicationIcon>Assets\FXplorerIQ.ico</ApplicationIcon>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
