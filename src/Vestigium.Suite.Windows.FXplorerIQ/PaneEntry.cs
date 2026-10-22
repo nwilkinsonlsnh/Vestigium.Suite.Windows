@@ -1,7 +1,12 @@
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+
 namespace Vestigium.Suite.Windows.FXplorerIQ;
 
-public sealed class PaneEntry
+public sealed class PaneEntry : INotifyPropertyChanged
 {
+    private string _hash;
+
     public PaneEntry(
         string name,
         string fullPath,
@@ -19,7 +24,7 @@ public sealed class PaneEntry
         DateModified = dateModified;
         Type = type;
         SizeText = sizeText;
-        Hash = hash;
+        _hash = hash;
         Category = category;
         Tag = tag;
     }
@@ -36,9 +41,24 @@ public sealed class PaneEntry
 
     public string SizeText { get; }
 
-    public string Hash { get; }
+    public string Hash
+    {
+        get => _hash;
+        set
+        {
+            if (string.Equals(_hash, value, StringComparison.Ordinal))
+                return;
+            _hash = value;
+            OnPropertyChanged();
+        }
+    }
 
     public string Category { get; }
 
     public string Tag { get; }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    private void OnPropertyChanged([CallerMemberName] string? name = null)
+        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 }
