@@ -20,6 +20,7 @@
 | Two panes, one Explorer | The operator asked to split the window they are in. |
 | Marks, no job | Source and destination have to exist before a verb does. |
 | Orientation and size | Vertical or horizontal. The splitter is remembered. |
+| Second pane is an Explorer | It owns its path. Open, parent, and a typed path are the same commands. |
 
 ---
 
@@ -28,7 +29,7 @@
 | Order | ID | Do | State |
 | ---: | :--- | :--- | :--- |
 | 1 | PR03.001 | Split command. An Explorer holds one pane or two. Vertical or horizontal, splitter sized, orientation and size remembered. | Done |
-| 2 | PR03.002 | Two panes side by side, each with its own path. Open, parent, and typed path work in both. | |
+| 2 | PR03.002 | Two panes side by side, each with its own path. Open, parent, and typed path work in both. | Done |
 | 3 | PR03.003 | Close split. Keep the remaining pane. | |
 | 4 | PR03.004 | Mark source and destination. The job bar shows both paths. | |
 | 5 | PR03.005 | Session stores the second path and which pane is the source. Log split opened and split closed. | |
