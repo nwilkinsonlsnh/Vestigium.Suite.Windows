@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using Vestigium.Helpers.FileSystemPaths;
@@ -12,7 +13,6 @@ namespace Vestigium.Suite.Windows.FXplorerIQ;
 
 public partial class ExplorerPane : UserControl
 {
-    private const double OpenWidth = 260;
     private const double ClosedWidth = 36;
 
     private readonly ObservableCollection<FolderNode> _roots = [];
@@ -40,7 +40,7 @@ public partial class ExplorerPane : UserControl
         if (_folder.Length == 0)
             Open(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
 
-        ApplyColumns(App.Settings.Load());
+        ApplyLayout(App.Settings.Load());
         HookColumns();
         FXplorerSettingsStore.Changed += OnSettingsChanged;
 
@@ -59,14 +59,17 @@ public partial class ExplorerPane : UserControl
     {
         if (_applying)
             return;
-        Dispatcher.Invoke(() => ApplyColumns(App.Settings.Load()));
+        Dispatcher.Invoke(() => ApplyLayout(App.Settings.Load()));
     }
 
-    private void ApplyColumns(FXplorerSettings settings)
+    private void ApplyLayout(FXplorerSettings settings)
     {
         _applying = true;
         try
         {
+            if (_treeOpen && settings.TreeWidth >= 160)
+                TreeColumn.Width = new GridLength(settings.TreeWidth);
+
             foreach (var column in Listing.Columns)
             {
                 var width = settings.Width(column.Header?.ToString() ?? "");
@@ -100,11 +103,28 @@ public partial class ExplorerPane : UserControl
         if (width < 40)
             return;
 
+        Save(settings => settings.SetWidth(header, Math.Round(width)));
+    }
+
+    private void TreeSplit_DragCompleted(object sender, DragCompletedEventArgs e)
+    {
+        if (!_treeOpen)
+            return;
+
+        var width = TreeColumn.ActualWidth;
+        if (width < 160)
+            return;
+
+        Save(settings => settings.TreeWidth = Math.Round(width));
+    }
+
+    private void Save(Action<FXplorerSettings> change)
+    {
         _applying = true;
         try
         {
             var settings = App.Settings.Load();
-            settings.SetWidth(header, Math.Round(width));
+            change(settings);
             App.Settings.Save(settings);
         }
         finally
@@ -143,9 +163,16 @@ public partial class ExplorerPane : UserControl
     private void TreeToggle_Click(object sender, RoutedEventArgs e)
     {
         _treeOpen = !_treeOpen;
-        TreeColumn.Width = new GridLength(_treeOpen ? OpenWidth : ClosedWidth);
+        var open = App.Settings.Load().TreeWidth;
+        if (open < 160)
+            open = FXplorerSettings.DefaultTreeWidth;
+
+        TreeColumn.Width = new GridLength(_treeOpen ? open : ClosedWidth);
+        TreeColumn.MinWidth = _treeOpen ? 160 : 0;
         TreeHost.Visibility = _treeOpen ? Visibility.Visible : Visibility.Collapsed;
         TreeOpen.Visibility = _treeOpen ? Visibility.Collapsed : Visibility.Visible;
+        TreeSplit.Visibility = _treeOpen ? Visibility.Visible : Visibility.Collapsed;
+        SplitColumn.Width = new GridLength(_treeOpen ? 8 : 0);
     }
 
     public void Open(string raw)
