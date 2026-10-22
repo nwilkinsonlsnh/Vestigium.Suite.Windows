@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>Vestigium.Suite.Windows.FXplorerIQ</RootNamespace>
+    <AssemblyName>FXplorerIQ</AssemblyName>
+    <ApplicationTitle>FXplorerIQ</ApplicationTitle>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Vestigium.Logging" Version="$(VestigiumLoggingVersion)" />
+    <PackageReference Include="Vestigium.Themes" Version="$(VestigiumThemesVersion)" />
+    <PackageReference Include="Vestigium.Helpers.FileIo" Version="$(VestigiumFileIoVersion)" />
+  </ItemGroup>
+</Project>
