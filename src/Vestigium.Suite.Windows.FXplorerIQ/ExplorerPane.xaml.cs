@@ -201,21 +201,67 @@ public partial class ExplorerPane : UserControl
 
     private void LoadRoots()
     {
+        var pc = Group("This PC");
+        pc.IsExpanded = true;
+
+        var devices = Group("Devices & Drives");
+        devices.IsExpanded = true;
         foreach (var drive in DriveInfo.GetDrives())
         {
-            if (!drive.IsReady)
+            if (!drive.IsReady || drive.DriveType is not (DriveType.Fixed or DriveType.Removable or DriveType.CDRom))
                 continue;
-            var root = new FolderNode(drive.Name, drive.RootDirectory.FullName);
-            root.Children.Add(new FolderNode("", ""));
-            _roots.Add(root);
+            devices.Children.Add(DriveNode(drive));
         }
+
+        var network = Group("Network Locations");
+        foreach (var drive in DriveInfo.GetDrives())
+        {
+            if (drive.DriveType != DriveType.Network || !drive.IsReady)
+                continue;
+            network.Children.Add(DriveNode(drive));
+        }
+
+        pc.Children.Add(devices);
+        pc.Children.Add(network);
+        _roots.Add(pc);
     }
+
+    private static FolderNode Group(string name)
+    {
+        var node = new FolderNode(name, "");
+        node.Loaded = true;
+        return node;
+    }
+
+    private static FolderNode DriveNode(DriveInfo drive)
+    {
+        var node = new FolderNode(DriveLabel(drive), drive.RootDirectory.FullName);
+        node.Children.Add(new FolderNode("", ""));
+        return node;
+    }
+
+    private static string DriveLabel(DriveInfo drive)
+    {
+        var letter = drive.Name.TrimEnd('\\');
+        var label = string.IsNullOrWhiteSpace(drive.VolumeLabel) ? DriveKind(drive.DriveType) : drive.VolumeLabel;
+        return label + " (" + letter + ")";
+    }
+
+    private static string DriveKind(DriveType type)
+        => type switch
+        {
+            DriveType.Fixed => "Local Disk",
+            DriveType.Removable => "Removable Disk",
+            DriveType.CDRom => "CD Drive",
+            DriveType.Network => "Network",
+            _ => "Drive"
+        };
 
     private void Folder_Expanded(object sender, RoutedEventArgs e)
     {
         if (e.OriginalSource is not TreeViewItem item || item.DataContext is not FolderNode node)
             return;
-        if (node.Loaded)
+        if (node.Loaded || node.FullPath.Length == 0)
             return;
 
         node.Loaded = true;
