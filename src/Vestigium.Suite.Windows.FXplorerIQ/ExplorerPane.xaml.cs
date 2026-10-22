@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Windows;
@@ -18,6 +19,7 @@ public partial class ExplorerPane : UserControl
     private string _folder = "";
     private bool _fromTree;
     private bool _treeOpen = true;
+    private bool _applying;
     private ScrollViewer? _host;
 
     public ExplorerPane()
@@ -26,6 +28,7 @@ public partial class ExplorerPane : UserControl
         Folders.ItemsSource = _roots;
         Folders.AddHandler(TreeViewItem.ExpandedEvent, new RoutedEventHandler(Folder_Expanded));
         Loaded += OnLoaded;
+        Unloaded += (_, _) => FXplorerSettingsStore.Changed -= OnSettingsChanged;
     }
 
     public Action<string>? Status { get; set; }
@@ -37,6 +40,10 @@ public partial class ExplorerPane : UserControl
         if (_folder.Length == 0)
             Open(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
 
+        ApplyColumns(App.Settings.Load());
+        HookColumns();
+        FXplorerSettingsStore.Changed += OnSettingsChanged;
+
         _host = FindHost();
         if (_host is not null)
             _host.SizeChanged += (_, _) => Fit();
@@ -46,6 +53,64 @@ public partial class ExplorerPane : UserControl
             window.SizeChanged += (_, _) => Fit();
 
         Fit();
+    }
+
+    private void OnSettingsChanged()
+    {
+        if (_applying)
+            return;
+        Dispatcher.Invoke(() => ApplyColumns(App.Settings.Load()));
+    }
+
+    private void ApplyColumns(FXplorerSettings settings)
+    {
+        _applying = true;
+        try
+        {
+            foreach (var column in Listing.Columns)
+            {
+                var width = settings.Width(column.Header?.ToString() ?? "");
+                if (width >= 40)
+                    column.Width = new DataGridLength(width);
+            }
+        }
+        finally
+        {
+            _applying = false;
+        }
+    }
+
+    private void HookColumns()
+    {
+        var descriptor = DependencyPropertyDescriptor.FromProperty(DataGridColumn.WidthProperty, typeof(DataGridColumn));
+        foreach (var column in Listing.Columns)
+            descriptor.AddValueChanged(column, OnColumnWidthChanged);
+    }
+
+    private void OnColumnWidthChanged(object? sender, EventArgs e)
+    {
+        if (_applying || sender is not DataGridColumn column)
+            return;
+
+        var header = column.Header?.ToString();
+        if (string.IsNullOrWhiteSpace(header))
+            return;
+
+        var width = column.ActualWidth;
+        if (width < 40)
+            return;
+
+        _applying = true;
+        try
+        {
+            var settings = App.Settings.Load();
+            settings.SetWidth(header, Math.Round(width));
+            App.Settings.Save(settings);
+        }
+        finally
+        {
+            _applying = false;
+        }
     }
 
     private void Fit()
