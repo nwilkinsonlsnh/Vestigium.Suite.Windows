@@ -9,7 +9,7 @@
     </Grid.ColumnDefinitions>
 
     <DockPanel Grid.Column="0" x:Name="TreeHost" Margin="0,0,8,0" LastChildFill="True">
-      <Grid DockPanel.Dock="Top" Height="40" Margin="0,0,0,8">
+      <Grid DockPanel.Dock="Top" Height="48" Margin="0,0,0,8">
         <TextBlock Text="Folders"
                    VerticalAlignment="Center"
                    FontWeight="SemiBold"
@@ -18,10 +18,10 @@
                 Style="{StaticResource Button.Utility}"
                 Content="◀"
                 ToolTip="Hide folders"
-                Width="28"
-                Height="28"
-                MinWidth="28"
-                MinHeight="28"
+                Width="32"
+                Height="32"
+                MinWidth="32"
+                MinHeight="32"
                 Padding="0"
                 FontSize="12"
                 HorizontalAlignment="Right"
@@ -56,10 +56,10 @@
             Style="{StaticResource Button.Utility}"
             Content="▶"
             ToolTip="Show folders"
-            Width="28"
-            Height="28"
-            MinWidth="28"
-            MinHeight="28"
+            Width="32"
+            Height="32"
+            MinWidth="32"
+            MinHeight="32"
             Padding="0"
             FontSize="12"
             HorizontalAlignment="Left"
@@ -68,7 +68,7 @@
             Click="TreeToggle_Click" />
 
     <DockPanel Grid.Column="1" LastChildFill="True">
-      <Grid DockPanel.Dock="Top" Height="40" Margin="0,0,0,8">
+      <Grid DockPanel.Dock="Top" Height="48" Margin="0,0,0,8">
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="Auto" />
           <ColumnDefinition Width="*" />
@@ -78,21 +78,24 @@
                 Content="Up"
                 Style="{StaticResource Button.Primary}"
                 MinWidth="72"
-                Height="32"
+                MinHeight="36"
+                Padding="16,6"
                 VerticalAlignment="Center"
                 Margin="0,0,8,0"
                 Click="Up_Click" />
         <TextBox x:Name="PathBox"
                  Grid.Column="1"
                  Style="{StaticResource TextBox.Standard}"
-                 Height="32"
+                 MinHeight="36"
                  VerticalAlignment="Center"
+                 VerticalContentAlignment="Center"
                  KeyDown="PathBox_KeyDown" />
         <Button Content="Go"
                 Grid.Column="2"
                 Style="{StaticResource Button.Primary}"
                 MinWidth="72"
-                Height="32"
+                MinHeight="36"
+                Padding="16,6"
                 VerticalAlignment="Center"
                 Margin="8,0,0,0"
                 Click="Go_Click" />
