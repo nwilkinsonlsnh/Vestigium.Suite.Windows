@@ -16,6 +16,11 @@
                    GroupName="FXplorerSettings"
                    Checked="Page_Checked"
                    Tag="Columns" />
+      <RadioButton Style="{StaticResource RadioButton.UnderlineTab}"
+                   Content="Hash"
+                   GroupName="FXplorerSettings"
+                   Checked="Page_Checked"
+                   Tag="Hash" />
     </StackPanel>
 
     <StackPanel x:Name="ThemesPage" HorizontalAlignment="Left" VerticalAlignment="Top" Width="420" Margin="8,0,0,0">
@@ -65,13 +70,38 @@
       <nud:VestigiumNumericUpDown x:Name="CategoryWidth" SignMode="Unsigned" Minimum="40" Maximum="800" Increment="1" DecimalPlaces="0" Width="120" HorizontalAlignment="Left" Margin="0,0,0,8" ValueChanged="Width_Changed" Tag="Category" />
 
       <Label Style="{StaticResource Label.Standard}" Content="Tag" />
-      <nud:VestigiumNumericUpDown x:Name="TagWidth" SignMode="Unsigned" Minimum="40" Maximum="800" Increment="1" DecimalPlaces="0" Width="120" HorizontalAlignment="Left" Margin="0,0,0,16" ValueChanged="Width_Changed" Tag="Tag" />
+      <nud:VestigiumNumericUpDown x:Name="TagWidth" SignMode="Unsigned" Minimum="40" Maximum="800" Increment="1" DecimalPlaces="0" Width="120" HorizontalAlignment="Left" Margin="0,0,0,8" ValueChanged="Width_Changed" Tag="Tag" />
+
+      <Label Style="{StaticResource Label.Standard}" Content="File Hash" />
+      <nud:VestigiumNumericUpDown x:Name="HashWidth" SignMode="Unsigned" Minimum="40" Maximum="800" Increment="1" DecimalPlaces="0" Width="120" HorizontalAlignment="Left" Margin="0,0,0,16" ValueChanged="Width_Changed" Tag="File Hash" />
 
       <Button Content="Defaults"
               Style="{StaticResource Button.Secondary}"
               HorizontalAlignment="Left"
               MinWidth="120"
               Click="Defaults_Click" />
+    </StackPanel>
+
+    <StackPanel x:Name="HashPage"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Width="420"
+                Margin="8,0,0,0"
+                Visibility="Collapsed">
+      <TextBlock Style="{StaticResource TextBlock.Caption}"
+                 Margin="0,0,0,16"
+                 TextWrapping="Wrap"
+                 Text="Algorithm used for the File Hash column. Folders stay blank." />
+      <Label Style="{StaticResource Label.Standard}" Content="Algorithm" />
+      <ComboBox x:Name="HashBox"
+                Style="{StaticResource ComboBox.Standard}"
+                DisplayMemberPath="Name"
+                SelectedValuePath="Id"
+                IsEditable="False"
+                IsReadOnly="True"
+                Width="220"
+                HorizontalAlignment="Left"
+                SelectionChanged="HashBox_SelectionChanged" />
     </StackPanel>
   </DockPanel>
 </UserControl>
