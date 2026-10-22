@@ -91,6 +91,8 @@
                 Style="{StaticResource DataGrid.Standard}"
                 AutoGenerateColumns="False"
                 IsReadOnly="True"
+                HeadersVisibility="Column"
+                RowHeaderWidth="0"
                 SelectionMode="Single"
                 SelectionUnit="FullRow"
                 ScrollViewer.VerticalScrollBarVisibility="Auto"
