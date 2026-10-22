@@ -3,7 +3,7 @@
 **Document ID:** VEST-SUITE-WINDOWS-FXPLORERIQ-PLAN-PR01
 **Host:** `Vestigium.Suite.Windows.FXplorerIQ`
 **APPID:** `FXplorerIQ`
-**Status:** Draft
+**Status:** Done
 **Date:** 21 October 2026
 **Binding:** PR01 Requirements wins on behavior. This file wins on the slice.
 
@@ -32,4 +32,12 @@
 | 2 | PR01.002 | Startup. Logging with APPID FXplorerIQ, FileIoCatalog.Register, then ThemeManager. | Done |
 | 3 | PR01.003 | The window. Vestigium shell. Explorer tab on the left. Dashboard, Settings, Help pinned on the right. Status area at the bottom. | Done |
 | 4 | PR01.004 | One Explorer, one pane. Lists a folder. Name, size, last write time. Open a folder. Open the parent. Type a path. | Done |
-| 5 | PR01.005 | Log that the host opened. Confirm every control takes a theme style. | |
+| 5 | PR01.005 | Log that the host opened. Confirm every control takes a theme style. | Done |
+
+---
+
+## Close
+
+PR01 is done. The host opens, logs `AppStarted` (18000), paints from the theme, and shows one Explorer with one pane.
+
+Not in this PR: a second Explorer, a split, a job, a queue.
