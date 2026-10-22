@@ -39,6 +39,7 @@ public partial class SettingsView : UserControl
 
     private void Show(FXplorerSettings settings)
     {
+        FoldersWidth.Value = (decimal)settings.TreeWidth;
         NameWidth.Value = (decimal)settings.NameWidth;
         DateModifiedWidth.Value = (decimal)settings.DateModifiedWidth;
         TypeWidth.Value = (decimal)settings.TypeWidth;
