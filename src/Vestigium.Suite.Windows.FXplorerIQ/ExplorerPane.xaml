@@ -100,9 +100,12 @@
                 PreviewMouseWheel="Pane_PreviewMouseWheel"
                 MouseDoubleClick="Listing_MouseDoubleClick">
         <DataGrid.Columns>
-          <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" />
-          <DataGridTextColumn Header="Size" Binding="{Binding SizeText}" Width="140" />
-          <DataGridTextColumn Header="Last write" Binding="{Binding LastWriteText}" Width="180" />
+          <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" MinWidth="160" />
+          <DataGridTextColumn Header="Date Modified" Binding="{Binding DateModified}" Width="160" />
+          <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="140" />
+          <DataGridTextColumn Header="Size" Binding="{Binding SizeText}" Width="100" />
+          <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="120" />
+          <DataGridTextColumn Header="Tag" Binding="{Binding Tag}" Width="120" />
         </DataGrid.Columns>
       </DataGrid>
     </DockPanel>
