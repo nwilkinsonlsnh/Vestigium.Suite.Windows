@@ -8,6 +8,10 @@ public sealed class ExplorerRecord
     public string? Name { get; set; }
 
     public string Path { get; set; } = "";
+
+    public bool Split { get; set; }
+
+    public string SecondPath { get; set; } = "";
 }
 
 public sealed class ExplorerSession
