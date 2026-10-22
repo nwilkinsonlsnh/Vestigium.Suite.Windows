@@ -11,25 +11,58 @@ namespace Vestigium.Suite.Windows.FXplorerIQ;
 
 public partial class ExplorerPane : UserControl
 {
+    private const double OpenWidth = 308;
+    private const double ClosedWidth = 28;
+
     private readonly ObservableCollection<FolderNode> _roots = [];
     private string _folder = "";
     private bool _fromTree;
+    private bool _treeOpen = true;
 
     public ExplorerPane()
     {
         InitializeComponent();
         Folders.ItemsSource = _roots;
         Folders.AddHandler(TreeViewItem.ExpandedEvent, new RoutedEventHandler(Folder_Expanded));
-        Loaded += (_, _) =>
-        {
-            if (_roots.Count == 0)
-                LoadRoots();
-            if (_folder.Length == 0)
-                Open(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
-        };
+        Loaded += OnLoaded;
     }
 
     public Action<string>? Status { get; set; }
+
+    private void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        if (_roots.Count == 0)
+            LoadRoots();
+        if (_folder.Length == 0)
+            Open(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
+
+        var window = Window.GetWindow(this);
+        if (window is null)
+            return;
+
+        window.SizeChanged += (_, _) => Fit();
+        Fit();
+    }
+
+    private void Fit()
+    {
+        var window = Window.GetWindow(this);
+        if (window is null || window.ActualHeight < 200)
+            return;
+
+        // Shell wraps the page in a ScrollViewer, so the pane must take a real height
+        // or the tree and grid grow instead of scrolling.
+        Height = Math.Max(240, window.ActualHeight - 140);
+    }
+
+    private void TreeToggle_Click(object sender, RoutedEventArgs e)
+    {
+        _treeOpen = !_treeOpen;
+        TreeColumn.Width = new GridLength(_treeOpen ? OpenWidth : ClosedWidth);
+        TreeHost.Visibility = _treeOpen ? Visibility.Visible : Visibility.Collapsed;
+        TreeToggle.Content = _treeOpen ? "◀" : "▶";
+        TreeToggle.ToolTip = _treeOpen ? "Hide folders" : "Show folders";
+    }
 
     public void Open(string raw)
     {
@@ -138,17 +171,20 @@ public partial class ExplorerPane : UserControl
         }
     }
 
-    private void Listing_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+    private void Pane_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
     {
-        var scroll = FindScroll(Listing);
+        if (sender is not DependencyObject source)
+            return;
+
+        var scroll = FindScroll(source);
         if (scroll is null)
             return;
 
         var lines = SystemParameters.WheelScrollLines;
-        if (lines == 0)
+        if (lines <= 0)
             lines = 3;
-        var delta = e.Delta > 0 ? -lines * 16 : lines * 16;
-        scroll.ScrollToVerticalOffset(scroll.VerticalOffset + delta);
+        var step = e.Delta > 0 ? -lines * 18 : lines * 18;
+        scroll.ScrollToVerticalOffset(scroll.VerticalOffset + step);
         e.Handled = true;
     }
 
@@ -159,8 +195,7 @@ public partial class ExplorerPane : UserControl
 
         for (var i = 0; i < VisualTreeHelper.GetChildrenCount(root); i++)
         {
-            var child = VisualTreeHelper.GetChild(root, i);
-            var hit = FindScroll(child);
+            var hit = FindScroll(VisualTreeHelper.GetChild(root, i));
             if (hit is not null)
                 return hit;
         }
