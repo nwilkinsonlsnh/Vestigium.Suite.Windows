@@ -14,6 +14,7 @@
     <PackageReference Include="Vestigium.Helpers.FileSystemPaths" Version="$(VestigiumFileSystemPathsVersion)" />
     <PackageReference Include="Vestigium.Controls" Version="$(VestigiumControlsVersion)" />
     <PackageReference Include="Vestigium.Controls.StatusBar" Version="$(VestigiumStatusBarVersion)" />
+    <PackageReference Include="Vestigium.Controls.NumericUpDown" Version="$(VestigiumNumericUpDownVersion)" />
     <PackageReference Include="Vestigium.Controls.UnderConstruction" Version="$(VestigiumUnderConstructionVersion)" />
   </ItemGroup>
 </Project>
