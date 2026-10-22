@@ -53,16 +53,23 @@ public partial class SettingsView : UserControl
         TagWidth.Value = (decimal)settings.TagWidth;
         HashWidth.Value = (decimal)settings.HashWidth;
         HashBox.SelectedValue = settings.Algorithm().ToString();
+        HideEmptyDrives.IsChecked = settings.HideEmptyDrives;
+        ShowAllFolders.IsChecked = settings.ShowAllFolders;
+        HideJunctions.IsChecked = settings.HideJunctions;
+        ShowHiddenFiles.IsChecked = settings.ShowHiddenFiles;
+        ShowFileExtensions.IsChecked = settings.ShowFileExtensions;
+        ShowSystemFiles.IsChecked = settings.ShowSystemFiles;
     }
 
     private void Page_Checked(object sender, RoutedEventArgs e)
     {
-        if (ThemesPage is null || ColumnsPage is null || HashPage is null)
+        if (ThemesPage is null || ColumnsPage is null || HashPage is null || ViewPage is null)
             return;
         var tag = sender is RadioButton button ? button.Tag as string : "Themes";
         ThemesPage.Visibility = tag == "Themes" ? Visibility.Visible : Visibility.Collapsed;
         ColumnsPage.Visibility = tag == "Columns" ? Visibility.Visible : Visibility.Collapsed;
         HashPage.Visibility = tag == "Hash" ? Visibility.Visible : Visibility.Collapsed;
+        ViewPage.Visibility = tag == "View" ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void ThemeBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -89,6 +96,21 @@ public partial class SettingsView : UserControl
         if (_loading || sender is not VestigiumNumericUpDown box || box.Tag is not string header)
             return;
         Save(settings => settings.SetWidth(header, (double)box.Value));
+    }
+
+    private void View_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_loading)
+            return;
+        Save(settings =>
+        {
+            settings.HideEmptyDrives = HideEmptyDrives.IsChecked == true;
+            settings.ShowAllFolders = ShowAllFolders.IsChecked == true;
+            settings.HideJunctions = HideJunctions.IsChecked == true;
+            settings.ShowHiddenFiles = ShowHiddenFiles.IsChecked == true;
+            settings.ShowFileExtensions = ShowFileExtensions.IsChecked == true;
+            settings.ShowSystemFiles = ShowSystemFiles.IsChecked == true;
+        });
     }
 
     private void Defaults_Click(object sender, RoutedEventArgs e)
