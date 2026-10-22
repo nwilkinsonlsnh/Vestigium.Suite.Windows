@@ -10,10 +10,31 @@
         Background="{DynamicResource Vestigium.Brushes.Surface.Window}">
   <DockPanel>
     <Grid DockPanel.Dock="Top" Margin="12,8,12,0">
-      <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-        <StackPanel x:Name="ExplorerTabs" Orientation="Horizontal" />
-        <Button x:Name="AddExplorer"
-                Content="+"
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+      <Grid x:Name="TabColumn" Grid.Column="0" SizeChanged="TabColumn_SizeChanged">
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+          <StackPanel x:Name="ExplorerTabs" Orientation="Horizontal" />
+          <Button x:Name="AddExplorer"
+                  Content="+"
+                  Style="{StaticResource Button.Utility}"
+                  Width="32"
+                  Height="32"
+                  MinWidth="32"
+                  MinHeight="32"
+                  Padding="0"
+                  FontSize="16"
+                  ToolTip="New Explorer"
+                  VerticalAlignment="Center"
+                  Margin="4,0,0,0"
+                  Click="AddExplorer_Click" />
+        </StackPanel>
+      </Grid>
+      <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="8,0,0,0">
+        <Button x:Name="Overflow"
+                Content="···"
                 Style="{StaticResource Button.Utility}"
                 Width="32"
                 Height="32"
@@ -21,12 +42,11 @@
                 MinHeight="32"
                 Padding="0"
                 FontSize="16"
-                ToolTip="New Explorer"
+                ToolTip="More Explorers"
                 VerticalAlignment="Center"
-                Margin="4,0,0,0"
-                Click="AddExplorer_Click" />
-      </StackPanel>
-      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                Margin="0,0,4,0"
+                Visibility="Collapsed"
+                Click="Overflow_Click" />
         <RadioButton Content="Dashboard"
                      Style="{StaticResource RadioButton.UnderlineTab}"
                      GroupName="FXplorerMainNav"
