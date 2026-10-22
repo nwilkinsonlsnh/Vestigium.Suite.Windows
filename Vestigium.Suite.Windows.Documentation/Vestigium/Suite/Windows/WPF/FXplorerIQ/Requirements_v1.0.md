@@ -40,16 +40,17 @@ The first release does not include a two-way merge, a scheduler, or a search acr
 
 ## 3. Shell
 
-The window is a Vestigium shell. The navigation is:
+The window is a Vestigium shell. The top bar holds two groups.
 
-1. Explorer
-2. Jobs
-3. Settings
-4. Help
+On the left, the Explorer tabs. The window opens with one. Each tab is a radio button with the theme underline. A tab can be double-clicked. A small menu appears, and the operator can name that Explorer. The name is shown on the tab. A tab with no name shows the folder it is in.
 
-Explorer is the work surface. Jobs holds the history of jobs this host has run. Settings holds the theme and the job defaults. Help explains the verbs and the options.
+On the right, pinned, and on the same bar: Dashboard, Settings, and Help. These do not scroll. They stay at the right edge.
 
-The look comes from Vestigium.Themes. Buttons, menus, panes, splitters, and the status area use the theme. Changing the theme changes the window. A control that does not take a theme style is a defect.
+Between the Explorer tabs and the pinned menus is an overflow. When the tabs no longer fit, the ones that do not fit collapse into it. The overflow opens a list of those tabs. Choosing one selects that Explorer. The overflow sits immediately left of Dashboard.
+
+Jobs is reached from the status area and from Help. It is not a top-level tab.
+
+The look comes from Vestigium.Themes. Buttons, menus, panes, splitters, the tabs, and the status area use the theme. Changing the theme changes the window. A control that does not take a theme style is a defect.
 
 ---
 
@@ -57,7 +58,7 @@ The look comes from Vestigium.Themes. Buttons, menus, panes, splitters, and the 
 
 The window opens with one Explorer.
 
-Each Explorer has a **+**. Choosing it opens a second Explorer, identical to the first. The operator may open as many as they need and leave them open. Each Explorer keeps its own location. Closing one does not close the others, and does not cancel work that Explorer started.
+A **+** on the tab bar opens another Explorer, identical to the first. The operator may open as many as they need and leave them open. Each Explorer keeps its own location, and its own name if one was given. Closing one does not close the others, and does not cancel work that Explorer started.
 
 An Explorer can be shown in two ways.
 
@@ -67,6 +68,12 @@ An Explorer can be shown in two ways.
 The split can be opened and closed. Closing the split returns the Explorer to a single pane and keeps the location of the pane that remains.
 
 A listing shows name, size, and last write time. A folder can be opened. A parent can be opened. The path can be typed or browsed.
+
+### 4.1 What is remembered
+
+The host remembers the Explorers that were open when the window closed. For each one it remembers the name, the location, and, if it was split, the second location. On the next open, those Explorers are restored, in the same order, on the same locations.
+
+The record is written under `C:\ProgramData\Vestigium\Settings\FXplorerIQ`.
 
 ---
 
@@ -219,3 +226,4 @@ A later release may add an elevated worker for a path the operator cannot write.
 | Version | Date | Change |
 |---|---|---|
 | 1.0 | 21 Oct 2026 | Initial lock. Explorers, split panes, queue, Copy, Mirror, Synchronize through FileIo. |
+| 1.0 | 21 Oct 2026 | Pinned Dashboard, Settings, and Help. Overflow for tabs. Rename on double-click. Tabs and locations remembered. |
