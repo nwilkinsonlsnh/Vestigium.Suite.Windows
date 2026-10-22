@@ -17,7 +17,7 @@
       <Grid x:Name="TabColumn" Grid.Column="0" SizeChanged="TabColumn_SizeChanged">
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
           <StackPanel x:Name="ExplorerTabs" Orientation="Horizontal" />
-          <Button x:Name="AddExplorer"
+          <Button x:Name="AddExplorerButton"
                   Content="+"
                   Style="{StaticResource Button.Utility}"
                   Width="32"
