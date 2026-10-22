@@ -10,7 +10,9 @@ public sealed class ExplorerSlot
 
     public string? Name { get; set; }
 
-    public required ExplorerPane Pane { get; init; }
+    public required ExplorerHost View { get; init; }
+
+    public ExplorerPane Pane => View.First;
 
     public required RadioButton Tab { get; init; }
 
