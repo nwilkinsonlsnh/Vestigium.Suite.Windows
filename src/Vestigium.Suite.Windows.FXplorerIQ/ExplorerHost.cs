@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace Vestigium.Suite.Windows.FXplorerIQ;
 
@@ -16,17 +17,21 @@ public sealed class ExplorerHost : DockPanel
     private readonly MenuItem _verticalItem;
     private readonly MenuItem _horizontalItem;
     private readonly MenuItem _swapItem;
+    private ScrollViewer? _viewport;
     private bool _applying;
 
     public ExplorerHost(Action<string> status)
     {
         LastChildFill = true;
-        First = new ExplorerPane { Status = status };
-        Second = new ExplorerPane { Status = status };
-        First.FillCell = true;
-        Second.FillCell = true;
+        HorizontalAlignment = HorizontalAlignment.Stretch;
+        VerticalAlignment = VerticalAlignment.Stretch;
+        ClipToBounds = true;
+        First = new ExplorerPane { Status = status, FillCell = true, HorizontalAlignment = HorizontalAlignment.Stretch, VerticalAlignment = VerticalAlignment.Stretch };
+        Second = new ExplorerPane { Status = status, FillCell = true, HorizontalAlignment = HorizontalAlignment.Stretch, VerticalAlignment = VerticalAlignment.Stretch };
         First.Navigated += _ => RefreshMarks();
         Second.Navigated += _ => RefreshMarks();
+        Loaded += (_, _) => BindViewport();
+        SizeChanged += (_, _) => Fit();
 
         _splitItem = Item("Split", Split_Click);
         _verticalItem = Item("Vertical", () => SetVertical(true));
@@ -56,6 +61,8 @@ public sealed class ExplorerHost : DockPanel
         Children.Add(_jobBar);
         DockPanel.SetDock(_jobBar, Dock.Top);
 
+        _body.HorizontalAlignment = HorizontalAlignment.Stretch;
+        _body.VerticalAlignment = VerticalAlignment.Stretch;
         _split.HorizontalAlignment = HorizontalAlignment.Stretch;
         _split.VerticalAlignment = VerticalAlignment.Stretch;
         _split.ResizeBehavior = GridResizeBehavior.PreviousAndNext;
@@ -98,11 +105,59 @@ public sealed class ExplorerHost : DockPanel
                 Second.Seed(secondPath);
             Layout();
             RefreshMarks();
+            Fit();
         }
         finally
         {
             _applying = false;
         }
+    }
+
+    private void BindViewport()
+    {
+        _viewport = FindViewport();
+        if (_viewport is not null)
+            _viewport.SizeChanged += (_, _) => Fit();
+
+        var window = Window.GetWindow(this);
+        if (window is not null)
+            window.SizeChanged += (_, _) => Fit();
+        Fit();
+    }
+
+    private void Fit()
+    {
+        var width = _viewport?.ViewportWidth ?? 0;
+        var height = _viewport?.ViewportHeight ?? 0;
+        if (width < 100 || height < 100)
+        {
+            var window = Window.GetWindow(this);
+            if (window is null)
+                return;
+            width = Math.Max(width, window.ActualWidth - 24);
+            height = Math.Max(height, window.ActualHeight - 120);
+        }
+
+        if (width < 100 || height < 100)
+            return;
+
+        Width = width;
+        Height = height;
+        _body.Width = double.NaN;
+        _body.Height = double.NaN;
+    }
+
+    private ScrollViewer? FindViewport()
+    {
+        DependencyObject? current = this;
+        while (current is not null)
+        {
+            if (current is ScrollViewer viewer)
+                return viewer;
+            current = VisualTreeHelper.GetParent(current);
+        }
+
+        return null;
     }
 
     private void OpenMenu(object sender, MouseButtonEventArgs e)
@@ -123,6 +178,7 @@ public sealed class ExplorerHost : DockPanel
         Layout();
         RefreshMarks();
         Save();
+        Fit();
         HostLog.Information(IsSplit ? FXplorerCatalog.SplitOpened : FXplorerCatalog.SplitClosed, "Lifecycle", IsSplit ? "Split opened." : "Split closed.");
         Changed?.Invoke();
     }
@@ -162,6 +218,7 @@ public sealed class ExplorerHost : DockPanel
         Vertical = vertical;
         Layout();
         Save();
+        Fit();
         Changed?.Invoke();
     }
 
@@ -199,9 +256,9 @@ public sealed class ExplorerHost : DockPanel
         var second = new GridLength(1 - Ratio, GridUnitType.Star);
         if (Vertical)
         {
-            _body.ColumnDefinitions.Add(new ColumnDefinition { Width = first, MinWidth = 240 });
+            _body.ColumnDefinitions.Add(new ColumnDefinition { Width = first, MinWidth = 0 });
             _body.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(8) });
-            _body.ColumnDefinitions.Add(new ColumnDefinition { Width = second, MinWidth = 240 });
+            _body.ColumnDefinitions.Add(new ColumnDefinition { Width = second, MinWidth = 0 });
             _body.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
             _split.ResizeDirection = GridResizeDirection.Columns;
             _split.Width = 8;
@@ -213,9 +270,9 @@ public sealed class ExplorerHost : DockPanel
         }
         else
         {
-            _body.RowDefinitions.Add(new RowDefinition { Height = first, MinHeight = 180 });
+            _body.RowDefinitions.Add(new RowDefinition { Height = first, MinHeight = 0 });
             _body.RowDefinitions.Add(new RowDefinition { Height = new GridLength(8) });
-            _body.RowDefinitions.Add(new RowDefinition { Height = second, MinHeight = 180 });
+            _body.RowDefinitions.Add(new RowDefinition { Height = second, MinHeight = 0 });
             _body.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             _split.ResizeDirection = GridResizeDirection.Rows;
             _split.Height = 8;
