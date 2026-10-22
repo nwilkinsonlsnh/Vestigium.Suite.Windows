@@ -4,11 +4,12 @@
              VerticalAlignment="Top">
   <Grid x:Name="Root" Margin="12,8,12,12">
     <Grid.ColumnDefinitions>
-      <ColumnDefinition x:Name="TreeColumn" Width="260" />
+      <ColumnDefinition x:Name="TreeColumn" Width="260" MinWidth="160" />
+      <ColumnDefinition x:Name="SplitColumn" Width="8" />
       <ColumnDefinition Width="*" />
     </Grid.ColumnDefinitions>
 
-    <DockPanel Grid.Column="0" x:Name="TreeHost" Margin="0,0,8,0" LastChildFill="True">
+    <DockPanel Grid.Column="0" x:Name="TreeHost" Margin="0,0,0,0" LastChildFill="True">
       <Grid DockPanel.Dock="Top" Height="48" Margin="0,0,0,8">
         <TextBlock Text="Folders"
                    VerticalAlignment="Center"
@@ -51,6 +52,17 @@
       </Border>
     </DockPanel>
 
+    <GridSplitter x:Name="TreeSplit"
+                  Grid.Column="1"
+                  Width="8"
+                  HorizontalAlignment="Stretch"
+                  VerticalAlignment="Stretch"
+                  ResizeBehavior="PreviousAndNext"
+                  ResizeDirection="Columns"
+                  ShowsPreview="False"
+                  Background="Transparent"
+                  DragCompleted="TreeSplit_DragCompleted" />
+
     <Button x:Name="TreeOpen"
             Grid.Column="0"
             Style="{StaticResource Button.Utility}"
@@ -67,7 +79,7 @@
             Visibility="Collapsed"
             Click="TreeToggle_Click" />
 
-    <DockPanel Grid.Column="1" LastChildFill="True">
+    <DockPanel Grid.Column="2" LastChildFill="True">
       <Grid DockPanel.Dock="Top" Height="48" Margin="0,0,0,8">
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="Auto" />
