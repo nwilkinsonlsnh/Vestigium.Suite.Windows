@@ -62,12 +62,8 @@ public partial class App : Application
             }
         });
 
-        Set(window.HostShell, "Explorer", new VestigiumUnderConstruction
-        {
-            Title = "Explorer",
-            Subject = "One pane",
-            Description = "The listing arrives in the next step."
-        });
+        var pane = new ExplorerPane { Status = text => chrome.Status.Message = text };
+        Set(window.HostShell, "Explorer", pane);
         Set(window.HostShell, "Dashboard", new VestigiumUnderConstruction
         {
             Title = "Dashboard",
