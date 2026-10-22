@@ -11,10 +11,10 @@ public sealed class ExplorerHost : DockPanel
     private readonly StackPanel _jobBar;
     private readonly TextBlock _sourceText;
     private readonly TextBlock _destinationText;
-    private readonly Button _splitButton;
-    private readonly Button _verticalButton;
-    private readonly Button _horizontalButton;
-    private readonly Button _swapButton;
+    private readonly MenuItem _splitItem;
+    private readonly MenuItem _verticalItem;
+    private readonly MenuItem _horizontalItem;
+    private readonly MenuItem _swapItem;
     private bool _applying;
 
     public ExplorerHost(Action<string> status)
@@ -27,28 +27,26 @@ public sealed class ExplorerHost : DockPanel
         First.Navigated += _ => RefreshMarks();
         Second.Navigated += _ => RefreshMarks();
 
-        var bar = new StackPanel
-        {
-            Orientation = Orientation.Horizontal,
-            Margin = new Thickness(12, 8, 12, 0)
-        };
-        _splitButton = Command("Split", "Open a second pane", Split_Click);
-        _verticalButton = Command("Vertical", "Side by side", () => SetVertical(true));
-        _horizontalButton = Command("Horizontal", "Stacked", () => SetVertical(false));
-        _swapButton = Command("Swap", "Swap source and destination", Swap_Click);
-        bar.Children.Add(_splitButton);
-        bar.Children.Add(_verticalButton);
-        bar.Children.Add(_horizontalButton);
-        bar.Children.Add(_swapButton);
-        Children.Add(bar);
-        DockPanel.SetDock(bar, Dock.Top);
+        _splitItem = Item("Split", Split_Click);
+        _verticalItem = Item("Vertical", () => SetVertical(true));
+        _horizontalItem = Item("Horizontal", () => SetVertical(false));
+        _swapItem = Item("Swap source and destination", Swap_Click);
+        var menu = new ContextMenu();
+        menu.Items.Add(_splitItem);
+        menu.Items.Add(new Separator());
+        menu.Items.Add(_verticalItem);
+        menu.Items.Add(_horizontalItem);
+        menu.Items.Add(new Separator());
+        menu.Items.Add(_swapItem);
+        menu.Opened += (_, _) => RefreshMenu();
+        ContextMenu = menu;
 
         _sourceText = Mark("Source");
         _destinationText = Mark("Destination");
         _jobBar = new StackPanel
         {
             Orientation = Orientation.Horizontal,
-            Margin = new Thickness(12, 6, 12, 0),
+            Margin = new Thickness(12, 8, 12, 0),
             Visibility = Visibility.Collapsed
         };
         _jobBar.Children.Add(_sourceText);
@@ -56,7 +54,6 @@ public sealed class ExplorerHost : DockPanel
         Children.Add(_jobBar);
         DockPanel.SetDock(_jobBar, Dock.Top);
 
-        _split.Width = 8;
         _split.HorizontalAlignment = HorizontalAlignment.Stretch;
         _split.VerticalAlignment = VerticalAlignment.Stretch;
         _split.ResizeBehavior = GridResizeBehavior.PreviousAndNext;
@@ -129,11 +126,19 @@ public sealed class ExplorerHost : DockPanel
 
     private void RefreshMarks()
     {
-        var show = IsSplit;
-        _jobBar.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
-        _swapButton.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
+        _jobBar.Visibility = IsSplit ? Visibility.Visible : Visibility.Collapsed;
         _sourceText.Text = "Source  " + OrNone(SourcePath);
         _destinationText.Text = "Destination  " + OrNone(DestinationPath);
+    }
+
+    private void RefreshMenu()
+    {
+        _splitItem.Header = IsSplit ? "Close split" : "Split";
+        _verticalItem.IsEnabled = IsSplit;
+        _horizontalItem.IsEnabled = IsSplit;
+        _swapItem.IsEnabled = IsSplit;
+        _verticalItem.IsChecked = IsSplit && Vertical;
+        _horizontalItem.IsChecked = IsSplit && !Vertical;
     }
 
     private static string OrNone(string path) => string.IsNullOrWhiteSpace(path) ? "(none)" : path;
@@ -167,6 +172,16 @@ public sealed class ExplorerHost : DockPanel
         _body.Children.Clear();
         _body.RowDefinitions.Clear();
         _body.ColumnDefinitions.Clear();
+        Grid.SetRow(First, 0);
+        Grid.SetColumn(First, 0);
+
+        if (!IsSplit)
+        {
+            _body.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+            _body.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            _body.Children.Add(First);
+            return;
+        }
 
         var first = new GridLength(Ratio, GridUnitType.Star);
         var second = new GridLength(1 - Ratio, GridUnitType.Star);
@@ -175,11 +190,10 @@ public sealed class ExplorerHost : DockPanel
             _body.ColumnDefinitions.Add(new ColumnDefinition { Width = first, MinWidth = 240 });
             _body.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(8) });
             _body.ColumnDefinitions.Add(new ColumnDefinition { Width = second, MinWidth = 240 });
+            _body.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
             _split.ResizeDirection = GridResizeDirection.Columns;
             _split.Width = 8;
             _split.Height = double.NaN;
-            Grid.SetColumn(First, 0);
-            Grid.SetRow(First, 0);
             Grid.SetColumn(_split, 1);
             Grid.SetRow(_split, 0);
             Grid.SetColumn(Second, 2);
@@ -190,11 +204,10 @@ public sealed class ExplorerHost : DockPanel
             _body.RowDefinitions.Add(new RowDefinition { Height = first, MinHeight = 180 });
             _body.RowDefinitions.Add(new RowDefinition { Height = new GridLength(8) });
             _body.RowDefinitions.Add(new RowDefinition { Height = second, MinHeight = 180 });
+            _body.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             _split.ResizeDirection = GridResizeDirection.Rows;
             _split.Height = 8;
             _split.Width = double.NaN;
-            Grid.SetRow(First, 0);
-            Grid.SetColumn(First, 0);
             Grid.SetRow(_split, 1);
             Grid.SetColumn(_split, 0);
             Grid.SetRow(Second, 2);
@@ -202,19 +215,10 @@ public sealed class ExplorerHost : DockPanel
         }
 
         _body.Children.Add(First);
-        if (IsSplit)
-        {
-            _body.Children.Add(_split);
-            _body.Children.Add(Second);
-            if (string.IsNullOrWhiteSpace(Second.Folder))
-                Second.Open(First.Folder);
-        }
-
-        _splitButton.Content = IsSplit ? "Close split" : "Split";
-        _verticalButton.Visibility = IsSplit ? Visibility.Visible : Visibility.Collapsed;
-        _horizontalButton.Visibility = IsSplit ? Visibility.Visible : Visibility.Collapsed;
-        _verticalButton.Opacity = Vertical ? 1 : 0.55;
-        _horizontalButton.Opacity = Vertical ? 0.55 : 1;
+        _body.Children.Add(_split);
+        _body.Children.Add(Second);
+        if (string.IsNullOrWhiteSpace(Second.Folder))
+            Second.Open(First.Folder);
     }
 
     private void Save()
@@ -227,20 +231,11 @@ public sealed class ExplorerHost : DockPanel
         App.Settings.Save(settings);
     }
 
-    private Button Command(string text, string tip, Action click)
+    private MenuItem Item(string text, Action click)
     {
-        var button = new Button
-        {
-            Content = text,
-            ToolTip = tip,
-            Style = (Style)Application.Current.FindResource("Button.Utility"),
-            MinWidth = 88,
-            MinHeight = 32,
-            Margin = new Thickness(0, 0, 8, 0),
-            Padding = new Thickness(12, 4, 12, 4)
-        };
-        button.Click += (_, _) => click();
-        return button;
+        var item = new MenuItem { Header = text };
+        item.Click += (_, _) => click();
+        return item;
     }
 
     private TextBlock Mark(string caption)
