@@ -1,5 +1,8 @@
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Input;
 using Vestigium.Controls.Shell;
 
 namespace Vestigium.Suite.Windows.FXplorerIQ;
@@ -84,7 +87,9 @@ public partial class FXplorerIqWindow : Window
         tab.Tag = slot;
         close.Tag = slot;
         tab.Checked += ExplorerTab_Checked;
+        tab.MouseDoubleClick += ExplorerTab_DoubleClick;
         close.Click += CloseExplorer_Click;
+        pane.Navigated += _ => RefreshLabel(slot);
         host.Children.Add(tab);
         host.Children.Add(close);
         _explorers.Add(slot);
@@ -98,6 +103,88 @@ public partial class FXplorerIqWindow : Window
         if (RootShell is null || sender is not RadioButton { Tag: ExplorerSlot slot })
             return;
         Show(slot);
+    }
+
+    private void ExplorerTab_DoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is not RadioButton { Tag: ExplorerSlot slot })
+            return;
+        OpenRename(slot);
+        e.Handled = true;
+    }
+
+    private void OpenRename(ExplorerSlot slot)
+    {
+        var box = new TextBox
+        {
+            Text = slot.Name ?? "",
+            Style = (Style)FindResource("TextBox.Standard"),
+            MinWidth = 180,
+            MinHeight = 32,
+            VerticalContentAlignment = VerticalAlignment.Center
+        };
+        var popup = new Popup
+        {
+            PlacementTarget = slot.Tab,
+            Placement = PlacementMode.Bottom,
+            StaysOpen = false,
+            AllowsTransparency = true
+        };
+        var panel = new StackPanel { Margin = new Thickness(8) };
+        panel.Children.Add(new TextBlock
+        {
+            Text = "Name",
+            Style = (Style)FindResource("TextBlock.Caption"),
+            Margin = new Thickness(0, 0, 0, 6)
+        });
+        panel.Children.Add(box);
+        popup.Child = new Border
+        {
+            Background = (System.Windows.Media.Brush)FindResource("Vestigium.Brushes.Surface.Window"),
+            BorderBrush = (System.Windows.Media.Brush)FindResource("Vestigium.Brushes.Stroke.Default"),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(6),
+            Child = panel
+        };
+        box.KeyDown += (_, args) =>
+        {
+            if (args.Key == Key.Enter)
+            {
+                CommitName(slot, box.Text);
+                popup.IsOpen = false;
+                args.Handled = true;
+            }
+            else if (args.Key == Key.Escape)
+            {
+                popup.IsOpen = false;
+                args.Handled = true;
+            }
+        };
+        popup.IsOpen = true;
+        box.Focus();
+        box.SelectAll();
+    }
+
+    private void CommitName(ExplorerSlot slot, string text)
+    {
+        var name = text.Trim();
+        slot.Name = name.Length == 0 ? null : name;
+        RefreshLabel(slot);
+    }
+
+    private void RefreshLabel(ExplorerSlot slot)
+    {
+        slot.Tab.Content = string.IsNullOrWhiteSpace(slot.Name)
+            ? FolderLabel(slot.Pane.Folder)
+            : slot.Name;
+    }
+
+    private static string FolderLabel(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            return "Explorer";
+        var name = Path.GetFileName(path.TrimEnd('\\', '/'));
+        return string.IsNullOrWhiteSpace(name) ? path : name;
     }
 
     private void CloseExplorer_Click(object sender, RoutedEventArgs e)
