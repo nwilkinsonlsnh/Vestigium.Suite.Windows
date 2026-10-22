@@ -47,7 +47,7 @@ public partial class FXplorerIqWindow : Window
         }
 
         for (var i = 0; i < records.Count; i++)
-            AddExplorer(records[i].Path, records[i].Name, select: i == 0, split: records[i].Split, second: records[i].SecondPath);
+            AddExplorer(records[i].Path, records[i].Name, select: i == 0, split: records[i].Split, second: records[i].SecondPath, sourceIsFirst: records[i].SourceIsFirst);
     }
 
     private void SaveSession()
@@ -59,7 +59,8 @@ public partial class FXplorerIqWindow : Window
                 Name = slot.Name,
                 Path = slot.Pane.Folder,
                 Split = slot.View.IsSplit,
-                SecondPath = slot.View.Second.Folder
+                SecondPath = slot.View.Second.Folder,
+                SourceIsFirst = slot.View.SourceIsFirst
             });
         _session.Save(session);
     }
@@ -77,14 +78,14 @@ public partial class FXplorerIqWindow : Window
 
     private void AddExplorer_Click(object sender, RoutedEventArgs e) => AddExplorer();
 
-    private void AddExplorer(string? path = null, string? name = null, bool select = true, bool split = false, string? second = null)
+    private void AddExplorer(string? path = null, string? name = null, bool select = true, bool split = false, string? second = null, bool sourceIsFirst = true)
     {
         var number = _next++;
         var header = number == 1 ? "Explorer" : "Explorer " + number;
         var view = new ExplorerHost(text => _status?.Invoke(text));
         if (!string.IsNullOrWhiteSpace(path))
             view.First.Seed(path);
-        view.Apply(split, App.Settings.Load(), second);
+        view.Apply(split, App.Settings.Load(), second, sourceIsFirst);
         var tab = new RadioButton
         {
             Content = header,
