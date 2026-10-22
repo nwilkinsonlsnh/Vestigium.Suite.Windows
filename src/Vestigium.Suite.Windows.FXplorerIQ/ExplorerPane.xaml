@@ -145,7 +145,7 @@
           <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="420">
             <TextBlock x:Name="BusyMessage"
                        Text="Loading"
-                       Style="{StaticResource TextBlock.Body}"
+                       Style="{StaticResource TextBlock.Standard}"
                        TextAlignment="Center"
                        TextWrapping="Wrap"
                        Margin="0,0,0,12" />
