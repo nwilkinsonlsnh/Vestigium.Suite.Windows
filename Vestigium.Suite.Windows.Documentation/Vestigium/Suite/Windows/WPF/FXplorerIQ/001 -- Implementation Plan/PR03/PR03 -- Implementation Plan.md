@@ -34,4 +34,4 @@
 | 2 | PR03.002 | Two panes side by side, each with its own path. Open, parent, and typed path work in both. | Done |
 | 3 | PR03.003 | Close split. Keep the remaining pane. | Done |
 | 4 | PR03.004 | Mark source and destination. The job bar shows both paths. | Done |
-| 5 | PR03.005 | Session stores the second path and which pane is the source. Log split opened and split closed. | |
+| 5 | PR03.005 | Session stores the second path and which pane is the source. Log split opened and split closed. | Done |
