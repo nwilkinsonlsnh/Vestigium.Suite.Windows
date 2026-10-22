@@ -33,11 +33,15 @@
               CornerRadius="6">
         <TreeView x:Name="Folders"
                   Style="{StaticResource TreeView.Standard}"
-                  ItemContainerStyle="{StaticResource TreeViewItem.Standard}"
                   ScrollViewer.VerticalScrollBarVisibility="Auto"
                   ScrollViewer.HorizontalScrollBarVisibility="Auto"
                   PreviewMouseWheel="Pane_PreviewMouseWheel"
                   SelectedItemChanged="Folders_SelectedItemChanged">
+          <TreeView.ItemContainerStyle>
+            <Style TargetType="TreeViewItem" BasedOn="{StaticResource TreeViewItem.Standard}">
+              <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+            </Style>
+          </TreeView.ItemContainerStyle>
           <TreeView.ItemTemplate>
             <HierarchicalDataTemplate ItemsSource="{Binding Children}">
               <TextBlock Text="{Binding Name}" />
