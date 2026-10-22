@@ -12,6 +12,8 @@ public sealed class ExplorerRecord
     public bool Split { get; set; }
 
     public string SecondPath { get; set; } = "";
+
+    public bool SourceIsFirst { get; set; } = true;
 }
 
 public sealed class ExplorerSession
