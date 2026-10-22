@@ -21,6 +21,11 @@
                    GroupName="FXplorerSettings"
                    Checked="Page_Checked"
                    Tag="Hash" />
+      <RadioButton Style="{StaticResource RadioButton.UnderlineTab}"
+                   Content="View"
+                   GroupName="FXplorerSettings"
+                   Checked="Page_Checked"
+                   Tag="View" />
     </StackPanel>
 
     <StackPanel x:Name="ThemesPage" HorizontalAlignment="Left" VerticalAlignment="Top" Width="420" Margin="8,0,0,0">
@@ -102,6 +107,60 @@
                 Width="220"
                 HorizontalAlignment="Left"
                 SelectionChanged="HashBox_SelectionChanged" />
+    </StackPanel>
+
+    <StackPanel x:Name="ViewPage"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Width="480"
+                Margin="8,0,0,0"
+                Visibility="Collapsed">
+      <TextBlock Style="{StaticResource TextBlock.Caption}"
+                 Margin="0,0,0,16"
+                 TextWrapping="Wrap"
+                 Text="What the tree and the list show. Changes apply to the open Explorer." />
+
+      <TextBlock Style="{StaticResource TextBlock.Caption}" Text="Drives" Margin="0,0,0,8" />
+      <CheckBox x:Name="HideEmptyDrives"
+                Style="{StaticResource CheckBox.Standard}"
+                Content="Hide empty drives"
+                Margin="0,0,0,16"
+                Checked="View_Changed"
+                Unchecked="View_Changed" />
+
+      <TextBlock Style="{StaticResource TextBlock.Caption}" Text="Directories" Margin="0,0,0,8" />
+      <CheckBox x:Name="ShowAllFolders"
+                Style="{StaticResource CheckBox.Standard}"
+                Content="Show all folders"
+                Margin="0,0,0,8"
+                Checked="View_Changed"
+                Unchecked="View_Changed" />
+      <CheckBox x:Name="HideJunctions"
+                Style="{StaticResource CheckBox.Standard}"
+                Content="Hide junctions"
+                Margin="0,0,0,16"
+                Checked="View_Changed"
+                Unchecked="View_Changed" />
+
+      <TextBlock Style="{StaticResource TextBlock.Caption}" Text="Files" Margin="0,0,0,8" />
+      <CheckBox x:Name="ShowHiddenFiles"
+                Style="{StaticResource CheckBox.Standard}"
+                Content="Show hidden files"
+                Margin="0,0,0,8"
+                Checked="View_Changed"
+                Unchecked="View_Changed" />
+      <CheckBox x:Name="ShowFileExtensions"
+                Style="{StaticResource CheckBox.Standard}"
+                Content="Show file extensions"
+                Margin="0,0,0,8"
+                Checked="View_Changed"
+                Unchecked="View_Changed" />
+      <CheckBox x:Name="ShowSystemFiles"
+                Style="{StaticResource CheckBox.Standard}"
+                Content="Show system files"
+                Margin="0,0,0,8"
+                Checked="View_Changed"
+                Unchecked="View_Changed" />
     </StackPanel>
   </DockPanel>
 </UserControl>
