@@ -27,7 +27,7 @@
 
 | Order | ID | Do | State |
 | ---: | :--- | :--- | :--- |
-| 1 | PR02.001 | A collection of Explorers. The + adds one. Closing one leaves the others. | |
+| 1 | PR02.001 | A collection of Explorers. The + adds one. Closing one leaves the others. | Done |
 | 2 | PR02.002 | Tabs as underlined radios. Double-click opens a naming menu. An unnamed tab shows the folder. | |
 | 3 | PR02.003 | Overflow immediately left of Dashboard. Hidden while every tab fits. A list of the hidden tabs. Choosing one selects it. | |
 | 4 | PR02.004 | ExplorerSession. Write name, location, and order on close. Restore on open. A missing path is kept and reported. | |
