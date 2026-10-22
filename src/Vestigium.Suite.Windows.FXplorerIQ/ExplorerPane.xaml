@@ -63,21 +63,21 @@
                   Background="Transparent"
                   DragCompleted="TreeSplit_DragCompleted" />
 
-    <Button x:Name="TreeOpen"
-            Grid.Column="0"
-            Style="{StaticResource Button.Utility}"
-            Content="▶"
-            ToolTip="Show folders"
-            Width="32"
-            Height="32"
-            MinWidth="32"
-            MinHeight="32"
-            Padding="0"
-            FontSize="12"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Top"
-            Visibility="Collapsed"
-            Click="TreeToggle_Click" />
+    <Grid x:Name="TreeOpenHost" Grid.Column="0" Height="48" VerticalAlignment="Top" Visibility="Collapsed">
+      <Button x:Name="TreeOpen"
+              Style="{StaticResource Button.Utility}"
+              Content="▶"
+              ToolTip="Show folders"
+              Width="32"
+              Height="32"
+              MinWidth="32"
+              MinHeight="32"
+              Padding="0"
+              FontSize="12"
+              HorizontalAlignment="Center"
+              VerticalAlignment="Center"
+              Click="TreeToggle_Click" />
+    </Grid>
 
     <DockPanel Grid.Column="2" LastChildFill="True">
       <Grid DockPanel.Dock="Top" Height="48" Margin="0,0,0,8">
