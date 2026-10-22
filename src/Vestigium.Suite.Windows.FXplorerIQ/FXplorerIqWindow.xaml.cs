@@ -10,8 +10,10 @@ namespace Vestigium.Suite.Windows.FXplorerIQ;
 public partial class FXplorerIqWindow : Window
 {
     private readonly List<ExplorerSlot> _explorers = [];
+    private readonly List<ExplorerSlot> _hidden = [];
     private int _next = 1;
     private Action<string>? _status;
+    private bool _fitting;
 
     public FXplorerIqWindow(VestigiumDefaultWindowViewModel viewModel)
     {
@@ -96,6 +98,7 @@ public partial class FXplorerIqWindow : Window
         ExplorerTabs.Children.Add(host);
         RefreshClose();
         tab.IsChecked = true;
+        FitTabs();
     }
 
     private void ExplorerTab_Checked(object sender, RoutedEventArgs e)
@@ -103,6 +106,7 @@ public partial class FXplorerIqWindow : Window
         if (RootShell is null || sender is not RadioButton { Tag: ExplorerSlot slot })
             return;
         Show(slot);
+        FitTabs();
     }
 
     private void ExplorerTab_DoubleClick(object sender, MouseButtonEventArgs e)
@@ -138,14 +142,7 @@ public partial class FXplorerIqWindow : Window
             Margin = new Thickness(0, 0, 0, 6)
         });
         panel.Children.Add(box);
-        popup.Child = new Border
-        {
-            Background = (System.Windows.Media.Brush)FindResource("Vestigium.Brushes.Surface.Window"),
-            BorderBrush = (System.Windows.Media.Brush)FindResource("Vestigium.Brushes.Stroke.Default"),
-            BorderThickness = new Thickness(1),
-            CornerRadius = new CornerRadius(6),
-            Child = panel
-        };
+        popup.Child = MenuChrome(panel);
         box.KeyDown += (_, args) =>
         {
             if (args.Key == Key.Enter)
@@ -177,6 +174,7 @@ public partial class FXplorerIqWindow : Window
         slot.Tab.Content = string.IsNullOrWhiteSpace(slot.Name)
             ? FolderLabel(slot.Pane.Folder)
             : slot.Name;
+        FitTabs();
     }
 
     private static string FolderLabel(string path)
@@ -198,11 +196,13 @@ public partial class FXplorerIqWindow : Window
         ExplorerTabs.Children.Remove(slot.Host);
         RefreshClose();
 
-        if (!wasSelected)
-            return;
+        if (wasSelected)
+        {
+            var next = _explorers[Math.Min(index, _explorers.Count - 1)];
+            next.Tab.IsChecked = true;
+        }
 
-        var next = _explorers[Math.Min(index, _explorers.Count - 1)];
-        next.Tab.IsChecked = true;
+        FitTabs();
     }
 
     private void Show(ExplorerSlot slot)
@@ -220,6 +220,133 @@ public partial class FXplorerIqWindow : Window
         foreach (var slot in _explorers)
             slot.Close.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
     }
+
+    private void TabColumn_SizeChanged(object sender, SizeChangedEventArgs e) => FitTabs();
+
+    private void FitTabs()
+    {
+        if (_fitting || TabColumn is null || TabColumn.ActualWidth <= 0)
+            return;
+
+        _fitting = true;
+        try
+        {
+            foreach (var slot in _explorers)
+                slot.Host.Visibility = Visibility.Visible;
+
+            var available = TabColumn.ActualWidth - AddExplorer.ActualWidth - 12;
+            if (available < 40)
+                available = TabColumn.ActualWidth;
+
+            var hidden = new List<ExplorerSlot>();
+            double used = 0;
+            foreach (var slot in _explorers)
+            {
+                var width = TabWidth(slot);
+                if (used + width <= available)
+                    used += width;
+                else
+                    hidden.Add(slot);
+            }
+
+            var selected = _explorers.FirstOrDefault(slot => slot.Tab.IsChecked == true);
+            if (selected is not null && hidden.Contains(selected))
+            {
+                hidden.Remove(selected);
+                var visible = _explorers.Where(slot => !hidden.Contains(slot) && slot != selected).ToList();
+                while (visible.Count > 0 && visible.Sum(TabWidth) + TabWidth(selected) > available)
+                {
+                    var drop = visible[^1];
+                    visible.RemoveAt(visible.Count - 1);
+                    hidden.Add(drop);
+                }
+            }
+
+            foreach (var slot in hidden)
+                slot.Host.Visibility = Visibility.Collapsed;
+
+            _hidden.Clear();
+            _hidden.AddRange(hidden);
+            Overflow.Visibility = hidden.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        }
+        finally
+        {
+            _fitting = false;
+        }
+    }
+
+    private static double TabWidth(ExplorerSlot slot)
+    {
+        slot.Host.Measure(new Size(double.PositiveInfinity, 48));
+        return slot.Host.DesiredSize.Width;
+    }
+
+    private void Overflow_Click(object sender, RoutedEventArgs e)
+    {
+        if (_hidden.Count == 0)
+            return;
+
+        var panel = new StackPanel { Margin = new Thickness(4) };
+        foreach (var slot in _hidden)
+        {
+            var button = new Button
+            {
+                Content = slot.Tab.Content,
+                Style = (Style)FindResource("Button.Utility"),
+                HorizontalContentAlignment = HorizontalAlignment.Left,
+                MinWidth = 160,
+                Margin = new Thickness(0, 2, 0, 2),
+                Tag = slot
+            };
+            button.Click += OverflowItem_Click;
+            panel.Children.Add(button);
+        }
+
+        var popup = new Popup
+        {
+            PlacementTarget = Overflow,
+            Placement = PlacementMode.Bottom,
+            StaysOpen = false,
+            AllowsTransparency = true,
+            Child = MenuChrome(panel)
+        };
+        popup.IsOpen = true;
+    }
+
+    private void OverflowItem_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { Tag: ExplorerSlot slot })
+            return;
+        if (sender is FrameworkElement element)
+        {
+            var popup = FindPopup(element);
+            if (popup is not null)
+                popup.IsOpen = false;
+        }
+        slot.Tab.IsChecked = true;
+    }
+
+    private static Popup? FindPopup(DependencyObject start)
+    {
+        DependencyObject? current = start;
+        while (current is not null)
+        {
+            if (current is Popup popup)
+                return popup;
+            current = System.Windows.Media.VisualTreeHelper.GetParent(current);
+        }
+        return null;
+    }
+
+    private Border MenuChrome(UIElement child)
+        => new()
+        {
+            Background = (System.Windows.Media.Brush)FindResource("Vestigium.Brushes.Surface.Window"),
+            BorderBrush = (System.Windows.Media.Brush)FindResource("Vestigium.Brushes.Stroke.Default"),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(6),
+            Child = child
+        };
 
     private void MainNav_Checked(object sender, RoutedEventArgs e)
     {
