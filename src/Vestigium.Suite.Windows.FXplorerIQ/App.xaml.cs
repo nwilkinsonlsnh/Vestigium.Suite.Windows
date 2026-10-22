@@ -70,12 +70,7 @@ public partial class App : Application
             Subject = "Later",
             Description = "Counts of ran, failed, and bytes moved."
         });
-        Set(window.HostShell, "Settings", new VestigiumUnderConstruction
-        {
-            Title = "Settings",
-            Subject = "Later",
-            Description = "Theme, default verb, collision, and retry."
-        });
+        Set(window.HostShell, "Settings", new SettingsView());
         Set(window.HostShell, "Help", new VestigiumUnderConstruction
         {
             Title = "Help",
