@@ -1,5 +1,7 @@
 using System.IO;
+using System.Security.Principal;
 using Vestigium.Helpers.FileIo;
+using Vestigium.Helpers.Hashing;
 using Vestigium.Logging;
 
 namespace Vestigium.Suite.Windows.FXplorerIQ;
@@ -23,7 +25,15 @@ public static class HostLog
             cfg.AppId = appId;
             cfg.LogDirectory = root;
             FileIoCatalog.Register(cfg);
+            HashingCatalog.Register(cfg);
+            FXplorerCatalog.Register(cfg);
         });
         VestigiumLogger.BindLifetime(System.Windows.Application.Current);
     }
+
+    private static IReadOnlyDictionary<string, string?> Actor =>
+        new Dictionary<string, string?> { ["user"] = WindowsIdentity.GetCurrent().Name };
+
+    public static void Information(int eventId, string subcategory, string message)
+        => VestigiumLog.Write(eventId, VestigiumLogLevel.Information, VestigiumStatus.Success, FXplorerCatalog.Category, subcategory, message, null, HostIds.FXplorerIQ, null, Actor);
 }
