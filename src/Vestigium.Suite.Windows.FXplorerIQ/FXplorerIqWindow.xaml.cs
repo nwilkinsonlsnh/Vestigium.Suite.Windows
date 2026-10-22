@@ -263,7 +263,7 @@ public partial class FXplorerIqWindow : Window
             foreach (var slot in _explorers)
                 slot.Host.Visibility = Visibility.Visible;
 
-            var available = TabColumn.ActualWidth - AddExplorer.ActualWidth - 12;
+            var available = TabColumn.ActualWidth - AddExplorerButton.ActualWidth - 12;
             if (available < 40)
                 available = TabColumn.ActualWidth;
 
