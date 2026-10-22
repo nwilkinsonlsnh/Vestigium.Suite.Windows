@@ -95,17 +95,18 @@
                 RowHeaderWidth="0"
                 SelectionMode="Single"
                 SelectionUnit="FullRow"
+                CanUserResizeColumns="True"
                 ScrollViewer.VerticalScrollBarVisibility="Auto"
                 ScrollViewer.HorizontalScrollBarVisibility="Auto"
                 PreviewMouseWheel="Pane_PreviewMouseWheel"
                 MouseDoubleClick="Listing_MouseDoubleClick">
         <DataGrid.Columns>
-          <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="2.4*" MinWidth="180" />
-          <DataGridTextColumn Header="Date Modified" Binding="{Binding DateModified}" Width="160" />
-          <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="110" />
-          <DataGridTextColumn Header="Size" Binding="{Binding SizeText}" Width="72" />
-          <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="100" />
-          <DataGridTextColumn Header="Tag" Binding="{Binding Tag}" Width="100" />
+          <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="280" MinWidth="40" />
+          <DataGridTextColumn Header="Date Modified" Binding="{Binding DateModified}" Width="160" MinWidth="40" />
+          <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="110" MinWidth="40" />
+          <DataGridTextColumn Header="Size" Binding="{Binding SizeText}" Width="72" MinWidth="40" />
+          <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="100" MinWidth="40" />
+          <DataGridTextColumn Header="Tag" Binding="{Binding Tag}" Width="100" MinWidth="40" />
         </DataGrid.Columns>
       </DataGrid>
     </DockPanel>
