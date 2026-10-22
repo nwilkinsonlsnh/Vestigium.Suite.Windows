@@ -1,6 +1,5 @@
 using System.Windows;
 using System.Windows.Controls;
-using Vestigium.Themes;
 
 namespace Vestigium.Suite.Windows.FXplorerIQ;
 
@@ -30,5 +29,9 @@ public partial class SettingsView : UserControl
         var themes = App.Themes;
         if (!string.Equals(themes.Current?.Id, id, StringComparison.OrdinalIgnoreCase))
             themes.SwitchTheme(id);
+
+        var settings = App.Settings.Load();
+        settings.ThemeId = id;
+        App.Settings.Save(settings);
     }
 }
