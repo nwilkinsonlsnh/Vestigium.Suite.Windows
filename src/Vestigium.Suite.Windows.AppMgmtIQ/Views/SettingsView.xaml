@@ -59,6 +59,7 @@
                                   PageIncrement="1"
                                   DecimalPlaces="0"
                                   Width="120"
+                                  TextAlignment="Center"
                                   HorizontalAlignment="Left" />
     </StackPanel>
 
