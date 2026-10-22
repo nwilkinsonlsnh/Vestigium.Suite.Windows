@@ -1,0 +1,42 @@
+<Window x:Class="Vestigium.Suite.Windows.FXplorerIQ.FXplorerIqWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:shell="clr-namespace:Vestigium.Controls.Shell;assembly=Vestigium.Controls"
+        Title="FXplorerIQ"
+        Height="980" Width="1800"
+        MinHeight="640" MinWidth="1200"
+        ResizeMode="CanResize"
+        WindowStartupLocation="Manual"
+        Background="{DynamicResource Vestigium.Brushes.Surface.Window}">
+  <DockPanel>
+    <Grid DockPanel.Dock="Top" Margin="12,8,12,0">
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+        <RadioButton Content="Explorer"
+                     Style="{StaticResource RadioButton.UnderlineTab}"
+                     GroupName="FXplorerMainNav"
+                     IsChecked="True"
+                     Checked="MainNav_Checked" />
+      </StackPanel>
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+        <RadioButton Content="Dashboard"
+                     Style="{StaticResource RadioButton.UnderlineTab}"
+                     GroupName="FXplorerMainNav"
+                     Checked="MainNav_Checked" />
+        <RadioButton Content="Settings"
+                     Style="{StaticResource RadioButton.UnderlineTab}"
+                     GroupName="FXplorerMainNav"
+                     Checked="MainNav_Checked" />
+        <RadioButton Content="Help"
+                     Style="{StaticResource RadioButton.UnderlineTab}"
+                     GroupName="FXplorerMainNav"
+                     Margin="0"
+                     Checked="MainNav_Checked" />
+      </StackPanel>
+    </Grid>
+    <shell:VestigiumShell x:Name="RootShell"
+                          ShowNav="False"
+                          Status="{Binding Status}"
+                          StatusBarPosition="{Binding Status.Position, Mode=TwoWay}"
+                          ShowStatusBar="{Binding ShowStatusBar}" />
+  </DockPanel>
+</Window>
