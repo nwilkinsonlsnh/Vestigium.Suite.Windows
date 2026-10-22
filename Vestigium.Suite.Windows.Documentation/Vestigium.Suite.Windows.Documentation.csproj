@@ -12,4 +12,8 @@
   <ItemGroup>
     <None Include="Vestigium\**\*.md" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Vestigium\Suite\Windows\WPF\FXplorerIQ\Completed\" />
+  </ItemGroup>
 </Project>
