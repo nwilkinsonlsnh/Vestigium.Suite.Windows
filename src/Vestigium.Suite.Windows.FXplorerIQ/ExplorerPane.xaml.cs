@@ -85,13 +85,13 @@ public partial class ExplorerPane : UserControl
             foreach (var dir in Directory.EnumerateDirectories(full))
             {
                 var info = new DirectoryInfo(dir);
-                rows.Add(new PaneEntry(info.Name, info.FullName, true, "", Write(info.LastWriteTime)));
+                rows.Add(new PaneEntry(info.Name, info.FullName, true, Write(info.LastWriteTime), "File folder", ""));
             }
 
             foreach (var file in Directory.EnumerateFiles(full))
             {
                 var info = new FileInfo(file);
-                rows.Add(new PaneEntry(info.Name, info.FullName, false, Size(info.Length), Write(info.LastWriteTime)));
+                rows.Add(new PaneEntry(info.Name, info.FullName, false, Write(info.LastWriteTime), Kind(info.Extension), Size(info.Length)));
             }
 
             rows.Sort(static (a, b) =>
@@ -240,6 +240,13 @@ public partial class ExplorerPane : UserControl
 
     private static string Write(DateTime when)
         => when.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+
+    private static string Kind(string? extension)
+    {
+        if (string.IsNullOrWhiteSpace(extension))
+            return "File";
+        return extension.TrimStart('.').ToUpperInvariant() + " File";
+    }
 
     private static string Size(long bytes)
     {
