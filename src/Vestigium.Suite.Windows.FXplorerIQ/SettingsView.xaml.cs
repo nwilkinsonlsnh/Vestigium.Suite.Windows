@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using Vestigium.Controls.NumericUpDown;
+using Vestigium.Helpers.Hashing;
 
 namespace Vestigium.Suite.Windows.FXplorerIQ;
 
@@ -21,6 +22,10 @@ public partial class SettingsView : UserControl
         var themes = App.Themes;
         ThemeBox.ItemsSource = themes.AvailableThemes;
         ThemeBox.SelectedValue = themes.Current?.Id ?? themes.AvailableThemes.FirstOrDefault()?.Id;
+        HashBox.ItemsSource = Enum.GetValues<HashingAlgorithm>()
+            .Where(HashingHelper.IsSupported)
+            .Select(algorithm => new HashChoice(algorithm.ToString(), HashingHelper.AlgorithmName(algorithm)))
+            .ToList();
         Show(App.Settings.Load());
         _loading = false;
     }
@@ -46,15 +51,18 @@ public partial class SettingsView : UserControl
         SizeWidth.Value = (decimal)settings.SizeWidth;
         CategoryWidth.Value = (decimal)settings.CategoryWidth;
         TagWidth.Value = (decimal)settings.TagWidth;
+        HashWidth.Value = (decimal)settings.HashWidth;
+        HashBox.SelectedValue = settings.Algorithm().ToString();
     }
 
     private void Page_Checked(object sender, RoutedEventArgs e)
     {
-        if (ThemesPage is null || ColumnsPage is null)
+        if (ThemesPage is null || ColumnsPage is null || HashPage is null)
             return;
-        var columns = sender is RadioButton button && button.Tag as string == "Columns";
-        ThemesPage.Visibility = columns ? Visibility.Collapsed : Visibility.Visible;
-        ColumnsPage.Visibility = columns ? Visibility.Visible : Visibility.Collapsed;
+        var tag = sender is RadioButton button ? button.Tag as string : "Themes";
+        ThemesPage.Visibility = tag == "Themes" ? Visibility.Visible : Visibility.Collapsed;
+        ColumnsPage.Visibility = tag == "Columns" ? Visibility.Visible : Visibility.Collapsed;
+        HashPage.Visibility = tag == "Hash" ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void ThemeBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -67,6 +75,13 @@ public partial class SettingsView : UserControl
             themes.SwitchTheme(id);
 
         Save(settings => settings.ThemeId = id);
+    }
+
+    private void HashBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_loading || HashBox.SelectedValue is not string id || string.IsNullOrWhiteSpace(id))
+            return;
+        Save(settings => settings.HashAlgorithm = id);
     }
 
     private void Width_Changed(object sender, RoutedPropertyChangedEventArgs<decimal> e)
@@ -96,4 +111,6 @@ public partial class SettingsView : UserControl
             _loading = false;
         }
     }
+
+    private sealed record HashChoice(string Id, string Name);
 }
