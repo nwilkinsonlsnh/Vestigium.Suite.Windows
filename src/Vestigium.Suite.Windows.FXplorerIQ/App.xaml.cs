@@ -9,19 +9,31 @@ public partial class App : Application
 {
     public static ThemeManager Themes { get; } = new();
 
+    public static FXplorerSettingsStore Settings { get; } = new(FXplorerSettingsStore.DefaultRoot);
+
     public static VestigiumShell? Shell { get; set; }
 
     protected override void OnStartup(StartupEventArgs e)
     {
         HostLog.Initialize(HostIds.FXplorerIQ);
         Themes.RegisterSuiteV1();
-        Themes.Initialize(this, "LightBlue");
+        Themes.Initialize(this, SavedTheme());
 
         ShutdownMode = ShutdownMode.OnMainWindowClose;
         MainWindow = CreateMainWindow();
         MainWindow.Show();
 
         base.OnStartup(e);
+    }
+
+    private static string SavedTheme()
+    {
+        var id = Settings.Load().ThemeId;
+        if (string.IsNullOrWhiteSpace(id))
+            return "LightBlue";
+        return Themes.AvailableThemes.Any(theme => string.Equals(theme.Id, id, StringComparison.OrdinalIgnoreCase))
+            ? id
+            : "LightBlue";
     }
 
     private static Window CreateMainWindow()
