@@ -5,6 +5,7 @@ namespace Vestigium.Suite.Windows.FXplorerIQ;
 
 public sealed class FXplorerSettings
 {
+    public const double DefaultTreeWidth = 260;
     public const double DefaultNameWidth = 280;
     public const double DefaultDateModifiedWidth = 160;
     public const double DefaultTypeWidth = 110;
@@ -13,6 +14,8 @@ public sealed class FXplorerSettings
     public const double DefaultTagWidth = 100;
 
     public string? ThemeId { get; set; }
+
+    public double TreeWidth { get; set; } = DefaultTreeWidth;
 
     public double NameWidth { get; set; } = DefaultNameWidth;
 
@@ -28,6 +31,7 @@ public sealed class FXplorerSettings
 
     public void ResetColumns()
     {
+        TreeWidth = DefaultTreeWidth;
         NameWidth = DefaultNameWidth;
         DateModifiedWidth = DefaultDateModifiedWidth;
         TypeWidth = DefaultTypeWidth;
@@ -39,6 +43,7 @@ public sealed class FXplorerSettings
     public double Width(string header)
         => header switch
         {
+            "Folders" => TreeWidth,
             "Name" => NameWidth,
             "Date Modified" => DateModifiedWidth,
             "Type" => TypeWidth,
@@ -52,6 +57,7 @@ public sealed class FXplorerSettings
     {
         switch (header)
         {
+            case "Folders": TreeWidth = width; break;
             case "Name": NameWidth = width; break;
             case "Date Modified": DateModifiedWidth = width; break;
             case "Type": TypeWidth = width; break;
