@@ -28,7 +28,7 @@
 
 | Order | ID | Do | State |
 | ---: | :--- | :--- | :--- |
-| 1 | PR01.001 | Create the project. WPF exe, net10.0-windows, references Themes, Logging, and FileIo. | |
+| 1 | PR01.001 | Create the project. WPF exe, net10.0-windows, references Themes, Logging, and FileIo. | Done |
 | 2 | PR01.002 | Startup. Logging with APPID FXplorerIQ, FileIoCatalog.Register, then ThemeManager. | |
 | 3 | PR01.003 | The window. Vestigium shell. Explorer tab on the left. Dashboard, Settings, Help pinned on the right. Status area at the bottom. | |
 | 4 | PR01.004 | One Explorer, one pane. Lists a folder. Name, size, last write time. Open a folder. Open the parent. Type a path. | |
