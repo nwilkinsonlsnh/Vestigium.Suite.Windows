@@ -48,11 +48,15 @@ No worker in the first release. Elevation is out of scope. A later release can a
 
 ## 4. Shell
 
-`FXplorerIqWindow` hosts a Vestigium shell. Navigation items are Explorer, Jobs, Settings, and Help.
+`FXplorerIqWindow` hosts a Vestigium shell.
 
-The Explorer surface holds the open Explorers and the status area. The status area is docked at the bottom. It is always visible while Explorer is selected.
+The top bar is one row. On the left, the Explorer tabs, each a radio button with the theme underline. On the right, pinned: Dashboard, Settings, Help. Between them, an overflow button. It is hidden while every tab fits. When a tab would be clipped, it moves into the overflow. The overflow opens a list of the hidden tabs. Choosing one selects that Explorer and, if needed, scrolls it into view.
 
-Styles come from Vestigium.Themes. A button uses a theme button style. A menu uses a theme menu style. A splitter uses the theme stroke. A pane uses the theme surface.
+A double-click on a tab opens a small naming menu. The name is stored on the Explorer and shown on the tab. An unnamed tab shows the current folder name.
+
+The status area is docked at the bottom. It is always visible while Explorer is selected.
+
+Styles come from Vestigium.Themes. A button uses a theme button style. A menu uses a theme menu style. A splitter uses the theme stroke. A pane uses the theme surface. A tab uses the theme radio style.
 
 ---
 
@@ -60,9 +64,15 @@ Styles come from Vestigium.Themes. A button uses a theme button style. A menu us
 
 ### 5.1 Opening
 
-The window opens with one `ExplorerView`. Each Explorer has a **+**. The command adds another `ExplorerView` to the collection. There is no fixed limit. Each Explorer is independent.
+The window opens with one `ExplorerView`, unless a session was saved. Each Explorer tab has a **+** on the bar. The command adds another `ExplorerView` to the collection. There is no fixed limit. Each Explorer is independent.
 
-An Explorer holds one or two `PaneView` models. Single is one pane. Split is two.
+An Explorer holds one or two `PaneView` models. Single is one pane. Split is two. It also holds an optional name.
+
+### 5.1.1 Session
+
+`ExplorerSession` writes the open Explorers when the window closes, and reads them when the window opens. For each Explorer it stores the name, the pane path, and the second pane path when split. The file lives under `C:\ProgramData\Vestigium\Settings\FXplorerIQ`.
+
+On open, the host rebuilds the tabs from that file, in order. A path that no longer exists is kept and reported. The Explorer still opens.
 
 ### 5.2 Panes
 
@@ -179,3 +189,4 @@ Those are later releases. The first release is the Explorers, the split, the que
 | Version | Date | Change |
 |---|---|---|
 | 1.0 | 21 Oct 2026 | Initial lock. Explorers with +, split panes, queue and status area, FileIo engine. |
+| 1.0 | 21 Oct 2026 | Pinned right menus, tab overflow, rename, and a remembered session. |
