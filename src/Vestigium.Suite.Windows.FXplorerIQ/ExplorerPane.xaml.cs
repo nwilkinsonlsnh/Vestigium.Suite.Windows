@@ -11,13 +11,14 @@ namespace Vestigium.Suite.Windows.FXplorerIQ;
 
 public partial class ExplorerPane : UserControl
 {
-    private const double OpenWidth = 280;
+    private const double OpenWidth = 260;
     private const double ClosedWidth = 36;
 
     private readonly ObservableCollection<FolderNode> _roots = [];
     private string _folder = "";
     private bool _fromTree;
     private bool _treeOpen = true;
+    private ScrollViewer? _host;
 
     public ExplorerPane()
     {
@@ -36,21 +37,42 @@ public partial class ExplorerPane : UserControl
         if (_folder.Length == 0)
             Open(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
 
-        var window = Window.GetWindow(this);
-        if (window is null)
-            return;
+        _host = FindHost();
+        if (_host is not null)
+            _host.SizeChanged += (_, _) => Fit();
 
-        window.SizeChanged += (_, _) => Fit();
+        var window = Window.GetWindow(this);
+        if (window is not null)
+            window.SizeChanged += (_, _) => Fit();
+
         Fit();
     }
 
     private void Fit()
     {
-        var window = Window.GetWindow(this);
-        if (window is null || window.ActualHeight < 200)
-            return;
+        var height = _host?.ActualHeight ?? 0;
+        if (height < 100)
+        {
+            var window = Window.GetWindow(this);
+            if (window is null || window.ActualHeight < 200)
+                return;
+            height = window.ActualHeight - 96;
+        }
 
-        Height = Math.Max(240, window.ActualHeight - 140);
+        Height = Math.Max(240, height);
+    }
+
+    private ScrollViewer? FindHost()
+    {
+        DependencyObject? current = this;
+        while (current is not null)
+        {
+            if (current is ScrollViewer viewer)
+                return viewer;
+            current = VisualTreeHelper.GetParent(current);
+        }
+
+        return null;
     }
 
     private void TreeToggle_Click(object sender, RoutedEventArgs e)
