@@ -22,6 +22,7 @@ public partial class ExplorerPane : UserControl
     private bool _fromTree;
     private bool _treeOpen = true;
     private bool _applying;
+    private int _load;
     private ScrollViewer? _host;
 
     public ExplorerPane()
@@ -195,7 +196,7 @@ public partial class ExplorerPane : UserControl
         SplitColumn.Width = new GridLength(_treeOpen ? 8 : 0);
     }
 
-    public void Open(string raw)
+    public async void Open(string raw)
     {
         var cleaned = PathResolve.Clean(PathTokens.Expand(raw));
         if (cleaned.Length == 0)
@@ -215,30 +216,17 @@ public partial class ExplorerPane : UserControl
             return;
         }
 
+        var token = ++_load;
+        var algorithm = App.Settings.Load().Algorithm();
+        ShowBusy("Loading " + cleaned);
         try
         {
-            var algorithm = App.Settings.Load().Algorithm();
-            _algorithm = algorithm.ToString();
             var full = Path.GetFullPath(path);
-            var rows = new List<PaneEntry>();
-            foreach (var dir in Directory.EnumerateDirectories(full))
-            {
-                var info = new DirectoryInfo(dir);
-                rows.Add(new PaneEntry(info.Name, info.FullName, true, Write(info.LastWriteTime), "File folder", ""));
-            }
+            var rows = await Task.Run(() => Read(full, algorithm)).ConfigureAwait(true);
+            if (token != _load)
+                return;
 
-            foreach (var file in Directory.EnumerateFiles(full))
-            {
-                var info = new FileInfo(file);
-                rows.Add(new PaneEntry(info.Name, info.FullName, false, Write(info.LastWriteTime), Kind(info.Extension), Size(info.Length), Hash(info.FullName, algorithm)));
-            }
-
-            rows.Sort(static (a, b) =>
-            {
-                var kind = b.IsDirectory.CompareTo(a.IsDirectory);
-                return kind != 0 ? kind : string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase);
-            });
-
+            _algorithm = algorithm.ToString();
             _folder = full;
             PathBox.Text = full;
             Listing.ItemsSource = rows;
@@ -248,9 +236,46 @@ public partial class ExplorerPane : UserControl
         }
         catch (Exception ex)
         {
-            Say(ex.Message);
+            if (token == _load)
+                Say(ex.Message);
+        }
+        finally
+        {
+            if (token == _load)
+                HideBusy();
         }
     }
+
+    private static List<PaneEntry> Read(string full, HashingAlgorithm algorithm)
+    {
+        var rows = new List<PaneEntry>();
+        foreach (var dir in Directory.EnumerateDirectories(full))
+        {
+            var info = new DirectoryInfo(dir);
+            rows.Add(new PaneEntry(info.Name, info.FullName, true, Write(info.LastWriteTime), "File folder", ""));
+        }
+
+        foreach (var file in Directory.EnumerateFiles(full))
+        {
+            var info = new FileInfo(file);
+            rows.Add(new PaneEntry(info.Name, info.FullName, false, Write(info.LastWriteTime), Kind(info.Extension), Size(info.Length), Hash(info.FullName, algorithm)));
+        }
+
+        rows.Sort(static (a, b) =>
+        {
+            var kind = b.IsDirectory.CompareTo(a.IsDirectory);
+            return kind != 0 ? kind : string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase);
+        });
+        return rows;
+    }
+
+    private void ShowBusy(string message)
+    {
+        BusyMessage.Text = message;
+        BusyOverlay.Visibility = Visibility.Visible;
+    }
+
+    private void HideBusy() => BusyOverlay.Visibility = Visibility.Collapsed;
 
     private void LoadRoots()
     {
