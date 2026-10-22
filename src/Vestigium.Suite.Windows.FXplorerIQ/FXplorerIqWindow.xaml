@@ -11,11 +11,20 @@
   <DockPanel>
     <Grid DockPanel.Dock="Top" Margin="12,8,12,0">
       <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-        <RadioButton Content="Explorer"
-                     Style="{StaticResource RadioButton.UnderlineTab}"
-                     GroupName="FXplorerMainNav"
-                     IsChecked="True"
-                     Checked="MainNav_Checked" />
+        <StackPanel x:Name="ExplorerTabs" Orientation="Horizontal" />
+        <Button x:Name="AddExplorer"
+                Content="+"
+                Style="{StaticResource Button.Utility}"
+                Width="32"
+                Height="32"
+                MinWidth="32"
+                MinHeight="32"
+                Padding="0"
+                FontSize="16"
+                ToolTip="New Explorer"
+                VerticalAlignment="Center"
+                Margin="4,0,0,0"
+                Click="AddExplorer_Click" />
       </StackPanel>
       <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
         <RadioButton Content="Dashboard"
