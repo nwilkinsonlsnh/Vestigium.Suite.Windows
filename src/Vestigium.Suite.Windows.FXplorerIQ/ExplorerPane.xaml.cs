@@ -11,8 +11,8 @@ namespace Vestigium.Suite.Windows.FXplorerIQ;
 
 public partial class ExplorerPane : UserControl
 {
-    private const double OpenWidth = 308;
-    private const double ClosedWidth = 28;
+    private const double OpenWidth = 280;
+    private const double ClosedWidth = 36;
 
     private readonly ObservableCollection<FolderNode> _roots = [];
     private string _folder = "";
@@ -50,8 +50,6 @@ public partial class ExplorerPane : UserControl
         if (window is null || window.ActualHeight < 200)
             return;
 
-        // Shell wraps the page in a ScrollViewer, so the pane must take a real height
-        // or the tree and grid grow instead of scrolling.
         Height = Math.Max(240, window.ActualHeight - 140);
     }
 
@@ -60,8 +58,7 @@ public partial class ExplorerPane : UserControl
         _treeOpen = !_treeOpen;
         TreeColumn.Width = new GridLength(_treeOpen ? OpenWidth : ClosedWidth);
         TreeHost.Visibility = _treeOpen ? Visibility.Visible : Visibility.Collapsed;
-        TreeToggle.Content = _treeOpen ? "◀" : "▶";
-        TreeToggle.ToolTip = _treeOpen ? "Hide folders" : "Show folders";
+        TreeOpen.Visibility = _treeOpen ? Visibility.Collapsed : Visibility.Visible;
     }
 
     public void Open(string raw)
