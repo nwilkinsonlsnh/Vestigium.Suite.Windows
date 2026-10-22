@@ -1,21 +1,29 @@
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using Vestigium.Helpers.FileSystemPaths;
 
 namespace Vestigium.Suite.Windows.FXplorerIQ;
 
 public partial class ExplorerPane : UserControl
 {
+    private readonly ObservableCollection<FolderNode> _roots = [];
     private string _folder = "";
+    private bool _fromTree;
 
     public ExplorerPane()
     {
         InitializeComponent();
+        Folders.ItemsSource = _roots;
+        Folders.AddHandler(TreeViewItem.ExpandedEvent, new RoutedEventHandler(Folder_Expanded));
         Loaded += (_, _) =>
         {
+            if (_roots.Count == 0)
+                LoadRoots();
             if (_folder.Length == 0)
                 Open(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
         };
@@ -71,6 +79,104 @@ public partial class ExplorerPane : UserControl
         catch (Exception ex)
         {
             Say(ex.Message);
+        }
+    }
+
+    private void LoadRoots()
+    {
+        foreach (var drive in DriveInfo.GetDrives())
+        {
+            if (!drive.IsReady)
+                continue;
+            var root = new FolderNode(drive.Name, drive.RootDirectory.FullName);
+            root.Children.Add(new FolderNode("", ""));
+            _roots.Add(root);
+        }
+    }
+
+    private void Folder_Expanded(object sender, RoutedEventArgs e)
+    {
+        if (e.OriginalSource is not TreeViewItem item || item.DataContext is not FolderNode node)
+            return;
+        if (node.Loaded)
+            return;
+
+        node.Loaded = true;
+        node.Children.Clear();
+        try
+        {
+            foreach (var dir in Directory.EnumerateDirectories(node.FullPath))
+            {
+                var info = new DirectoryInfo(dir);
+                var child = new FolderNode(info.Name, info.FullName);
+                if (HasSubfolder(info.FullName))
+                    child.Children.Add(new FolderNode("", ""));
+                node.Children.Add(child);
+            }
+        }
+        catch (Exception ex)
+        {
+            Say(ex.Message);
+        }
+    }
+
+    private void Folders_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+    {
+        if (_fromTree || e.NewValue is not FolderNode node || node.FullPath.Length == 0)
+            return;
+        if (string.Equals(node.FullPath, _folder, StringComparison.OrdinalIgnoreCase))
+            return;
+
+        _fromTree = true;
+        try
+        {
+            Open(node.FullPath);
+        }
+        finally
+        {
+            _fromTree = false;
+        }
+    }
+
+    private void Listing_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+    {
+        var scroll = FindScroll(Listing);
+        if (scroll is null)
+            return;
+
+        var lines = SystemParameters.WheelScrollLines;
+        if (lines == 0)
+            lines = 3;
+        var delta = e.Delta > 0 ? -lines * 16 : lines * 16;
+        scroll.ScrollToVerticalOffset(scroll.VerticalOffset + delta);
+        e.Handled = true;
+    }
+
+    private static ScrollViewer? FindScroll(DependencyObject root)
+    {
+        if (root is ScrollViewer found)
+            return found;
+
+        for (var i = 0; i < VisualTreeHelper.GetChildrenCount(root); i++)
+        {
+            var child = VisualTreeHelper.GetChild(root, i);
+            var hit = FindScroll(child);
+            if (hit is not null)
+                return hit;
+        }
+
+        return null;
+    }
+
+    private static bool HasSubfolder(string path)
+    {
+        try
+        {
+            return Directory.EnumerateDirectories(path).Any();
+        }
+        catch
+        {
+            return false;
         }
     }
 
