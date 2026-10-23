@@ -1,6 +1,7 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace Vestigium.Suite.Windows.FXplorerIQ;
 
@@ -12,23 +13,36 @@ public sealed class FolderPicker : Window
     {
         Title = "Choose a folder";
         Width = 420;
-        Height = 480;
+        Height = 520;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
-        Background = Application.Current.TryFindResource("Brush.Surface.Background") as System.Windows.Media.Brush
-                     ?? SystemColors.WindowBrush;
+        Background = Brush("Brush.Surface.Background") ?? SystemColors.WindowBrush;
+        Foreground = Brush("Brush.Text.Primary") ?? SystemColors.WindowTextBrush;
 
         _tree.Margin = new Thickness(0, 0, 0, 12);
+        _tree.Background = Brushes.Transparent;
+        _tree.BorderThickness = new Thickness(0);
+        _tree.Foreground = Foreground;
         if (Application.Current.TryFindResource("TreeView.Standard") is Style style)
             _tree.Style = style;
 
-        var pc = new TreeViewItem { Header = "This PC", IsExpanded = true, Tag = "" };
+        var settings = App.Settings.Load();
+        var pc = Group("This PC");
+        var devices = Group("Devices & Drives");
+        var network = Group("Network Locations");
+
         foreach (var drive in DriveInfo.GetDrives())
         {
-            if (!drive.IsReady)
+            if (!Show(drive, settings))
                 continue;
-            pc.Items.Add(Folder(drive.Name, drive.Name.TrimEnd('\\')));
+            var node = Folder(drive.RootDirectory.FullName, Label(drive));
+            if (drive.DriveType == DriveType.Network)
+                network.Items.Add(node);
+            else if (drive.DriveType is DriveType.Fixed or DriveType.Removable or DriveType.CDRom)
+                devices.Items.Add(node);
         }
 
+        pc.Items.Add(devices);
+        pc.Items.Add(network);
         _tree.Items.Add(pc);
         Select(current);
 
@@ -42,7 +56,7 @@ public sealed class FolderPicker : Window
         actions.Children.Add(ok);
         actions.Children.Add(cancel);
 
-        var root = new DockPanel { Margin = new Thickness(16) };
+        var root = new DockPanel { Margin = new Thickness(16), Background = Background };
         DockPanel.SetDock(actions, Dock.Bottom);
         root.Children.Add(actions);
         root.Children.Add(_tree);
@@ -65,9 +79,23 @@ public sealed class FolderPicker : Window
         DialogResult = true;
     }
 
+    private static TreeViewItem Group(string name)
+        => new()
+        {
+            Header = name,
+            Tag = "",
+            IsExpanded = true,
+            Foreground = Brush("Brush.Text.Primary") ?? SystemColors.WindowTextBrush
+        };
+
     private TreeViewItem Folder(string path, string label)
     {
-        var item = new TreeViewItem { Header = label, Tag = path };
+        var item = new TreeViewItem
+        {
+            Header = label,
+            Tag = path,
+            Foreground = Brush("Brush.Text.Primary") ?? SystemColors.WindowTextBrush
+        };
         item.Items.Add(new TreeViewItem { Header = "" });
         item.Expanded += (_, _) => Fill(item);
         return item;
@@ -86,7 +114,12 @@ public sealed class FolderPicker : Window
         {
             foreach (var folder in Directory.EnumerateDirectories(path))
             {
-                var child = new TreeViewItem { Header = System.IO.Path.GetFileName(folder), Tag = folder };
+                var child = new TreeViewItem
+                {
+                    Header = System.IO.Path.GetFileName(folder),
+                    Tag = folder,
+                    Foreground = Brush("Brush.Text.Primary") ?? SystemColors.WindowTextBrush
+                };
                 child.Items.Add(new TreeViewItem { Header = "" });
                 child.Expanded += (_, _) => Fill(child);
                 item.Items.Add(child);
@@ -100,22 +133,58 @@ public sealed class FolderPicker : Window
 
     private void Select(string? current)
     {
-        if (string.IsNullOrWhiteSpace(current))
-            return;
-        if (_tree.Items[0] is not TreeViewItem pc)
+        if (string.IsNullOrWhiteSpace(current) || _tree.Items[0] is not TreeViewItem pc)
             return;
 
-        foreach (TreeViewItem drive in pc.Items)
+        foreach (TreeViewItem group in pc.Items)
         {
-            if (drive.Tag is not string root)
-                continue;
-            if (!current.StartsWith(root, StringComparison.OrdinalIgnoreCase))
-                continue;
-            drive.IsExpanded = true;
-            drive.IsSelected = true;
-            break;
+            foreach (TreeViewItem drive in group.Items)
+            {
+                if (drive.Tag is not string root)
+                    continue;
+                if (!current.StartsWith(root, StringComparison.OrdinalIgnoreCase))
+                    continue;
+                group.IsExpanded = true;
+                drive.IsExpanded = true;
+                drive.IsSelected = true;
+                return;
+            }
         }
     }
+
+    private static bool Show(DriveInfo drive, FXplorerSettings settings)
+    {
+        if (!drive.IsReady)
+            return !settings.HideEmptyDrives;
+        if (!settings.HideEmptyDrives)
+            return true;
+        try
+        {
+            return drive.TotalSize > 0;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static string Label(DriveInfo drive)
+    {
+        var letter = drive.Name.TrimEnd('\\');
+        var kind = drive.DriveType switch
+        {
+            DriveType.Fixed => "Local Disk",
+            DriveType.Removable => "Removable Disk",
+            DriveType.CDRom => "CD Drive",
+            DriveType.Network => "Network",
+            _ => "Drive"
+        };
+        var label = string.IsNullOrWhiteSpace(drive.VolumeLabel) ? kind : drive.VolumeLabel;
+        return label + " (" + letter + ")";
+    }
+
+    private static Brush? Brush(string key)
+        => Application.Current.TryFindResource(key) as Brush;
 
     private static Button Button(string text, bool primary)
     {
