@@ -20,33 +20,36 @@ public sealed class JobWindow : Window
     private readonly Button _cancel;
     private readonly Button _close;
 
-    public JobWindow(string title, FileIoJob job)
+    public JobWindow(string title, FileIoJob job, string source, string? destination)
     {
         _job = job;
         Title = title;
         Width = 760;
-        Height = 460;
+        Height = 520;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
         ResizeMode = ResizeMode.NoResize;
         Background = TryBrush("Brush.Surface.Background") ?? SystemColors.WindowBrush;
 
         _phase.Text = "Starting";
-        _phase.FontSize = 18;
-        _phase.Margin = new Thickness(0, 0, 0, 8);
+        _phase.Style = TryStyle("TextBlock.Title");
+        _phase.Margin = new Thickness(0, 0, 0, 12);
 
         _bar.Height = 16;
         _bar.Minimum = 0;
         _bar.Maximum = 100;
         _bar.Margin = new Thickness(0, 0, 0, 8);
+        if (TryStyle("ProgressBar.Standard") is { } barStyle)
+            _bar.Style = barStyle;
 
         _rate.Text = "Waiting for the first files.";
+        _rate.Style = TryStyle("TextBlock.Caption");
         _rate.Margin = new Thickness(0, 0, 0, 16);
 
         var bins = new UniformGrid { Columns = 5, Margin = new Thickness(0, 0, 0, 16) };
         var cardBrush = TryBrush("Brush.Surface.Card") ?? SystemColors.ControlBrush;
         for (var i = 0; i < 5; i++)
         {
-            _bins[i] = new TextBlock { Text = NameOf(i), Margin = new Thickness(8) };
+            _bins[i] = new TextBlock { Text = NameOf(i), Margin = new Thickness(8), Style = TryStyle("TextBlock.Caption") };
             _cards[i] = new Border
             {
                 Margin = new Thickness(4),
@@ -58,10 +61,10 @@ public sealed class JobWindow : Window
             bins.Children.Add(_cards[i]);
         }
 
-        _pause = Button("Pause", () => Safe(() => _job.Pause()));
-        _resume = Button("Resume", () => Safe(() => _job.Resume()));
-        _cancel = Button("Cancel", () => Safe(() => _job.Cancel()));
-        _close = Button("Close", Close);
+        _pause = Button("Pause", "Button.Secondary", () => Safe(() => _job.Pause()));
+        _resume = Button("Resume", "Button.Secondary", () => Safe(() => _job.Resume()));
+        _cancel = Button("Cancel", "Button.Ghost", () => Safe(() => _job.Cancel()));
+        _close = Button("Close", "Button.Primary", Close);
         _close.IsEnabled = false;
         var actions = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
         actions.Children.Add(_pause);
@@ -71,6 +74,9 @@ public sealed class JobWindow : Window
 
         var root = new StackPanel { Margin = new Thickness(20) };
         root.Children.Add(_phase);
+        root.Children.Add(Path("Source", source));
+        if (!string.IsNullOrWhiteSpace(destination))
+            root.Children.Add(Path("Destination", destination));
         root.Children.Add(_bar);
         root.Children.Add(_rate);
         root.Children.Add(bins);
@@ -144,6 +150,20 @@ public sealed class JobWindow : Window
         }
     }
 
+    private static StackPanel Path(string caption, string value)
+    {
+        var panel = new StackPanel { Margin = new Thickness(0, 0, 0, 8) };
+        panel.Children.Add(new TextBlock { Text = caption, Style = TryStyle("TextBlock.Caption") });
+        panel.Children.Add(new TextBlock
+        {
+            Text = value,
+            Style = TryStyle("TextBlock.Body"),
+            TextWrapping = TextWrapping.NoWrap,
+            TextTrimming = TextTrimming.CharacterEllipsis
+        });
+        return panel;
+    }
+
     private static string NameOf(int index)
         => index switch
         {
@@ -183,15 +203,19 @@ public sealed class JobWindow : Window
     private static Brush? TryBrush(string key)
         => Application.Current.TryFindResource(key) as Brush;
 
-    private static Button Button(string text, Action click)
+    private static Style? TryStyle(string key)
+        => Application.Current.TryFindResource(key) as Style;
+
+    private static Button Button(string text, string styleKey, Action click)
     {
         var button = new Button
         {
             Content = text,
             Margin = new Thickness(6, 0, 0, 0),
-            Padding = new Thickness(12, 6, 12, 6)
+            Padding = new Thickness(12, 6, 12, 6),
+            MinWidth = 88
         };
-        if (Application.Current.TryFindResource("Button.Ghost") is Style style)
+        if (TryStyle(styleKey) is { } style)
             button.Style = style;
         button.Click += (_, _) => click();
         return button;
