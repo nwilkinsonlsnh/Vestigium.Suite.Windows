@@ -153,6 +153,8 @@ public sealed class JobWindow : Window
 
     public FileIoJobResult? Result => _result;
 
+    public bool AutoClose { get; set; }
+
     private void Pick(string report, string chart)
     {
         _report = report;
@@ -272,6 +274,8 @@ public sealed class JobWindow : Window
             _cancel.IsEnabled = false;
             _close.IsEnabled = true;
             ShowChart();
+            if (AutoClose)
+                Close();
         }
         catch (Exception ex)
         {
