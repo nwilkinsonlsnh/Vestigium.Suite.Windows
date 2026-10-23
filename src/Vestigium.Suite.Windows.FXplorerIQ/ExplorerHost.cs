@@ -3,6 +3,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using Vestigium.Helpers.FileIo;
 
 namespace Vestigium.Suite.Windows.FXplorerIQ;
 
@@ -20,6 +21,7 @@ public sealed class ExplorerHost : DockPanel
     private readonly Action<string> _status;
     private ScrollViewer? _viewport;
     private bool _applying;
+    private bool _busy;
 
     public ExplorerHost(Action<string> status)
     {
@@ -182,9 +184,16 @@ public sealed class ExplorerHost : DockPanel
 
     private void Verb(JobVerb verb, bool verify)
     {
+        if (_busy)
+        {
+            _status("A job is already running.");
+            return;
+        }
+
         var sourcePane = SourceIsFirst ? First : Second;
+        var destPane = SourceIsFirst ? Second : First;
         var source = sourcePane.SelectionOrFolder();
-        var destination = verb == JobVerb.Delete ? null : DestinationPath;
+        var destination = verb == JobVerb.Delete ? null : destPane.Folder;
         var guard = JobGuard.Check(verb, source, destination);
         if (!guard.Ok)
         {
@@ -192,15 +201,74 @@ public sealed class ExplorerHost : DockPanel
             return;
         }
 
+        if (verb == JobVerb.Copy && !verify)
+        {
+            _ = Copy(source, destination!, destPane);
+            return;
+        }
+
         var name = verb switch
         {
-            JobVerb.Copy => verify ? "Copy (Verify)" : "Copy",
+            JobVerb.Copy => "Copy (Verify)",
             JobVerb.Move => verify ? "Move (Verify)" : "Move",
             JobVerb.Delete => verify ? "Delete (Secure)" : "Delete",
             _ => "Mirror (Verify)"
         };
         _status(name + " is ready. " + source);
     }
+
+    private async Task Copy(string source, string destination, ExplorerPane destPane)
+    {
+        var settings = App.Settings.Load();
+        var collision = CollisionOf(settings.Collision);
+        if (collision == FileIoCollision.Overwrite && settings.AskBeforeOverwrite)
+        {
+            var answer = MessageBox.Show(
+                "Overwrite will replace files that already exist in " + destination + ".",
+                "Copy",
+                MessageBoxButton.OKCancel,
+                MessageBoxImage.Warning);
+            if (answer != MessageBoxResult.OK)
+            {
+                _status("Copy cancelled.");
+                return;
+            }
+        }
+
+        _busy = true;
+        try
+        {
+            var job = FileIoHelper.Copy(source, destination, new FileIoJobOptions
+            {
+                Collision = collision,
+                UniqueNamePattern = string.IsNullOrWhiteSpace(settings.UniqueNamePattern) ? ".##" : settings.UniqueNamePattern,
+                Purge = false,
+                ReconLeadTime = TimeSpan.FromSeconds(2)
+            });
+            job.ProgressChanged += (_, progress) => Dispatcher.Invoke(() =>
+                _status("Copy  " + progress.Phase + "  " + progress.FilesDone + " / " + progress.FilesFound));
+            _status("Copy started. " + source);
+            var result = await job.RunAsync().ConfigureAwait(true);
+            destPane.Open(destination);
+            _status("Copy " + result.Status + ". " + result.Copied + " copied, " + result.Skipped + " skipped, " + result.Failed + " failed.");
+        }
+        catch (Exception ex)
+        {
+            _status("Copy failed. " + ex.Message);
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private static FileIoCollision CollisionOf(string name)
+        => name switch
+        {
+            "Skip" => FileIoCollision.Skip,
+            "Overwrite" => FileIoCollision.Overwrite,
+            _ => FileIoCollision.UniqueName
+        };
 
     private void Split_Click()
     {
