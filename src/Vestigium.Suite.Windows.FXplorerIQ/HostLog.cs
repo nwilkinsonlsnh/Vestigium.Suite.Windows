@@ -1,5 +1,6 @@
 using System.IO;
 using System.Security.Principal;
+using Vestigium.Helpers.Analytics;
 using Vestigium.Helpers.FileIo;
 using Vestigium.Helpers.Hashing;
 using Vestigium.Logging;
@@ -25,6 +26,7 @@ public static class HostLog
             cfg.AppId = appId;
             cfg.LogDirectory = root;
             FileIoCatalog.Register(cfg);
+            AnalyticsCatalog.Register(cfg);
             HashingCatalog.Register(cfg);
             FXplorerCatalog.Register(cfg);
         });
