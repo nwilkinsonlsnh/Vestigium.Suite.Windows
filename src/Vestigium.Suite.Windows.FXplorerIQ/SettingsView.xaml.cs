@@ -7,6 +7,7 @@ namespace Vestigium.Suite.Windows.FXplorerIQ;
 
 public partial class SettingsView : UserControl
 {
+    private static readonly string[] Collisions = ["UniqueName", "Skip", "Overwrite"];
     private bool _loading = true;
 
     public SettingsView()
@@ -22,10 +23,13 @@ public partial class SettingsView : UserControl
         var themes = App.Themes;
         ThemeBox.ItemsSource = themes.AvailableThemes;
         ThemeBox.SelectedValue = themes.Current?.Id ?? themes.AvailableThemes.FirstOrDefault()?.Id;
-        HashBox.ItemsSource = Enum.GetValues<HashingAlgorithm>()
+        var algorithms = Enum.GetValues<HashingAlgorithm>()
             .Where(HashingHelper.IsSupported)
             .Select(algorithm => new HashChoice(algorithm.ToString(), HashingHelper.AlgorithmName(algorithm)))
             .ToList();
+        HashBox.ItemsSource = algorithms;
+        VerifyBox.ItemsSource = algorithms;
+        CollisionBox.ItemsSource = Collisions;
         Show(App.Settings.Load());
         _loading = false;
     }
@@ -59,17 +63,22 @@ public partial class SettingsView : UserControl
         ShowHiddenFiles.IsChecked = settings.ShowHiddenFiles;
         ShowFileExtensions.IsChecked = settings.ShowFileExtensions;
         ShowSystemFiles.IsChecked = settings.ShowSystemFiles;
+        CollisionBox.SelectedItem = Collisions.Contains(settings.Collision) ? settings.Collision : "UniqueName";
+        PatternBox.Text = string.IsNullOrWhiteSpace(settings.UniqueNamePattern) ? ".##" : settings.UniqueNamePattern;
+        AskOverwrite.IsChecked = settings.AskBeforeOverwrite;
+        VerifyBox.SelectedValue = settings.Verify().ToString();
     }
 
     private void Page_Checked(object sender, RoutedEventArgs e)
     {
-        if (ThemesPage is null || ColumnsPage is null || HashPage is null || ViewPage is null)
+        if (ThemesPage is null || ColumnsPage is null || HashPage is null || ViewPage is null || CollisionPage is null)
             return;
         var tag = sender is RadioButton button ? button.Tag as string : "Themes";
         ThemesPage.Visibility = tag == "Themes" ? Visibility.Visible : Visibility.Collapsed;
         ColumnsPage.Visibility = tag == "Columns" ? Visibility.Visible : Visibility.Collapsed;
         HashPage.Visibility = tag == "Hash" ? Visibility.Visible : Visibility.Collapsed;
         ViewPage.Visibility = tag == "View" ? Visibility.Visible : Visibility.Collapsed;
+        CollisionPage.Visibility = tag == "Collision" ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void ThemeBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -89,6 +98,37 @@ public partial class SettingsView : UserControl
         if (_loading || HashBox.SelectedValue is not string id || string.IsNullOrWhiteSpace(id))
             return;
         Save(settings => settings.HashAlgorithm = id);
+    }
+
+    private void Collision_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        if (_loading || CollisionBox.SelectedItem is not string collision)
+            return;
+        Save(settings => settings.Collision = collision);
+    }
+
+    private void Pattern_LostFocus(object sender, RoutedEventArgs e)
+    {
+        if (_loading)
+            return;
+        var pattern = PatternBox.Text.Trim();
+        if (pattern.Length == 0)
+            pattern = ".##";
+        Save(settings => settings.UniqueNamePattern = pattern);
+    }
+
+    private void CollisionFlag_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_loading)
+            return;
+        Save(settings => settings.AskBeforeOverwrite = AskOverwrite.IsChecked == true);
+    }
+
+    private void Verify_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        if (_loading || VerifyBox.SelectedValue is not string id || string.IsNullOrWhiteSpace(id))
+            return;
+        Save(settings => settings.VerifyAlgorithm = id);
     }
 
     private void Width_Changed(object sender, RoutedPropertyChangedEventArgs<decimal> e)
