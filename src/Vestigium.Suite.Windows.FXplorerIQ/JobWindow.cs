@@ -21,18 +21,22 @@ public sealed class JobWindow : Window
     private readonly Button _resume;
     private readonly Button _cancel;
     private readonly Button _close;
-    private readonly StackPanel _dashboard = new();
+    private readonly ContentControl _page = new();
+    private readonly ContentControl _report = new();
+    private readonly Brush _surface;
+    private FileIoJobResult? _result;
     private bool _queued;
 
     public JobWindow(string title, FileIoJob job, string source, string? destination)
     {
         _job = job;
         Title = title;
-        Width = 820;
-        Height = 700;
+        Width = 860;
+        Height = 740;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
         ResizeMode = ResizeMode.NoResize;
-        Background = TryBrush("Vestigium.Brushes.Surface.Window") ?? SystemColors.WindowBrush;
+        _surface = TryBrush("Vestigium.Brushes.Surface.Window") ?? SystemColors.WindowBrush;
+        Background = _surface;
         Foreground = TryBrush("Vestigium.Brushes.Text.Primary") ?? SystemColors.WindowTextBrush;
 
         _phase.Text = "Starting";
@@ -66,11 +70,7 @@ public sealed class JobWindow : Window
             bins.Children.Add(_cards[i]);
         }
 
-        var scroller = new ScrollViewer
-        {
-            Content = _files,
-            VerticalScrollBarVisibility = ScrollBarVisibility.Auto
-        };
+        var scroller = new ScrollViewer { Content = _files, VerticalScrollBarVisibility = ScrollBarVisibility.Auto, Background = _surface };
 
         _pause = Button("Pause", "Button.Secondary", () => Safe(() => _job.Pause()));
         _resume = Button("Resume", "Button.Secondary", () => Safe(() => _job.Resume()));
@@ -97,34 +97,39 @@ public sealed class JobWindow : Window
         body.Children.Add(_rate);
         body.Children.Add(bins);
 
-        var action = new DockPanel { Margin = new Thickness(4) };
+        var action = new DockPanel { Background = _surface };
         DockPanel.SetDock(actions, Dock.Bottom);
         DockPanel.SetDock(body, Dock.Top);
         action.Children.Add(actions);
         action.Children.Add(body);
         action.Children.Add(scroller);
 
-        var actionTab = new TabItem { Header = "Action", Content = action };
-        _dashboard.Margin = new Thickness(4);
-        _dashboard.Children.Add(new TextBlock
-        {
-            Text = "The dashboard fills when the job finishes.",
-            Style = TryStyle("TextBlock.Body"),
-            Foreground = Foreground,
-            Margin = new Thickness(0, 12, 0, 0)
-        });
-        var dashboardTab = new TabItem { Header = "Dashboard", Content = new ScrollViewer { Content = _dashboard, VerticalScrollBarVisibility = ScrollBarVisibility.Auto } };
+        var dashboard = new DockPanel { Background = _surface };
+        var sub = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 8) };
+        sub.Children.Add(Radio("Shape", "report", true, () => ShowReport("shape")));
+        sub.Children.Add(Radio("Throughput", "report", false, () => ShowReport("rate")));
+        sub.Children.Add(Radio("Time", "report", false, () => ShowReport("time")));
+        DockPanel.SetDock(sub, Dock.Top);
+        dashboard.Children.Add(sub);
+        dashboard.Children.Add(_report);
+        _report.Content = Note("The report fills when the job finishes.");
 
-        var tabs = new TabControl { Margin = new Thickness(12) };
-        tabs.Items.Add(actionTab);
-        tabs.Items.Add(dashboardTab);
-        Content = tabs;
+        var main = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 8) };
+        main.Children.Add(Radio("Action", "main", true, () => _page.Content = action));
+        main.Children.Add(Radio("Dashboard", "main", false, () => _page.Content = dashboard));
+
+        _page.Content = action;
+        var root = new DockPanel { Margin = new Thickness(16), Background = _surface };
+        DockPanel.SetDock(main, Dock.Top);
+        root.Children.Add(main);
+        root.Children.Add(_page);
+        Content = root;
 
         _job.ProgressChanged += (_, progress) => Queue(progress);
         Loaded += async (_, _) => await Run();
     }
 
-    public FileIoJobResult? Result { get; private set; }
+    public FileIoJobResult? Result => _result;
 
     private void Queue(FileIoProgress progress)
     {
@@ -142,13 +147,13 @@ public sealed class JobWindow : Window
     {
         try
         {
-            Result = await _job.RunAsync().ConfigureAwait(true);
-            _phase.Text = Result.Status;
+            _result = await _job.RunAsync().ConfigureAwait(true);
+            _phase.Text = _result.Status;
             _pause.IsEnabled = false;
             _resume.IsEnabled = false;
             _cancel.IsEnabled = false;
             _close.IsEnabled = true;
-            FillDashboard(Result);
+            ShowReport("shape");
         }
         catch (Exception ex)
         {
@@ -164,44 +169,91 @@ public sealed class JobWindow : Window
         }
     }
 
-    private void FillDashboard(FileIoJobResult result)
+    private void ShowReport(string which)
     {
-        _dashboard.Children.Clear();
-        var stats = result.Stats;
-        _dashboard.Children.Add(new TextBlock
+        if (_result is null)
         {
-            Text = result.Status + "  ·  " + stats.FormatLine(result.JobId),
-            Style = TryStyle("TextBlock.Caption"),
-            Foreground = Foreground,
-            TextWrapping = TextWrapping.Wrap,
-            Margin = new Thickness(0, 0, 0, 12)
-        });
+            _report.Content = Note("The report fills when the job finishes.");
+            return;
+        }
 
-        var slices = stats.Buckets
-            .Where(b => b.FileSizes.Count > 0)
-            .Select(b => new ChartSlice { Label = b.Name, Value = b.FileSizes.Count })
-            .ToList();
+        try
+        {
+            _report.Content = which switch
+            {
+                "rate" => Throughput(_result),
+                "time" => Time(_result),
+                _ => Shape(_result)
+            };
+        }
+        catch (Exception ex)
+        {
+            _report.Content = Note(ex.Message);
+        }
+    }
+
+    private ScrollViewer Shape(FileIoJobResult result)
+    {
+        var panel = new StackPanel();
+        panel.Children.Add(Line(result.Stats.FormatLine(result.JobId)));
+        var sizes = result.Stats.FileSizes.Series;
+        if (sizes is not null)
+        {
+            panel.Children.Add(Caption("File size"));
+            panel.Children.Add(Frame(ChartView.Histogram(sizes, ChartTheme.Apply(new ChartOptions { Title = "File size" }))));
+            panel.Children.Add(Caption("Size distribution"));
+            panel.Children.Add(Frame(ChartView.Box(sizes, ChartTheme.Apply(new ChartOptions { Title = "Size" }))));
+        }
+
+        var slices = result.Stats.Buckets.Where(b => b.FileSizes.Count > 0).Select(b => new ChartSlice { Label = b.Name, Value = b.FileSizes.Count }).ToList();
         if (slices.Count > 0)
         {
-            _dashboard.Children.Add(Label("Files by bucket"));
-            _dashboard.Children.Add(Frame(ChartView.Pareto(slices, ChartTheme.Apply(new ChartOptions { Title = "Files by bucket" }))));
-            _dashboard.Children.Add(Label("Transfer rate by bucket"));
-            var rates = stats.Buckets
-                .Where(b => b.TransferRates.Mean is > 0)
-                .Select(b => new ChartSlice { Label = b.Name, Value = b.TransferRates.Mean ?? 0 })
-                .ToList();
-            if (rates.Count > 0)
-                _dashboard.Children.Add(Frame(ChartView.Pie(rates, ChartTheme.Apply(new ChartOptions { Title = "Mean rate" }))));
+            panel.Children.Add(Caption("Files by bucket"));
+            panel.Children.Add(Frame(ChartView.Pareto(slices, ChartTheme.Apply(new ChartOptions { Title = "Files by bucket" }))));
+        }
+
+        return Scroll(panel);
+    }
+
+    private ScrollViewer Throughput(FileIoJobResult result)
+    {
+        var panel = new StackPanel();
+        panel.Children.Add(Line("Job rate " + Size((long)result.Stats.JobRateBytesPerSec) + "/s  ·  " + result.Stats.TransferredCount + " transferred"));
+        var rates = result.Stats.TransferRates.Series;
+        if (rates is not null)
+        {
+            panel.Children.Add(Caption("Transfer rate"));
+            panel.Children.Add(Frame(ChartView.Histogram(rates, ChartTheme.Apply(new ChartOptions { Title = "Rate" }))));
+        }
+
+        var byBucket = result.Stats.Buckets.Where(b => b.TransferRates.Mean is > 0).Select(b => new ChartSlice { Label = b.Name, Value = b.TransferRates.Mean ?? 0 }).ToList();
+        if (byBucket.Count > 0)
+        {
+            panel.Children.Add(Caption("Mean rate by bucket"));
+            panel.Children.Add(Frame(ChartView.Column(NumericSeries.FromDecimal(byBucket.Select(s => (decimal)s.Value).ToArray(), "rate"), ChartTheme.Apply(new ChartOptions { Title = "Mean rate" }))));
+        }
+
+        return Scroll(panel);
+    }
+
+    private ScrollViewer Time(FileIoJobResult result)
+    {
+        var panel = new StackPanel();
+        panel.Children.Add(Line("Elapsed " + (result.Stats.JobElapsedMs / 1000.0).ToString("0.0", CultureInfo.InvariantCulture) + " s"));
+        var durations = result.Stats.Durations.Series;
+        if (durations is not null)
+        {
+            panel.Children.Add(Caption("Time per file"));
+            panel.Children.Add(Frame(ChartView.Histogram(durations, ChartTheme.Apply(new ChartOptions { Title = "Duration ms" }))));
+            panel.Children.Add(Caption("Duration spread"));
+            panel.Children.Add(Frame(ChartView.Ecdf(durations, ChartTheme.Apply(new ChartOptions { Title = "Duration" }))));
         }
         else
         {
-            _dashboard.Children.Add(new TextBlock
-            {
-                Text = "No observations to chart.",
-                Style = TryStyle("TextBlock.Body"),
-                Foreground = Foreground
-            });
+            panel.Children.Add(Note("No timed transfers."));
         }
+
+        return Scroll(panel);
     }
 
     private void Safe(Action action)
@@ -312,20 +364,63 @@ public sealed class JobWindow : Window
         return panel;
     }
 
-    private static TextBlock Label(string text)
+    private RadioButton Radio(string text, string group, bool check, Action click)
+    {
+        var radio = new RadioButton
+        {
+            Content = text,
+            GroupName = group,
+            IsChecked = check,
+            Style = TryStyle("RadioButton.UnderlineTab"),
+            Foreground = Foreground
+        };
+        radio.Checked += (_, _) => click();
+        return radio;
+    }
+
+    private TextBlock Caption(string text)
         => new()
         {
             Text = text,
             Style = TryStyle("TextBlock.Caption"),
+            Foreground = Foreground,
             Margin = new Thickness(0, 8, 0, 4)
         };
 
-    private static Border Frame(FrameworkElement chart)
+    private TextBlock Line(string text)
         => new()
         {
-            Height = 220,
+            Text = text,
+            Style = TryStyle("TextBlock.Caption"),
+            Foreground = Foreground,
+            TextWrapping = TextWrapping.Wrap,
+            Margin = new Thickness(0, 0, 0, 8)
+        };
+
+    private TextBlock Note(string text)
+        => new()
+        {
+            Text = text,
+            Style = TryStyle("TextBlock.Body"),
+            Foreground = Foreground,
+            Margin = new Thickness(0, 12, 0, 0)
+        };
+
+    private Border Frame(FrameworkElement chart)
+        => new()
+        {
+            Height = 240,
             Margin = new Thickness(0, 0, 0, 8),
+            Background = _surface,
             Child = chart
+        };
+
+    private ScrollViewer Scroll(StackPanel panel)
+        => new()
+        {
+            Content = panel,
+            VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+            Background = _surface
         };
 
     private static string NameOf(int index)
