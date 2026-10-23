@@ -67,11 +67,22 @@ public partial class SettingsView : UserControl
         PatternBox.Text = string.IsNullOrWhiteSpace(settings.UniqueNamePattern) ? ".##" : settings.UniqueNamePattern;
         AskOverwrite.IsChecked = settings.AskBeforeOverwrite;
         VerifyBox.SelectedValue = settings.Verify().ToString();
+        FileMasks.Text = settings.ExcludeFileMasks;
+        DirectoryMasks.Text = settings.ExcludeDirectoryMasks;
+        MinSize.Text = settings.MinSizeBytes?.ToString() ?? "";
+        MaxSize.Text = settings.MaxSizeBytes?.ToString() ?? "";
+        MinAge.Text = settings.MinAgeDays?.ToString() ?? "";
+        MaxAge.Text = settings.MaxAgeDays?.ToString() ?? "";
+        Depth.Text = settings.MaxDepth?.ToString() ?? "";
+        Retries.Text = settings.RetryCount.ToString();
+        RetryWait.Text = settings.RetryWaitSeconds.ToString();
+        EmptyDirectories.IsChecked = settings.IncludeEmptyDirectories;
+        Timestamps.IsChecked = settings.CopyTimestamps;
     }
 
     private void Page_Checked(object sender, RoutedEventArgs e)
     {
-        if (ThemesPage is null || ColumnsPage is null || HashPage is null || ViewPage is null || CollisionPage is null)
+        if (ThemesPage is null || ColumnsPage is null || HashPage is null || ViewPage is null || CollisionPage is null || JobPage is null)
             return;
         var tag = sender is RadioButton button ? button.Tag as string : "Themes";
         ThemesPage.Visibility = tag == "Themes" ? Visibility.Visible : Visibility.Collapsed;
@@ -79,6 +90,7 @@ public partial class SettingsView : UserControl
         HashPage.Visibility = tag == "Hash" ? Visibility.Visible : Visibility.Collapsed;
         ViewPage.Visibility = tag == "View" ? Visibility.Visible : Visibility.Collapsed;
         CollisionPage.Visibility = tag == "Collision" ? Visibility.Visible : Visibility.Collapsed;
+        JobPage.Visibility = tag == "Job" ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void ThemeBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -152,6 +164,41 @@ public partial class SettingsView : UserControl
             settings.ShowSystemFiles = ShowSystemFiles.IsChecked == true;
         });
     }
+
+    private void Job_LostFocus(object sender, RoutedEventArgs e)
+    {
+        if (_loading)
+            return;
+        Save(settings =>
+        {
+            settings.ExcludeFileMasks = FileMasks.Text.Trim();
+            settings.ExcludeDirectoryMasks = DirectoryMasks.Text.Trim();
+            settings.MinSizeBytes = LongOrNull(MinSize.Text);
+            settings.MaxSizeBytes = LongOrNull(MaxSize.Text);
+            settings.MinAgeDays = IntOrNull(MinAge.Text);
+            settings.MaxAgeDays = IntOrNull(MaxAge.Text);
+            settings.MaxDepth = IntOrNull(Depth.Text);
+            settings.RetryCount = IntOrNull(Retries.Text) ?? 3;
+            settings.RetryWaitSeconds = IntOrNull(RetryWait.Text) ?? 2;
+        });
+    }
+
+    private void JobFlag_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_loading)
+            return;
+        Save(settings =>
+        {
+            settings.IncludeEmptyDirectories = EmptyDirectories.IsChecked == true;
+            settings.CopyTimestamps = Timestamps.IsChecked == true;
+        });
+    }
+
+    private static long? LongOrNull(string text)
+        => long.TryParse(text.Trim(), out var value) ? value : null;
+
+    private static int? IntOrNull(string text)
+        => int.TryParse(text.Trim(), out var value) ? value : null;
 
     private void Defaults_Click(object sender, RoutedEventArgs e)
     {
