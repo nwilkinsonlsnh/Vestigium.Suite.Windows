@@ -121,7 +121,7 @@
                   IsReadOnly="True"
                   HeadersVisibility="Column"
                   RowHeaderWidth="0"
-                  SelectionMode="Single"
+                  SelectionMode="Extended"
                   SelectionUnit="FullRow"
                   CanUserResizeColumns="True"
                   HorizontalAlignment="Stretch"
