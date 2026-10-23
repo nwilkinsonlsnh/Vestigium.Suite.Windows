@@ -12,6 +12,7 @@
     <PackageReference Include="Vestigium.Logging" Version="$(VestigiumLoggingVersion)" />
     <PackageReference Include="Vestigium.Themes" Version="$(VestigiumThemesVersion)" />
     <PackageReference Include="Vestigium.Helpers.FileIo" Version="$(VestigiumFileIoVersion)" />
+    <PackageReference Include="Vestigium.Helpers.Analytics" Version="$(VestigiumAnalyticsVersion)" />
     <PackageReference Include="Vestigium.Helpers.FileSystemPaths" Version="$(VestigiumFileSystemPathsVersion)" />
     <PackageReference Include="Vestigium.Helpers.Hashing" Version="$(VestigiumHashingVersion)" />
     <PackageReference Include="Vestigium.Controls" Version="$(VestigiumControlsVersion)" />
