@@ -13,6 +13,8 @@ public static class FXplorerCatalog
     public const int SplitOpened = 18003;
     public const int SplitClosed = 18004;
     public const int VerifyCompleted = 18005;
+    public const int JobStarted = 18006;
+    public const int JobCompleted = 18007;
 
     public static void Register(VestigiumLoggerOptions cfg)
     {
@@ -27,5 +29,7 @@ public static class FXplorerCatalog
         cfg.RegisterEvent("SplitOpened", "Vestigium.Suite.Windows.FXplorerIQ.Events.SplitOpened", Category, Subcategory, SplitOpened, "Information", "split opened");
         cfg.RegisterEvent("SplitClosed", "Vestigium.Suite.Windows.FXplorerIQ.Events.SplitClosed", Category, Subcategory, SplitClosed, "Information", "split closed");
         cfg.RegisterEvent("VerifyCompleted", "Vestigium.Suite.Windows.FXplorerIQ.Events.VerifyCompleted", Category, Subcategory, VerifyCompleted, "Information", "verify completed");
+        cfg.RegisterEvent("JobStarted", "Vestigium.Suite.Windows.FXplorerIQ.Events.JobStarted", Category, Subcategory, JobStarted, "Information", "job started");
+        cfg.RegisterEvent("JobCompleted", "Vestigium.Suite.Windows.FXplorerIQ.Events.JobCompleted", Category, Subcategory, JobCompleted, "Information", "job completed");
     }
 }
