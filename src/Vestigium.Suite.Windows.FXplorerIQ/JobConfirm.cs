@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace Vestigium.Suite.Windows.FXplorerIQ;
 
@@ -14,8 +15,8 @@ public sealed class JobConfirm : Window
         Height = 280;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
         ResizeMode = ResizeMode.NoResize;
-        Background = Application.Current.TryFindResource("Brush.Surface.Background") as System.Windows.Media.Brush
-                     ?? SystemColors.WindowBrush;
+        Background = Brush("Vestigium.Brushes.Surface.Window") ?? SystemColors.WindowBrush;
+        Foreground = Brush("Vestigium.Brushes.Text.Primary") ?? SystemColors.WindowTextBrush;
 
         var sourceBox = Box(source, true);
         _destination = Box(suggested ?? "", false);
@@ -37,7 +38,7 @@ public sealed class JobConfirm : Window
         actions.Children.Add(ok);
         actions.Children.Add(cancel);
 
-        var root = new StackPanel { Margin = new Thickness(20) };
+        var root = new StackPanel { Margin = new Thickness(20), Background = Background };
         root.Children.Add(Label("Source"));
         root.Children.Add(sourceBox);
         root.Children.Add(Label("Destination"));
@@ -74,6 +75,7 @@ public sealed class JobConfirm : Window
         {
             Text = text,
             Style = Application.Current.TryFindResource("TextBlock.Caption") as Style,
+            Foreground = Brush("Vestigium.Brushes.Text.Primary") ?? SystemColors.WindowTextBrush,
             Margin = new Thickness(0, 8, 0, 4)
         };
 
@@ -85,6 +87,9 @@ public sealed class JobConfirm : Window
             Style = Application.Current.TryFindResource("TextBox.Standard") as Style,
             MinHeight = 36
         };
+
+    private static Brush? Brush(string key)
+        => Application.Current.TryFindResource(key) as Brush;
 
     private static Button Button(string text, bool primary)
     {
