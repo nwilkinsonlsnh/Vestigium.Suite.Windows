@@ -292,10 +292,10 @@ public sealed class ExplorerHost : DockPanel
             _ => verb.ToString()
         };
 
-    private FileIoJobResult? ShowJob(string title, FileIoJob job, string source, string? destination)
+    private FileIoJobResult? ShowJob(string title, FileIoJob job, string source, string? destination, bool autoClose = false)
     {
         JobLog.Start(title, job.JobId, source, destination);
-        var window = new JobWindow(title, job, source, destination) { Owner = Window.GetWindow(this) };
+        var window = new JobWindow(title, job, source, destination) { Owner = Window.GetWindow(this), AutoClose = autoClose };
         window.ShowDialog();
         JobLog.End(title, job.JobId, source, destination, window.Result?.Status ?? "Failed");
         return window.Result;
@@ -488,7 +488,7 @@ public sealed class ExplorerHost : DockPanel
             {
                 var source = paths[i];
                 var label = (secure ? "Delete (Secure)" : "Delete") + " (" + (i + 1) + " of " + paths.Count + ")";
-                var result = await DeleteOne(source, sourcePane, secure, label);
+                var result = await DeleteOne(source, sourcePane, secure, label, i < paths.Count - 1);
                 if (result is null || result.Status is "Cancelled" or "Canceled")
                     break;
                 deleted += Math.Max(result.Deleted, 1);
@@ -507,13 +507,14 @@ public sealed class ExplorerHost : DockPanel
         }
     }
 
-    private async Task<FileIoJobResult?> DeleteOne(string source, ExplorerPane sourcePane, bool secure, string label)
+    private async Task<FileIoJobResult?> DeleteOne(string source, ExplorerPane sourcePane, bool secure, string label, bool autoClose)
     {
         var settings = App.Settings.Load();
         var options = Options(settings, CollisionOf(settings.Collision));
+        options.ReconLeadTime = TimeSpan.Zero;
         if (secure)
             options.Shred = FileIoShredRecipe.ZeroRandomZero;
-        var result = ShowJob(label, FileIoHelper.Delete(source, options), source, null);
+        var result = ShowJob(label, FileIoHelper.Delete(source, options), source, null, autoClose);
         if (result is null)
             return null;
         Remove(source);
