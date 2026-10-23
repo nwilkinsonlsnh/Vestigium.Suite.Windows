@@ -1,3 +1,31 @@
+<UserControl x:Class="Vestigium.Suite.Windows.FXplorerIQ.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:nud="clr-namespace:Vestigium.Controls.NumericUpDown;assembly=Vestigium.Controls.NumericUpDown"
+             Background="{DynamicResource Vestigium.Brushes.Surface.Window}">
+  <DockPanel Margin="12">
+    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" HorizontalAlignment="Left" Margin="8,0,0,12">
+      <RadioButton Style="{StaticResource RadioButton.UnderlineTab}"
+                   Content="Themes"
+                   GroupName="FXplorerSettings"
+                   IsChecked="True"
+                   Checked="Page_Checked"
+                   Tag="Themes" />
+      <RadioButton Style="{StaticResource RadioButton.UnderlineTab}"
+                   Content="Columns"
+                   GroupName="FXplorerSettings"
+                   Checked="Page_Checked"
+                   Tag="Columns" />
+      <RadioButton Style="{StaticResource RadioButton.UnderlineTab}"
+                   Content="Hash"
+                   GroupName="FXplorerSettings"
+                   Checked="Page_Checked"
+                   Tag="Hash" />
+      <RadioButton Style="{StaticResource RadioButton.UnderlineTab}"
+                   Content="View"
+                   GroupName="FXplorerSettings"
+                   Checked="Page_Checked"
+                   Tag="View" />
       <RadioButton Style="{StaticResource RadioButton.UnderlineTab}"
                    Content="Collision"
                    GroupName="FXplorerSettings"
@@ -8,3 +36,242 @@
                    GroupName="FXplorerSettings"
                    Checked="Page_Checked"
                    Tag="Job" />
+    </StackPanel>
+
+    <StackPanel x:Name="ThemesPage" HorizontalAlignment="Left" VerticalAlignment="Top" Width="420" Margin="8,0,0,0">
+      <TextBlock Style="{StaticResource TextBlock.Caption}"
+                 Margin="0,0,0,16"
+                 TextWrapping="Wrap"
+                 Text="Palette for the application." />
+      <Label Style="{StaticResource Label.Standard}" Content="Theme" />
+      <ComboBox x:Name="ThemeBox"
+                Style="{StaticResource ComboBox.Standard}"
+                DisplayMemberPath="DisplayName"
+                SelectedValuePath="Id"
+                IsEditable="False"
+                IsReadOnly="True"
+                Width="220"
+                HorizontalAlignment="Left"
+                SelectionChanged="ThemeBox_SelectionChanged" />
+    </StackPanel>
+
+    <StackPanel x:Name="ColumnsPage"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Width="420"
+                Margin="8,0,0,0"
+                Visibility="Collapsed">
+      <TextBlock Style="{StaticResource TextBlock.Caption}"
+                 Margin="0,0,0,16"
+                 TextWrapping="Wrap"
+                 Text="Widths in pixels. Dragging the folder splitter or a column header writes the same numbers." />
+
+      <Label Style="{StaticResource Label.Standard}" Content="Folders pane" />
+      <nud:VestigiumNumericUpDown x:Name="FoldersWidth" SignMode="Unsigned" Minimum="160" Maximum="800" Increment="1" DecimalPlaces="0" Width="120" HorizontalAlignment="Left" Margin="0,0,0,12" ValueChanged="Width_Changed" Tag="Folders" />
+
+      <Label Style="{StaticResource Label.Standard}" Content="Name" />
+      <nud:VestigiumNumericUpDown x:Name="NameWidth" SignMode="Unsigned" Minimum="40" Maximum="800" Increment="1" DecimalPlaces="0" Width="120" HorizontalAlignment="Left" Margin="0,0,0,8" ValueChanged="Width_Changed" Tag="Name" />
+
+      <Label Style="{StaticResource Label.Standard}" Content="Date Modified" />
+      <nud:VestigiumNumericUpDown x:Name="DateModifiedWidth" SignMode="Unsigned" Minimum="40" Maximum="800" Increment="1" DecimalPlaces="0" Width="120" HorizontalAlignment="Left" Margin="0,0,0,8" ValueChanged="Width_Changed" Tag="Date Modified" />
+
+      <Label Style="{StaticResource Label.Standard}" Content="Type" />
+      <nud:VestigiumNumericUpDown x:Name="TypeWidth" SignMode="Unsigned" Minimum="40" Maximum="800" Increment="1" DecimalPlaces="0" Width="120" HorizontalAlignment="Left" Margin="0,0,0,8" ValueChanged="Width_Changed" Tag="Type" />
+
+      <Label Style="{StaticResource Label.Standard}" Content="Size" />
+      <nud:VestigiumNumericUpDown x:Name="SizeWidth" SignMode="Unsigned" Minimum="40" Maximum="800" Increment="1" DecimalPlaces="0" Width="120" HorizontalAlignment="Left" Margin="0,0,0,8" ValueChanged="Width_Changed" Tag="Size" />
+
+      <Label Style="{StaticResource Label.Standard}" Content="Category" />
+      <nud:VestigiumNumericUpDown x:Name="CategoryWidth" SignMode="Unsigned" Minimum="40" Maximum="800" Increment="1" DecimalPlaces="0" Width="120" HorizontalAlignment="Left" Margin="0,0,0,8" ValueChanged="Width_Changed" Tag="Category" />
+
+      <Label Style="{StaticResource Label.Standard}" Content="Tag" />
+      <nud:VestigiumNumericUpDown x:Name="TagWidth" SignMode="Unsigned" Minimum="40" Maximum="800" Increment="1" DecimalPlaces="0" Width="120" HorizontalAlignment="Left" Margin="0,0,0,8" ValueChanged="Width_Changed" Tag="Tag" />
+
+      <Label Style="{StaticResource Label.Standard}" Content="File Hash" />
+      <nud:VestigiumNumericUpDown x:Name="HashWidth" SignMode="Unsigned" Minimum="40" Maximum="800" Increment="1" DecimalPlaces="0" Width="120" HorizontalAlignment="Left" Margin="0,0,0,16" ValueChanged="Width_Changed" Tag="File Hash" />
+
+      <Button Content="Defaults"
+              Style="{StaticResource Button.Secondary}"
+              HorizontalAlignment="Left"
+              MinWidth="120"
+              Click="Defaults_Click" />
+    </StackPanel>
+
+    <StackPanel x:Name="HashPage"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Width="420"
+                Margin="8,0,0,0"
+                Visibility="Collapsed">
+      <TextBlock Style="{StaticResource TextBlock.Caption}"
+                 Margin="0,0,0,16"
+                 TextWrapping="Wrap"
+                 Text="Algorithm used for the File Hash column. Folders stay blank." />
+      <Label Style="{StaticResource Label.Standard}" Content="Algorithm" />
+      <ComboBox x:Name="HashBox"
+                Style="{StaticResource ComboBox.Standard}"
+                DisplayMemberPath="Name"
+                SelectedValuePath="Id"
+                IsEditable="False"
+                IsReadOnly="True"
+                Width="220"
+                HorizontalAlignment="Left"
+                SelectionChanged="HashBox_SelectionChanged" />
+    </StackPanel>
+
+    <StackPanel x:Name="ViewPage"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Width="480"
+                Margin="8,0,0,0"
+                Visibility="Collapsed">
+      <TextBlock Style="{StaticResource TextBlock.Caption}"
+                 Margin="0,0,0,16"
+                 TextWrapping="Wrap"
+                 Text="What the tree and the list show. Changes apply to the open Explorer." />
+
+      <TextBlock Style="{StaticResource TextBlock.Caption}" Text="Drives" Margin="0,0,0,8" />
+      <CheckBox x:Name="HideEmptyDrives"
+                Style="{StaticResource CheckBox.Standard}"
+                Content="Hide empty drives"
+                Margin="0,0,0,16"
+                Checked="View_Changed"
+                Unchecked="View_Changed" />
+
+      <TextBlock Style="{StaticResource TextBlock.Caption}" Text="Directories" Margin="0,0,0,8" />
+      <CheckBox x:Name="ShowAllFolders"
+                Style="{StaticResource CheckBox.Standard}"
+                Content="Show all folders"
+                Margin="0,0,0,8"
+                Checked="View_Changed"
+                Unchecked="View_Changed" />
+      <CheckBox x:Name="HideJunctions"
+                Style="{StaticResource CheckBox.Standard}"
+                Content="Hide junctions"
+                Margin="0,0,0,16"
+                Checked="View_Changed"
+                Unchecked="View_Changed" />
+
+      <TextBlock Style="{StaticResource TextBlock.Caption}" Text="Files" Margin="0,0,0,8" />
+      <CheckBox x:Name="ShowHiddenFiles"
+                Style="{StaticResource CheckBox.Standard}"
+                Content="Show hidden files"
+                Margin="0,0,0,8"
+                Checked="View_Changed"
+                Unchecked="View_Changed" />
+      <CheckBox x:Name="ShowFileExtensions"
+                Style="{StaticResource CheckBox.Standard}"
+                Content="Show file extensions"
+                Margin="0,0,0,8"
+                Checked="View_Changed"
+                Unchecked="View_Changed" />
+      <CheckBox x:Name="ShowSystemFiles"
+                Style="{StaticResource CheckBox.Standard}"
+                Content="Show system files"
+                Margin="0,0,0,8"
+                Checked="View_Changed"
+                Unchecked="View_Changed" />
+    </StackPanel>
+
+    <StackPanel x:Name="CollisionPage"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Width="480"
+                Margin="8,0,0,0"
+                Visibility="Collapsed">
+      <TextBlock Style="{StaticResource TextBlock.Caption}"
+                 Margin="0,0,0,16"
+                 TextWrapping="Wrap"
+                 Text="Defaults a job uses when a name already exists. UniqueName never overwrites the original." />
+
+      <Label Style="{StaticResource Label.Standard}" Content="Collision" />
+      <ComboBox x:Name="CollisionBox"
+                Style="{StaticResource ComboBox.Standard}"
+                IsEditable="False"
+                IsReadOnly="True"
+                Width="220"
+                HorizontalAlignment="Left"
+                Margin="0,0,0,12"
+                SelectionChanged="Collision_Changed" />
+
+      <Label Style="{StaticResource Label.Standard}" Content="UniqueName pattern" />
+      <TextBox x:Name="PatternBox"
+               Style="{StaticResource TextBox.Standard}"
+               Width="220"
+               MinHeight="36"
+               HorizontalAlignment="Left"
+               Margin="0,0,0,12"
+               LostFocus="Pattern_LostFocus" />
+
+      <CheckBox x:Name="AskOverwrite"
+                Style="{StaticResource CheckBox.Standard}"
+                Content="Ask before Overwrite"
+                Margin="0,0,0,16"
+                Checked="CollisionFlag_Changed"
+                Unchecked="CollisionFlag_Changed" />
+
+      <Label Style="{StaticResource Label.Standard}" Content="Verify algorithm" />
+      <ComboBox x:Name="VerifyBox"
+                Style="{StaticResource ComboBox.Standard}"
+                DisplayMemberPath="Name"
+                SelectedValuePath="Id"
+                IsEditable="False"
+                IsReadOnly="True"
+                Width="220"
+                HorizontalAlignment="Left"
+                SelectionChanged="Verify_Changed" />
+    </StackPanel>
+
+    <StackPanel x:Name="JobPage"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Width="480"
+                Margin="8,0,0,0"
+                Visibility="Collapsed">
+      <TextBlock Style="{StaticResource TextBlock.Caption}"
+                 Margin="0,0,0,16"
+                 TextWrapping="Wrap"
+                 Text="Filters and retry for every job. Leave a field blank for no limit. Masks are separated by a semicolon." />
+
+      <Label Style="{StaticResource Label.Standard}" Content="Exclude file masks" />
+      <TextBox x:Name="FileMasks" Style="{StaticResource TextBox.Standard}" Width="320" MinHeight="36" HorizontalAlignment="Left" Margin="0,0,0,8" LostFocus="Job_LostFocus" />
+
+      <Label Style="{StaticResource Label.Standard}" Content="Exclude directory masks" />
+      <TextBox x:Name="DirectoryMasks" Style="{StaticResource TextBox.Standard}" Width="320" MinHeight="36" HorizontalAlignment="Left" Margin="0,0,0,8" LostFocus="Job_LostFocus" />
+
+      <Label Style="{StaticResource Label.Standard}" Content="Minimum size, bytes" />
+      <TextBox x:Name="MinSize" Style="{StaticResource TextBox.Standard}" Width="160" MinHeight="36" HorizontalAlignment="Left" Margin="0,0,0,8" LostFocus="Job_LostFocus" />
+
+      <Label Style="{StaticResource Label.Standard}" Content="Maximum size, bytes" />
+      <TextBox x:Name="MaxSize" Style="{StaticResource TextBox.Standard}" Width="160" MinHeight="36" HorizontalAlignment="Left" Margin="0,0,0,8" LostFocus="Job_LostFocus" />
+
+      <Label Style="{StaticResource Label.Standard}" Content="Minimum age, days" />
+      <TextBox x:Name="MinAge" Style="{StaticResource TextBox.Standard}" Width="160" MinHeight="36" HorizontalAlignment="Left" Margin="0,0,0,8" LostFocus="Job_LostFocus" />
+
+      <Label Style="{StaticResource Label.Standard}" Content="Maximum age, days" />
+      <TextBox x:Name="MaxAge" Style="{StaticResource TextBox.Standard}" Width="160" MinHeight="36" HorizontalAlignment="Left" Margin="0,0,0,8" LostFocus="Job_LostFocus" />
+
+      <Label Style="{StaticResource Label.Standard}" Content="Maximum depth" />
+      <TextBox x:Name="Depth" Style="{StaticResource TextBox.Standard}" Width="160" MinHeight="36" HorizontalAlignment="Left" Margin="0,0,0,8" LostFocus="Job_LostFocus" />
+
+      <Label Style="{StaticResource Label.Standard}" Content="Retry count" />
+      <TextBox x:Name="Retries" Style="{StaticResource TextBox.Standard}" Width="160" MinHeight="36" HorizontalAlignment="Left" Margin="0,0,0,8" LostFocus="Job_LostFocus" />
+
+      <Label Style="{StaticResource Label.Standard}" Content="Retry wait, seconds" />
+      <TextBox x:Name="RetryWait" Style="{StaticResource TextBox.Standard}" Width="160" MinHeight="36" HorizontalAlignment="Left" Margin="0,0,0,12" LostFocus="Job_LostFocus" />
+
+      <CheckBox x:Name="EmptyDirectories"
+                Style="{StaticResource CheckBox.Standard}"
+                Content="Include empty directories"
+                Margin="0,0,0,8"
+                Checked="JobFlag_Changed"
+                Unchecked="JobFlag_Changed" />
+      <CheckBox x:Name="Timestamps"
+                Style="{StaticResource CheckBox.Standard}"
+                Content="Copy timestamps and attributes"
+                Margin="0,0,0,8"
+                Checked="JobFlag_Changed"
+                Unchecked="JobFlag_Changed" />
+    </StackPanel>
+  </DockPanel>
+</UserControl>
