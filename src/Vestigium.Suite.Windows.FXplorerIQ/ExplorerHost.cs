@@ -334,12 +334,8 @@ public sealed class ExplorerHost : DockPanel
         var collision = CollisionOf(settings.Collision);
         if (collision == FileIoCollision.Overwrite && settings.AskBeforeOverwrite)
         {
-            var answer = MessageBox.Show(
-                "Overwrite will replace files that already exist in " + destination + ".",
-                verify ? "Copy (Verify)" : "Copy",
-                MessageBoxButton.OKCancel,
-                MessageBoxImage.Warning);
-            if (answer != MessageBoxResult.OK)
+            if (!JobAsk.Ask(Window.GetWindow(this), verify ? "Copy (Verify)" : "Copy",
+                "Overwrite will replace files that already exist in " + destination + "."))
             {
                 _status("Copy cancelled.");
                 return;
@@ -386,14 +382,10 @@ public sealed class ExplorerHost : DockPanel
         var collision = CollisionOf(settings.Collision);
         if (collision == FileIoCollision.Overwrite && settings.AskBeforeOverwrite)
         {
-            var answer = MessageBox.Show(
+            if (!JobAsk.Ask(Window.GetWindow(this), verify ? "Move (Verify)" : "Move",
                 verify
                     ? "Overwrite will replace files that already exist in " + destination + ". The source is removed only if the verify matches."
-                    : "Overwrite will replace files that already exist in " + destination + ". The source is removed after the write.",
-                verify ? "Move (Verify)" : "Move",
-                MessageBoxButton.OKCancel,
-                MessageBoxImage.Warning);
-            if (answer != MessageBoxResult.OK)
+                    : "Overwrite will replace files that already exist in " + destination + ". The source is removed after the write."))
             {
                 _status("Move cancelled.");
                 return;
@@ -477,17 +469,11 @@ public sealed class ExplorerHost : DockPanel
 
     private async Task DeleteMany(IReadOnlyList<string> paths, ExplorerPane sourcePane, bool secure)
     {
-        var list = string.Join("\n", paths.Take(8));
-        if (paths.Count > 8)
-            list += "\n…";
-        var answer = MessageBox.Show(
+        if (!JobAsk.Ask(Window.GetWindow(this), secure ? "Delete (Secure)" : "Delete",
             secure
-                ? "Shred and delete " + paths.Count + " item(s)?\n\n" + list + "\n\nThis cannot be undone."
-                : "Delete " + paths.Count + " item(s)?\n\n" + list + "\n\nThis cannot be undone.",
-            secure ? "Delete (Secure)" : "Delete",
-            MessageBoxButton.OKCancel,
-            MessageBoxImage.Warning);
-        if (answer != MessageBoxResult.OK)
+                ? "Shred and delete " + paths.Count + " item(s)? This cannot be undone."
+                : "Delete " + paths.Count + " item(s)? This cannot be undone.",
+            paths))
         {
             _status("Delete cancelled.");
             return;
@@ -498,14 +484,13 @@ public sealed class ExplorerHost : DockPanel
         _busy = true;
         try
         {
-            foreach (var source in paths)
+            for (var i = 0; i < paths.Count; i++)
             {
-                var result = await DeleteOne(source, sourcePane, secure);
-                if (result is null)
-                {
-                    failed++;
-                    continue;
-                }
+                var source = paths[i];
+                var label = (secure ? "Delete (Secure)" : "Delete") + " (" + (i + 1) + " of " + paths.Count + ")";
+                var result = await DeleteOne(source, sourcePane, secure, label);
+                if (result is null || result.Status is "Cancelled" or "Canceled")
+                    break;
                 deleted += Math.Max(result.Deleted, 1);
                 failed += result.Failed;
             }
@@ -522,13 +507,12 @@ public sealed class ExplorerHost : DockPanel
         }
     }
 
-    private async Task<FileIoJobResult?> DeleteOne(string source, ExplorerPane sourcePane, bool secure)
+    private async Task<FileIoJobResult?> DeleteOne(string source, ExplorerPane sourcePane, bool secure, string label)
     {
         var settings = App.Settings.Load();
         var options = Options(settings, CollisionOf(settings.Collision));
         if (secure)
             options.Shred = FileIoShredRecipe.ZeroRandomZero;
-        var label = secure ? "Delete (Secure)" : "Delete";
         var result = ShowJob(label, FileIoHelper.Delete(source, options), source, null);
         if (result is null)
             return null;
@@ -558,12 +542,8 @@ public sealed class ExplorerHost : DockPanel
 
     private async Task Mirror(string source, string destination, ExplorerPane destPane)
     {
-        var answer = MessageBox.Show(
-            "Mirror will make " + destination + " match " + source + ". Files in the destination that are not in the source will be deleted. Then the result is verified.",
-            "Mirror (Verify)",
-            MessageBoxButton.OKCancel,
-            MessageBoxImage.Warning);
-        if (answer != MessageBoxResult.OK)
+        if (!JobAsk.Ask(Window.GetWindow(this), "Mirror (Verify)",
+            "Mirror will make " + destination + " match " + source + ". Files in the destination that are not in the source will be deleted. Then the result is verified."))
         {
             _status("Mirror cancelled.");
             return;
