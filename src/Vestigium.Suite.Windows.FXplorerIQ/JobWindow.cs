@@ -322,7 +322,9 @@ public sealed class JobWindow : Window
         {
             var bin = progress.Buckets[i];
             var closed = bin.Found > 0 && bin.Done + bin.Skipped + bin.Failed >= bin.Found;
-            _bins[i].Text = bin.Name + "\n" + bin.Done + " / " + bin.Found + "\nactive " + bin.Active;
+            _bins[i].Text = bin.Name + "\n" + bin.Done + " / " + bin.Found
+                + (bin.Failed > 0 ? "\nfailed " + bin.Failed : "")
+                + "\nactive " + bin.Active;
             _cards[i].Opacity = closed ? 0.45 : 1;
         }
 
@@ -330,6 +332,8 @@ public sealed class JobWindow : Window
         var shown = 0;
         foreach (var file in progress.Active)
         {
+            if (file.Status == "Done")
+                continue;
             if (shown++ >= 30)
                 break;
             _files.Children.Add(Row(file));
