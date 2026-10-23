@@ -31,6 +31,6 @@
 | ---: | :--- | :--- | :--- |
 | 1 | PR04a.001 | Register FileIoCatalog and AnalyticsCatalog at startup. A log miss never becomes the job status. | Done |
 | 2 | PR04a.002 | Confirm sheet. Source read only. Destination editable. OK starts. Cancel does nothing. Prefill from the other pane, never auto-start. | Done |
-| 3 | PR04a.003 | Themed folder picker. This PC, drives, folders. Browse on the confirm sheet. | |
+| 3 | PR04a.003 | Themed folder picker. This PC, drives, folders. Browse on the confirm sheet. | Done |
 | 4 | PR04a.004 | Theme the job window. Source and destination stay visible. Pause, resume, cancel use the theme. | |
 | 5 | PR04a.005 | FileIo exposes the live files. Publish. Bump the host. Grid of name, bucket, size, bar, status. Finished rows leave. Failed rows stay. | |
