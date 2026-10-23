@@ -41,6 +41,19 @@ public partial class ExplorerPane : UserControl
     public string SelectionOrFolder()
         => Listing.SelectedItem is PaneEntry entry && entry.FullPath.Length > 0 ? entry.FullPath : _folder;
 
+    public IReadOnlyList<string> SelectedPaths()
+    {
+        var paths = new List<string>();
+        foreach (var item in Listing.SelectedItems)
+        {
+            if (item is PaneEntry entry && entry.FullPath.Length > 0)
+                paths.Add(entry.FullPath);
+        }
+        if (paths.Count == 0 && _folder.Length > 0)
+            paths.Add(_folder);
+        return paths;
+    }
+
     public bool FillCell { get; set; }
 
     public event Action<string>? Navigated;
