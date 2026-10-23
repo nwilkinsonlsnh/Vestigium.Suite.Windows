@@ -484,18 +484,25 @@ public sealed class ExplorerHost : DockPanel
         _busy = true;
         try
         {
-            for (var i = 0; i < paths.Count; i++)
+            var settings = App.Settings.Load();
+            var options = Options(settings, CollisionOf(settings.Collision));
+            options.ReconLeadTime = TimeSpan.Zero;
+            if (secure)
+                options.Shred = FileIoShredRecipe.ZeroRandomZero;
+            var label = (secure ? "Delete (Secure)" : "Delete") + " (" + paths.Count + ")";
+            var shown = paths.Count == 1 ? paths[0] : paths.Count + " items";
+            var result = ShowJob(label, FileIoHelper.Delete(paths, options), shown, null);
+            if (result is null || result.Status is "Cancelled" or "Canceled")
             {
-                var source = paths[i];
-                var label = (secure ? "Delete (Secure)" : "Delete") + " (" + (i + 1) + " of " + paths.Count + ")";
-                var result = await DeleteOne(source, sourcePane, secure, label, i < paths.Count - 1);
-                if (result is null || result.Status is "Cancelled" or "Canceled")
-                    break;
-                deleted += Math.Max(result.Deleted, 1);
-                failed += result.Failed;
+                _status(label + " cancelled.");
+                return;
             }
+            foreach (var path in paths)
+                Remove(path);
+            deleted = result.Deleted;
+            failed = result.Failed;
             sourcePane.Open(Directory.Exists(sourcePane.Folder) ? sourcePane.Folder : Path.GetDirectoryName(paths[0]) ?? sourcePane.Folder);
-            _status((secure ? "Delete (Secure) " : "Delete ") + deleted + " removed, " + failed + " failed.");
+            _status(label + " " + result.Status + ". " + deleted + " deleted, " + failed + " failed.");
         }
         catch (Exception ex)
         {
@@ -505,20 +512,6 @@ public sealed class ExplorerHost : DockPanel
         {
             _busy = false;
         }
-    }
-
-    private async Task<FileIoJobResult?> DeleteOne(string source, ExplorerPane sourcePane, bool secure, string label, bool autoClose)
-    {
-        var settings = App.Settings.Load();
-        var options = Options(settings, CollisionOf(settings.Collision));
-        options.ReconLeadTime = TimeSpan.Zero;
-        if (secure)
-            options.Shred = FileIoShredRecipe.ZeroRandomZero;
-        var result = ShowJob(label, FileIoHelper.Delete(source, options), source, null, autoClose);
-        if (result is null)
-            return null;
-        Remove(source);
-        return result;
     }
 
     private static void Remove(string path)
