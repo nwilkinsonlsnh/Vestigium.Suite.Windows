@@ -11,7 +11,7 @@ public sealed class JobConfirm : Window
     {
         Title = title;
         Width = 560;
-        Height = 260;
+        Height = 280;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
         ResizeMode = ResizeMode.NoResize;
         Background = Application.Current.TryFindResource("Brush.Surface.Background") as System.Windows.Media.Brush
@@ -19,6 +19,13 @@ public sealed class JobConfirm : Window
 
         var sourceBox = Box(source, true);
         _destination = Box(suggested ?? "", false);
+
+        var browse = Button("Browse", false);
+        browse.Click += (_, _) => Browse();
+        var row = new DockPanel { Margin = new Thickness(0, 0, 0, 8) };
+        DockPanel.SetDock(browse, Dock.Right);
+        row.Children.Add(browse);
+        row.Children.Add(_destination);
 
         var ok = Button("OK", true);
         ok.IsDefault = true;
@@ -34,7 +41,7 @@ public sealed class JobConfirm : Window
         root.Children.Add(Label("Source"));
         root.Children.Add(sourceBox);
         root.Children.Add(Label("Destination"));
-        root.Children.Add(_destination);
+        root.Children.Add(row);
         root.Children.Add(actions);
         Content = root;
     }
@@ -45,6 +52,14 @@ public sealed class JobConfirm : Window
     {
         var window = new JobConfirm(title, source, suggested) { Owner = owner };
         return window.ShowDialog() == true ? window.Destination : null;
+    }
+
+    private void Browse()
+    {
+        var picked = FolderPicker.Ask(this, Destination);
+        if (picked is null)
+            return;
+        _destination.Text = picked;
     }
 
     private void Accept()
@@ -68,8 +83,7 @@ public sealed class JobConfirm : Window
             Text = text,
             IsReadOnly = readOnly,
             Style = Application.Current.TryFindResource("TextBox.Standard") as Style,
-            MinHeight = 36,
-            Margin = new Thickness(0, 0, 0, 8)
+            MinHeight = 36
         };
 
     private static Button Button(string text, bool primary)
