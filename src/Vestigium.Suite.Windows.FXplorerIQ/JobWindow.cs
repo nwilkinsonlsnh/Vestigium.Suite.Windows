@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Media;
+using Vestigium.Helpers.Charts;
 using Vestigium.Helpers.FileIo;
 
 namespace Vestigium.Suite.Windows.FXplorerIQ;
@@ -20,15 +21,15 @@ public sealed class JobWindow : Window
     private readonly Button _resume;
     private readonly Button _cancel;
     private readonly Button _close;
-    private DateTimeOffset _painted = DateTimeOffset.MinValue;
+    private readonly StackPanel _dashboard = new();
     private bool _queued;
 
     public JobWindow(string title, FileIoJob job, string source, string? destination)
     {
         _job = job;
         Title = title;
-        Width = 760;
-        Height = 640;
+        Width = 820;
+        Height = 700;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
         ResizeMode = ResizeMode.NoResize;
         Background = TryBrush("Vestigium.Brushes.Surface.Window") ?? SystemColors.WindowBrush;
@@ -49,7 +50,7 @@ public sealed class JobWindow : Window
         _rate.Style = TryStyle("TextBlock.Caption");
         _rate.Margin = new Thickness(0, 0, 0, 16);
 
-        var bins = new UniformGrid { Columns = 5, Margin = new Thickness(0, 0, 0, 16) };
+        var bins = new UniformGrid { Columns = 5, Margin = new Thickness(0, 0, 0, 12) };
         var cardBrush = TryBrush("Vestigium.Brushes.Surface.Card") ?? SystemColors.ControlBrush;
         for (var i = 0; i < 5; i++)
         {
@@ -65,30 +66,58 @@ public sealed class JobWindow : Window
             bins.Children.Add(_cards[i]);
         }
 
-        var scroller = new ScrollViewer { Height = 180, Content = _files, VerticalScrollBarVisibility = ScrollBarVisibility.Auto };
+        var scroller = new ScrollViewer
+        {
+            Content = _files,
+            VerticalScrollBarVisibility = ScrollBarVisibility.Auto
+        };
 
         _pause = Button("Pause", "Button.Secondary", () => Safe(() => _job.Pause()));
         _resume = Button("Resume", "Button.Secondary", () => Safe(() => _job.Resume()));
         _cancel = Button("Cancel", "Button.Ghost", () => Safe(() => _job.Cancel()));
         _close = Button("Close", "Button.Primary", Close);
         _close.IsEnabled = false;
-        var actions = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
+        var actions = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Margin = new Thickness(0, 12, 0, 0)
+        };
         actions.Children.Add(_pause);
         actions.Children.Add(_resume);
         actions.Children.Add(_cancel);
         actions.Children.Add(_close);
 
-        var root = new StackPanel { Margin = new Thickness(20), Background = Background };
-        root.Children.Add(_phase);
-        root.Children.Add(Path("Source", source));
+        var action = new DockPanel { Margin = new Thickness(4) };
+        DockPanel.SetDock(actions, Dock.Bottom);
+        action.Children.Add(actions);
+        action.Children.Add(scroller);
+
+        var body = new StackPanel();
+        body.Children.Add(_phase);
+        body.Children.Add(Path("Source", source));
         if (!string.IsNullOrWhiteSpace(destination))
-            root.Children.Add(Path("Destination", destination));
-        root.Children.Add(_bar);
-        root.Children.Add(_rate);
-        root.Children.Add(bins);
-        root.Children.Add(scroller);
-        root.Children.Add(actions);
-        Content = root;
+            body.Children.Add(Path("Destination", destination));
+        body.Children.Add(_bar);
+        body.Children.Add(_rate);
+        body.Children.Add(bins);
+        body.Children.Add(action);
+
+        var actionTab = new TabItem { Header = "Action", Content = body };
+        _dashboard.Margin = new Thickness(4);
+        _dashboard.Children.Add(new TextBlock
+        {
+            Text = "The dashboard fills when the job finishes.",
+            Style = TryStyle("TextBlock.Body"),
+            Foreground = Foreground,
+            Margin = new Thickness(0, 12, 0, 0)
+        });
+        var dashboardTab = new TabItem { Header = "Dashboard", Content = new ScrollViewer { Content = _dashboard, VerticalScrollBarVisibility = ScrollBarVisibility.Auto } };
+
+        var tabs = new TabControl { Margin = new Thickness(12) };
+        tabs.Items.Add(actionTab);
+        tabs.Items.Add(dashboardTab);
+        Content = tabs;
 
         _job.ProgressChanged += (_, progress) => Queue(progress);
         Loaded += async (_, _) => await Run();
@@ -104,7 +133,6 @@ public sealed class JobWindow : Window
         Dispatcher.BeginInvoke(() =>
         {
             _queued = false;
-            _painted = DateTimeOffset.UtcNow;
             Show(progress);
         }, System.Windows.Threading.DispatcherPriority.Background);
     }
@@ -119,6 +147,7 @@ public sealed class JobWindow : Window
             _resume.IsEnabled = false;
             _cancel.IsEnabled = false;
             _close.IsEnabled = true;
+            FillDashboard(Result);
         }
         catch (Exception ex)
         {
@@ -131,6 +160,46 @@ public sealed class JobWindow : Window
             _phase.Text = "Failed";
             _rate.Text = ex.Message;
             _close.IsEnabled = true;
+        }
+    }
+
+    private void FillDashboard(FileIoJobResult result)
+    {
+        _dashboard.Children.Clear();
+        var stats = result.Stats;
+        _dashboard.Children.Add(new TextBlock
+        {
+            Text = result.Status + "  ·  " + stats.FormatLine(result.JobId),
+            Style = TryStyle("TextBlock.Caption"),
+            Foreground = Foreground,
+            TextWrapping = TextWrapping.Wrap,
+            Margin = new Thickness(0, 0, 0, 12)
+        });
+
+        var slices = stats.Buckets
+            .Where(b => b.FileSizes.Count > 0)
+            .Select(b => new ChartSlice { Label = b.Name, Value = b.FileSizes.Count })
+            .ToList();
+        if (slices.Count > 0)
+        {
+            _dashboard.Children.Add(Label("Files by bucket"));
+            _dashboard.Children.Add(Frame(ChartView.Pareto(slices, ChartTheme.Apply(new ChartOptions { Title = "Files by bucket" }))));
+            _dashboard.Children.Add(Label("Transfer rate by bucket"));
+            var rates = stats.Buckets
+                .Where(b => b.TransferRates.Mean is > 0)
+                .Select(b => new ChartSlice { Label = b.Name, Value = b.TransferRates.Mean ?? 0 })
+                .ToList();
+            if (rates.Count > 0)
+                _dashboard.Children.Add(Frame(ChartView.Pie(rates, ChartTheme.Apply(new ChartOptions { Title = "Mean rate" }))));
+        }
+        else
+        {
+            _dashboard.Children.Add(new TextBlock
+            {
+                Text = "No observations to chart.",
+                Style = TryStyle("TextBlock.Body"),
+                Foreground = Foreground
+            });
         }
     }
 
@@ -154,7 +223,7 @@ public sealed class JobWindow : Window
     {
         _phase.Text = progress.IsPaused ? "Paused  " + progress.Phase : progress.Phase;
         var found = Math.Max(progress.FilesFound, 1);
-        _bar.Value = Math.Min(100, progress.FilesDone * 100d / found);
+        Set(_bar, Math.Min(100, progress.FilesDone * 100d / found), 100);
         var rate = progress.RateBytesPerSec > 0 ? Size(progress.RateBytesPerSec) + "/s" : "—";
         var eta = progress.EtaUtc is { } when ? when.ToLocalTime().ToString("HH:mm:ss", CultureInfo.InvariantCulture) : "—";
         _rate.Text = progress.FilesDone + " / " + progress.FilesFound
@@ -197,7 +266,9 @@ public sealed class JobWindow : Window
         };
         var bucket = new TextBlock { Text = file.Bucket, Style = TryStyle("TextBlock.Caption"), VerticalAlignment = VerticalAlignment.Center };
         var size = new TextBlock { Text = Size(file.Size), Style = TryStyle("TextBlock.Caption"), VerticalAlignment = VerticalAlignment.Center };
-        var bar = new ProgressBar { Height = 10, Minimum = 0, Maximum = Math.Max(file.Size, 1), Value = file.BytesDone, VerticalAlignment = VerticalAlignment.Center };
+        var max = Math.Max(file.Size, 1);
+        var bar = new ProgressBar { Height = 10, Minimum = 0, Maximum = max, VerticalAlignment = VerticalAlignment.Center };
+        Set(bar, file.BytesDone, max);
         if (TryStyle("ProgressBar.Standard") is { } style)
             bar.Style = style;
         var status = new TextBlock { Text = file.Reason ?? file.Status, Style = TryStyle("TextBlock.Caption"), VerticalAlignment = VerticalAlignment.Center };
@@ -215,6 +286,17 @@ public sealed class JobWindow : Window
         return grid;
     }
 
+    private static void Set(ProgressBar bar, double value, double max)
+    {
+        if (double.IsNaN(value) || double.IsInfinity(value))
+            value = 0;
+        if (value < bar.Minimum)
+            value = bar.Minimum;
+        if (value > max)
+            value = max;
+        bar.Value = value;
+    }
+
     private static StackPanel Path(string caption, string value)
     {
         var panel = new StackPanel { Margin = new Thickness(0, 0, 0, 8) };
@@ -228,6 +310,22 @@ public sealed class JobWindow : Window
         });
         return panel;
     }
+
+    private static TextBlock Label(string text)
+        => new()
+        {
+            Text = text,
+            Style = TryStyle("TextBlock.Caption"),
+            Margin = new Thickness(0, 8, 0, 4)
+        };
+
+    private static Border Frame(FrameworkElement chart)
+        => new()
+        {
+            Height = 220,
+            Margin = new Thickness(0, 0, 0, 8),
+            Child = chart
+        };
 
     private static string NameOf(int index)
         => index switch
@@ -276,7 +374,7 @@ public sealed class JobWindow : Window
         var button = new Button
         {
             Content = text,
-            Margin = new Thickness(6, 0, 0, 0),
+            Margin = new Thickness(0, 0, 8, 0),
             Padding = new Thickness(12, 6, 12, 6),
             MinWidth = 88
         };
