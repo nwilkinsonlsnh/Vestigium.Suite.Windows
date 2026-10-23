@@ -141,6 +141,12 @@ public sealed class JobWindow : Window
         root.Children.Add(_page);
         Content = root;
 
+        Closing += (_, _) =>
+        {
+            if (_result is null)
+                Safe(() => _job.Cancel());
+        };
+
         _job.ProgressChanged += (_, progress) => Queue(progress);
         Loaded += async (_, _) => await Run();
     }
