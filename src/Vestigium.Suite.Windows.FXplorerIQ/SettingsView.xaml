@@ -26,6 +26,11 @@
                    GroupName="FXplorerSettings"
                    Checked="Page_Checked"
                    Tag="View" />
+      <RadioButton Style="{StaticResource RadioButton.UnderlineTab}"
+                   Content="Collision"
+                   GroupName="FXplorerSettings"
+                   Checked="Page_Checked"
+                   Tag="Collision" />
     </StackPanel>
 
     <StackPanel x:Name="ThemesPage" HorizontalAlignment="Left" VerticalAlignment="Top" Width="420" Margin="8,0,0,0">
@@ -161,6 +166,55 @@
                 Margin="0,0,0,8"
                 Checked="View_Changed"
                 Unchecked="View_Changed" />
+    </StackPanel>
+
+    <StackPanel x:Name="CollisionPage"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Width="480"
+                Margin="8,0,0,0"
+                Visibility="Collapsed">
+      <TextBlock Style="{StaticResource TextBlock.Caption}"
+                 Margin="0,0,0,16"
+                 TextWrapping="Wrap"
+                 Text="Defaults a job uses when a name already exists. UniqueName never overwrites the original." />
+
+      <Label Style="{StaticResource Label.Standard}" Content="Collision" />
+      <ComboBox x:Name="CollisionBox"
+                Style="{StaticResource ComboBox.Standard}"
+                IsEditable="False"
+                IsReadOnly="True"
+                Width="220"
+                HorizontalAlignment="Left"
+                Margin="0,0,0,12"
+                SelectionChanged="Collision_Changed" />
+
+      <Label Style="{StaticResource Label.Standard}" Content="UniqueName pattern" />
+      <TextBox x:Name="PatternBox"
+               Style="{StaticResource TextBox.Standard}"
+               Width="220"
+               MinHeight="36"
+               HorizontalAlignment="Left"
+               Margin="0,0,0,12"
+               LostFocus="Pattern_LostFocus" />
+
+      <CheckBox x:Name="AskOverwrite"
+                Style="{StaticResource CheckBox.Standard}"
+                Content="Ask before Overwrite"
+                Margin="0,0,0,16"
+                Checked="CollisionFlag_Changed"
+                Unchecked="CollisionFlag_Changed" />
+
+      <Label Style="{StaticResource Label.Standard}" Content="Verify algorithm" />
+      <ComboBox x:Name="VerifyBox"
+                Style="{StaticResource ComboBox.Standard}"
+                DisplayMemberPath="Name"
+                SelectedValuePath="Id"
+                IsEditable="False"
+                IsReadOnly="True"
+                Width="220"
+                HorizontalAlignment="Left"
+                SelectionChanged="Verify_Changed" />
     </StackPanel>
   </DockPanel>
 </UserControl>
