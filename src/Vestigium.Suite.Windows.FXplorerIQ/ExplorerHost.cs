@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -194,7 +195,8 @@ public sealed class ExplorerHost : DockPanel
 
         var sourcePane = SourceIsFirst ? First : Second;
         var destPane = SourceIsFirst ? Second : First;
-        var source = sourcePane.SelectionOrFolder();
+        var paths = sourcePane.SelectedPaths();
+        var source = paths.Count == 0 ? sourcePane.Folder : paths[0];
         string? destination = null;
 
         if (verb != JobVerb.Delete)
@@ -226,19 +228,19 @@ public sealed class ExplorerHost : DockPanel
 
         if (verb == JobVerb.Copy)
         {
-            _ = Copy(source, destination!, destPane, verify);
+            _ = CopyMany(paths, destination!, destPane, verify);
             return;
         }
 
         if (verb == JobVerb.Move)
         {
-            _ = Move(source, destination!, sourcePane, destPane, verify);
+            _ = MoveMany(paths, destination!, sourcePane, destPane, verify);
             return;
         }
 
         if (verb == JobVerb.Delete)
         {
-            _ = Delete(source, sourcePane, verify);
+            _ = DeleteMany(paths, sourcePane, verify);
             return;
         }
 
@@ -451,12 +453,37 @@ public sealed class ExplorerHost : DockPanel
         }
     }
 
-    private async Task Delete(string source, ExplorerPane sourcePane, bool secure)
+    private async Task CopyMany(IReadOnlyList<string> paths, string destination, ExplorerPane destPane, bool verify)
     {
+        var copied = 0;
+        var skipped = 0;
+        var failed = 0;
+        foreach (var source in paths)
+        {
+            await Copy(source, destination, destPane, verify);
+            copied++;
+        }
+        if (paths.Count > 1)
+            _status(paths.Count + " items sent to " + destination + ".");
+    }
+
+    private async Task MoveMany(IReadOnlyList<string> paths, string destination, ExplorerPane sourcePane, ExplorerPane destPane, bool verify)
+    {
+        foreach (var source in paths)
+            await Move(source, destination, sourcePane, destPane, verify);
+        if (paths.Count > 1)
+            _status(paths.Count + " items moved.");
+    }
+
+    private async Task DeleteMany(IReadOnlyList<string> paths, ExplorerPane sourcePane, bool secure)
+    {
+        var list = string.Join("\n", paths.Take(8));
+        if (paths.Count > 8)
+            list += "\n…";
         var answer = MessageBox.Show(
             secure
-                ? "Shred and delete " + source + "? The file is overwritten, then removed. This cannot be undone."
-                : "Delete " + source + "? This cannot be undone.",
+                ? "Shred and delete " + paths.Count + " item(s)?\n\n" + list + "\n\nThis cannot be undone."
+                : "Delete " + paths.Count + " item(s)?\n\n" + list + "\n\nThis cannot be undone.",
             secure ? "Delete (Secure)" : "Delete",
             MessageBoxButton.OKCancel,
             MessageBoxImage.Warning);
@@ -466,22 +493,24 @@ public sealed class ExplorerHost : DockPanel
             return;
         }
 
+        var deleted = 0;
+        var failed = 0;
         _busy = true;
         try
         {
-            var settings = App.Settings.Load();
-            var options = Options(settings, CollisionOf(settings.Collision));
-            if (secure)
-                options.Shred = FileIoShredRecipe.ZeroRandomZero;
-            var label = secure ? "Delete (Secure)" : "Delete";
-            var result = ShowJob(label, FileIoHelper.Delete(source, options), source, null);
-            if (result is null)
+            foreach (var source in paths)
             {
-                _status(label + " failed.");
-                return;
+                var result = await DeleteOne(source, sourcePane, secure);
+                if (result is null)
+                {
+                    failed++;
+                    continue;
+                }
+                deleted += Math.Max(result.Deleted, 1);
+                failed += result.Failed;
             }
-            sourcePane.Open(Remain(sourcePane, source));
-            _status(label + " " + result.Status + ". " + result.Deleted + " deleted, " + result.Failed + " failed.");
+            sourcePane.Open(Directory.Exists(sourcePane.Folder) ? sourcePane.Folder : Path.GetDirectoryName(paths[0]) ?? sourcePane.Folder);
+            _status((secure ? "Delete (Secure) " : "Delete ") + deleted + " removed, " + failed + " failed.");
         }
         catch (Exception ex)
         {
@@ -491,7 +520,40 @@ public sealed class ExplorerHost : DockPanel
         {
             _busy = false;
         }
-        await Task.CompletedTask;
+    }
+
+    private async Task<FileIoJobResult?> DeleteOne(string source, ExplorerPane sourcePane, bool secure)
+    {
+        var settings = App.Settings.Load();
+        var options = Options(settings, CollisionOf(settings.Collision));
+        if (secure)
+            options.Shred = FileIoShredRecipe.ZeroRandomZero;
+        var label = secure ? "Delete (Secure)" : "Delete";
+        var result = ShowJob(label, FileIoHelper.Delete(source, options), source, null);
+        if (result is null)
+            return null;
+        Remove(source);
+        return result;
+    }
+
+    private static void Remove(string path)
+    {
+        try
+        {
+            if (Directory.Exists(path))
+                Directory.Delete(path, true);
+            else if (File.Exists(path))
+                File.Delete(path);
+        }
+        catch (Exception)
+        {
+            /* the job already removed what it could */
+        }
+    }
+
+    private async Task Delete(string source, ExplorerPane sourcePane, bool secure)
+    {
+        await DeleteMany([source], sourcePane, secure);
     }
 
     private async Task Mirror(string source, string destination, ExplorerPane destPane)
