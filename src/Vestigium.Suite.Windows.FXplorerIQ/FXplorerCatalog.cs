@@ -12,6 +12,7 @@ public static class FXplorerCatalog
     public const int ExplorerClosed = 18002;
     public const int SplitOpened = 18003;
     public const int SplitClosed = 18004;
+    public const int VerifyCompleted = 18005;
 
     public static void Register(VestigiumLoggerOptions cfg)
     {
@@ -25,5 +26,6 @@ public static class FXplorerCatalog
         cfg.RegisterEvent("ExplorerClosed", "Vestigium.Suite.Windows.FXplorerIQ.Events.ExplorerClosed", Category, Subcategory, ExplorerClosed, "Information", "explorer closed");
         cfg.RegisterEvent("SplitOpened", "Vestigium.Suite.Windows.FXplorerIQ.Events.SplitOpened", Category, Subcategory, SplitOpened, "Information", "split opened");
         cfg.RegisterEvent("SplitClosed", "Vestigium.Suite.Windows.FXplorerIQ.Events.SplitClosed", Category, Subcategory, SplitClosed, "Information", "split closed");
+        cfg.RegisterEvent("VerifyCompleted", "Vestigium.Suite.Windows.FXplorerIQ.Events.VerifyCompleted", Category, Subcategory, VerifyCompleted, "Information", "verify completed");
     }
 }
