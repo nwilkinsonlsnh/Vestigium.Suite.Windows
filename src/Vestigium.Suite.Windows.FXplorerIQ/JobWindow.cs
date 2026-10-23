@@ -58,9 +58,9 @@ public sealed class JobWindow : Window
             bins.Children.Add(_cards[i]);
         }
 
-        _pause = Button("Pause", () => _job.Pause());
-        _resume = Button("Resume", () => _job.Resume());
-        _cancel = Button("Cancel", () => _job.Cancel());
+        _pause = Button("Pause", () => Safe(() => _job.Pause()));
+        _resume = Button("Resume", () => Safe(() => _job.Resume()));
+        _cancel = Button("Cancel", () => Safe(() => _job.Cancel()));
         _close = Button("Close", Close);
         _close.IsEnabled = false;
         var actions = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
@@ -96,11 +96,33 @@ public sealed class JobWindow : Window
         }
         catch (Exception ex)
         {
+            if (IsCatalog(ex))
+            {
+                _rate.Text = "Log skipped. The job is still running.";
+                return;
+            }
+
             _phase.Text = "Failed";
             _rate.Text = ex.Message;
             _close.IsEnabled = true;
         }
     }
+
+    private void Safe(Action action)
+    {
+        try
+        {
+            action();
+        }
+        catch (Exception ex) when (IsCatalog(ex))
+        {
+            _rate.Text = "Log skipped. The job is still running.";
+        }
+    }
+
+    private static bool IsCatalog(Exception ex)
+        => ex.Message.Contains("EVENTID", StringComparison.OrdinalIgnoreCase)
+           && ex.Message.Contains("catalog", StringComparison.OrdinalIgnoreCase);
 
     private void Show(FileIoProgress progress)
     {
