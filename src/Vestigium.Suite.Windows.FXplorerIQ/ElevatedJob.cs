@@ -22,6 +22,8 @@ public sealed class ElevatedJob
 
     public bool Secure { get; set; }
 
+    public int SecurePasses { get; set; } = 3;
+
     public static ElevatedJob? Read(string path)
     {
         if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
@@ -37,7 +39,9 @@ public sealed class ElevatedJob
             UniqueNamePattern = string.IsNullOrWhiteSpace(Pattern) ? ".##" : Pattern,
             Purge = Purge,
             AuditMode = Audit,
-            Shred = Secure ? FileIoShredRecipe.ZeroRandomZero : null,
+            Shred = Secure
+                ? SecurePasses == 7 ? FileIoShredRecipe.SevenRandomThenZero : FileIoShredRecipe.ThreeRandomThenZero
+                : null,
             ReconLeadTime = TimeSpan.FromSeconds(2)
         };
         return Verb switch
