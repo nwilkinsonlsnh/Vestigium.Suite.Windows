@@ -1,0 +1,21 @@
+<UserControl x:Class="Vestigium.Suite.Windows.FXplorerIQ.HelpView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{DynamicResource Vestigium.Brushes.Surface.Window}">
+  <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="16">
+    <StackPanel MaxWidth="720" HorizontalAlignment="Left">
+      <TextBlock Style="{StaticResource TextBlock.Caption}" Text="Secure Delete" Margin="0,0,0,8" />
+      <TextBlock TextWrapping="Wrap" Margin="0,0,0,12"
+                 Text="Delete (Secure) overwrites the file's contents with cryptographic random bits, writes one zero pass, and deletes the file. The default is three random passes. Seven is available in Settings. The file is renamed before it is deleted, and a TRIM is sent for its ranges. TRIM is a request to the drive, not a confirmation." />
+      <TextBlock Style="{StaticResource TextBlock.Caption}" Text="Spinning disk" Margin="0,8,0,8" />
+      <TextBlock TextWrapping="Wrap" Margin="0,0,0,12"
+                 Text="On a spinning disk, that overwrite lands on the sectors the file occupied. A compressed, sparse, or encrypted file is handled by its clusters, because a normal overwrite would allocate new ones and leave the old data behind." />
+      <TextBlock Style="{StaticResource TextBlock.Caption}" Text="Solid-state drive" Margin="0,8,0,8" />
+      <TextBlock TextWrapping="Wrap" Margin="0,0,0,12"
+                 Text="On an SSD there is no guarantee the original data is gone. The drive writes a new page and may keep the old one until it erases it itself. A file overwrite cannot address a physical flash cell." />
+      <TextBlock Style="{StaticResource TextBlock.Caption}" Text="What this is not" Margin="0,8,0,8" />
+      <TextBlock TextWrapping="Wrap" Margin="0,0,0,12"
+                 Text="This is not a DoD wipe. It is not a sector erase. Clearing an SSD takes the drive's own sanitize command, which erases the whole drive, or destruction of the chips." />
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>
