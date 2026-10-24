@@ -13,43 +13,42 @@ public sealed class CollisionPrompt : Window
     private static readonly string[] Patterns = [".#", ".##", ".###", ".####", ".#####", "A#", "A##", "A###", "A####", "A#####"];
 
     private readonly ComboBox _method;
-    private readonly ComboBox _pattern;
     private readonly TextBlock _patternLabel;
+    private readonly ComboBox _pattern;
     private readonly TextBlock _hint;
 
     private CollisionPrompt(string verb, string current, string pattern)
     {
         Title = "Automatic Collision Handling (OFF)";
         Width = 520;
-        SizeToContent = SizeToContent.Height;
+        Height = 360;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
         ResizeMode = ResizeMode.NoResize;
+        ShowInTaskbar = false;
         Background = Brush("Vestigium.Brushes.Surface.Window") ?? SystemColors.WindowBrush;
         Foreground = Brush("Vestigium.Brushes.Text.Primary") ?? SystemColors.WindowTextBrush;
 
-        var title = Text(verb, "TextBlock.Caption");
-        title.FontSize = 16;
-        title.Margin = new Thickness(0, 0, 0, 8);
-
-        var body = Text(
-            "Automatic Collision Handling is turned off. Choose how this " + verb.ToLowerInvariant() + " should treat a name that already exists.",
-            "TextBlock.Standard");
+        var body = Block(
+            "Automatic Collision Handling is turned off. Choose how this "
+            + verb.ToLowerInvariant()
+            + " should treat a name that already exists.");
         body.TextWrapping = TextWrapping.Wrap;
         body.Margin = new Thickness(0, 0, 0, 16);
 
         _method = Combo(Methods, Methods.Contains(current) ? current : "UniqueName");
         _method.SelectionChanged += (_, _) => ShowPattern();
 
-        _patternLabel = Text("Unique name pattern", "Label.Standard");
+        _patternLabel = Block("Unique name pattern");
         _patternLabel.Margin = new Thickness(0, 12, 0, 4);
         _pattern = Combo(Patterns, Patterns.Contains(pattern) ? pattern : ".##");
 
-        _hint = Text(HintOf("UniqueName"), "TextBlock.Caption");
+        _hint = Block(HintOf("UniqueName"));
         _hint.TextWrapping = TextWrapping.Wrap;
         _hint.Margin = new Thickness(0, 12, 0, 0);
+        _hint.Opacity = 0.8;
 
         var form = new StackPanel();
-        form.Children.Add(Text("Method", "Label.Standard"));
+        form.Children.Add(Block("Method"));
         form.Children.Add(_method);
         form.Children.Add(_patternLabel);
         form.Children.Add(_pattern);
@@ -57,23 +56,21 @@ public sealed class CollisionPrompt : Window
 
         var ok = Button("Continue", true);
         ok.IsDefault = true;
-        ok.Click += (_, _) => DialogResult = true;
+        ok.Click += (_, _) => { DialogResult = true; };
         var cancel = Button("Cancel", false);
         cancel.IsCancel = true;
         var actions = new StackPanel
         {
             Orientation = Orientation.Horizontal,
             HorizontalAlignment = HorizontalAlignment.Right,
-            Margin = new Thickness(0, 20, 0, 0)
+            Margin = new Thickness(0, 16, 0, 0)
         };
         actions.Children.Add(ok);
         actions.Children.Add(cancel);
 
-        var root = new DockPanel { Margin = new Thickness(24), Background = Background };
-        DockPanel.SetDock(title, Dock.Top);
+        var root = new DockPanel { Margin = new Thickness(20), Background = Background };
         DockPanel.SetDock(body, Dock.Top);
         DockPanel.SetDock(actions, Dock.Bottom);
-        root.Children.Add(title);
         root.Children.Add(body);
         root.Children.Add(actions);
         root.Children.Add(form);
@@ -86,8 +83,11 @@ public sealed class CollisionPrompt : Window
 
     public static CollisionChoice? Ask(Window? owner, string verb, string current, string pattern)
     {
-        var window = new CollisionPrompt(verb, current, pattern) { Owner = owner };
-        return window.ShowDialog() == true ? window.Choice : null;
+        var window = new CollisionPrompt(verb, current, pattern);
+        if (owner is not null)
+            window.Owner = owner;
+        window.ShowDialog();
+        return window.DialogResult == true ? window.Choice : null;
     }
 
     private void ShowPattern()
@@ -116,22 +116,28 @@ public sealed class CollisionPrompt : Window
         };
 
     private static ComboBox Combo(string[] items, string selected)
-        => new()
+    {
+        var box = new ComboBox
         {
             ItemsSource = items,
             SelectedItem = selected,
             IsEditable = false,
             Width = 240,
+            MinHeight = 32,
             HorizontalAlignment = HorizontalAlignment.Left,
-            Style = Application.Current.TryFindResource("ComboBox.Standard") as Style
+            Margin = new Thickness(0, 4, 0, 0)
         };
+        if (Application.Current.TryFindResource("ComboBox.Standard") is Style style)
+            box.Style = style;
+        return box;
+    }
 
-    private static TextBlock Text(string value, string style)
+    private static TextBlock Block(string value)
         => new()
         {
             Text = value,
-            Style = Application.Current.TryFindResource(style) as Style,
-            Foreground = Brush("Vestigium.Brushes.Text.Primary") ?? SystemColors.WindowTextBrush
+            Foreground = Brush("Vestigium.Brushes.Text.Primary") ?? SystemColors.WindowTextBrush,
+            Margin = new Thickness(0, 8, 0, 0)
         };
 
     private static Brush? Brush(string key)
