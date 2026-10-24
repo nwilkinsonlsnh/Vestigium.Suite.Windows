@@ -217,8 +217,8 @@ public sealed class JobWindow : Window
             ("shape", "huge") => (BucketSize(stats, "Huge"), "Huge files, doubled ranges above 256 MB."),
             ("shape", "iqr") => (Iqr(stats), "The middle half of each bucket. Outliers are the files that stuck out."),
             ("shape", _) => (Mix(stats), "Where the files went. Five slices, one for each bucket."),
-            ("rate", "bucket") => (BucketRate(stats), "Mean rate by bucket. The tall bar set the pace."),
-            ("rate", _) => (Rate(stats), "How fast each file moved."),
+            ("rate", "bucket") => (BucketRate(stats), "Mean rate by bucket, in MB/s. The tall bar set the pace."),
+            ("rate", _) => (Rate(stats), "How fast each file moved, in doubled MB/s ranges. The count is on each bar."),
             ("time", "duration") => (Duration(stats), "Median time per bucket, in milliseconds."),
             ("time", "curve") => (Curve(stats), "How long files took, smallest to largest."),
             ("time", _) => (Share(stats), "Which bucket held the clock."),
@@ -442,18 +442,74 @@ public sealed class JobWindow : Window
     }
 
     private FrameworkElement Rate(FileIoJobStats stats)
-        => stats.TransferRates.Series is { } s
-            ? ChartView.Histogram(s, ChartTheme.Apply(new ChartOptions { Title = "Rate" }))
-            : Empty();
+    {
+        if (stats.TransferRates.Series is not { Count: > 0 } series)
+            return Empty();
+        var values = series.Values.Select(v => (double)v / (1024d * 1024d)).ToArray();
+        var (counts, labels) = RateBins(values);
+        return ChartView.From(new ChartSpec
+        {
+            Kind = ChartKind.Bar,
+            Options = ChartTheme.Apply(new ChartOptions { Title = "Rate (MB/s)" }),
+            Series = [new ChartSeries { Y = counts, Labels = labels }]
+        });
+    }
 
     private FrameworkElement BucketRate(FileIoJobStats stats)
     {
         var rows = stats.Buckets.Where(b => b.TransferRates.Mean is > 0).ToArray();
         if (rows.Length == 0)
             return Empty();
-        return ChartView.Column(
-            NumericSeries.FromDecimal(rows.Select(b => (decimal)(b.TransferRates.Mean ?? 0)).ToArray(), "rate"),
-            ChartTheme.Apply(new ChartOptions { Title = "Mean rate" }));
+        return ChartView.From(new ChartSpec
+        {
+            Kind = ChartKind.Column,
+            Options = ChartTheme.Apply(new ChartOptions { Title = "Mean rate (MB/s)", YLabel = "MB/s" }),
+            Series =
+            [
+                new ChartSeries
+                {
+                    Y = rows.Select(b => (b.TransferRates.Mean ?? 0) / (1024d * 1024d)).ToArray(),
+                    Labels = rows.Select(b => b.Name).ToArray()
+                }
+            ]
+        });
+    }
+
+    private static (double[] Counts, string[] Labels) RateBins(double[] values)
+    {
+        var max = values.Length == 0 ? 1 : Math.Max(1, values.Max());
+        var edges = new List<double> { 0, 1 };
+        for (var edge = 2d; edge < max; edge *= 2)
+            edges.Add(edge);
+        if (edges[^1] < max)
+            edges.Add(NextPow2(max));
+        var counts = new double[edges.Count - 1];
+        foreach (var value in values)
+        {
+            var bin = counts.Length - 1;
+            for (var i = 0; i < counts.Length; i++)
+            {
+                if (value <= edges[i + 1])
+                {
+                    bin = i;
+                    break;
+                }
+            }
+            counts[bin]++;
+        }
+
+        var labels = new string[counts.Length];
+        for (var i = 0; i < labels.Length; i++)
+            labels[i] = Range(edges[i], edges[i + 1]) + "   " + counts[i].ToString("N0");
+        return (counts, labels);
+    }
+
+    private static double NextPow2(double value)
+    {
+        var edge = 1d;
+        while (edge < value)
+            edge *= 2;
+        return edge;
     }
 
     private FrameworkElement Duration(FileIoJobStats stats)
