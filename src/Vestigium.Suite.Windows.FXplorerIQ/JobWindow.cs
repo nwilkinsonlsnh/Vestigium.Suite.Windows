@@ -227,9 +227,10 @@ public sealed class JobWindow : Window
 
     private FrameworkElement Overview(FileIoJobStats stats)
     {
-        var pies = new StackPanel { Margin = new Thickness(0, 8, 0, 8) };
-        pies.Children.Add(Mix(stats));
-        pies.Children.Add(Weight(stats));
+        var files = Mix(stats);
+        var bytes = Weight(stats);
+        files.VerticalAlignment = VerticalAlignment.Stretch;
+        bytes.VerticalAlignment = VerticalAlignment.Stretch;
         var line = new TextBlock
         {
             Text = Summary(stats),
@@ -237,10 +238,17 @@ public sealed class JobWindow : Window
             Foreground = Foreground,
             Margin = new Thickness(0, 4, 0, 4)
         };
-        var root = new StackPanel();
-        root.Children.Add(line);
-        root.Children.Add(pies);
-        return root;
+        var grid = new Grid();
+        grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+        grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+        Grid.SetRow(line, 0);
+        Grid.SetRow(files, 1);
+        Grid.SetRow(bytes, 2);
+        grid.Children.Add(line);
+        grid.Children.Add(files);
+        grid.Children.Add(bytes);
+        return grid;
     }
 
     private FrameworkElement Mix(FileIoJobStats stats)
