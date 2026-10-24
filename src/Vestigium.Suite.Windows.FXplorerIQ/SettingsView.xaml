@@ -32,10 +32,10 @@
                    Checked="Page_Checked"
                    Tag="Collision" />
       <RadioButton Style="{StaticResource RadioButton.UnderlineTab}"
-                   Content="Job"
+                   Content="Secure Delete"
                    GroupName="FXplorerSettings"
                    Checked="Page_Checked"
-                   Tag="Job" />
+                   Tag="Secure" />
     </StackPanel>
 
     <StackPanel x:Name="ThemesPage" HorizontalAlignment="Left" VerticalAlignment="Top" Width="420" Margin="8,0,0,0">
@@ -222,6 +222,25 @@
                 Width="220"
                 HorizontalAlignment="Left"
                 SelectionChanged="Verify_Changed" />
+    </StackPanel>
+
+    <StackPanel x:Name="SecurePage"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Width="460"
+                Margin="8,0,0,0"
+                Visibility="Collapsed">
+      <TextBlock Style="{StaticResource TextBlock.Caption}" Margin="0,0,0,8" Text="Random passes" />
+      <ComboBox x:Name="SecureBox"
+                Style="{StaticResource ComboBox.Standard}"
+                Width="220"
+                HorizontalAlignment="Left"
+                Margin="0,0,0,8"
+                SelectionChanged="Secure_Changed" />
+      <TextBlock x:Name="SecureLine"
+                 Style="{StaticResource TextBlock.Caption}"
+                 TextWrapping="Wrap"
+                 Margin="0,0,0,8" />
     </StackPanel>
 
     <StackPanel x:Name="JobPage"
