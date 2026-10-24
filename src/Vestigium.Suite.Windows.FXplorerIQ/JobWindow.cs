@@ -227,7 +227,7 @@ public sealed class JobWindow : Window
 
     private FrameworkElement Overview(FileIoJobStats stats)
     {
-        var pies = new UniformGrid { Columns = 2, Margin = new Thickness(0, 8, 0, 8) };
+        var pies = new StackPanel { Margin = new Thickness(0, 8, 0, 8) };
         pies.Children.Add(Mix(stats));
         pies.Children.Add(Weight(stats));
         var line = new TextBlock
@@ -244,24 +244,27 @@ public sealed class JobWindow : Window
     }
 
     private FrameworkElement Mix(FileIoJobStats stats)
-        => Pie(stats, b => b.FileSizes.Count, "Files");
+        => Pie(stats, b => b.FileSizes.Count, b => b.Name + "  " + b.FileSizes.Count.ToString("N0"), "Files");
 
     private FrameworkElement Weight(FileIoJobStats stats)
-        => Pie(stats, b => Sum(b.FileSizes), "Bytes");
+        => Pie(stats, b => Sum(b.FileSizes), b => b.Name + "  " + Size((long)Sum(b.FileSizes)), "Bytes");
 
     private FrameworkElement Share(FileIoJobStats stats)
-        => Pie(stats, b => Sum(b.Durations), "Time");
+        => Pie(stats, b => Sum(b.Durations), b => b.Name + "  " + Millis(Sum(b.Durations)), "Time");
 
-    private FrameworkElement Pie(FileIoJobStats stats, Func<FileIoBucketAnalytics, double> value, string title)
+    private FrameworkElement Pie(FileIoJobStats stats, Func<FileIoBucketAnalytics, double> value, Func<FileIoBucketAnalytics, string> label, string title)
     {
         var slices = stats.Buckets
-            .Select(b => new ChartSlice { Label = b.Name, Value = value(b) })
+            .Select(b => new ChartSlice { Label = label(b), Value = value(b) })
             .Where(s => s.Value > 0)
             .ToList();
         return slices.Count == 0
             ? Empty()
             : ChartView.Pie(slices, ChartTheme.Apply(new ChartOptions { Title = title }));
     }
+
+    private static string Millis(double ms)
+        => ms >= 1000 ? (ms / 1000d).ToString("0.#") + " s" : ms.ToString("0") + " ms";
 
     private FrameworkElement BucketSize(FileIoJobStats stats, string name)
     {
