@@ -122,12 +122,7 @@ public partial class App : Application
             Description = "Counts of ran, failed, and bytes moved."
         });
         Set(window.HostShell, "Settings", new SettingsView());
-        Set(window.HostShell, "Help", new VestigiumUnderConstruction
-        {
-            Title = "Help",
-            Subject = "About",
-            Description = "Explorers, verbs, queue, and cancel."
-        });
+        Set(window.HostShell, "Help", new HelpView());
 
         window.Start(text => chrome.Status.Message = text);
         return window;
