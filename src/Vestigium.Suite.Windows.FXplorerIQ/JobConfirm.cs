@@ -7,6 +7,8 @@ namespace Vestigium.Suite.Windows.FXplorerIQ;
 public sealed class JobConfirm : Window
 {
     private readonly TextBox _destination;
+    private readonly string _source;
+    private readonly TextBlock _hint;
 
     public JobConfirm(string title, string source, string? suggested)
     {
@@ -18,8 +20,15 @@ public sealed class JobConfirm : Window
         Background = Brush("Vestigium.Brushes.Surface.Window") ?? SystemColors.WindowBrush;
         Foreground = Brush("Vestigium.Brushes.Text.Primary") ?? SystemColors.WindowTextBrush;
 
+        _source = source;
         var sourceBox = Box(source, true);
         _destination = Box(suggested ?? "", false);
+        _hint = new TextBlock
+        {
+            Foreground = Brush("Vestigium.Brushes.Status.Error") ?? Brushes.IndianRed,
+            TextWrapping = TextWrapping.Wrap,
+            Margin = new Thickness(0, 8, 0, 0)
+        };
 
         var browse = Button("Browse", false);
         browse.Click += (_, _) => Browse();
@@ -43,6 +52,7 @@ public sealed class JobConfirm : Window
         root.Children.Add(sourceBox);
         root.Children.Add(Label("Destination"));
         root.Children.Add(row);
+        root.Children.Add(_hint);
         root.Children.Add(actions);
         Content = root;
     }
@@ -67,7 +77,19 @@ public sealed class JobConfirm : Window
     {
         if (Destination.Length == 0)
             return;
+        if (Same(_source, Destination))
+        {
+            _hint.Text = "Source and destination are the same path.";
+            return;
+        }
         DialogResult = true;
+    }
+
+    private static bool Same(string left, string right)
+    {
+        var a = left.Trim().TrimEnd('\\', '/');
+        var b = right.Trim().TrimEnd('\\', '/');
+        return string.Equals(a, b, StringComparison.OrdinalIgnoreCase);
     }
 
     private static TextBlock Label(string text)
