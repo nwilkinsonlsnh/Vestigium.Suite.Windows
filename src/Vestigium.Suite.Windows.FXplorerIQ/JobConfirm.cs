@@ -14,7 +14,7 @@ public sealed class JobConfirm : Window
     {
         Title = title;
         Width = 560;
-        Height = 280;
+        Height = 320;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
         ResizeMode = ResizeMode.NoResize;
         Background = Brush("Vestigium.Brushes.Surface.Window") ?? SystemColors.WindowBrush;
@@ -47,13 +47,17 @@ public sealed class JobConfirm : Window
         actions.Children.Add(ok);
         actions.Children.Add(cancel);
 
-        var root = new StackPanel { Margin = new Thickness(20), Background = Background };
-        root.Children.Add(Label("Source"));
-        root.Children.Add(sourceBox);
-        root.Children.Add(Label("Destination"));
-        root.Children.Add(row);
-        root.Children.Add(_hint);
+        var form = new StackPanel();
+        form.Children.Add(Label("Source"));
+        form.Children.Add(sourceBox);
+        form.Children.Add(Label("Destination"));
+        form.Children.Add(row);
+        form.Children.Add(_hint);
+
+        var root = new DockPanel { Margin = new Thickness(20), Background = Background };
+        DockPanel.SetDock(actions, Dock.Bottom);
         root.Children.Add(actions);
+        root.Children.Add(form);
         Content = root;
     }
 
