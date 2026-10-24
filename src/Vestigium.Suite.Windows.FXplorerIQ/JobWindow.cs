@@ -675,6 +675,8 @@ public sealed class JobWindow : Window
         var shown = 0;
         foreach (var file in progress.Active)
         {
+            if (file.Status is "Done" or "Skipped")
+                continue;
             if (shown++ >= 30)
                 break;
             _files.Children.Add(Row(file));
