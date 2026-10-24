@@ -121,7 +121,7 @@ public sealed class JobWindow : Window
         var dashboard = new DockPanel { Background = _surface };
         var sub = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 4) };
         sub.Children.Add(Radio("Overview", "report", true, () => Pick("overview", "story")));
-        sub.Children.Add(Radio("Shape", "report", false, () => Pick("shape", "mix")));
+        sub.Children.Add(Radio("Shape", "report", false, () => Pick("shape", "types")));
         sub.Children.Add(Radio("Throughput", "report", false, () => Pick("rate", "rate")));
         sub.Children.Add(Radio("Time", "report", false, () => Pick("time", "share")));
         var head = new StackPanel();
@@ -174,7 +174,7 @@ public sealed class JobWindow : Window
         _charts.Children.Clear();
         var items = _report switch
         {
-            "shape" => new[] { ("mix", "Mix"), ("weight", "Weight"), ("types", "Types"), ("tiny", "Tiny"), ("small", "Small"), ("medium", "Medium"), ("large", "Large"), ("huge", "Huge"), ("iqr", "IQR") },
+            "shape" => new[] { ("types", "Types"), ("mix", "Mix"), ("weight", "Weight"), ("tiny", "Tiny"), ("small", "Small"), ("medium", "Medium"), ("large", "Large"), ("huge", "Huge"), ("iqr", "IQR") },
             "rate" => new[] { ("rate", "Rate"), ("bucket", "By bucket") },
             "time" => new[] { ("share", "Share"), ("duration", "Duration"), ("curve", "Curve") },
             _ => Array.Empty<(string, string)>()
