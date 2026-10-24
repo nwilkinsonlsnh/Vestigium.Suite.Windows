@@ -83,11 +83,14 @@ public partial class SettingsView : UserControl
         EmptyDirectories.IsChecked = settings.IncludeEmptyDirectories;
         Timestamps.IsChecked = settings.CopyTimestamps;
         CreateMissing.IsChecked = settings.CreateMissingDestination;
+        SecureBox.ItemsSource = new[] { 3, 7 };
+        SecureBox.SelectedItem = settings.SecurePasses == 7 ? 7 : 3;
+        SecureLine.Text = Line(settings.SecurePasses);
     }
 
     private void Page_Checked(object sender, RoutedEventArgs e)
     {
-        if (ThemesPage is null || ColumnsPage is null || HashPage is null || ViewPage is null || CollisionPage is null || JobPage is null)
+        if (ThemesPage is null || ColumnsPage is null || HashPage is null || ViewPage is null || CollisionPage is null || JobPage is null || SecurePage is null)
             return;
         var tag = sender is RadioButton button ? button.Tag as string : "Themes";
         ThemesPage.Visibility = tag == "Themes" ? Visibility.Visible : Visibility.Collapsed;
@@ -96,7 +99,20 @@ public partial class SettingsView : UserControl
         ViewPage.Visibility = tag == "View" ? Visibility.Visible : Visibility.Collapsed;
         CollisionPage.Visibility = tag == "Collision" ? Visibility.Visible : Visibility.Collapsed;
         JobPage.Visibility = tag == "Job" ? Visibility.Visible : Visibility.Collapsed;
+        SecurePage.Visibility = tag == "Secure" ? Visibility.Visible : Visibility.Collapsed;
+        JobPage.Visibility = tag == "Job" ? Visibility.Visible : Visibility.Collapsed;
     }
+
+    private void Secure_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        if (_loading || SecureBox.SelectedItem is not int passes)
+            return;
+        SecureLine.Text = Line(passes);
+        Save(settings => settings.SecurePasses = passes);
+    }
+
+    private static string Line(int passes)
+        => (passes == 7 ? "Seven" : "Three") + " cryptographic random passes, then one zero pass, then delete.";
 
     private void ThemeBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
