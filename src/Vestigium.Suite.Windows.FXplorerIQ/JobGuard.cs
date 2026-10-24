@@ -51,7 +51,18 @@ public static class JobGuard
         => string.IsNullOrWhiteSpace(path) ? "" : path.Trim().TrimEnd('\\', '/');
 
     private static bool Same(string left, string right)
-        => string.Equals(left, right, StringComparison.OrdinalIgnoreCase);
+    {
+        if (string.Equals(left, right, StringComparison.OrdinalIgnoreCase))
+            return true;
+        try
+        {
+            return string.Equals(Path.GetFullPath(left), Path.GetFullPath(right), StringComparison.OrdinalIgnoreCase);
+        }
+        catch (IOException)
+        {
+            return false;
+        }
+    }
 
     private static bool Inside(string path, string root)
     {
