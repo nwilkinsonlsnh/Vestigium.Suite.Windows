@@ -77,6 +77,8 @@ public sealed class FXplorerSettings
 
     public bool CopyTimestamps { get; set; } = true;
 
+    public bool CreateMissingDestination { get; set; }
+
     public int RetryCount { get; set; } = 3;
 
     public int RetryWaitSeconds { get; set; } = 2;
