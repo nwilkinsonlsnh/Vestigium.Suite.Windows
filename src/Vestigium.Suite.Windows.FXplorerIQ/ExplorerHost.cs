@@ -253,10 +253,10 @@ public sealed class ExplorerHost : DockPanel
 
         if (access.Decision == JobAccessDecision.Elevate)
         {
-            var choice = JobHandoff.Offer(Window.GetWindow(this), verb, source, destination, verify && verb == JobVerb.Delete, false);
-            _status(choice == ElevationChoice.Accepted
-                ? "Elevation accepted. The elevated runner is the next slice."
-                : "Elevation cancelled.");
+            var outcome = JobHandoff.Run(
+                Window.GetWindow(this), verb, source, destination, collision.ToString(), pattern,
+                verify && verb == JobVerb.Delete, false);
+            FinishElevated(outcome, verb, source, destination, sourcePane, destPane);
             return;
         }
 
@@ -316,10 +316,15 @@ public sealed class ExplorerHost : DockPanel
 
         if (access.Decision == JobAccessDecision.Elevate)
         {
-            var choice = JobHandoff.Offer(Window.GetWindow(this), JobVerb.Copy, source, destination, false, true);
-            _status(choice == ElevationChoice.Accepted
-                ? "Elevation accepted. The elevated runner is the next slice."
-                : "Elevation cancelled.");
+            var outcome = JobHandoff.Run(
+                Window.GetWindow(this), JobVerb.Copy, source, destination, CollisionOf(App.Settings.Load().Collision).ToString(),
+                App.Settings.Load().UniqueNamePattern, false, true);
+            _status(outcome.Choice switch
+            {
+                ElevationChoice.Finished => "Elevated audit " + outcome.Status + ".",
+                ElevationChoice.Denied => outcome.Status,
+                _ => "Elevation cancelled."
+            });
             return;
         }
 
@@ -369,6 +374,33 @@ public sealed class ExplorerHost : DockPanel
             _busy = false;
         }
         await Task.CompletedTask;
+    }
+
+    private void FinishElevated(
+        ElevationOutcome outcome,
+        JobVerb verb,
+        string source,
+        string? destination,
+        ExplorerPane sourcePane,
+        ExplorerPane destPane)
+    {
+        if (outcome.Choice == ElevationChoice.Cancelled)
+        {
+            _status("Elevation cancelled.");
+            return;
+        }
+
+        if (outcome.Choice == ElevationChoice.Denied)
+        {
+            _status(outcome.Status);
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(destination))
+            destPane.Open(destination);
+        if (verb is JobVerb.Move or JobVerb.Delete)
+            sourcePane.Open(Remain(sourcePane, source));
+        _status("Elevated " + verb + " " + outcome.Status + ".");
     }
 
     private async Task Run(Task work)
