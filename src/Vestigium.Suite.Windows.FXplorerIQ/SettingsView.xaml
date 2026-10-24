@@ -235,13 +235,13 @@
                  TextWrapping="Wrap"
                  Text="Filters and retry for every job. Leave a field blank for no limit. Masks are separated by a semicolon." />
 
-      <TextBlock Style="{StaticResource TextBlock.Title}" Margin="0,0,0,8" Text="Filters" />
+      <TextBlock Style="{StaticResource TextBlock.Caption}" Margin="0,0,0,8" Text="Filters" />
       <Label Style="{StaticResource Label.Standard}" Content="Exclude file masks" />
       <TextBox x:Name="FileMasks" Style="{StaticResource TextBox.Standard}" Width="220" MinHeight="36" HorizontalAlignment="Left" Margin="0,0,0,8" LostFocus="Job_LostFocus" />
       <Label Style="{StaticResource Label.Standard}" Content="Exclude directory masks" />
       <TextBox x:Name="DirectoryMasks" Style="{StaticResource TextBox.Standard}" Width="220" MinHeight="36" HorizontalAlignment="Left" Margin="0,8,0,16" LostFocus="Job_LostFocus" />
 
-      <TextBlock Style="{StaticResource TextBlock.Title}" Margin="0,0,0,8" Text="Limits" />
+      <TextBlock Style="{StaticResource TextBlock.Caption}" Margin="0,0,0,8" Text="Limits" />
       <Label Style="{StaticResource Label.Standard}" Content="Minimum size, bytes" />
       <TextBox x:Name="MinSize" Style="{StaticResource TextBox.Standard}" Width="220" MinHeight="36" HorizontalAlignment="Left" Margin="0,0,0,8" LostFocus="Job_LostFocus" />
       <Label Style="{StaticResource Label.Standard}" Content="Maximum size, bytes" />
@@ -253,13 +253,13 @@
       <Label Style="{StaticResource Label.Standard}" Content="Maximum depth" />
       <TextBox x:Name="Depth" Style="{StaticResource TextBox.Standard}" Width="220" MinHeight="36" HorizontalAlignment="Left" Margin="0,0,0,16" LostFocus="Job_LostFocus" />
 
-      <TextBlock Style="{StaticResource TextBlock.Title}" Margin="0,0,0,8" Text="Retry" />
+      <TextBlock Style="{StaticResource TextBlock.Caption}" Margin="0,0,0,8" Text="Retry" />
       <Label Style="{StaticResource Label.Standard}" Content="Retry count" />
       <nud:VestigiumNumericUpDown x:Name="Retries" SignMode="Unsigned" Minimum="0" Maximum="20" Increment="1" DecimalPlaces="0" Width="220" HorizontalAlignment="Left" Margin="0,0,0,8" ValueChanged="Retry_Changed" />
       <Label Style="{StaticResource Label.Standard}" Content="Retry wait, seconds" />
       <nud:VestigiumNumericUpDown x:Name="RetryWait" SignMode="Unsigned" Minimum="0" Maximum="120" Increment="1" DecimalPlaces="0" Width="220" HorizontalAlignment="Left" Margin="0,0,0,16" ValueChanged="Retry_Changed" />
 
-      <TextBlock Style="{StaticResource TextBlock.Title}" Margin="0,0,0,8" Text="Options" />
+      <TextBlock Style="{StaticResource TextBlock.Caption}" Margin="0,0,0,8" Text="Options" />
 
       <CheckBox x:Name="EmptyDirectories"
                 Style="{StaticResource CheckBox.Standard}"
