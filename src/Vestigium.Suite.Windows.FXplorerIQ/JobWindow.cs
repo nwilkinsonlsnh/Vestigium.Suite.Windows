@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Media;
+using System.Windows.Threading;
 using Vestigium.Helpers.Analytics;
 using Vestigium.Helpers.Charts;
 using Vestigium.Helpers.FileIo;
@@ -30,7 +31,9 @@ public sealed class JobWindow : Window
     private FileIoJobResult? _result;
     private string _report = "shape";
     private string _chart = "size";
+    private readonly DispatcherTimer _pulse;
     private bool _queued;
+    private DateTimeOffset _lastPaint = DateTimeOffset.MinValue;
 
     public JobWindow(string title, FileIoJob job, string source, string? destination)
     {
@@ -148,6 +151,8 @@ public sealed class JobWindow : Window
         };
 
         _job.ProgressChanged += (_, progress) => Queue(progress);
+        _pulse = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
+        _pulse.Tick += (_, _) => Show(_job.Progress);
         ContentRendered += async (_, _) => await Run();
     }
 
@@ -255,8 +260,7 @@ public sealed class JobWindow : Window
 
     private void Queue(FileIoProgress progress)
     {
-        var now = DateTimeOffset.UtcNow;
-        if (_queued || now - _lastPaint < TimeSpan.FromMilliseconds(150))
+        if (_queued)
             return;
         _queued = true;
         Dispatcher.BeginInvoke(() =>
@@ -264,14 +268,16 @@ public sealed class JobWindow : Window
             _queued = false;
             _lastPaint = DateTimeOffset.UtcNow;
             Show(progress);
-        }, System.Windows.Threading.DispatcherPriority.Background);
+        }, DispatcherPriority.Render);
     }
 
     private async Task Run()
     {
+        _pulse.Start();
         try
         {
             _result = await _job.RunAsync().ConfigureAwait(true);
+            _pulse.Stop();
             _phase.Text = _result.Status;
             _pause.IsEnabled = false;
             _resume.IsEnabled = false;
@@ -294,6 +300,10 @@ public sealed class JobWindow : Window
             _phase.Text = "Failed";
             _rate.Text = ex.Message;
             _close.IsEnabled = true;
+        }
+        finally
+        {
+            _pulse.Stop();
         }
     }
 
