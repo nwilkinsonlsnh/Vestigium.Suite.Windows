@@ -48,7 +48,8 @@ public static class JobHandoff
             Pattern = string.IsNullOrWhiteSpace(pattern) ? ".##" : pattern,
             Purge = verb == JobVerb.Mirror,
             Audit = audit,
-            Secure = secure
+            Secure = secure,
+            SecurePasses = App.Settings.Load().SecurePasses == 7 ? 7 : 3
         };
         File.WriteAllText(path, JsonSerializer.Serialize(job));
 
