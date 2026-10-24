@@ -8,6 +8,7 @@ namespace Vestigium.Suite.Windows.FXplorerIQ;
 public partial class SettingsView : UserControl
 {
     private static readonly string[] Collisions = ["UniqueName", "Skip", "Overwrite"];
+    private static readonly string[] Patterns = [".#", ".##", ".###", ".####", ".#####", "A#", "A##", "A###", "A####", "A#####"];
     private bool _loading = true;
 
     public SettingsView()
@@ -30,6 +31,7 @@ public partial class SettingsView : UserControl
         HashBox.ItemsSource = algorithms;
         VerifyBox.ItemsSource = algorithms;
         CollisionBox.ItemsSource = Collisions;
+        PatternBox.ItemsSource = Patterns;
         Show(App.Settings.Load());
         _loading = false;
     }
@@ -64,8 +66,10 @@ public partial class SettingsView : UserControl
         ShowFileExtensions.IsChecked = settings.ShowFileExtensions;
         ShowSystemFiles.IsChecked = settings.ShowSystemFiles;
         CollisionBox.SelectedItem = Collisions.Contains(settings.Collision) ? settings.Collision : "UniqueName";
-        PatternBox.Text = string.IsNullOrWhiteSpace(settings.UniqueNamePattern) ? ".##" : settings.UniqueNamePattern;
-        AskOverwrite.IsChecked = settings.AskBeforeOverwrite;
+        var pattern = Patterns.Contains(settings.UniqueNamePattern) ? settings.UniqueNamePattern : ".##";
+        PatternBox.SelectedItem = pattern;
+        AskOverwrite.IsChecked = settings.AskBeforeOverwrite == false;
+        ApplyCollision();
         VerifyBox.SelectedValue = settings.Verify().ToString();
         FileMasks.Text = settings.ExcludeFileMasks;
         DirectoryMasks.Text = settings.ExcludeDirectoryMasks;
@@ -74,8 +78,8 @@ public partial class SettingsView : UserControl
         MinAge.Text = settings.MinAgeDays?.ToString() ?? "";
         MaxAge.Text = settings.MaxAgeDays?.ToString() ?? "";
         Depth.Text = settings.MaxDepth?.ToString() ?? "";
-        Retries.Text = settings.RetryCount.ToString();
-        RetryWait.Text = settings.RetryWaitSeconds.ToString();
+        Retries.Value = settings.RetryCount;
+        RetryWait.Value = settings.RetryWaitSeconds;
         EmptyDirectories.IsChecked = settings.IncludeEmptyDirectories;
         Timestamps.IsChecked = settings.CopyTimestamps;
     }
@@ -119,13 +123,10 @@ public partial class SettingsView : UserControl
         Save(settings => settings.Collision = collision);
     }
 
-    private void Pattern_LostFocus(object sender, RoutedEventArgs e)
+    private void Pattern_Changed(object sender, SelectionChangedEventArgs e)
     {
-        if (_loading)
+        if (_loading || PatternBox.SelectedItem is not string pattern)
             return;
-        var pattern = PatternBox.Text.Trim();
-        if (pattern.Length == 0)
-            pattern = ".##";
         Save(settings => settings.UniqueNamePattern = pattern);
     }
 
@@ -133,7 +134,16 @@ public partial class SettingsView : UserControl
     {
         if (_loading)
             return;
-        Save(settings => settings.AskBeforeOverwrite = AskOverwrite.IsChecked == true);
+        var automatic = AskOverwrite.IsChecked == true;
+        ApplyCollision();
+        Save(settings => settings.AskBeforeOverwrite = !automatic);
+    }
+
+    private void ApplyCollision()
+    {
+        var automatic = AskOverwrite.IsChecked == true;
+        CollisionBox.IsEnabled = automatic;
+        PatternBox.IsEnabled = automatic;
     }
 
     private void Verify_Changed(object sender, SelectionChangedEventArgs e)
@@ -178,8 +188,17 @@ public partial class SettingsView : UserControl
             settings.MinAgeDays = IntOrNull(MinAge.Text);
             settings.MaxAgeDays = IntOrNull(MaxAge.Text);
             settings.MaxDepth = IntOrNull(Depth.Text);
-            settings.RetryCount = IntOrNull(Retries.Text) ?? 3;
-            settings.RetryWaitSeconds = IntOrNull(RetryWait.Text) ?? 2;
+        });
+    }
+
+    private void Retry_Changed(object sender, EventArgs e)
+    {
+        if (_loading)
+            return;
+        Save(settings =>
+        {
+            settings.RetryCount = (int)Retries.Value;
+            settings.RetryWaitSeconds = (int)RetryWait.Value;
         });
     }
 
