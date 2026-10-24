@@ -184,6 +184,14 @@
                  TextWrapping="Wrap"
                  Text="Defaults a job uses when a name already exists. UniqueName never overwrites the original." />
 
+      <Label Style="{StaticResource Label.Standard}" Content="Enable automatic collision handling" />
+      <CheckBox x:Name="AskOverwrite"
+                Style="{StaticResource CheckBox.Standard}"
+                Content="Enable Automatic Collision Handling"
+                Margin="0,0,0,16"
+                Checked="CollisionFlag_Changed"
+                Unchecked="CollisionFlag_Changed" />
+
       <Label Style="{StaticResource Label.Standard}" Content="Collision" />
       <ComboBox x:Name="CollisionBox"
                 Style="{StaticResource ComboBox.Standard}"
@@ -195,20 +203,14 @@
                 SelectionChanged="Collision_Changed" />
 
       <Label Style="{StaticResource Label.Standard}" Content="UniqueName pattern" />
-      <TextBox x:Name="PatternBox"
-               Style="{StaticResource TextBox.Standard}"
-               Width="220"
-               MinHeight="36"
-               HorizontalAlignment="Left"
-               Margin="0,0,0,12"
-               LostFocus="Pattern_LostFocus" />
-
-      <CheckBox x:Name="AskOverwrite"
-                Style="{StaticResource CheckBox.Standard}"
-                Content="Ask before Overwrite"
-                Margin="0,0,0,16"
-                Checked="CollisionFlag_Changed"
-                Unchecked="CollisionFlag_Changed" />
+      <ComboBox x:Name="PatternBox"
+                Style="{StaticResource ComboBox.Standard}"
+                IsEditable="False"
+                IsReadOnly="True"
+                Width="220"
+                HorizontalAlignment="Left"
+                Margin="0,0,0,12"
+                SelectionChanged="Pattern_Changed" />
 
       <Label Style="{StaticResource Label.Standard}" Content="Verify algorithm" />
       <ComboBox x:Name="VerifyBox"
@@ -233,32 +235,31 @@
                  TextWrapping="Wrap"
                  Text="Filters and retry for every job. Leave a field blank for no limit. Masks are separated by a semicolon." />
 
+      <TextBlock Style="{StaticResource TextBlock.Title}" Margin="0,0,0,8" Text="Filters" />
       <Label Style="{StaticResource Label.Standard}" Content="Exclude file masks" />
-      <TextBox x:Name="FileMasks" Style="{StaticResource TextBox.Standard}" Width="320" MinHeight="36" HorizontalAlignment="Left" Margin="0,0,0,8" LostFocus="Job_LostFocus" />
-
+      <TextBox x:Name="FileMasks" Style="{StaticResource TextBox.Standard}" Width="220" MinHeight="36" HorizontalAlignment="Left" Margin="0,0,0,8" LostFocus="Job_LostFocus" />
       <Label Style="{StaticResource Label.Standard}" Content="Exclude directory masks" />
-      <TextBox x:Name="DirectoryMasks" Style="{StaticResource TextBox.Standard}" Width="320" MinHeight="36" HorizontalAlignment="Left" Margin="0,0,0,8" LostFocus="Job_LostFocus" />
+      <TextBox x:Name="DirectoryMasks" Style="{StaticResource TextBox.Standard}" Width="220" MinHeight="36" HorizontalAlignment="Left" Margin="0,8,0,16" LostFocus="Job_LostFocus" />
 
+      <TextBlock Style="{StaticResource TextBlock.Title}" Margin="0,0,0,8" Text="Limits" />
       <Label Style="{StaticResource Label.Standard}" Content="Minimum size, bytes" />
-      <TextBox x:Name="MinSize" Style="{StaticResource TextBox.Standard}" Width="160" MinHeight="36" HorizontalAlignment="Left" Margin="0,0,0,8" LostFocus="Job_LostFocus" />
-
+      <TextBox x:Name="MinSize" Style="{StaticResource TextBox.Standard}" Width="220" MinHeight="36" HorizontalAlignment="Left" Margin="0,0,0,8" LostFocus="Job_LostFocus" />
       <Label Style="{StaticResource Label.Standard}" Content="Maximum size, bytes" />
-      <TextBox x:Name="MaxSize" Style="{StaticResource TextBox.Standard}" Width="160" MinHeight="36" HorizontalAlignment="Left" Margin="0,0,0,8" LostFocus="Job_LostFocus" />
-
+      <TextBox x:Name="MaxSize" Style="{StaticResource TextBox.Standard}" Width="220" MinHeight="36" HorizontalAlignment="Left" Margin="0,0,0,8" LostFocus="Job_LostFocus" />
       <Label Style="{StaticResource Label.Standard}" Content="Minimum age, days" />
-      <TextBox x:Name="MinAge" Style="{StaticResource TextBox.Standard}" Width="160" MinHeight="36" HorizontalAlignment="Left" Margin="0,0,0,8" LostFocus="Job_LostFocus" />
-
+      <TextBox x:Name="MinAge" Style="{StaticResource TextBox.Standard}" Width="220" MinHeight="36" HorizontalAlignment="Left" Margin="0,0,0,8" LostFocus="Job_LostFocus" />
       <Label Style="{StaticResource Label.Standard}" Content="Maximum age, days" />
-      <TextBox x:Name="MaxAge" Style="{StaticResource TextBox.Standard}" Width="160" MinHeight="36" HorizontalAlignment="Left" Margin="0,0,0,8" LostFocus="Job_LostFocus" />
-
+      <TextBox x:Name="MaxAge" Style="{StaticResource TextBox.Standard}" Width="220" MinHeight="36" HorizontalAlignment="Left" Margin="0,0,0,8" LostFocus="Job_LostFocus" />
       <Label Style="{StaticResource Label.Standard}" Content="Maximum depth" />
-      <TextBox x:Name="Depth" Style="{StaticResource TextBox.Standard}" Width="160" MinHeight="36" HorizontalAlignment="Left" Margin="0,0,0,8" LostFocus="Job_LostFocus" />
+      <TextBox x:Name="Depth" Style="{StaticResource TextBox.Standard}" Width="220" MinHeight="36" HorizontalAlignment="Left" Margin="0,0,0,16" LostFocus="Job_LostFocus" />
 
+      <TextBlock Style="{StaticResource TextBlock.Title}" Margin="0,0,0,8" Text="Retry" />
       <Label Style="{StaticResource Label.Standard}" Content="Retry count" />
-      <TextBox x:Name="Retries" Style="{StaticResource TextBox.Standard}" Width="160" MinHeight="36" HorizontalAlignment="Left" Margin="0,0,0,8" LostFocus="Job_LostFocus" />
-
+      <nud:VestigiumNumericUpDown x:Name="Retries" SignMode="Unsigned" Minimum="0" Maximum="20" Increment="1" DecimalPlaces="0" Width="220" HorizontalAlignment="Left" Margin="0,0,0,8" ValueChanged="Retry_Changed" />
       <Label Style="{StaticResource Label.Standard}" Content="Retry wait, seconds" />
-      <TextBox x:Name="RetryWait" Style="{StaticResource TextBox.Standard}" Width="160" MinHeight="36" HorizontalAlignment="Left" Margin="0,0,0,12" LostFocus="Job_LostFocus" />
+      <nud:VestigiumNumericUpDown x:Name="RetryWait" SignMode="Unsigned" Minimum="0" Maximum="120" Increment="1" DecimalPlaces="0" Width="220" HorizontalAlignment="Left" Margin="0,0,0,16" ValueChanged="Retry_Changed" />
+
+      <TextBlock Style="{StaticResource TextBlock.Title}" Margin="0,0,0,8" Text="Options" />
 
       <CheckBox x:Name="EmptyDirectories"
                 Style="{StaticResource CheckBox.Standard}"
