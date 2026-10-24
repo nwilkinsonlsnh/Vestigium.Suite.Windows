@@ -332,14 +332,15 @@ public sealed class ExplorerHost : DockPanel
     {
         var settings = App.Settings.Load();
         var collision = CollisionOf(settings.Collision);
-        if (collision == FileIoCollision.Overwrite && settings.AskBeforeOverwrite)
+        if (settings.AskBeforeOverwrite)
         {
             if (!JobAsk.Ask(Window.GetWindow(this), verify ? "Copy (Verify)" : "Copy",
-                "Overwrite will replace files that already exist in " + destination + "."))
+                "Automatic collision handling is off. Existing names will be kept and the copy will use a unique name."))
             {
                 _status("Copy cancelled.");
                 return;
             }
+            collision = FileIoCollision.UniqueName;
         }
 
         _busy = true;
@@ -380,16 +381,15 @@ public sealed class ExplorerHost : DockPanel
     {
         var settings = App.Settings.Load();
         var collision = CollisionOf(settings.Collision);
-        if (collision == FileIoCollision.Overwrite && settings.AskBeforeOverwrite)
+        if (settings.AskBeforeOverwrite)
         {
             if (!JobAsk.Ask(Window.GetWindow(this), verify ? "Move (Verify)" : "Move",
-                verify
-                    ? "Overwrite will replace files that already exist in " + destination + ". The source is removed only if the verify matches."
-                    : "Overwrite will replace files that already exist in " + destination + ". The source is removed after the write."))
+                "Automatic collision handling is off. Existing names will be kept and the move will use a unique name."))
             {
                 _status("Move cancelled.");
                 return;
             }
+            collision = FileIoCollision.UniqueName;
         }
 
         _busy = true;
