@@ -210,11 +210,11 @@ public sealed class JobWindow : Window
         {
             ("overview", _) => (Overview(stats), Sentence(stats)),
             ("shape", "weight") => (Weight(stats), "Where the bytes went. This often disagrees with the count pie."),
-            ("shape", "tiny") => (BucketSize(stats, "Tiny"), "Tiny files, 0 to 256 KB."),
-            ("shape", "small") => (BucketSize(stats, "Small"), "Small files, up to 4 MB."),
-            ("shape", "medium") => (BucketSize(stats, "Medium"), "Medium files, up to 32 MB."),
-            ("shape", "large") => (BucketSize(stats, "Large"), "Large files, up to 256 MB."),
-            ("shape", "huge") => (BucketSize(stats, "Huge"), "Huge files, above 256 MB."),
+            ("shape", "tiny") => (BucketSize(stats, "Tiny"), "Tiny files, doubled ranges from 0 to 256 KB. The count is on each bar."),
+            ("shape", "small") => (BucketSize(stats, "Small"), "Small files, doubled ranges up to 4 MB."),
+            ("shape", "medium") => (BucketSize(stats, "Medium"), "Medium files, doubled ranges up to 32 MB."),
+            ("shape", "large") => (BucketSize(stats, "Large"), "Large files, doubled ranges up to 256 MB."),
+            ("shape", "huge") => (BucketSize(stats, "Huge"), "Huge files, doubled ranges above 256 MB."),
             ("shape", "iqr") => (Iqr(stats), "The middle half of each bucket. Outliers are the files that stuck out."),
             ("shape", _) => (Mix(stats), "Where the files went. Five slices, one for each bucket."),
             ("rate", "bucket") => (BucketRate(stats), "Mean rate by bucket. The tall bar set the pace."),
@@ -282,9 +282,70 @@ public sealed class JobWindow : Window
         var kb = name == "Tiny";
         var scale = kb ? 1024m : 1024m * 1024m;
         var unit = kb ? "KB" : "MB";
-        var scaled = NumericSeries.FromDecimal(series.Values.Select(v => v / scale), unit);
-        return ChartView.Histogram(scaled, ChartTheme.Apply(new ChartOptions { Title = name + " (" + unit + ")" }));
+        var values = series.Values.Select(v => (double)(v / scale)).ToArray();
+        var (counts, labels) = LogBins(values, name);
+        return ChartView.From(new ChartSpec
+        {
+            Kind = ChartKind.Bar,
+            Options = ChartTheme.Apply(new ChartOptions { Title = name + " (" + unit + ")" }),
+            Series = [new ChartSeries { Y = counts, Labels = labels }]
+        });
     }
+
+    private static (double[] Counts, string[] Labels) LogBins(double[] values, string name)
+    {
+        var edges = Edges(name, values.Length == 0 ? 0 : values.Max());
+        var counts = new double[edges.Length - 1];
+        foreach (var value in values)
+        {
+            var bin = edges.Length - 2;
+            for (var i = 0; i < edges.Length - 1; i++)
+            {
+                if (value <= edges[i + 1])
+                {
+                    bin = i;
+                    break;
+                }
+            }
+            counts[bin]++;
+        }
+
+        var labels = new string[counts.Length];
+        for (var i = 0; i < labels.Length; i++)
+            labels[i] = Range(edges[i], edges[i + 1]) + "   " + counts[i].ToString("N0");
+        return (counts, labels);
+    }
+
+    private static double[] Edges(string name, double max)
+    {
+        var (start, end) = name switch
+        {
+            "Tiny" => (0d, 256d),
+            "Small" => (0.25d, 4d),
+            "Medium" => (4d, 32d),
+            "Large" => (32d, 256d),
+            _ => (256d, Math.Max(512d, max))
+        };
+        var edges = new List<double>();
+        if (start == 0)
+        {
+            edges.Add(0);
+            for (var edge = 1d; edge < end; edge *= 2)
+                edges.Add(edge);
+        }
+        else
+        {
+            for (var edge = start; edge < end; edge *= 2)
+                edges.Add(edge);
+        }
+        edges.Add(Math.Max(end, max));
+        return edges.ToArray();
+    }
+
+    private static string Range(double low, double high)
+        => (low >= 10 ? low.ToString("0") : low.ToString("0.##"))
+            + "–"
+            + (high >= 10 ? high.ToString("0") : high.ToString("0.##"));
 
     private FrameworkElement Iqr(FileIoJobStats stats)
     {
