@@ -354,13 +354,18 @@ public sealed class ExplorerHost : DockPanel
             _ => verb.ToString()
         };
 
-    private FileIoJobResult? ShowJob(string title, FileIoJob job, string source, string? destination, bool autoClose = false)
+    private Task<FileIoJobResult?> await ShowJob(string title, FileIoJob job, string source, string? destination, bool autoClose = false)
     {
         JobLog.Start(title, job.JobId, source, destination);
+        var done = new TaskCompletionSource<FileIoJobResult?>();
         var window = new JobWindow(title, job, source, destination) { Owner = Window.GetWindow(this), AutoClose = autoClose };
-        window.ShowDialog();
-        JobLog.End(title, job.JobId, source, destination, window.Result?.Status ?? "Failed");
-        return window.Result;
+        window.Closed += (_, _) =>
+        {
+            JobLog.End(title, job.JobId, source, destination, window.Result?.Status ?? "Failed");
+            done.TrySetResult(window.Result);
+        };
+        window.Show();
+        return done.Task;
     }
 
     private async Task Audit(string source, string destination)
@@ -371,7 +376,7 @@ public sealed class ExplorerHost : DockPanel
             var settings = App.Settings.Load();
             var options = Options(settings, CollisionOf(settings.Collision));
             options.AuditMode = true;
-            var result = ShowJob("Audit", FileIoHelper.Copy(source, destination, options), source, destination);
+            var result = await ShowJob("Audit", FileIoHelper.Copy(source, destination, options), source, destination);
             if (result is null)
             {
                 _status("Audit failed.");
@@ -479,7 +484,7 @@ public sealed class ExplorerHost : DockPanel
         try
         {
             var label = verify ? "Copy (Verify)" : "Copy";
-            var result = ShowJob(label, FileIoHelper.Copy(source, destination, Options(settings, collision, pattern)), source, destination);
+            var result = await ShowJob(label, FileIoHelper.Copy(source, destination, Options(settings, collision, pattern)), source, destination);
             if (result is null)
             {
                 _status(label + " failed.");
@@ -521,7 +526,7 @@ public sealed class ExplorerHost : DockPanel
         {
             if (!verify)
             {
-                var result = ShowJob("Move", FileIoHelper.Move(source, destination, Options(settings, collision, pattern)), source, destination);
+                var result = await ShowJob("Move", FileIoHelper.Move(source, destination, Options(settings, collision, pattern)), source, destination);
                 if (result is null)
                 {
                     _status("Move failed.");
@@ -533,7 +538,7 @@ public sealed class ExplorerHost : DockPanel
                 return;
             }
 
-            var copied = ShowJob("Move (Verify)", FileIoHelper.Copy(source, destination, Options(settings, collision, pattern)), source, destination);
+            var copied = await ShowJob("Move (Verify)", FileIoHelper.Copy(source, destination, Options(settings, collision, pattern)), source, destination);
             if (copied is null)
             {
                 _status("Move (Verify) failed.");
@@ -551,7 +556,7 @@ public sealed class ExplorerHost : DockPanel
                 return;
             }
 
-            ShowJob("Move (Verify)", FileIoHelper.Delete(source, Options(settings, collision)), source, null);
+            await ShowJob("Move (Verify)", FileIoHelper.Delete(source, Options(settings, collision)), source, null);
             sourcePane.Open(Remain(sourcePane, source));
             HostLog.Information(
                 FXplorerCatalog.VerifyCompleted,
@@ -617,7 +622,7 @@ public sealed class ExplorerHost : DockPanel
                     : FileIoShredRecipe.ThreeRandomThenZero;
             var label = (secure ? "Delete (Secure)" : "Delete") + " (" + paths.Count + ")";
             var shown = paths.Count == 1 ? paths[0] : paths.Count + " items";
-            var result = ShowJob(label, FileIoHelper.Delete(paths, options), shown, null);
+            var result = await ShowJob(label, FileIoHelper.Delete(paths, options), shown, null);
             if (result is null || result.Status is "Cancelled" or "Canceled")
             {
                 _status(label + " cancelled.");
@@ -675,7 +680,7 @@ public sealed class ExplorerHost : DockPanel
             var settings = App.Settings.Load();
             var options = Options(settings, CollisionOf(settings.Collision));
             options.Purge = true;
-            var result = ShowJob("Mirror (Verify)", FileIoHelper.Mirror(source, destination, options), source, destination);
+            var result = await ShowJob("Mirror (Verify)", FileIoHelper.Mirror(source, destination, options), source, destination);
             if (result is null)
             {
                 _status("Mirror failed.");
