@@ -332,22 +332,24 @@ public sealed class ExplorerHost : DockPanel
     {
         var settings = App.Settings.Load();
         var collision = CollisionOf(settings.Collision);
+        var pattern = settings.UniqueNamePattern;
         if (settings.AskBeforeOverwrite)
         {
-            if (!JobAsk.Ask(Window.GetWindow(this), verify ? "Copy (Verify)" : "Copy",
-                "Automatic collision handling is off. Existing names will be kept and the copy will use a unique name."))
+            var choice = CollisionPrompt.Ask(Window.GetWindow(this), verify ? "Copy (Verify)" : "Copy", settings.Collision, pattern);
+            if (choice is null)
             {
                 _status("Copy cancelled.");
                 return;
             }
-            collision = FileIoCollision.UniqueName;
+            collision = choice.Collision;
+            pattern = choice.Pattern;
         }
 
         _busy = true;
         try
         {
             var label = verify ? "Copy (Verify)" : "Copy";
-            var result = ShowJob(label, FileIoHelper.Copy(source, destination, Options(settings, collision)), source, destination);
+            var result = ShowJob(label, FileIoHelper.Copy(source, destination, Options(settings, collision, pattern)), source, destination);
             if (result is null)
             {
                 _status(label + " failed.");
@@ -381,15 +383,17 @@ public sealed class ExplorerHost : DockPanel
     {
         var settings = App.Settings.Load();
         var collision = CollisionOf(settings.Collision);
+        var pattern = settings.UniqueNamePattern;
         if (settings.AskBeforeOverwrite)
         {
-            if (!JobAsk.Ask(Window.GetWindow(this), verify ? "Move (Verify)" : "Move",
-                "Automatic collision handling is off. Existing names will be kept and the move will use a unique name."))
+            var choice = CollisionPrompt.Ask(Window.GetWindow(this), verify ? "Move (Verify)" : "Move", settings.Collision, pattern);
+            if (choice is null)
             {
                 _status("Move cancelled.");
                 return;
             }
-            collision = FileIoCollision.UniqueName;
+            collision = choice.Collision;
+            pattern = choice.Pattern;
         }
 
         _busy = true;
@@ -397,7 +401,7 @@ public sealed class ExplorerHost : DockPanel
         {
             if (!verify)
             {
-                var result = ShowJob("Move", FileIoHelper.Move(source, destination, Options(settings, collision)), source, destination);
+                var result = ShowJob("Move", FileIoHelper.Move(source, destination, Options(settings, collision, pattern)), source, destination);
                 if (result is null)
                 {
                     _status("Move failed.");
@@ -409,7 +413,7 @@ public sealed class ExplorerHost : DockPanel
                 return;
             }
 
-            var copied = ShowJob("Move (Verify)", FileIoHelper.Copy(source, destination, Options(settings, collision)), source, destination);
+            var copied = ShowJob("Move (Verify)", FileIoHelper.Copy(source, destination, Options(settings, collision, pattern)), source, destination);
             if (copied is null)
             {
                 _status("Move (Verify) failed.");
@@ -576,11 +580,11 @@ public sealed class ExplorerHost : DockPanel
     private static string Remain(ExplorerPane pane, string source)
         => Directory.Exists(pane.Folder) ? pane.Folder : Path.GetDirectoryName(source) ?? pane.Folder;
 
-    private static FileIoJobOptions Options(FXplorerSettings settings, FileIoCollision collision)
+    private static FileIoJobOptions Options(FXplorerSettings settings, FileIoCollision collision, string? pattern = null)
         => new()
         {
             Collision = collision,
-            UniqueNamePattern = string.IsNullOrWhiteSpace(settings.UniqueNamePattern) ? ".##" : settings.UniqueNamePattern,
+            UniqueNamePattern = string.IsNullOrWhiteSpace(pattern) ? ".##" : pattern,
             Purge = false,
             HashAlgorithm = settings.Verify(),
             ReconLeadTime = TimeSpan.FromSeconds(2),
