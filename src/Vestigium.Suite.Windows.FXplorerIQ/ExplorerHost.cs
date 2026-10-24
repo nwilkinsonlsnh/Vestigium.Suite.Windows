@@ -397,9 +397,19 @@ public sealed class ExplorerHost : DockPanel
         }
 
         if (!string.IsNullOrWhiteSpace(destination))
+        {
+            var parent = Path.GetDirectoryName(destination);
+            if (!string.IsNullOrWhiteSpace(parent))
+                destPane.RefreshTree(parent);
             destPane.Open(destination);
+        }
         if (verb is JobVerb.Move or JobVerb.Delete)
+        {
+            var parent = Path.GetDirectoryName(source);
+            if (!string.IsNullOrWhiteSpace(parent))
+                sourcePane.RefreshTree(parent);
             sourcePane.Open(Remain(sourcePane, source));
+        }
         _status("Elevated " + verb + " " + outcome.Status + ".");
     }
 
