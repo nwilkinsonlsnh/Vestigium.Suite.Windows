@@ -6,6 +6,7 @@ public enum JobAccessDecision
 {
     Run,
     Elevate,
+    AskCreate,
     Refuse,
 }
 
@@ -19,7 +20,7 @@ public sealed class JobAccessResult
 
     public static JobAccessResult NeedsAdmin(string reason) => new() { Decision = JobAccessDecision.Elevate, Reason = reason };
 
-    public static JobAccessResult Stop(string reason) => new() { Decision = JobAccessDecision.Refuse, Reason = reason };
+    public static JobAccessResult Ask(string reason) => new() { Decision = JobAccessDecision.AskCreate, Reason = reason };
 }
 
 public static class JobAccess
@@ -96,7 +97,11 @@ public static class JobAccess
         {
             var folder = Directory.Exists(destination) ? destination : destination;
             if (!Directory.Exists(folder))
+            {
+                if (!App.Settings.Load().CreateMissingDestination)
+                    return JobAccessResult.Ask("Destination does not exist: " + destination);
                 Directory.CreateDirectory(folder);
+            }
 
             var probe = Path.Combine(folder, ".fxplorer-probe");
             File.WriteAllText(probe, "probe");
