@@ -82,6 +82,7 @@ public partial class SettingsView : UserControl
         RetryWait.Value = settings.RetryWaitSeconds;
         EmptyDirectories.IsChecked = settings.IncludeEmptyDirectories;
         Timestamps.IsChecked = settings.CopyTimestamps;
+        CreateMissing.IsChecked = settings.CreateMissingDestination;
     }
 
     private void Page_Checked(object sender, RoutedEventArgs e)
@@ -215,6 +216,7 @@ public partial class SettingsView : UserControl
         {
             settings.IncludeEmptyDirectories = EmptyDirectories.IsChecked == true;
             settings.CopyTimestamps = Timestamps.IsChecked == true;
+            settings.CreateMissingDestination = CreateMissing.IsChecked == true;
         });
     }
 
