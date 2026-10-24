@@ -273,6 +273,12 @@
                 Margin="0,0,0,8"
                 Checked="JobFlag_Changed"
                 Unchecked="JobFlag_Changed" />
+      <CheckBox x:Name="CreateMissing"
+                Style="{StaticResource CheckBox.Standard}"
+                Content="Create if destination does not exist"
+                Margin="0,0,0,8"
+                Checked="JobFlag_Changed"
+                Unchecked="JobFlag_Changed" />
     </StackPanel>
   </DockPanel>
 </UserControl>
