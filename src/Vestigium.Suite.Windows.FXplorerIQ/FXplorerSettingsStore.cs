@@ -79,6 +79,8 @@ public sealed class FXplorerSettings
 
     public bool CreateMissingDestination { get; set; }
 
+    public int SecurePasses { get; set; } = 3;
+
     public int RetryCount { get; set; } = 3;
 
     public int RetryWaitSeconds { get; set; } = 2;
