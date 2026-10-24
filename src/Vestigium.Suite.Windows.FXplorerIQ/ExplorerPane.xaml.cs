@@ -603,6 +603,36 @@ public partial class ExplorerPane : UserControl
         e.Handled = true;
     }
 
+    private void Listing_RightClick(object sender, MouseButtonEventArgs e)
+    {
+        var row = Parent<DataGridRow>(e.OriginalSource as DependencyObject);
+        if (row?.Item is not PaneEntry)
+            return;
+        if (!row.IsSelected)
+            Listing.SelectedItem = row.Item;
+        row.Focus();
+    }
+
+    private void Folders_RightClick(object sender, MouseButtonEventArgs e)
+    {
+        var item = Parent<TreeViewItem>(e.OriginalSource as DependencyObject);
+        if (item is null)
+            return;
+        item.IsSelected = true;
+        item.Focus();
+    }
+
+    private static T? Parent<T>(DependencyObject? current) where T : DependencyObject
+    {
+        while (current is not null)
+        {
+            if (current is T found)
+                return found;
+            current = VisualTreeHelper.GetParent(current);
+        }
+        return null;
+    }
+
     private void Listing_MouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
         if (Listing.SelectedItem is not PaneEntry entry || !entry.IsDirectory)
