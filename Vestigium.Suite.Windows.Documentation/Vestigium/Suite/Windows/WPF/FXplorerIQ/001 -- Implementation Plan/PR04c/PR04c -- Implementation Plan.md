@@ -30,7 +30,7 @@
 | Order | ID | Do | State |
 | ---: | :--- | :--- | :--- |
 | 1 | PR04c.001 | FileIo fill uses `RandomNumberGenerator`. Publish. | Done |
-| 2 | PR04c.002 | Secure Delete setting. 3 or 7, default 3, remembered. Delete (Secure) uses it. | |
+| 2 | PR04c.002 | Secure Delete setting. 3 or 7, default 3, remembered. Delete (Secure) uses it. | Done |
 | 3 | PR04c.003 | Retrieval pointers for compressed, sparse, and encrypted files. Overwrite those clusters. Log the fallback. | |
 | 4 | PR04c.004 | Rename before delete. TRIM the ranges after the overwrite. | |
 | 5 | PR04c.005 | Help section. What it does, spinning disk, SSD, not a DoD wipe. | |
