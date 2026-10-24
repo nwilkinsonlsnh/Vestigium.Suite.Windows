@@ -20,11 +20,51 @@ public partial class App : Application
         Themes.RegisterSuiteV1();
         Themes.Initialize(this, SavedTheme());
 
+        var jobPath = JobPath(e.Args);
+        if (jobPath is not null)
+        {
+            RunJob(jobPath);
+            base.OnStartup(e);
+            return;
+        }
+
         ShutdownMode = ShutdownMode.OnMainWindowClose;
         MainWindow = CreateMainWindow();
         MainWindow.Show();
 
         base.OnStartup(e);
+    }
+
+    private static string? JobPath(string[] args)
+    {
+        for (var i = 0; i < args.Length; i++)
+        {
+            if (!string.Equals(args[i], "--job", StringComparison.OrdinalIgnoreCase))
+                continue;
+            return i + 1 < args.Length ? args[i + 1] : null;
+        }
+        return null;
+    }
+
+    private void RunJob(string path)
+    {
+        ShutdownMode = ShutdownMode.OnMainWindowClose;
+        var job = ElevatedJob.Read(path);
+        if (job is null)
+        {
+            Shutdown(2);
+            return;
+        }
+
+        var work = job.Build();
+        var window = new JobWindow(job.Verb, work, job.Source, job.Destination)
+        {
+            WindowStartupLocation = WindowStartupLocation.CenterScreen
+        };
+        MainWindow = window;
+        window.ShowDialog();
+        ElevatedJob.WriteResult(path, window.Result);
+        Shutdown(window.Result?.Status == "Success" ? 0 : 1);
     }
 
     private static string SavedTheme()
