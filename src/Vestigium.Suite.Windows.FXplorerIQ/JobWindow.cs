@@ -148,7 +148,7 @@ public sealed class JobWindow : Window
         };
 
         _job.ProgressChanged += (_, progress) => Queue(progress);
-        Loaded += async (_, _) => await Run();
+        ContentRendered += async (_, _) => await Run();
     }
 
     public FileIoJobResult? Result => _result;
@@ -251,14 +251,18 @@ public sealed class JobWindow : Window
             ? ChartView.Ecdf(s, ChartTheme.Apply(new ChartOptions { Title = "Duration" }))
             : Empty();
 
+    private DateTimeOffset _lastPaint = DateTimeOffset.MinValue;
+
     private void Queue(FileIoProgress progress)
     {
-        if (_queued)
+        var now = DateTimeOffset.UtcNow;
+        if (_queued || now - _lastPaint < TimeSpan.FromMilliseconds(150))
             return;
         _queued = true;
         Dispatcher.BeginInvoke(() =>
         {
             _queued = false;
+            _lastPaint = DateTimeOffset.UtcNow;
             Show(progress);
         }, System.Windows.Threading.DispatcherPriority.Background);
     }
@@ -273,6 +277,8 @@ public sealed class JobWindow : Window
             _resume.IsEnabled = false;
             _cancel.IsEnabled = false;
             _close.IsEnabled = true;
+            _files.Children.Clear();
+            Show(_job.Progress);
             ShowChart();
             if (AutoClose)
                 Close();
@@ -329,6 +335,8 @@ public sealed class JobWindow : Window
         }
 
         _files.Children.Clear();
+        if (_result is not null)
+            return;
         var shown = 0;
         foreach (var file in progress.Active)
         {
