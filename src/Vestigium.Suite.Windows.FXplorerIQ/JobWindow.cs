@@ -174,7 +174,7 @@ public sealed class JobWindow : Window
         _charts.Children.Clear();
         var items = _report switch
         {
-            "shape" => new[] { ("mix", "Mix"), ("weight", "Weight"), ("tiny", "Tiny"), ("small", "Small"), ("medium", "Medium"), ("large", "Large"), ("huge", "Huge"), ("iqr", "IQR") },
+            "shape" => new[] { ("mix", "Mix"), ("weight", "Weight"), ("types", "Types"), ("tiny", "Tiny"), ("small", "Small"), ("medium", "Medium"), ("large", "Large"), ("huge", "Huge"), ("iqr", "IQR") },
             "rate" => new[] { ("rate", "Rate"), ("bucket", "By bucket") },
             "time" => new[] { ("share", "Share"), ("duration", "Duration"), ("curve", "Curve") },
             _ => Array.Empty<(string, string)>()
@@ -210,6 +210,7 @@ public sealed class JobWindow : Window
         {
             ("overview", _) => (Overview(stats), Sentence(stats)),
             ("shape", "weight") => (Weight(stats), "Where the bytes went. This often disagrees with the count pie."),
+            ("shape", "types") => (Types(stats), "The file types in this job. Count is on the bar, size is in the label."),
             ("shape", "tiny") => (BucketSize(stats, "Tiny"), "Tiny files, doubled ranges from 0 to 256 KB. The count is on each bar."),
             ("shape", "small") => (BucketSize(stats, "Small"), "Small files, doubled ranges up to 4 MB."),
             ("shape", "medium") => (BucketSize(stats, "Medium"), "Medium files, doubled ranges up to 32 MB."),
@@ -249,6 +250,26 @@ public sealed class JobWindow : Window
         grid.Children.Add(files);
         grid.Children.Add(bytes);
         return grid;
+    }
+
+    private FrameworkElement Types(FileIoJobStats stats)
+    {
+        var rows = stats.Extensions.Where(e => e.Count > 0).ToArray();
+        if (rows.Length == 0)
+            return Empty();
+        return ChartView.From(new ChartSpec
+        {
+            Kind = ChartKind.Bar,
+            Options = ChartTheme.Apply(new ChartOptions { Title = "Top extensions", XLabel = "Files", YLabel = "Type" }),
+            Series =
+            [
+                new ChartSeries
+                {
+                    Y = rows.Select(e => (double)e.Count).ToArray(),
+                    Labels = rows.Select(e => e.Name + "   " + e.Count.ToString("N0") + "   " + Size(e.Bytes)).ToArray()
+                }
+            ]
+        });
     }
 
     private FrameworkElement Mix(FileIoJobStats stats)
