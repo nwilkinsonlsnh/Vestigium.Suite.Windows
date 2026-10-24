@@ -82,7 +82,11 @@ public sealed class JobWindow : Window
 
         _pause = Button("Pause", "Button.Secondary", () => Safe(() => _job.Pause()));
         _resume = Button("Resume", "Button.Secondary", () => Safe(() => _job.Resume()));
-        _cancel = Button("Cancel", "Button.Ghost", () => Safe(() => _job.Cancel()));
+        _cancel = Button("Cancel", "Button.Ghost", () =>
+        {
+            Safe(() => _job.Cancel());
+            Close();
+        });
         _close = Button("Close", "Button.Primary", Close);
         _close.IsEnabled = false;
         var actions = new StackPanel
