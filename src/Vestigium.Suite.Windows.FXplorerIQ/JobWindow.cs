@@ -287,7 +287,7 @@ public sealed class JobWindow : Window
         return ChartView.From(new ChartSpec
         {
             Kind = ChartKind.Bar,
-            Options = ChartTheme.Apply(new ChartOptions { Title = name + " (" + unit + ")" }),
+            Options = ChartTheme.Apply(new ChartOptions { Title = name + " (" + unit + ")", XLabel = "Files", YLabel = unit }),
             Series = [new ChartSeries { Y = counts, Labels = labels }]
         });
     }
@@ -450,7 +450,7 @@ public sealed class JobWindow : Window
         return ChartView.From(new ChartSpec
         {
             Kind = ChartKind.Bar,
-            Options = ChartTheme.Apply(new ChartOptions { Title = "Rate (MB/s)" }),
+            Options = ChartTheme.Apply(new ChartOptions { Title = "Rate (MB/s)", XLabel = "Files", YLabel = "MB/s" }),
             Series = [new ChartSeries { Y = counts, Labels = labels }]
         });
     }
@@ -463,7 +463,7 @@ public sealed class JobWindow : Window
         return ChartView.From(new ChartSpec
         {
             Kind = ChartKind.Column,
-            Options = ChartTheme.Apply(new ChartOptions { Title = "Mean rate (MB/s)", YLabel = "MB/s" }),
+            Options = ChartTheme.Apply(new ChartOptions { Title = "Mean rate (MB/s)", XLabel = "Bucket", YLabel = "MB/s" }),
             Series =
             [
                 new ChartSeries
