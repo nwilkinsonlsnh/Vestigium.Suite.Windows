@@ -192,7 +192,7 @@
                 Checked="CollisionFlag_Changed"
                 Unchecked="CollisionFlag_Changed" />
 
-      <Label Style="{StaticResource Label.Standard}" Content="Collision" />
+      <Label x:Name="CollisionLabel" Style="{StaticResource Label.Standard}" Content="Collision" />
       <ComboBox x:Name="CollisionBox"
                 Style="{StaticResource ComboBox.Standard}"
                 IsEditable="False"
@@ -202,7 +202,7 @@
                 Margin="0,0,0,12"
                 SelectionChanged="Collision_Changed" />
 
-      <Label Style="{StaticResource Label.Standard}" Content="UniqueName pattern" />
+      <Label x:Name="PatternLabel" Style="{StaticResource Label.Standard}" Content="UniqueName pattern" />
       <ComboBox x:Name="PatternBox"
                 Style="{StaticResource ComboBox.Standard}"
                 IsEditable="False"
