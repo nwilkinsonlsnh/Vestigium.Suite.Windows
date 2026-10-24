@@ -212,6 +212,39 @@ public sealed class ExplorerHost : DockPanel
             destination = picked;
         }
 
+        var collision = FileIoCollision.UniqueName;
+        var pattern = ".##";
+        if (verb is JobVerb.Copy or JobVerb.Move)
+        {
+            var settings = App.Settings.Load();
+            collision = CollisionOf(settings.Collision);
+            pattern = string.IsNullOrWhiteSpace(settings.UniqueNamePattern) ? ".##" : settings.UniqueNamePattern;
+            if (settings.AskBeforeOverwrite)
+            {
+                try
+                {
+                    var choice = CollisionPrompt.Ask(Window.GetWindow(this), Label(verb, verify), settings.Collision, pattern);
+                    if (choice is null)
+                    {
+                        _status("Cancelled.");
+                        return;
+                    }
+                    collision = choice.Collision;
+                    pattern = choice.Pattern;
+                }
+                catch (Exception ex)
+                {
+                    if (!JobAsk.Ask(Window.GetWindow(this), "Automatic Collision Handling (OFF)",
+                        "The chooser could not open (" + ex.Message + "). Continue with UniqueName?"))
+                    {
+                        _status("Cancelled.");
+                        return;
+                    }
+                    collision = FileIoCollision.UniqueName;
+                }
+            }
+        }
+
         var guard = JobGuard.Check(verb, source, destination);
         if (!guard.Ok)
         {
@@ -228,13 +261,13 @@ public sealed class ExplorerHost : DockPanel
 
         if (verb == JobVerb.Copy)
         {
-            _ = CopyMany(paths, destination!, destPane, verify);
+            _ = CopyMany(paths, destination!, destPane, verify, collision, pattern);
             return;
         }
 
         if (verb == JobVerb.Move)
         {
-            _ = MoveMany(paths, destination!, sourcePane, destPane, verify);
+            _ = MoveMany(paths, destination!, sourcePane, destPane, verify, collision, pattern);
             return;
         }
 
@@ -328,22 +361,9 @@ public sealed class ExplorerHost : DockPanel
         await Task.CompletedTask;
     }
 
-    private async Task Copy(string source, string destination, ExplorerPane destPane, bool verify)
+    private async Task Copy(string source, string destination, ExplorerPane destPane, bool verify, FileIoCollision collision, string pattern)
     {
         var settings = App.Settings.Load();
-        var collision = CollisionOf(settings.Collision);
-        var pattern = settings.UniqueNamePattern;
-        if (settings.AskBeforeOverwrite)
-        {
-            var choice = CollisionPrompt.Ask(Window.GetWindow(this), verify ? "Copy (Verify)" : "Copy", settings.Collision, pattern);
-            if (choice is null)
-            {
-                _status("Copy cancelled.");
-                return;
-            }
-            collision = choice.Collision;
-            pattern = choice.Pattern;
-        }
 
         _busy = true;
         try
@@ -379,22 +399,9 @@ public sealed class ExplorerHost : DockPanel
         }
     }
 
-    private async Task Move(string source, string destination, ExplorerPane sourcePane, ExplorerPane destPane, bool verify)
+    private async Task Move(string source, string destination, ExplorerPane sourcePane, ExplorerPane destPane, bool verify, FileIoCollision collision, string pattern)
     {
         var settings = App.Settings.Load();
-        var collision = CollisionOf(settings.Collision);
-        var pattern = settings.UniqueNamePattern;
-        if (settings.AskBeforeOverwrite)
-        {
-            var choice = CollisionPrompt.Ask(Window.GetWindow(this), verify ? "Move (Verify)" : "Move", settings.Collision, pattern);
-            if (choice is null)
-            {
-                _status("Move cancelled.");
-                return;
-            }
-            collision = choice.Collision;
-            pattern = choice.Pattern;
-        }
 
         _busy = true;
         try
@@ -449,24 +456,24 @@ public sealed class ExplorerHost : DockPanel
         }
     }
 
-    private async Task CopyMany(IReadOnlyList<string> paths, string destination, ExplorerPane destPane, bool verify)
+    private async Task CopyMany(IReadOnlyList<string> paths, string destination, ExplorerPane destPane, bool verify, FileIoCollision collision, string pattern)
     {
         var copied = 0;
         var skipped = 0;
         var failed = 0;
         foreach (var source in paths)
         {
-            await Copy(source, destination, destPane, verify);
+            await Copy(source, destination, destPane, verify, collision, pattern);
             copied++;
         }
         if (paths.Count > 1)
             _status(paths.Count + " items sent to " + destination + ".");
     }
 
-    private async Task MoveMany(IReadOnlyList<string> paths, string destination, ExplorerPane sourcePane, ExplorerPane destPane, bool verify)
+    private async Task MoveMany(IReadOnlyList<string> paths, string destination, ExplorerPane sourcePane, ExplorerPane destPane, bool verify, FileIoCollision collision, string pattern)
     {
         foreach (var source in paths)
-            await Move(source, destination, sourcePane, destPane, verify);
+            await Move(source, destination, sourcePane, destPane, verify, collision, pattern);
         if (paths.Count > 1)
             _status(paths.Count + " items moved.");
     }
