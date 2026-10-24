@@ -30,7 +30,7 @@
 
 | Order | ID | Do | State |
 | ---: | :--- | :--- | :--- |
-| 1 | PR04b.001 | Access gate. Probe source and destination only. Creatable missing folder is created. Access denied is elevation. Invalid path is a message. | |
+| 1 | PR04b.001 | Access gate. Probe source and destination only. Creatable missing folder is created. Access denied is elevation. Invalid path is a message. | Done |
 | 2 | PR04b.002 | Themed elevation window. Job, path, Continue, Cancel. Replaces both `MessageBox` calls. No `FileOps.exe` lookup. | |
 | 3 | PR04b.003 | `--job` mode. Elevated instance reads the job file, opens the job window, runs FileIo, writes a result file, exits. No explorer UI. | |
 | 4 | PR04b.004 | Host writes the job file, starts this exe with `runas`, waits, refreshes the panes from the result. UAC denied stops the job. | |
