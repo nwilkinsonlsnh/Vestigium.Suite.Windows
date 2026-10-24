@@ -269,6 +269,7 @@ public partial class ExplorerPane : UserControl
             UpButton.IsEnabled = Path.GetDirectoryName(full) is not null;
             Say(rows.Count + " item" + (rows.Count == 1 ? "" : "s") + " · " + HashingHelper.AlgorithmName(algorithm));
             Navigated?.Invoke(full);
+            RefreshTree(full);
             _ = FillHashes(rows, algorithm, token);
         }
         catch (Exception ex)
@@ -421,6 +422,30 @@ public partial class ExplorerPane : UserControl
             _ => "Drive"
         };
 
+    public void RefreshTree(string path)
+    {
+        var full = PathResolve.Clean(PathTokens.Expand(path));
+        if (full.Length == 0)
+            return;
+        var node = Find(_roots, full);
+        if (node is null || !node.Loaded)
+            return;
+        Fill(node);
+    }
+
+    private static FolderNode? Find(IEnumerable<FolderNode> nodes, string path)
+    {
+        foreach (var node in nodes)
+        {
+            if (string.Equals(node.FullPath, path, StringComparison.OrdinalIgnoreCase))
+                return node;
+            var child = Find(node.Children, path);
+            if (child is not null)
+                return child;
+        }
+        return null;
+    }
+
     private void Folder_Expanded(object sender, RoutedEventArgs e)
     {
         if (e.OriginalSource is not TreeViewItem item || item.DataContext is not FolderNode node)
@@ -429,6 +454,11 @@ public partial class ExplorerPane : UserControl
             return;
 
         node.Loaded = true;
+        Fill(node);
+    }
+
+    private void Fill(FolderNode node)
+    {
         node.Children.Clear();
         var settings = App.Settings.Load();
         try
