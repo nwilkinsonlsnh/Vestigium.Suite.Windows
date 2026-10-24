@@ -251,6 +251,13 @@ public sealed class ExplorerHost : DockPanel
             return;
         }
 
+        access = ConfirmCreate(access, destination);
+        if (access.Decision == JobAccessDecision.Refuse)
+        {
+            _status(access.Reason);
+            return;
+        }
+
         if (access.Decision == JobAccessDecision.Elevate)
         {
             var outcome = JobHandoff.Run(
@@ -308,6 +315,13 @@ public sealed class ExplorerHost : DockPanel
         }
 
         var access = JobAccess.Check(JobVerb.Copy, source, destination);
+        if (access.Decision == JobAccessDecision.Refuse)
+        {
+            _status(access.Reason);
+            return;
+        }
+
+        access = ConfirmCreate(access, destination);
         if (access.Decision == JobAccessDecision.Refuse)
         {
             _status(access.Reason);
@@ -374,6 +388,27 @@ public sealed class ExplorerHost : DockPanel
             _busy = false;
         }
         await Task.CompletedTask;
+    }
+
+    private JobAccessResult ConfirmCreate(JobAccessResult access, string? destination)
+    {
+        if (access.Decision != JobAccessDecision.AskCreate)
+            return access;
+        if (!JobAsk.Ask(Window.GetWindow(this), "Create destination", access.Reason + " Create it?"))
+            return JobAccessResult.Stop("Cancelled.");
+        try
+        {
+            Directory.CreateDirectory(destination!);
+            return JobAccessResult.Ok();
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return JobAccessResult.NeedsAdmin("Access denied on " + destination + ".");
+        }
+        catch (IOException ex)
+        {
+            return JobAccessResult.Stop(ex.Message);
+        }
     }
 
     private void FinishElevated(
