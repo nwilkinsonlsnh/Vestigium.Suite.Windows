@@ -256,8 +256,6 @@ public sealed class JobWindow : Window
             ? ChartView.Ecdf(s, ChartTheme.Apply(new ChartOptions { Title = "Duration" }))
             : Empty();
 
-    private DateTimeOffset _lastPaint = DateTimeOffset.MinValue;
-
     private void Queue(FileIoProgress progress)
     {
         if (_queued)
