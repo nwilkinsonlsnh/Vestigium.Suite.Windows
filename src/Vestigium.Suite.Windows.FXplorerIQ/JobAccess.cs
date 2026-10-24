@@ -21,6 +21,8 @@ public sealed class JobAccessResult
     public static JobAccessResult NeedsAdmin(string reason) => new() { Decision = JobAccessDecision.Elevate, Reason = reason };
 
     public static JobAccessResult Ask(string reason) => new() { Decision = JobAccessDecision.AskCreate, Reason = reason };
+
+    public static JobAccessResult Stop(string reason) => new() { Decision = JobAccessDecision.Refuse, Reason = reason };
 }
 
 public static class JobAccess
