@@ -120,6 +120,7 @@ public partial class SettingsView : UserControl
     {
         if (_loading || CollisionBox.SelectedItem is not string collision)
             return;
+        ApplyCollision();
         Save(settings => settings.Collision = collision);
     }
 
@@ -142,8 +143,12 @@ public partial class SettingsView : UserControl
     private void ApplyCollision()
     {
         var automatic = AskOverwrite.IsChecked == true;
-        CollisionBox.IsEnabled = automatic;
-        PatternBox.IsEnabled = automatic;
+        var unique = CollisionBox.SelectedItem as string == "UniqueName";
+        CollisionLabel.Visibility = automatic ? Visibility.Visible : Visibility.Collapsed;
+        CollisionBox.Visibility = automatic ? Visibility.Visible : Visibility.Collapsed;
+        var showPattern = automatic && unique;
+        PatternLabel.Visibility = showPattern ? Visibility.Visible : Visibility.Collapsed;
+        PatternBox.Visibility = showPattern ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void Verify_Changed(object sender, SelectionChangedEventArgs e)
