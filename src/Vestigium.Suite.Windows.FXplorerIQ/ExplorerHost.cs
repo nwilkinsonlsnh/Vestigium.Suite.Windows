@@ -253,8 +253,10 @@ public sealed class ExplorerHost : DockPanel
 
         if (access.Decision == JobAccessDecision.Elevate)
         {
-            var elevated = JobHandoff.Offer(verb, source, destination, verify && verb == JobVerb.Delete, false);
-            _status(elevated ? "Elevated job started." : "Elevation cancelled.");
+            var choice = JobHandoff.Offer(Window.GetWindow(this), verb, source, destination, verify && verb == JobVerb.Delete, false);
+            _status(choice == ElevationChoice.Accepted
+                ? "Elevation accepted. The elevated runner is the next slice."
+                : "Elevation cancelled.");
             return;
         }
 
@@ -314,8 +316,10 @@ public sealed class ExplorerHost : DockPanel
 
         if (access.Decision == JobAccessDecision.Elevate)
         {
-            var elevated = JobHandoff.Offer(JobVerb.Copy, source, destination, false, true);
-            _status(elevated ? "Elevated audit started." : "Elevation cancelled.");
+            var choice = JobHandoff.Offer(Window.GetWindow(this), JobVerb.Copy, source, destination, false, true);
+            _status(choice == ElevationChoice.Accepted
+                ? "Elevation accepted. The elevated runner is the next slice."
+                : "Elevation cancelled.");
             return;
         }
 
