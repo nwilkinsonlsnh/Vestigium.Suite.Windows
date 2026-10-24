@@ -652,7 +652,9 @@ public sealed class JobWindow : Window
     {
         _phase.Text = progress.IsPaused ? "Paused  " + progress.Phase : progress.Phase;
         var found = Math.Max(progress.FilesFound, 1);
-        Set(_bar, Math.Min(100, progress.FilesDone * 100d / found), 100);
+        var active = progress.Active.FirstOrDefault(file => file.Status == "Active" && file.Size > 0);
+        var fraction = active is null ? 0 : active.BytesDone / (double)active.Size;
+        Set(_bar, Math.Min(100, (progress.FilesDone + fraction) * 100d / found), 100);
         var rate = progress.RateBytesPerSec > 0 ? Size(progress.RateBytesPerSec) + "/s" : "—";
         var eta = progress.EtaUtc is { } when ? when.ToLocalTime().ToString("HH:mm:ss", CultureInfo.InvariantCulture) : "—";
         _rate.Text = progress.FilesDone + " / " + progress.FilesFound
