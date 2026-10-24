@@ -305,7 +305,14 @@ public sealed class ExplorerHost : DockPanel
             return;
         }
 
-        if (!JobAccess.CanRun(JobVerb.Copy, source, destination))
+        var access = JobAccess.Check(JobVerb.Copy, source, destination);
+        if (access.Decision == JobAccessDecision.Refuse)
+        {
+            _status(access.Reason);
+            return;
+        }
+
+        if (access.Decision == JobAccessDecision.Elevate)
         {
             var elevated = JobHandoff.Offer(JobVerb.Copy, source, destination, false, true);
             _status(elevated ? "Elevated audit started." : "Elevation cancelled.");
