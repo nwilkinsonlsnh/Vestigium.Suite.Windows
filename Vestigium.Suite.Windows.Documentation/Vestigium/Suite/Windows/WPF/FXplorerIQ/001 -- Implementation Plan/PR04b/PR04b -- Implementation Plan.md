@@ -34,4 +34,4 @@
 | 2 | PR04b.002 | Themed elevation window. Job, path, Continue, Cancel. Replaces both `MessageBox` calls. No `FileOps.exe` lookup. | Done |
 | 3 | PR04b.003 | `--job` mode. Elevated instance reads the job file, opens the job window, runs FileIo, writes a result file, exits. No explorer UI. | Done |
 | 4 | PR04b.004 | Host writes the job file, starts this exe with `runas`, waits, refreshes the panes from the result. UAC denied stops the job. | Done |
-| 5 | PR04b.005 | Remove the old handoff. No sibling path. No second error box. | |
+| 5 | PR04b.005 | Remove the old handoff. No sibling path. No second error box. | Done |
