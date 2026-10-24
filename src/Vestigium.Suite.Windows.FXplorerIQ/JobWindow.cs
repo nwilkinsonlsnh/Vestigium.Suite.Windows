@@ -29,8 +29,8 @@ public sealed class JobWindow : Window
     private readonly TextBlock _story = new();
     private readonly Brush _surface;
     private FileIoJobResult? _result;
-    private string _report = "shape";
-    private string _chart = "size";
+    private string _report = "overview";
+    private string _chart = "story";
     private readonly DispatcherTimer _pulse;
     private bool _queued;
     private DateTimeOffset _lastPaint = DateTimeOffset.MinValue;
@@ -120,9 +120,10 @@ public sealed class JobWindow : Window
 
         var dashboard = new DockPanel { Background = _surface };
         var sub = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 4) };
-        sub.Children.Add(Radio("Shape", "report", true, () => Pick("shape", "size")));
+        sub.Children.Add(Radio("Overview", "report", true, () => Pick("overview", "story")));
+        sub.Children.Add(Radio("Shape", "report", false, () => Pick("shape", "mix")));
         sub.Children.Add(Radio("Throughput", "report", false, () => Pick("rate", "rate")));
-        sub.Children.Add(Radio("Time", "report", false, () => Pick("time", "perfile")));
+        sub.Children.Add(Radio("Time", "report", false, () => Pick("time", "share")));
         var head = new StackPanel();
         head.Children.Add(sub);
         head.Children.Add(_charts);
@@ -131,7 +132,7 @@ public sealed class JobWindow : Window
         dashboard.Children.Add(head);
         dashboard.Children.Add(_story);
         dashboard.Children.Add(_stage);
-        Pick("shape", "size");
+        Pick("overview", "story");
 
         var main = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 8) };
         main.Children.Add(Radio("Action", "main", true, () => _page.Content = action));
@@ -173,9 +174,10 @@ public sealed class JobWindow : Window
         _charts.Children.Clear();
         var items = _report switch
         {
+            "shape" => new[] { ("mix", "Mix"), ("weight", "Weight"), ("tiny", "Tiny"), ("small", "Small"), ("medium", "Medium"), ("large", "Large"), ("huge", "Huge"), ("iqr", "IQR") },
             "rate" => new[] { ("rate", "Rate"), ("bucket", "By bucket") },
-            "time" => new[] { ("perfile", "Per file"), ("curve", "Curve") },
-            _ => new[] { ("size", "Size"), ("spread", "Spread"), ("buckets", "Buckets") }
+            "time" => new[] { ("share", "Share"), ("duration", "Duration"), ("curve", "Curve") },
+            _ => Array.Empty<(string, string)>()
         };
         foreach (var (key, label) in items)
             _charts.Children.Add(Radio(label, "chart", key == _chart, () => { _chart = key; ShowChart(); }));
@@ -206,29 +208,95 @@ public sealed class JobWindow : Window
     private (FrameworkElement View, string Story) ChartOf(FileIoJobStats stats)
         => (_report, _chart) switch
         {
-            ("rate", "bucket") => (BucketRate(stats), "Mean rate by bucket. Tall bars are the fast lanes."),
-            ("rate", _) => (Rate(stats), "How fast each file moved. The peak is the common rate."),
-            ("time", "curve") => (Curve(stats), "How long files took, smallest to largest. A steep curve means most finished together."),
-            ("time", _) => (Duration(stats), "Time per file. A long tail means a few files held the job."),
-            (_, "spread") => (Spread(stats), "The size spread. The box is the middle half. Dots past the whiskers are outliers."),
-            (_, "buckets") => (Buckets(stats), "How the files split across the five size lanes."),
-            _ => (Size(stats), "The shape of the files. Most of the work sits under the tallest bars.")
+            ("overview", _) => (Overview(stats), Sentence(stats)),
+            ("shape", "weight") => (Weight(stats), "Where the bytes went. This often disagrees with the count pie."),
+            ("shape", "tiny") => (BucketSize(stats, "Tiny"), "Tiny files, 0 to 256 KB."),
+            ("shape", "small") => (BucketSize(stats, "Small"), "Small files, up to 4 MB."),
+            ("shape", "medium") => (BucketSize(stats, "Medium"), "Medium files, up to 32 MB."),
+            ("shape", "large") => (BucketSize(stats, "Large"), "Large files, up to 256 MB."),
+            ("shape", "huge") => (BucketSize(stats, "Huge"), "Huge files, above 256 MB."),
+            ("shape", "iqr") => (Iqr(stats), "The middle half of each bucket. Outliers are the files that stuck out."),
+            ("shape", _) => (Mix(stats), "Where the files went. Five slices, one for each bucket."),
+            ("rate", "bucket") => (BucketRate(stats), "Mean rate by bucket. The tall bar set the pace."),
+            ("rate", _) => (Rate(stats), "How fast each file moved."),
+            ("time", "duration") => (Duration(stats), "Median time per bucket, in milliseconds."),
+            ("time", "curve") => (Curve(stats), "How long files took, smallest to largest."),
+            ("time", _) => (Share(stats), "Which bucket held the clock."),
+            _ => (Overview(stats), Sentence(stats))
         };
 
-    private FrameworkElement Size(FileIoJobStats stats)
-        => stats.FileSizes.Series is { } s
-            ? ChartView.Histogram(s, ChartTheme.Apply(new ChartOptions { Title = "File size" }))
-            : Empty();
-
-    private FrameworkElement Spread(FileIoJobStats stats)
-        => stats.FileSizes.Series is { } s
-            ? ChartView.Box(s, ChartTheme.Apply(new ChartOptions { Title = "Size" }))
-            : Empty();
-
-    private FrameworkElement Buckets(FileIoJobStats stats)
+    private FrameworkElement Overview(FileIoJobStats stats)
     {
-        var slices = stats.Buckets.Where(b => b.FileSizes.Count > 0).Select(b => new ChartSlice { Label = b.Name, Value = b.FileSizes.Count }).ToList();
-        return slices.Count == 0 ? Empty() : ChartView.Pareto(slices, ChartTheme.Apply(new ChartOptions { Title = "Files by bucket" }));
+        var pies = new UniformGrid { Columns = 2, Margin = new Thickness(0, 8, 0, 8) };
+        pies.Children.Add(Mix(stats));
+        pies.Children.Add(Weight(stats));
+        var line = new TextBlock
+        {
+            Text = Summary(stats),
+            Style = TryStyle("TextBlock.Body"),
+            Foreground = Foreground,
+            Margin = new Thickness(0, 4, 0, 4)
+        };
+        var root = new StackPanel();
+        root.Children.Add(line);
+        root.Children.Add(pies);
+        return root;
+    }
+
+    private FrameworkElement Mix(FileIoJobStats stats)
+        => Pie(stats, b => b.FileSizes.Count, "Files");
+
+    private FrameworkElement Weight(FileIoJobStats stats)
+        => Pie(stats, b => Sum(b.FileSizes), "Bytes");
+
+    private FrameworkElement Share(FileIoJobStats stats)
+        => Pie(stats, b => Sum(b.Durations), "Time");
+
+    private FrameworkElement Pie(FileIoJobStats stats, Func<FileIoBucketAnalytics, double> value, string title)
+    {
+        var slices = stats.Buckets
+            .Select(b => new ChartSlice { Label = b.Name, Value = value(b) })
+            .Where(s => s.Value > 0)
+            .ToList();
+        return slices.Count == 0
+            ? Empty()
+            : ChartView.Pie(slices, ChartTheme.Apply(new ChartOptions { Title = title }));
+    }
+
+    private FrameworkElement BucketSize(FileIoJobStats stats, string name)
+    {
+        var bucket = stats.Buckets.FirstOrDefault(b => b.Name == name);
+        if (bucket?.FileSizes.Series is not { Count: > 0 } series)
+            return Empty();
+        var kb = name == "Tiny";
+        var scale = kb ? 1024m : 1024m * 1024m;
+        var unit = kb ? "KB" : "MB";
+        var scaled = NumericSeries.FromDecimal(series.Values.Select(v => v / scale), unit);
+        return ChartView.Histogram(scaled, ChartTheme.Apply(new ChartOptions { Title = name + " (" + unit + ")" }));
+    }
+
+    private FrameworkElement Iqr(FileIoJobStats stats)
+    {
+        var panel = new StackPanel { Margin = new Thickness(0, 12, 0, 0) };
+        foreach (var bucket in stats.Buckets)
+        {
+            var sizes = bucket.FileSizes;
+            var text = sizes.Count == 0
+                ? bucket.Name + "  —"
+                : bucket.Name + "   n " + sizes.Count
+                    + "   Q1 " + Human(sizes.Q1)
+                    + "   median " + Human(sizes.Median)
+                    + "   Q3 " + Human(sizes.Q3)
+                    + "   outliers " + sizes.HighOutlierCount;
+            panel.Children.Add(new TextBlock
+            {
+                Text = text,
+                Style = TryStyle("TextBlock.Body"),
+                Foreground = Foreground,
+                Margin = new Thickness(0, 4, 0, 4)
+            });
+        }
+        return panel;
     }
 
     private FrameworkElement Rate(FileIoJobStats stats)
@@ -247,14 +315,45 @@ public sealed class JobWindow : Window
     }
 
     private FrameworkElement Duration(FileIoJobStats stats)
-        => stats.Durations.Series is { } s
-            ? ChartView.Histogram(s, ChartTheme.Apply(new ChartOptions { Title = "Duration ms" }))
-            : Empty();
+    {
+        var rows = stats.Buckets.Where(b => b.Durations.Median is > 0).ToArray();
+        if (rows.Length == 0)
+            return Empty();
+        return ChartView.Column(
+            NumericSeries.FromDecimal(rows.Select(b => b.Durations.Median ?? 0).ToArray(), "ms"),
+            ChartTheme.Apply(new ChartOptions { Title = "Median ms" }));
+    }
 
     private FrameworkElement Curve(FileIoJobStats stats)
         => stats.Durations.Series is { } s
             ? ChartView.Ecdf(s, ChartTheme.Apply(new ChartOptions { Title = "Duration" }))
             : Empty();
+
+    private static double Sum(FileIoSeriesSnapshot snap)
+        => snap.Series is { } s ? (double)s.Values.Sum() : 0;
+
+    private static string Human(decimal? bytes)
+        => bytes is { } n ? Size((long)n) : "—";
+
+    private static string Summary(FileIoJobStats stats)
+        => stats.ObservationCount + " files   "
+            + Size((long)Sum(stats.FileSizes)) + "   "
+            + stats.JobElapsedMs + " ms   "
+            + Size((long)stats.JobRateBytesPerSec) + "/s";
+
+    private static string Sentence(FileIoJobStats stats)
+    {
+        var counted = stats.Buckets.OrderByDescending(b => b.FileSizes.Count).FirstOrDefault();
+        var heavy = stats.Buckets.OrderByDescending(b => Sum(b.FileSizes)).FirstOrDefault();
+        if (counted is null || heavy is null || stats.ObservationCount == 0)
+            return "No files in this job.";
+        var files = stats.ObservationCount;
+        var countShare = counted.FileSizes.Count * 100 / files;
+        var bytes = Sum(stats.FileSizes);
+        var weightShare = bytes > 0 ? (int)(Sum(heavy.FileSizes) * 100 / bytes) : 0;
+        return counted.Name + " is " + countShare + "% of the files. "
+            + heavy.Name + " is " + weightShare + "% of the bytes.";
+    }
 
     private void Queue(FileIoProgress progress)
     {
