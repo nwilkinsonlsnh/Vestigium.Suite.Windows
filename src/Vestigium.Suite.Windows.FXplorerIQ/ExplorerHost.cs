@@ -219,29 +219,21 @@ public sealed class ExplorerHost : DockPanel
             var settings = App.Settings.Load();
             collision = CollisionOf(settings.Collision);
             pattern = string.IsNullOrWhiteSpace(settings.UniqueNamePattern) ? ".##" : settings.UniqueNamePattern;
-            if (settings.AskBeforeOverwrite)
+            if (!settings.AskBeforeOverwrite)
             {
-                try
+                _status("Using " + settings.Collision + ".");
+            }
+            else
+            {
+                _status("Automatic Collision Handling is off.");
+                var choice = CollisionPrompt.Ask(Window.GetWindow(this), Label(verb, verify), settings.Collision, pattern);
+                if (choice is null)
                 {
-                    var choice = CollisionPrompt.Ask(Window.GetWindow(this), Label(verb, verify), settings.Collision, pattern);
-                    if (choice is null)
-                    {
-                        _status("Cancelled.");
-                        return;
-                    }
-                    collision = choice.Collision;
-                    pattern = choice.Pattern;
+                    _status("Cancelled.");
+                    return;
                 }
-                catch (Exception ex)
-                {
-                    if (!JobAsk.Ask(Window.GetWindow(this), "Automatic Collision Handling (OFF)",
-                        "The chooser could not open (" + ex.Message + "). Continue with UniqueName?"))
-                    {
-                        _status("Cancelled.");
-                        return;
-                    }
-                    collision = FileIoCollision.UniqueName;
-                }
+                collision = choice.Collision;
+                pattern = choice.Pattern;
             }
         }
 
@@ -261,13 +253,13 @@ public sealed class ExplorerHost : DockPanel
 
         if (verb == JobVerb.Copy)
         {
-            _ = CopyMany(paths, destination!, destPane, verify, collision, pattern);
+            _ = Run(CopyMany(paths, destination!, destPane, verify, collision, pattern));
             return;
         }
 
         if (verb == JobVerb.Move)
         {
-            _ = MoveMany(paths, destination!, sourcePane, destPane, verify, collision, pattern);
+            _ = Run(MoveMany(paths, destination!, sourcePane, destPane, verify, collision, pattern));
             return;
         }
 
@@ -359,6 +351,19 @@ public sealed class ExplorerHost : DockPanel
             _busy = false;
         }
         await Task.CompletedTask;
+    }
+
+    private async Task Run(Task work)
+    {
+        try
+        {
+            await work.ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            _status(ex.Message);
+            _busy = false;
+        }
     }
 
     private async Task Copy(string source, string destination, ExplorerPane destPane, bool verify, FileIoCollision collision, string pattern)
