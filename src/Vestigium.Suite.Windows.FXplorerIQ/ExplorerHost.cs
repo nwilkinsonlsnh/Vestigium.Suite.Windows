@@ -244,7 +244,14 @@ public sealed class ExplorerHost : DockPanel
             return;
         }
 
-        if (!JobAccess.CanRun(verb, source, destination))
+        var access = JobAccess.Check(verb, source, destination ?? "");
+        if (access.Decision == JobAccessDecision.Refuse)
+        {
+            _status(access.Reason);
+            return;
+        }
+
+        if (access.Decision == JobAccessDecision.Elevate)
         {
             var elevated = JobHandoff.Offer(verb, source, destination, verify && verb == JobVerb.Delete, false);
             _status(elevated ? "Elevated job started." : "Elevation cancelled.");
