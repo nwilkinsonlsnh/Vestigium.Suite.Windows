@@ -354,7 +354,7 @@ public sealed class ExplorerHost : DockPanel
             _ => verb.ToString()
         };
 
-    private Task<FileIoJobResult?> await ShowJob(string title, FileIoJob job, string source, string? destination, bool autoClose = false)
+    private Task<FileIoJobResult?> ShowJob(string title, FileIoJob job, string source, string? destination, bool autoClose = false)
     {
         JobLog.Start(title, job.JobId, source, destination);
         var done = new TaskCompletionSource<FileIoJobResult?>();
