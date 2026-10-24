@@ -349,26 +349,96 @@ public sealed class JobWindow : Window
 
     private FrameworkElement Iqr(FileIoJobStats stats)
     {
-        var panel = new StackPanel { Margin = new Thickness(0, 12, 0, 0) };
+        var panel = new StackPanel { Margin = new Thickness(0, 16, 0, 0) };
+        var accent = TryBrush("Vestigium.Brushes.Accent.Primary") ?? SystemColors.HighlightBrush;
+        var track = TryBrush("Vestigium.Brushes.Surface.Card") ?? SystemColors.ControlBrush;
         foreach (var bucket in stats.Buckets)
-        {
-            var sizes = bucket.FileSizes;
-            var text = sizes.Count == 0
-                ? bucket.Name + "  —"
-                : bucket.Name + "   n " + sizes.Count
-                    + "   Q1 " + Human(sizes.Q1)
-                    + "   median " + Human(sizes.Median)
-                    + "   Q3 " + Human(sizes.Q3)
-                    + "   outliers " + sizes.HighOutlierCount;
-            panel.Children.Add(new TextBlock
-            {
-                Text = text,
-                Style = TryStyle("TextBlock.Body"),
-                Foreground = Foreground,
-                Margin = new Thickness(0, 4, 0, 4)
-            });
-        }
+            panel.Children.Add(BoxRow(bucket, accent, track));
         return panel;
+    }
+
+    private FrameworkElement BoxRow(FileIoBucketAnalytics bucket, Brush accent, Brush track)
+    {
+        var sizes = bucket.FileSizes;
+        var name = new TextBlock
+        {
+            Text = bucket.Name,
+            Width = 72,
+            Style = TryStyle("TextBlock.Body"),
+            Foreground = Foreground,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        var plot = new Grid { Height = 28, Margin = new Thickness(8, 0, 12, 0) };
+        if (sizes.Count > 0 && sizes.Min is { } min && sizes.Max is { } max && max > min
+            && sizes.Q1 is { } q1 && sizes.Median is { } median && sizes.Q3 is { } q3)
+        {
+            var span = (double)(max - min);
+            double At(decimal value) => (double)(value - min) / span;
+            plot.Children.Add(new Border
+            {
+                Height = 2,
+                Background = track,
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(0)
+            });
+            var box = new Border
+            {
+                Height = 16,
+                Background = accent,
+                Opacity = 0.85,
+                VerticalAlignment = VerticalAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                Margin = new Thickness(0)
+            };
+            box.Loaded += (_, _) =>
+            {
+                var width = plot.ActualWidth;
+                if (width <= 0)
+                    return;
+                var left = At(q1) * width;
+                var right = At(q3) * width;
+                box.Margin = new Thickness(left, 0, 0, 0);
+                box.Width = Math.Max(4, right - left);
+            };
+            plot.Children.Add(box);
+            var mark = new Border
+            {
+                Width = 2,
+                Background = Foreground,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                VerticalAlignment = VerticalAlignment.Stretch
+            };
+            mark.Loaded += (_, _) =>
+            {
+                var width = plot.ActualWidth;
+                if (width <= 0)
+                    return;
+                mark.Margin = new Thickness(At(median) * width, 4, 0, 4);
+            };
+            plot.Children.Add(mark);
+        }
+
+        var caption = new TextBlock
+        {
+            Text = sizes.Count == 0
+                ? "—"
+                : "n " + sizes.Count
+                    + "   " + Human(sizes.Q1)
+                    + " · " + Human(sizes.Median)
+                    + " · " + Human(sizes.Q3)
+                    + "   outliers " + sizes.HighOutlierCount,
+            Style = TryStyle("TextBlock.Caption"),
+            Foreground = Foreground,
+            VerticalAlignment = VerticalAlignment.Center,
+            TextWrapping = TextWrapping.NoWrap
+        };
+        var row = new DockPanel { Margin = new Thickness(0, 10, 0, 10) };
+        DockPanel.SetDock(name, Dock.Left);
+        DockPanel.SetDock(caption, Dock.Right);
+        row.Children.Add(name);
+        row.Children.Add(caption);
+        row.Children.Add(plot);
+        return row;
     }
 
     private FrameworkElement Rate(FileIoJobStats stats)
