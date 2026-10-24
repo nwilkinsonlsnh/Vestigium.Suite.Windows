@@ -39,6 +39,7 @@
                   ScrollViewer.VerticalScrollBarVisibility="Auto"
                   ScrollViewer.HorizontalScrollBarVisibility="Auto"
                   PreviewMouseWheel="Pane_PreviewMouseWheel"
+                  PreviewMouseRightButtonDown="Folders_RightClick"
                   SelectedItemChanged="Folders_SelectedItemChanged">
           <TreeView.ItemContainerStyle>
             <Style TargetType="TreeViewItem" BasedOn="{StaticResource TreeViewItem.Standard}">
@@ -128,6 +129,7 @@
                   ScrollViewer.VerticalScrollBarVisibility="Auto"
                   ScrollViewer.HorizontalScrollBarVisibility="Auto"
                   PreviewMouseWheel="Pane_PreviewMouseWheel"
+                  PreviewMouseRightButtonDown="Listing_RightClick"
                   MouseDoubleClick="Listing_MouseDoubleClick">
           <DataGrid.Columns>
             <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="280" MinWidth="40" />
