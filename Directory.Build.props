@@ -26,7 +26,7 @@
     <VestigiumClosedXmlVersion>1.0.1</VestigiumClosedXmlVersion>
     <VestigiumAnalyticsVersion>1.0.4</VestigiumAnalyticsVersion>
     <VestigiumChartsVersion>1.0.11</VestigiumChartsVersion>
-    <VestigiumFileIoVersion>1.2.7</VestigiumFileIoVersion>
+    <VestigiumFileIoVersion>1.2.8</VestigiumFileIoVersion>
     <VestigiumHashingVersion>1.4.1</VestigiumHashingVersion>
     <MicrosoftExtensionsDiVersion>10.0.12</MicrosoftExtensionsDiVersion>
   </PropertyGroup>
