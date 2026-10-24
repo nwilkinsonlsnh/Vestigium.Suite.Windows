@@ -435,17 +435,27 @@ public sealed class ExplorerHost : DockPanel
         {
             var parent = Path.GetDirectoryName(destination);
             if (!string.IsNullOrWhiteSpace(parent))
-                destPane.RefreshTree(parent);
+                RefreshShowing(parent);
             destPane.Open(destination);
         }
         if (verb is JobVerb.Move or JobVerb.Delete)
         {
             var parent = Path.GetDirectoryName(source);
             if (!string.IsNullOrWhiteSpace(parent))
-                sourcePane.RefreshTree(parent);
+                RefreshShowing(parent);
             sourcePane.Open(Remain(sourcePane, source));
         }
         _status("Elevated " + verb + " " + outcome.Status + ".");
+    }
+
+    private void RefreshShowing(string path)
+    {
+        foreach (var pane in new[] { First, Second })
+        {
+            pane.RefreshTree(path);
+            if (string.Equals(pane.Folder, path, StringComparison.OrdinalIgnoreCase))
+                pane.Open(path);
+        }
     }
 
     private async Task Run(Task work)
@@ -475,6 +485,9 @@ public sealed class ExplorerHost : DockPanel
                 _status(label + " failed.");
                 return;
             }
+            var parent = Path.GetDirectoryName(destination);
+            if (!string.IsNullOrWhiteSpace(parent))
+                RefreshShowing(parent);
             destPane.Open(destination);
             if (!verify)
             {
@@ -666,6 +679,9 @@ public sealed class ExplorerHost : DockPanel
                 _status("Mirror failed.");
                 return;
             }
+            var parent = Path.GetDirectoryName(destination);
+            if (!string.IsNullOrWhiteSpace(parent))
+                RefreshShowing(parent);
             destPane.Open(destination);
             var verified = await Task.Run(() => JobVerify.Run(result.JobId, source, destination, settings.Verify())).ConfigureAwait(true);
             HostLog.Information(
