@@ -612,7 +612,9 @@ public sealed class ExplorerHost : DockPanel
             var options = Options(settings, CollisionOf(settings.Collision));
             options.ReconLeadTime = TimeSpan.Zero;
             if (secure)
-                options.Shred = FileIoShredRecipe.ZeroRandomZero;
+                options.Shred = settings.SecurePasses == 7
+                    ? FileIoShredRecipe.SevenRandomThenZero
+                    : FileIoShredRecipe.ThreeRandomThenZero;
             var label = (secure ? "Delete (Secure)" : "Delete") + " (" + paths.Count + ")";
             var shown = paths.Count == 1 ? paths[0] : paths.Count + " items";
             var result = ShowJob(label, FileIoHelper.Delete(paths, options), shown, null);
