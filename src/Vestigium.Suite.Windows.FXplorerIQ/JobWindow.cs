@@ -599,10 +599,7 @@ public sealed class JobWindow : Window
             _result = await _job.RunAsync().ConfigureAwait(true);
             _pulse.Stop();
             _phase.Text = _result.Status;
-            _pause.IsEnabled = false;
-            _resume.IsEnabled = false;
-            _cancel.IsEnabled = false;
-            _close.IsEnabled = true;
+            Done();
             _files.Children.Clear();
             Show(_job.Progress);
             ShowChart();
@@ -625,6 +622,14 @@ public sealed class JobWindow : Window
         {
             _pulse.Stop();
         }
+    }
+
+    private void Done()
+    {
+        _pause.Visibility = Visibility.Collapsed;
+        _resume.Visibility = Visibility.Collapsed;
+        _cancel.Visibility = Visibility.Collapsed;
+        _close.IsEnabled = true;
     }
 
     private void Safe(Action action)
