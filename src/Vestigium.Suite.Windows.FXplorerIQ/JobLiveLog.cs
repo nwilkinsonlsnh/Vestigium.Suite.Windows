@@ -94,6 +94,7 @@ public sealed class JobLiveLog
         foreach (var path in _seen.Keys)
             if (_seen.TryRemove(path, out _))
                 _done.Enqueue(path);
+            Interlocked.Increment(ref _taken);
         var idle = 0;
         var until = DateTimeOffset.UtcNow.AddSeconds(90);
         while (!_done.IsEmpty && DateTimeOffset.UtcNow < until && idle < 600)
@@ -163,6 +164,7 @@ public sealed class JobLiveLog
             if (still.Contains(path) || !_seen.TryRemove(path, out _))
                 continue;
             _done.Enqueue(path);
+            Interlocked.Increment(ref _taken);
         }
     }
 
