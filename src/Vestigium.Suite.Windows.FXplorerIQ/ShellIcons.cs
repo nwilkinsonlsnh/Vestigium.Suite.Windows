@@ -15,14 +15,15 @@ public static class ShellIcons
     private const uint Small = 0x1;
     private const uint UseAttributes = 0x10;
     private const uint Attributes = 0x200;
+    private const uint PidL = 0x8;
     private const uint Directory = 0x10;
-    private const string ThisPC = "::{20D04FE0-3AEA-1069-A2D8-08002B30309D}";
+    private const int Drives = 0x11;
 
-    private static readonly Dictionary<string, string> Known = new(StringComparer.OrdinalIgnoreCase)
+    private static readonly Dictionary<string, Guid> Known = new(StringComparer.OrdinalIgnoreCase)
     {
-        ["Contacts"] = "::{56784854-C6CB-462B-8169-88E350ACB882}",
-        ["Favorites"] = "::{1777F761-68AD-4D8A-87BD-30B759FA33DD}",
-        ["OneDrive"] = "::{A52BBA46-E9E1-435F-B3D9-28DAA648C0F6}"
+        ["Contacts"] = new("56784854-C6CB-462B-8169-88E350ACB882"),
+        ["Favorites"] = new("1777F761-68AD-4D8A-87BD-30B759FA33DD"),
+        ["OneDrive"] = new("A52BBA46-E9E1-435F-B3D9-28DAA648C0F6")
     };
 
     private static readonly ConcurrentDictionary<string, ImageSource> Cache = new(StringComparer.OrdinalIgnoreCase);
@@ -31,19 +32,48 @@ public static class ShellIcons
     {
         if (path.Length == 0)
             return null;
-        if (folder && KnownFolder(path) is { } known)
-            return Cache.GetOrAdd(known, _ => Load(known, folder: true, attributes: false));
+        if (folder && Known.TryGetValue(Path.GetFileName(path.TrimEnd('\\')), out var id))
+            return Cache.GetOrAdd(id.ToString(), _ => FromKnown(id));
         var key = folder ? path : Extension(path);
         return Cache.GetOrAdd(key, _ => Load(folder ? path : "file" + key, folder, attributes: !folder));
     }
 
     public static ImageSource? Computer()
-        => Cache.GetOrAdd("thispc", _ => Load(ThisPC, folder: true, attributes: false));
+        => Cache.GetOrAdd("thispc", _ => FromSpecial(Drives));
 
-    private static string? KnownFolder(string path)
+    private static ImageSource FromKnown(Guid id)
     {
-        var name = Path.GetFileName(path.TrimEnd('\\'));
-        return Known.TryGetValue(name, out var id) ? id : null;
+        if (SHGetKnownFolderIDList(id, 0, IntPtr.Zero, out var pidl) != 0 || pidl == IntPtr.Zero)
+            return new BitmapImage();
+        try
+        {
+            return FromPidl(pidl);
+        }
+        finally
+        {
+            Marshal.FreeCoTaskMem(pidl);
+        }
+    }
+
+    private static ImageSource FromSpecial(int folder)
+    {
+        if (SHGetSpecialFolderLocation(IntPtr.Zero, folder, out var pidl) != 0 || pidl == IntPtr.Zero)
+            return new BitmapImage();
+        try
+        {
+            return FromPidl(pidl);
+        }
+        finally
+        {
+            Marshal.FreeCoTaskMem(pidl);
+        }
+    }
+
+    private static ImageSource FromPidl(IntPtr pidl)
+    {
+        var info = new ShFileInfo();
+        SHGetFileInfo(pidl, 0, ref info, (uint)Marshal.SizeOf<ShFileInfo>(), Icon | Small | PidL);
+        return Freeze(info);
     }
 
     private static string Extension(string path)
@@ -58,6 +88,11 @@ public static class ShellIcons
         var flags = Icon | Small | (attributes ? UseAttributes : 0);
         var attr = folder ? Directory : 0u;
         SHGetFileInfo(path, attr, ref info, (uint)Marshal.SizeOf<ShFileInfo>(), flags);
+        return Freeze(info);
+    }
+
+    private static ImageSource Freeze(ShFileInfo info)
+    {
         if (info.Icon == IntPtr.Zero)
             return new BitmapImage();
         try
@@ -71,6 +106,15 @@ public static class ShellIcons
             DestroyIcon(info.Icon);
         }
     }
+
+    [DllImport("shell32.dll")]
+    private static extern int SHGetKnownFolderIDList(Guid id, uint flags, IntPtr token, out IntPtr pidl);
+
+    [DllImport("shell32.dll")]
+    private static extern int SHGetSpecialFolderLocation(IntPtr window, int folder, out IntPtr pidl);
+
+    [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
+    private static extern IntPtr SHGetFileInfo(IntPtr pidl, uint attributes, ref ShFileInfo info, uint size, uint flags);
 
     [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
     private static extern IntPtr SHGetFileInfo(string path, uint attributes, ref ShFileInfo info, uint size, uint flags);
