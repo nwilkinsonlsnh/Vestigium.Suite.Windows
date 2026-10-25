@@ -35,6 +35,7 @@ public sealed class JobLiveLog
     private readonly int _parallel;
     private int _doneCount;
     private int _expected;
+    private int _taken;
     private Action<int, int, string>? _progress;
 
     public JobLiveLog(FileIoJob job, string source, string destination, HashingAlgorithm algorithm, string verb, int retries, int waitMs, int parallel)
@@ -224,8 +225,10 @@ public sealed class JobLiveLog
 
     private void Report(string text)
     {
-        var total = _expected > 0 ? _expected : Math.Max(_doneCount, 1);
-        _progress?.Invoke(Math.Min(_doneCount, total), total, text);
+        var total = Math.Max(_expected, Math.Max(_taken, _doneCount));
+        if (total < 1)
+            total = 1;
+        _progress?.Invoke(_doneCount, total, text);
     }
 
     private void WriteRow(string relative, string left, string right, bool equal, string? sourceHash, string? destinationHash, int attempts, string? reason)
