@@ -20,7 +20,6 @@ public partial class ExplorerPane : UserControl
     private string _folder = "";
     private string _algorithm = HashingAlgorithm.Sha256.ToString();
     private bool _fromTree;
-    private bool _treeOpen = true;
     private bool _applying;
     private int _load;
     private ScrollViewer? _host;
@@ -106,7 +105,7 @@ public partial class ExplorerPane : UserControl
         _applying = true;
         try
         {
-            if (_treeOpen && settings.TreeWidth >= 160)
+            if (settings.TreeWidth >= 160)
                 TreeColumn.Width = new GridLength(settings.TreeWidth);
 
             foreach (var column in Listing.Columns)
@@ -147,7 +146,7 @@ public partial class ExplorerPane : UserControl
 
     private void TreeSplit_DragCompleted(object sender, DragCompletedEventArgs e)
     {
-        if (!_treeOpen)
+        if (TreeColumn.ActualWidth < 160)
             return;
 
         var width = TreeColumn.ActualWidth;
@@ -204,21 +203,6 @@ public partial class ExplorerPane : UserControl
         }
 
         return null;
-    }
-
-    private void TreeToggle_Click(object sender, RoutedEventArgs e)
-    {
-        _treeOpen = !_treeOpen;
-        var open = App.Settings.Load().TreeWidth;
-        if (open < 160)
-            open = FXplorerSettings.DefaultTreeWidth;
-
-        TreeColumn.Width = new GridLength(_treeOpen ? open : ClosedWidth);
-        TreeColumn.MinWidth = _treeOpen ? 160 : 0;
-        TreeHost.Visibility = _treeOpen ? Visibility.Visible : Visibility.Collapsed;
-        TreeOpenHost.Visibility = _treeOpen ? Visibility.Collapsed : Visibility.Visible;
-        TreeSplit.Visibility = _treeOpen ? Visibility.Visible : Visibility.Collapsed;
-        SplitColumn.Width = new GridLength(_treeOpen ? 8 : 0);
     }
 
     public async void Open(string raw)
