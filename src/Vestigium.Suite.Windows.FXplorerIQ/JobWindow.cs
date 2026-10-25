@@ -727,6 +727,14 @@ public sealed class JobWindow : Window
             System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(dialog.FileName) { UseShellExecute = true });
     }
 
+    public void BeginVerify()
+    {
+        _verifyLine.Text = "Verifying";
+        _verifyLine.Visibility = Visibility.Visible;
+        _verifyBar.Visibility = Visibility.Visible;
+        _verifyBar.Value = 0;
+    }
+
     public void VerifyProgress(int done, int total, string name)
     {
         var max = Math.Max(total, 1);
