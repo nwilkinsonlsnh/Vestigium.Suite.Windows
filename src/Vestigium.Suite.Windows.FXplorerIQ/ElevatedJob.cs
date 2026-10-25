@@ -24,6 +24,8 @@ public sealed class ElevatedJob
 
     public int SecurePasses { get; set; } = 3;
 
+    public int MaxThreads { get; set; } = 32;
+
     public static ElevatedJob? Read(string path)
     {
         if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
@@ -42,7 +44,8 @@ public sealed class ElevatedJob
             Shred = Secure
                 ? SecurePasses == 7 ? FileIoShredRecipe.SevenRandomThenZero : FileIoShredRecipe.ThreeRandomThenZero
                 : null,
-            ReconLeadTime = TimeSpan.FromSeconds(2)
+            ReconLeadTime = TimeSpan.FromSeconds(2),
+            MaxThreads = MaxThreads
         };
         return Verb switch
         {
