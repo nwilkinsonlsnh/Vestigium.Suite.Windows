@@ -332,6 +332,8 @@ public partial class ExplorerPane : UserControl
     {
         _roots.Clear();
         var settings = App.Settings.Load();
+        _roots.Add(Places());
+
         var pc = Group("This PC", thisPC: true);
         pc.IsExpanded = true;
 
@@ -357,6 +359,30 @@ public partial class ExplorerPane : UserControl
         pc.Children.Add(devices);
         pc.Children.Add(network);
         _roots.Add(pc);
+    }
+
+    private static FolderNode Places()
+    {
+        var node = Group("Common Places");
+        node.IsExpanded = true;
+        var profile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        Add(node, "OneDrive", Environment.GetEnvironmentVariable("OneDrive") ?? Path.Combine(profile, "OneDrive"));
+        Add(node, "Desktop", Environment.GetFolderPath(Environment.SpecialFolder.Desktop));
+        Add(node, "Downloads", Path.Combine(profile, "Downloads"));
+        Add(node, "Documents", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
+        Add(node, "Pictures", Environment.GetFolderPath(Environment.SpecialFolder.MyPictures));
+        Add(node, "Music", Environment.GetFolderPath(Environment.SpecialFolder.MyMusic));
+        Add(node, "Videos", Environment.GetFolderPath(Environment.SpecialFolder.MyVideos));
+        return node;
+    }
+
+    private static void Add(FolderNode parent, string name, string path)
+    {
+        if (path.Length == 0 || !Directory.Exists(path))
+            return;
+        var child = new FolderNode(name, path);
+        child.Children.Add(new FolderNode("", ""));
+        parent.Children.Add(child);
     }
 
     private static bool ShowDrive(DriveInfo drive, FXplorerSettings settings)
