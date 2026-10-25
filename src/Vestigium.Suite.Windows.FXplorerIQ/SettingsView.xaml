@@ -36,6 +36,16 @@
                    GroupName="FXplorerSettings"
                    Checked="Page_Checked"
                    Tag="Secure" />
+      <RadioButton Style="{StaticResource RadioButton.UnderlineTab}"
+                   Content="Threads"
+                   GroupName="FXplorerSettings"
+                   Checked="Page_Checked"
+                   Tag="Threads" />
+      <RadioButton Style="{StaticResource RadioButton.UnderlineTab}"
+                   Content="Job"
+                   GroupName="FXplorerSettings"
+                   Checked="Page_Checked"
+                   Tag="Job" />
     </StackPanel>
 
     <StackPanel x:Name="ThemesPage" HorizontalAlignment="Left" VerticalAlignment="Top" Width="420" Margin="8,0,0,0">
@@ -224,6 +234,28 @@
                 SelectionChanged="Verify_Changed" />
     </StackPanel>
 
+    <StackPanel x:Name="ThreadsPage"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Width="460"
+                Margin="8,0,0,0"
+                Visibility="Collapsed">
+      <TextBlock Style="{StaticResource TextBlock.Caption}" Margin="0,0,0,8" Text="Concurrent threads" />
+      <TextBlock Style="{StaticResource TextBlock.Caption}" TextWrapping="Wrap" Margin="0,0,0,8"
+                 Text="How many files a job works on at once. The arrows step through the allowed counts." />
+      <nud:VestigiumNumericUpDown x:Name="Threads"
+                                  SignMode="Unsigned"
+                                  Minimum="1"
+                                  Maximum="128"
+                                  Increment="1"
+                                  DecimalPlaces="0"
+                                  Width="220"
+                                  HorizontalAlignment="Left"
+                                  Margin="0,0,0,4"
+                                  ValueChanged="Threads_Changed" />
+      <TextBlock x:Name="ThreadLine" Style="{StaticResource TextBlock.Caption}" TextWrapping="Wrap" Margin="0,0,0,16" />
+    </StackPanel>
+
     <StackPanel x:Name="SecurePage"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
@@ -271,20 +303,6 @@
       <TextBox x:Name="MaxAge" Style="{StaticResource TextBox.Standard}" Width="220" MinHeight="36" HorizontalAlignment="Left" Margin="0,0,0,8" LostFocus="Job_LostFocus" />
       <Label Style="{StaticResource Label.Standard}" Content="Maximum depth" />
       <TextBox x:Name="Depth" Style="{StaticResource TextBox.Standard}" Width="220" MinHeight="36" HorizontalAlignment="Left" Margin="0,0,0,16" LostFocus="Job_LostFocus" />
-
-      <TextBlock Style="{StaticResource TextBlock.Caption}" Margin="0,0,0,8" Text="Threads" />
-      <Label Style="{StaticResource Label.Standard}" Content="Concurrent threads" />
-      <nud:VestigiumNumericUpDown x:Name="Threads"
-                                  SignMode="Unsigned"
-                                  Minimum="1"
-                                  Maximum="128"
-                                  Increment="1"
-                                  DecimalPlaces="0"
-                                  Width="220"
-                                  HorizontalAlignment="Left"
-                                  Margin="0,0,0,4"
-                                  ValueChanged="Threads_Changed" />
-      <TextBlock x:Name="ThreadLine" Style="{StaticResource TextBlock.Caption}" TextWrapping="Wrap" Margin="0,0,0,16" />
 
       <TextBlock Style="{StaticResource TextBlock.Caption}" Margin="0,0,0,8" Text="Retry" />
       <Label Style="{StaticResource Label.Standard}" Content="Retry count" />
