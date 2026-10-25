@@ -237,23 +237,20 @@
     <StackPanel x:Name="ThreadsPage"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
-                Width="460"
+                Width="640"
                 Margin="8,0,0,0"
                 Visibility="Collapsed">
       <TextBlock Style="{StaticResource TextBlock.Caption}" Margin="0,0,0,8" Text="Concurrent threads" />
       <TextBlock Style="{StaticResource TextBlock.Caption}" TextWrapping="Wrap" Margin="0,0,0,8"
-                 Text="How many files a job works on at once. The arrows step through the allowed counts." />
-      <nud:VestigiumNumericUpDown x:Name="Threads"
-                                  SignMode="Unsigned"
-                                  Minimum="1"
-                                  Maximum="128"
-                                  Increment="1"
-                                  DecimalPlaces="0"
-                                  Width="220"
-                                  HorizontalAlignment="Left"
-                                  Margin="0,0,0,4"
-                                  ValueChanged="Threads_Changed" />
-      <TextBlock x:Name="ThreadLine" Style="{StaticResource TextBlock.Caption}" TextWrapping="Wrap" Margin="0,0,0,16" />
+                 Text="How many files a job works on at once." />
+      <ComboBox x:Name="ThreadBox"
+                Style="{StaticResource ComboBox.Standard}"
+                Width="220"
+                HorizontalAlignment="Left"
+                Margin="0,0,0,8"
+                SelectionChanged="Threads_Changed" />
+      <TextBlock x:Name="ThreadLine" Style="{StaticResource TextBlock.Caption}" TextWrapping="Wrap" Margin="0,0,0,12" />
+      <UniformGrid x:Name="ThreadCards" Columns="5" />
     </StackPanel>
 
     <StackPanel x:Name="SecurePage"
