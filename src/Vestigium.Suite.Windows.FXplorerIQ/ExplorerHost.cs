@@ -567,6 +567,7 @@ public sealed class ExplorerHost : DockPanel
             var window = _openJob;
             var jobId = result.JobId;
             window?.OfferLog(JobLog.File(jobId));
+            window?.ShowEvidence();
             await Task.Run(() => live?.Drain());
             var rows = live?.Rows ?? Array.Empty<PdfRow>();
             var matched = rows.Count(row => row.Equal);
