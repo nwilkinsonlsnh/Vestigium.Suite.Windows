@@ -258,7 +258,8 @@ public sealed class ExplorerHost : DockPanel
     {
         if (string.IsNullOrWhiteSpace(_copied))
             return;
-        Verb(verb, false, _copied, DirectoryOf(Target()));
+        var pane = SourceIsFirst ? First : Second;
+        Verb(verb, false, _copied, pane.Folder);
     }
 
     private void CopyText(string text)
@@ -299,7 +300,9 @@ public sealed class ExplorerHost : DockPanel
     {
         var sourcePane = SourceIsFirst ? First : Second;
         var destPane = SourceIsFirst ? Second : First;
-        var paths = sourcePane.SelectedPaths();
+        var paths = sourceOverride is not null
+            ? new List<string> { sourceOverride }
+            : sourcePane.SelectedPaths().ToList();
         var source = sourceOverride ?? (paths.Count == 0 ? sourcePane.Folder : paths[0]);
         string? destination = destinationOverride;
 
@@ -379,7 +382,8 @@ public sealed class ExplorerHost : DockPanel
 
         if (verb == JobVerb.Copy)
         {
-            var work = Run(CopyMany(paths, destination!, destPane, verify, collision, pattern));
+            var land = destinationOverride is not null ? sourcePane : destPane;
+            var work = Run(CopyMany(paths, destination!, land, verify, collision, pattern));
             Track(source, destination, work);
             _running = work;
             return;
@@ -387,7 +391,8 @@ public sealed class ExplorerHost : DockPanel
 
         if (verb == JobVerb.Move)
         {
-            var work = Run(MoveMany(paths, destination!, sourcePane, destPane, verify, collision, pattern));
+            var land = destinationOverride is not null ? sourcePane : destPane;
+            var work = Run(MoveMany(paths, destination!, sourcePane, land, verify, collision, pattern));
             Track(source, destination, work);
             _running = work;
             return;
