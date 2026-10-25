@@ -103,8 +103,15 @@ public sealed class JobWindow : Window
         actions.Children.Add(_pause);
         actions.Children.Add(_resume);
         actions.Children.Add(_cancel);
-        actions.Children.Add(_openLog);
         actions.Children.Add(_close);
+
+        var logRow = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Margin = new Thickness(0, 8, 0, 0)
+        };
+        logRow.Children.Add(_openLog);
 
         var body = new StackPanel();
         body.Children.Add(_phase);
@@ -114,6 +121,7 @@ public sealed class JobWindow : Window
         body.Children.Add(_bar);
         body.Children.Add(_rate);
         body.Children.Add(bins);
+        body.Children.Add(logRow);
 
         var action = new DockPanel { Background = _surface };
         DockPanel.SetDock(actions, Dock.Bottom);
@@ -648,9 +656,12 @@ public sealed class JobWindow : Window
 
     private void OpenLog()
     {
-        if (string.IsNullOrWhiteSpace(_logPath) || !File.Exists(_logPath))
+        if (string.IsNullOrWhiteSpace(_logPath))
             return;
-        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(_logPath) { UseShellExecute = true });
+        var target = File.Exists(_logPath) ? _logPath : Path.GetDirectoryName(_logPath);
+        if (string.IsNullOrWhiteSpace(target))
+            return;
+        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(target) { UseShellExecute = true });
     }
 
     private void Done()
