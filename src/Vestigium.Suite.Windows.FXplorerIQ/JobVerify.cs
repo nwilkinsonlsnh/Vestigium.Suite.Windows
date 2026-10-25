@@ -25,21 +25,23 @@ public static class JobVerify
         "FXplorerIQ",
         "Operations");
 
-    public static VerifyResult Run(string jobId, string source, string destination, HashingAlgorithm algorithm, IProgress<(int Done, int Total, string Name)>? progress = null)
+    public static VerifyResult Run(string jobId, string source, string destination, HashingAlgorithm algorithm, IProgress<(int Done, int Total, string Name)>? progress = null, int expected = 0)
     {
         Directory.CreateDirectory(Root);
         var file = Path.Combine(Root, jobId + ".jsonl");
         var matched = 0;
         var failed = 0;
         var sourceIsFile = File.Exists(source);
-        var files = sourceIsFile
+        IEnumerable<string> files = sourceIsFile
             ? new[] { source }
-            : Directory.EnumerateFiles(source, "*", SearchOption.AllDirectories).ToArray();
-        var total = files.Length;
+            : Directory.EnumerateFiles(source, "*", SearchOption.AllDirectories);
+        var matched = 0;
+        var failed = 0;
+        var done = 0;
 
-        for (var i = 0; i < files.Length; i++)
+        foreach (var left in files)
         {
-            var left = files[i];
+            done++;
             var relative = sourceIsFile ? Path.GetFileName(left) : Path.GetRelativePath(source, left);
             var right = Path.Combine(destination, relative);
             var compared = FileIoHelper.CompareFiles(left, right, algorithm);
@@ -60,10 +62,11 @@ public static class JobVerify
                 at = DateTimeOffset.UtcNow
             }, Json);
             File.AppendAllText(file, line + Environment.NewLine);
-            if (i % 25 == 0 || i == files.Length - 1)
-                progress?.Report((i + 1, total, relative));
+            if (done == 1 || done % 25 == 0)
+                progress?.Report((done, expected > 0 ? expected : done, relative));
         }
 
+        progress?.Report((done, done, ""));
         return new VerifyResult { Path = file, Matched = matched, Failed = failed };
     }
 }
