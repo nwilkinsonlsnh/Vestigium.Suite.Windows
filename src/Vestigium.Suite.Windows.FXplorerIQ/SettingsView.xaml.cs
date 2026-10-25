@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using Vestigium.Controls.NumericUpDown;
@@ -86,8 +87,9 @@ public partial class SettingsView : UserControl
         SecureBox.ItemsSource = new[] { 3, 7 };
         SecureBox.SelectedItem = settings.SecurePasses == 7 ? 7 : 3;
         SecureLine.Text = Line(settings.SecurePasses);
-        Threads.Value = settings.MaxThreads;
-        ThreadLine.Text = ThreadText(settings.MaxThreads);
+        ThreadBox.ItemsSource = Choices;
+        ThreadBox.SelectedItem = Choices.Contains(settings.MaxThreads) ? settings.MaxThreads : 32;
+        ShowThreads(ThreadBox.SelectedItem is int picked ? picked : 32);
     }
 
     private void Page_Checked(object sender, RoutedEventArgs e)
@@ -105,42 +107,64 @@ public partial class SettingsView : UserControl
         ThreadsPage.Visibility = tag == "Threads" ? Visibility.Visible : Visibility.Collapsed;
     }
 
-    private void Threads_Changed(object sender, EventArgs e)
+    private static readonly int[] Choices = [1, 8, 16, 32, 48, 64, 80, 96, 112, 128];
+
+    private void Threads_Changed(object sender, SelectionChangedEventArgs e)
     {
-        if (_loading)
+        if (_loading || ThreadBox.SelectedItem is not int count)
             return;
-        var requested = (int)Threads.Value;
-        var current = App.Settings.Load().MaxThreads;
-        var next = requested == current
-            ? current
-            : requested > current ? Next(current, 1) : Next(current, -1);
-        if (next != requested)
-        {
-            Threads.Value = next;
-            return;
-        }
-        ThreadLine.Text = ThreadText(next);
-        Save(settings => settings.MaxThreads = next);
+        ShowThreads(count);
+        Save(settings => settings.MaxThreads = count);
     }
 
-    private static int Next(int current, int direction)
+    private void ShowThreads(int count)
     {
-        var allowed = new[] { 1, 4, 8, 16, 24, 32, 45, 64, 96, 128 };
-        if (direction > 0)
-        {
-            foreach (var count in allowed)
-                if (count > current)
-                    return count;
-            return allowed[^1];
-        }
-        for (var i = allowed.Length - 1; i >= 0; i--)
-            if (allowed[i] < current)
-                return allowed[i];
-        return allowed[0];
+        var shares = Split(count);
+        ThreadLine.Text = count + " threads. Tiny " + shares[0]
+            + ", Small " + shares[1]
+            + ", Medium " + shares[2]
+            + ", Large " + shares[3]
+            + ", Huge " + shares[4] + ".";
+        ThreadCards.Children.Clear();
+        var names = new[] { "Tiny", "Small", "Medium", "Large", "Huge" };
+        for (var i = 0; i < names.Length; i++)
+            ThreadCards.Children.Add(Card(names[i], shares[i]));
     }
 
-    private static string ThreadText(int count)
-        => count + " threads. Tiny 70%, Small 10%, Medium 10%, Large 5%, Huge 5%.";
+    private static int[] Split(int total)
+    {
+        if (total < 5)
+            return [total, 0, 0, 0, 0];
+        var raw = new[] { total * 0.70, total * 0.10, total * 0.10, total * 0.05, total * 0.05 };
+        var shares = raw.Select(value => Math.Max(1, (int)Math.Round(value, MidpointRounding.AwayFromZero))).ToArray();
+        shares[0] += total - shares.Sum();
+        if (shares[0] < 1)
+            shares[0] = 1;
+        return shares;
+    }
+
+    private FrameworkElement Card(string name, int threads)
+    {
+        var panel = new StackPanel { Margin = new Thickness(8) };
+        panel.Children.Add(new TextBlock { Text = name, Style = Try("TextBlock.Caption") });
+        panel.Children.Add(new TextBlock { Text = threads + (threads == 1 ? " thread" : " threads"), Margin = new Thickness(0, 4, 0, 0) });
+        return new Border
+        {
+            Margin = new Thickness(0, 0, 8, 0),
+            Padding = new Thickness(4),
+            CornerRadius = new CornerRadius(6),
+            BorderThickness = new Thickness(1),
+            BorderBrush = TryBrush("Vestigium.Brushes.Stroke.Default"),
+            Background = TryBrush("Vestigium.Brushes.Surface.Card"),
+            Child = panel
+        };
+    }
+
+    private static Style? Try(string key) => Application.Current?.TryFindResource(key) as Style;
+
+    private static System.Windows.Media.Brush TryBrush(string key)
+        => Application.Current?.TryFindResource(key) as System.Windows.Media.Brush
+           ?? System.Windows.Media.Brushes.Transparent;
 
     private void Secure_Changed(object sender, SelectionChangedEventArgs e)
     {
