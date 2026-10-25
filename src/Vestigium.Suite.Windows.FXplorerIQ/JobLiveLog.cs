@@ -72,7 +72,8 @@ public sealed class JobLiveLog
             if (_seen.TryRemove(path, out _))
                 _done.Enqueue(path);
         var idle = 0;
-        while (!_done.IsEmpty && idle < 600)
+        var until = DateTimeOffset.UtcNow.AddSeconds(90);
+        while (!_done.IsEmpty && DateTimeOffset.UtcNow < until && idle < 600)
         {
             Thread.Sleep(50);
             idle = _readers.All(reader => reader.IsCompleted) ? idle + 1 : 0;
