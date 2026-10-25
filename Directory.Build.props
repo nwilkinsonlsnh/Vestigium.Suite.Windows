@@ -28,7 +28,7 @@
     <VestigiumChartsVersion>1.1.1</VestigiumChartsVersion>
     <VestigiumFileIoVersion>4.1.0</VestigiumFileIoVersion>
     <VestigiumHashingVersion>1.4.1</VestigiumHashingVersion>
-    <VestigiumPdfVersion>1.1.0</VestigiumPdfVersion>
+    <VestigiumPdfVersion>1.2.0</VestigiumPdfVersion>
     <MicrosoftExtensionsDiVersion>10.0.12</MicrosoftExtensionsDiVersion>
   </PropertyGroup>
 
