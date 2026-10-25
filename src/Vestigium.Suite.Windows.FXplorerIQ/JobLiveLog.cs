@@ -21,6 +21,7 @@ public sealed class JobLiveLog
     private readonly ConcurrentQueue<string> _done = new();
     private readonly List<PdfRow> _rows = new();
     private readonly object _gate = new();
+    private readonly object _write = new();
     private readonly CancellationTokenSource _stop = new();
     private readonly Task[] _readers;
     private readonly string _logPath;
@@ -37,7 +38,8 @@ public sealed class JobLiveLog
         _jobId = job.JobId;
         Directory.CreateDirectory(JobVerify.Root);
         _logPath = Path.Combine(JobVerify.Root, job.JobId + ".jsonl");
-        File.WriteAllText(_logPath, Line(new
+        File.WriteAllText(_logPath, "");
+        Write(Line(new
         {
             type = "start",
             correlationId = _jobId,
@@ -46,7 +48,7 @@ public sealed class JobLiveLog
             destination,
             algorithm = algorithm.ToString(),
             startedUtc = DateTimeOffset.UtcNow
-        }) + Environment.NewLine);
+        }));
         job.ProgressChanged += (_, progress) => Note(progress);
         _readers = Enumerable.Range(0, 4).Select(_ => Task.Run(Read)).ToArray();
     }
@@ -66,7 +68,7 @@ public sealed class JobLiveLog
             Record(relative);
         var matched = _matched;
         var failed = _failed;
-        File.AppendAllText(_logPath, Line(new
+        Write(Line(new
         {
             type = "end",
             correlationId = _jobId,
@@ -76,7 +78,7 @@ public sealed class JobLiveLog
             result = failed == 0 ? "Passed" : "Failed",
             elapsed = (DateTimeOffset.UtcNow - _started).ToString(),
             endedUtc = DateTimeOffset.UtcNow
-        }) + Environment.NewLine);
+        }));
     }
 
     private void Read()
@@ -122,7 +124,7 @@ public sealed class JobLiveLog
                 SourceDigest = compared.LeftDigest,
                 DestinationDigest = compared.RightDigest
             });
-        File.AppendAllText(_logPath, Line(new
+        Write(Line(new
         {
             type = "file",
             sourceDirectory = Path.GetDirectoryName(left) ?? "",
@@ -136,7 +138,7 @@ public sealed class JobLiveLog
             hashMatch = compared.Equal,
             sourceHash = compared.LeftDigest,
             destinationHash = compared.RightDigest
-        }) + Environment.NewLine);
+        }));
     }
 
     private static long Info(string path)
@@ -146,4 +148,10 @@ public sealed class JobLiveLog
     }
 
     private static string Line(object value) => JsonSerializer.Serialize(value, Json);
+
+    private void Write(string line)
+    {
+        lock (_write)
+            File.AppendAllText(_logPath, line + Environment.NewLine);
+    }
 }
