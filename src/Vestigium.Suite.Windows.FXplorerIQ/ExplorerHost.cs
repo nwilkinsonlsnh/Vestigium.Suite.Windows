@@ -562,7 +562,8 @@ public sealed class ExplorerHost : DockPanel
             var jobId = result.JobId;
             window?.OfferLog(JobLog.File(jobId));
             var progress = new Progress<(int Done, int Total, string Name)>(step => window?.VerifyProgress(step.Done, step.Total, step.Name));
-            _ = Task.Run(() => JobVerify.Run(jobId, source, destination, settings.Verify(), progress))
+            var expected = result.Copied + result.Skipped + result.Failed;
+            _ = Task.Run(() => JobVerify.Run(jobId, source, destination, settings.Verify(), progress, expected))
                 .ContinueWith(done =>
                 {
                     if (done.IsFaulted)
@@ -571,6 +572,7 @@ public sealed class ExplorerHost : DockPanel
                     Dispatcher.Invoke(() =>
                     {
                         window?.OfferLog(verified.Path);
+                        window?.VerifyDone(verified.Matched, verified.Failed);
                         _status("Copy (Verify) " + result.Status + ". " + verified.Matched + " matched, " + verified.Failed + " failed. Source kept.");
                     });
                 });
