@@ -72,6 +72,8 @@ public partial class SettingsView : UserControl
         AskOverwrite.IsChecked = settings.AskBeforeOverwrite == false;
         ApplyCollision();
         VerifyBox.SelectedValue = settings.Verify().ToString();
+        VerifyRetries.Value = settings.VerifyReadRetries;
+        VerifyWait.Value = settings.VerifyReadWaitMs;
         FileMasks.Text = settings.ExcludeFileMasks;
         DirectoryMasks.Text = settings.ExcludeDirectoryMasks;
         MinSize.Text = settings.MinSizeBytes?.ToString() ?? "";
@@ -229,6 +231,17 @@ public partial class SettingsView : UserControl
         var showPattern = automatic && unique;
         PatternLabel.Visibility = showPattern ? Visibility.Visible : Visibility.Collapsed;
         PatternBox.Visibility = showPattern ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private void VerifyRetry_Changed(object sender, EventArgs e)
+    {
+        if (_loading)
+            return;
+        Save(settings =>
+        {
+            settings.VerifyReadRetries = (int)VerifyRetries.Value;
+            settings.VerifyReadWaitMs = (int)VerifyWait.Value;
+        });
     }
 
     private void Verify_Changed(object sender, SelectionChangedEventArgs e)
