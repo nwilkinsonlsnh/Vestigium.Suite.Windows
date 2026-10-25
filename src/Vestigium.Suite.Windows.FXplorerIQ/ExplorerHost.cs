@@ -365,11 +365,14 @@ public sealed class ExplorerHost : DockPanel
             _ => verb.ToString()
         };
 
+    private JobWindow? _openJob;
+
     private Task<FileIoJobResult?> ShowJob(string title, FileIoJob job, string source, string? destination, bool autoClose = false)
     {
         JobLog.Start(title, job.JobId, source, destination);
         var done = new TaskCompletionSource<FileIoJobResult?>();
         var window = new JobWindow(title, job, source, destination) { Owner = Window.GetWindow(this), AutoClose = autoClose };
+        _openJob = window;
         window.Finished += (_, _) =>
         {
             JobLog.End(title, job.JobId, source, destination, window.Result?.Status ?? "Failed");
@@ -518,6 +521,7 @@ public sealed class ExplorerHost : DockPanel
                 "Lifecycle",
                 "Copy verify " + result.JobId + " matched=" + verified.Matched + " failed=" + verified.Failed + " log=" + verified.Path);
             _status("Copy (Verify) " + result.Status + ". " + verified.Matched + " matched, " + verified.Failed + " failed. Source kept.");
+            _openJob?.OfferLog(verified.Path);
         }
         catch (Exception ex)
         {
@@ -558,6 +562,7 @@ public sealed class ExplorerHost : DockPanel
             }
             destPane.Open(destination);
             var verified = await Task.Run(() => JobVerify.Run(copied.JobId, source, destination, settings.Verify())).ConfigureAwait(true);
+            _openJob?.OfferLog(verified.Path);
             if (verified.Failed > 0)
             {
                 HostLog.Information(
@@ -565,6 +570,7 @@ public sealed class ExplorerHost : DockPanel
                     "Lifecycle",
                     "Move verify " + copied.JobId + " matched=" + verified.Matched + " failed=" + verified.Failed + " source kept log=" + verified.Path);
                 _status("Move (Verify) failed. " + verified.Failed + " did not match. Source kept.");
+                _openJob?.OfferLog(verified.Path);
                 return;
             }
 
@@ -575,6 +581,7 @@ public sealed class ExplorerHost : DockPanel
                 "Lifecycle",
                 "Move verify " + copied.JobId + " matched=" + verified.Matched + " source removed log=" + verified.Path);
             _status("Move (Verify) matched. " + verified.Matched + " verified. Source removed.");
+            _openJob?.OfferLog(verified.Path);
         }
         catch (Exception ex)
         {
@@ -708,6 +715,7 @@ public sealed class ExplorerHost : DockPanel
                 "Lifecycle",
                 "Mirror verify " + result.JobId + " matched=" + verified.Matched + " failed=" + verified.Failed + " log=" + verified.Path);
             _status("Mirror (Verify) " + result.Status + ". " + verified.Matched + " matched, " + verified.Failed + " failed.");
+            _openJob?.OfferLog(verified.Path);
         }
         catch (Exception ex)
         {
