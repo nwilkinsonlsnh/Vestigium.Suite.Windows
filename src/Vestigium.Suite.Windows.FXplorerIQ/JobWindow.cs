@@ -828,7 +828,7 @@ public sealed class JobWindow : Window
             var closed = bin.Found > 0 && bin.Done + bin.Skipped + bin.Failed >= bin.Found;
             _bins[i].Text = bin.Name + "\n" + bin.Done + " / " + bin.Found
                 + (bin.Failed > 0 ? "\nfailed " + bin.Failed : "")
-                + "\nactive " + bin.Active + " / " + (bin.Workers > 0 ? bin.Workers : Workers(i));
+                + "\nactive " + Math.Min(bin.Active, bin.Workers > 0 ? bin.Workers : Workers(i)) + " / " + (bin.Workers > 0 ? bin.Workers : Workers(i));
             _cards[i].Opacity = closed ? 0.45 : 1;
         }
 
