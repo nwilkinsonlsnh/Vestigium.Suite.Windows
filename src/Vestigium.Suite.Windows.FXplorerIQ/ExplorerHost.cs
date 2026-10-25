@@ -638,34 +638,44 @@ public sealed class ExplorerHost : DockPanel
                 return;
             }
 
-            var copied = await ShowJob("Move (Verify)", FileIoHelper.Copy(source, destination, Options(settings, collision, pattern)), source, destination);
+            var settings = App.Settings.Load();
+            var options = Options(settings, collision, pattern);
+            JobLiveLog? live = null;
+            var job = FileIoHelper.Copy(source, destination, options);
+            if (verify)
+                live = new JobLiveLog(job, source, destination, settings.Verify(), "Move (Verify)", settings.VerifyReadRetries, settings.VerifyReadWaitMs, settings.VerifyRetryParallel);
+            var copied = await ShowJob("Move (Verify)", job, source, destination);
             if (copied is null)
             {
                 _status("Move (Verify) failed.");
                 return;
             }
             destPane.Open(destination);
-            var verified = await Task.Run(() => JobVerify.Run(copied.JobId, source, destination, settings.Verify(), verb: "Move (Verify)")).ConfigureAwait(true);
-            _openJob?.OfferEvidence(verified.Pdf);
-            if (verified.Failed > 0)
+            var window = _openJob;
+            window?.OfferLog(live?.LogPath ?? JobLog.File(copied.JobId));
+            window?.ShowEvidence();
+            window?.BeginVerify();
+            var expected = copied.Copied + copied.Skipped + copied.Failed;
+            live?.Watch(expected, (done, total, name) => Dispatcher.Invoke(() => window?.VerifyProgress(done, total, name)));
+            await Task.Run(() => live?.Drain());
+            var rows = live?.Rows ?? Array.Empty<PdfRow>();
+            var matched = rows.Count(row => row.Equal);
+            var failed = rows.Count - matched;
+            if (failed > 0)
             {
-                HostLog.Information(
-                    FXplorerCatalog.VerifyCompleted,
-                    "Lifecycle",
-                    "Move verify " + copied.JobId + " matched=" + verified.Matched + " failed=" + verified.Failed + " source kept log=" + verified.Path);
-                _status("Move (Verify) failed. " + verified.Failed + " did not match. Source kept.");
-                _openJob?.OfferEvidence(verified.Pdf);
+                var pdf = WriteEvidence(copied.JobId, "Move (Verify)", source, destination, settings.Verify(), rows);
+                window?.OfferEvidence(pdf);
+                window?.VerifyDone(matched, failed);
+                _status("Move (Verify) failed. " + failed + " did not match. Source kept.");
                 return;
             }
-
-            await ShowJob("Move (Verify)", FileIoHelper.Delete(source, Options(settings, collision)), source, null);
+            window?.SetPhase("Removing source");
+            var removed = await FileIoHelper.Delete(source, options).RunAsync();
             sourcePane.Open(Remain(sourcePane, source));
-            HostLog.Information(
-                FXplorerCatalog.VerifyCompleted,
-                "Lifecycle",
-                "Move verify " + copied.JobId + " matched=" + verified.Matched + " source removed log=" + verified.Path);
-            _status("Move (Verify) matched. " + verified.Matched + " verified. Source removed.");
-            _openJob?.OfferEvidence(verified.Pdf);
+            var pdfOk = WriteEvidence(copied.JobId, "Move (Verify)", source, destination, settings.Verify(), rows);
+            window?.OfferEvidence(pdfOk);
+            window?.VerifyDone(matched, failed);
+            _status("Move (Verify) matched. " + matched + " verified. Source removed. " + removed.Status + ".");
         }
         catch (Exception ex)
         {
