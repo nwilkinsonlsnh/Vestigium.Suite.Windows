@@ -24,6 +24,7 @@ public sealed class ExplorerHost : DockPanel
     private ScrollViewer? _viewport;
     private bool _applying;
     private bool _busy;
+    private Task? _running;
 
     public ExplorerHost(Action<string> status)
     {
@@ -187,7 +188,7 @@ public sealed class ExplorerHost : DockPanel
 
     private void Verb(JobVerb verb, bool verify)
     {
-        if (_busy)
+        if (Busy())
         {
             _status("A job is already running.");
             return;
@@ -269,28 +270,38 @@ public sealed class ExplorerHost : DockPanel
 
         if (verb == JobVerb.Copy)
         {
-            _ = Run(CopyMany(paths, destination!, destPane, verify, collision, pattern));
+            _running = Run(CopyMany(paths, destination!, destPane, verify, collision, pattern));
             return;
         }
 
         if (verb == JobVerb.Move)
         {
-            _ = Run(MoveMany(paths, destination!, sourcePane, destPane, verify, collision, pattern));
+            _running = Run(MoveMany(paths, destination!, sourcePane, destPane, verify, collision, pattern));
             return;
         }
 
         if (verb == JobVerb.Delete)
         {
-            _ = DeleteMany(paths, sourcePane, verify);
+            _running = DeleteMany(paths, sourcePane, verify);
             return;
         }
 
-        _ = Mirror(source, destination!, destPane);
+        _running = Mirror(source, destination!, destPane);
+    }
+
+    private bool Busy()
+    {
+        if (_running is { IsCompleted: true })
+        {
+            _busy = false;
+            _running = null;
+        }
+        return _busy && _running is { IsCompleted: false };
     }
 
     private void Audit_Click()
     {
-        if (_busy)
+        if (Busy())
         {
             _status("A job is already running.");
             return;
