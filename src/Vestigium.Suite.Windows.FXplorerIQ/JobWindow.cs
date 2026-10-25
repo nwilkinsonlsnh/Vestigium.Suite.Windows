@@ -605,26 +605,19 @@ public sealed class JobWindow : Window
             _files.Children.Clear();
             Show(_job.Progress);
             ShowChart();
-            Finished?.Invoke(this, EventArgs.Empty);
             if (AutoClose)
                 Close();
         }
         catch (Exception ex)
         {
-            if (IsCatalog(ex))
-            {
-                _rate.Text = "Log skipped. The job is still running.";
-                return;
-            }
-
             _phase.Text = "Failed";
             _rate.Text = ex.Message;
             Done();
-            Finished?.Invoke(this, EventArgs.Empty);
         }
         finally
         {
             _pulse.Stop();
+            Finished?.Invoke(this, EventArgs.Empty);
         }
     }
 
