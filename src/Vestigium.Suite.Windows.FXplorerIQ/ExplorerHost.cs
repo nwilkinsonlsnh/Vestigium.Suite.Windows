@@ -547,7 +547,7 @@ public sealed class ExplorerHost : DockPanel
             var job = FileIoHelper.Copy(source, destination, Options(settings, collision, pattern));
             JobLiveLog? live = null;
             if (verify)
-                live = new JobLiveLog(job, source, destination, settings.Verify(), "Copy (Verify)", settings.VerifyReadRetries, settings.VerifyReadWaitMs);
+                live = new JobLiveLog(job, source, destination, settings.Verify(), "Copy (Verify)", settings.VerifyReadRetries, settings.VerifyReadWaitMs, settings.VerifyRetryParallel);
             var result = await ShowJob(label, job, source, destination);
             if (result is null)
             {
@@ -568,6 +568,9 @@ public sealed class ExplorerHost : DockPanel
             var jobId = result.JobId;
             window?.OfferLog(live?.LogPath ?? JobLog.File(jobId));
             window?.ShowEvidence();
+            window?.BeginVerify();
+            var expected = result.Copied + result.Skipped + result.Failed;
+            live?.Watch(expected, (done, total, name) => Dispatcher.Invoke(() => window?.VerifyProgress(done, total, name)));
             _ = Task.Run(() =>
             {
                 live?.Drain();
