@@ -676,6 +676,12 @@ public sealed class JobWindow : Window
         _openLog.IsEnabled = true;
     }
 
+    public void ShowEvidence()
+    {
+        _saveEvidence.Visibility = Visibility.Visible;
+        _saveEvidence.IsEnabled = false;
+    }
+
     public void OfferEvidence(string path)
     {
         if (string.IsNullOrWhiteSpace(path))
