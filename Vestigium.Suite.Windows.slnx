@@ -17,6 +17,7 @@
   <Folder Name="/Suite/Windows/WPF/FXplorerIQ/">
     <Project Path="src/Vestigium.Suite.Windows.FXplorerIQ/Vestigium.Suite.Windows.FXplorerIQ.csproj" />
   </Folder>
+  <Folder Name="/Suite/Windows/WPF/FXplorerIQ/Helpers/" />
   <Folder Name="/Tests/">
     <Project Path="tests/Vestigium.Suite.Windows.Tests/Vestigium.Suite.Windows.Tests.csproj" />
   </Folder>
