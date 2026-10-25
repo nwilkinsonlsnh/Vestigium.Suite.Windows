@@ -49,7 +49,8 @@ public static class JobHandoff
             Purge = verb == JobVerb.Mirror,
             Audit = audit,
             Secure = secure,
-            SecurePasses = App.Settings.Load().SecurePasses == 7 ? 7 : 3
+            SecurePasses = App.Settings.Load().SecurePasses == 7 ? 7 : 3,
+            MaxThreads = App.Settings.Load().MaxThreads
         };
         File.WriteAllText(path, JsonSerializer.Serialize(job));
 
