@@ -83,8 +83,13 @@ public sealed class JobLiveLog
         _progress = progress;
     }
 
+    private int _closed;
+
     public void Drain()
     {
+        var phase = DateTimeOffset.UtcNow;
+        Write(Line(new { type = "phase", phase = "verification", event = "began", utc = phase }));
+        Report("Verification phase began");
         foreach (var path in _seen.Keys)
             if (_seen.TryRemove(path, out _))
                 _done.Enqueue(path);
@@ -104,8 +109,19 @@ public sealed class JobLiveLog
         Task.WaitAll(retrying);
         while (_retry.TryDequeue(out var relative))
             Finish(relative, _retries, "unread");
+        if (Interlocked.Exchange(ref _closed, 1) != 0)
+            return;
         var matched = _matched;
         var failed = _failed;
+        var ended = DateTimeOffset.UtcNow;
+        Write(Line(new
+        {
+            type = "phase",
+            phase = "verification",
+            event = "ended",
+            elapsed = (ended - phase).ToString(),
+            utc = ended
+        }));
         Write(Line(new
         {
             type = "end",
@@ -114,8 +130,9 @@ public sealed class JobLiveLog
             matched,
             failed,
             result = failed == 0 ? "Passed" : "Failed",
-            elapsed = (DateTimeOffset.UtcNow - _started).ToString(),
-            endedUtc = DateTimeOffset.UtcNow
+            elapsed = (ended - _started).ToString(),
+            verificationElapsed = (ended - phase).ToString(),
+            endedUtc = ended
         }));
         lock (_gate)
         {
