@@ -188,12 +188,6 @@ public sealed class ExplorerHost : DockPanel
 
     private void Verb(JobVerb verb, bool verify)
     {
-        if (Busy())
-        {
-            _status("A job is already running.");
-            return;
-        }
-
         var sourcePane = SourceIsFirst ? First : Second;
         var destPane = SourceIsFirst ? Second : First;
         var paths = sourcePane.SelectedPaths();
@@ -268,26 +262,69 @@ public sealed class ExplorerHost : DockPanel
             return;
         }
 
+        if (Overlaps(source, destination))
+        {
+            _status("A job is already using that folder.");
+            return;
+        }
+
         if (verb == JobVerb.Copy)
         {
-            _running = Run(CopyMany(paths, destination!, destPane, verify, collision, pattern));
+            var work = Run(CopyMany(paths, destination!, destPane, verify, collision, pattern));
+            Track(source, destination, work);
+            _running = work;
             return;
         }
 
         if (verb == JobVerb.Move)
         {
-            _running = Run(MoveMany(paths, destination!, sourcePane, destPane, verify, collision, pattern));
+            var work = Run(MoveMany(paths, destination!, sourcePane, destPane, verify, collision, pattern));
+            Track(source, destination, work);
+            _running = work;
             return;
         }
 
         if (verb == JobVerb.Delete)
         {
-            _running = DeleteMany(paths, sourcePane, verify);
+            var work = DeleteMany(paths, sourcePane, verify);
+            Track(source, null, work);
+            _running = work;
             return;
         }
 
-        _running = Mirror(source, destination!, destPane);
+        var mirror = Mirror(source, destination!, destPane);
+        Track(source, destination, mirror);
+        _running = mirror;
     }
+
+    private readonly List<RunningJob> _jobs = new();
+
+    private bool Overlaps(string? source, string? destination)
+    {
+        _jobs.RemoveAll(job => job.Work.IsCompleted);
+        foreach (var job in _jobs)
+        {
+            if (Hits(source, job.Source) || Hits(source, job.Destination) || Hits(destination, job.Source) || Hits(destination, job.Destination))
+                return true;
+        }
+        return false;
+    }
+
+    private static bool Hits(string? left, string? right)
+    {
+        if (string.IsNullOrWhiteSpace(left) || string.IsNullOrWhiteSpace(right))
+            return false;
+        var a = Path.GetFullPath(left).TrimEnd('\\');
+        var b = Path.GetFullPath(right).TrimEnd('\\');
+        return a.Equals(b, StringComparison.OrdinalIgnoreCase)
+            || a.StartsWith(b + "\\", StringComparison.OrdinalIgnoreCase)
+            || b.StartsWith(a + "\\", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private void Track(string? source, string? destination, Task work)
+        => _jobs.Add(new RunningJob(source, destination, work));
+
+    private sealed record RunningJob(string? Source, string? Destination, Task Work);
 
     private bool Busy()
     {
@@ -521,13 +558,21 @@ public sealed class ExplorerHost : DockPanel
                 return;
             }
 
-            var verified = await Task.Run(() => JobVerify.Run(result.JobId, source, destination, settings.Verify())).ConfigureAwait(true);
-            HostLog.Information(
-                FXplorerCatalog.VerifyCompleted,
-                "Lifecycle",
-                "Copy verify " + result.JobId + " matched=" + verified.Matched + " failed=" + verified.Failed + " log=" + verified.Path);
-            _status("Copy (Verify) " + result.Status + ". " + verified.Matched + " matched, " + verified.Failed + " failed. Source kept.");
-            _openJob?.OfferLog(verified.Path);
+            var window = _openJob;
+            var jobId = result.JobId;
+            window?.OfferLog(JobLog.File(jobId));
+            _ = Task.Run(() => JobVerify.Run(jobId, source, destination, settings.Verify()))
+                .ContinueWith(done =>
+                {
+                    if (done.IsFaulted)
+                        return;
+                    var verified = done.Result;
+                    Dispatcher.Invoke(() =>
+                    {
+                        window?.OfferLog(verified.Path);
+                        _status("Copy (Verify) " + result.Status + ". " + verified.Matched + " matched, " + verified.Failed + " failed. Source kept.");
+                    });
+                });
         }
         catch (Exception ex)
         {
