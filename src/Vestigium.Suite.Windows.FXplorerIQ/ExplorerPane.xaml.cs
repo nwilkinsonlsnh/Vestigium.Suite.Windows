@@ -348,7 +348,7 @@ public partial class ExplorerPane : UserControl
     {
         _roots.Clear();
         var settings = App.Settings.Load();
-        var pc = Group("This PC");
+        var pc = Group("This PC", IconKind.ThisPC);
         pc.IsExpanded = true;
 
         var devices = Group("Devices & Drives");
@@ -391,9 +391,9 @@ public partial class ExplorerPane : UserControl
         }
     }
 
-    private static FolderNode Group(string name)
+    private static FolderNode Group(string name, IconKind? kind = null)
     {
-        var node = new FolderNode(name, "");
+        var node = new FolderNode(name, "") { Kind = kind };
         node.Loaded = true;
         return node;
     }
