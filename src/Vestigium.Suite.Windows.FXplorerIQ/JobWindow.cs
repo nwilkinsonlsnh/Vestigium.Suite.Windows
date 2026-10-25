@@ -674,7 +674,7 @@ public sealed class JobWindow : Window
             var closed = bin.Found > 0 && bin.Done + bin.Skipped + bin.Failed >= bin.Found;
             _bins[i].Text = bin.Name + "\n" + bin.Done + " / " + bin.Found
                 + (bin.Failed > 0 ? "\nfailed " + bin.Failed : "")
-                + "\nactive " + bin.Active;
+                + "\nactive " + bin.Active + " / " + Workers(i);
             _cards[i].Opacity = closed ? 0.45 : 1;
         }
 
@@ -718,6 +718,15 @@ public sealed class JobWindow : Window
         foreach (var file in _errors)
             list.Children.Add(Row(file));
         return new ScrollViewer { Content = list, VerticalScrollBarVisibility = ScrollBarVisibility.Auto };
+    }
+
+    private static int Workers(int bucket)
+    {
+        var total = 32;
+        var raw = new[] { total * 0.70, total * 0.10, total * 0.10, total * 0.05, total * 0.05 };
+        var shares = raw.Select(value => Math.Max(1, (int)Math.Round(value, MidpointRounding.AwayFromZero))).ToArray();
+        shares[0] += total - shares.Sum();
+        return bucket >= 0 && bucket < shares.Length ? Math.Max(0, shares[bucket]) : 0;
     }
 
     private static Grid Row(FileIoFileProgress file)
