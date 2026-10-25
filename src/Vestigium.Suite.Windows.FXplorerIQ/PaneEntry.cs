@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows.Media;
 
 namespace Vestigium.Suite.Windows.FXplorerIQ;
 
@@ -56,6 +57,8 @@ public sealed class PaneEntry : INotifyPropertyChanged
     public string Category { get; }
 
     public string Tag { get; }
+
+    public ImageSource? Icon => ShellIcons.For(FullPath, IsDirectory);
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
