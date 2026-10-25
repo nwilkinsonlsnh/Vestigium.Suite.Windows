@@ -686,7 +686,7 @@ public sealed class JobWindow : Window
     {
         if (string.IsNullOrWhiteSpace(_logPath))
             return;
-        var target = File.Exists(_logPath) ? _logPath : Path.GetDirectoryName(_logPath);
+        var target = File.Exists(_logPath) ? _logPath : System.IO.Path.GetDirectoryName(_logPath);
         if (string.IsNullOrWhiteSpace(target))
             return;
         System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(target) { UseShellExecute = true });
