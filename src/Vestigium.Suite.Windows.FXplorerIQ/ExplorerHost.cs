@@ -561,7 +561,8 @@ public sealed class ExplorerHost : DockPanel
             var window = _openJob;
             var jobId = result.JobId;
             window?.OfferLog(JobLog.File(jobId));
-            _ = Task.Run(() => JobVerify.Run(jobId, source, destination, settings.Verify()))
+            var progress = new Progress<(int Done, int Total, string Name)>(step => window?.VerifyProgress(step.Done, step.Total, step.Name));
+            _ = Task.Run(() => JobVerify.Run(jobId, source, destination, settings.Verify(), progress))
                 .ContinueWith(done =>
                 {
                     if (done.IsFaulted)
