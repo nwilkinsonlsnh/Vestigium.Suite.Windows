@@ -86,6 +86,8 @@ public partial class SettingsView : UserControl
         SecureBox.ItemsSource = new[] { 3, 7 };
         SecureBox.SelectedItem = settings.SecurePasses == 7 ? 7 : 3;
         SecureLine.Text = Line(settings.SecurePasses);
+        Threads.Value = settings.MaxThreads;
+        ThreadLine.Text = ThreadText(settings.MaxThreads);
     }
 
     private void Page_Checked(object sender, RoutedEventArgs e)
@@ -102,6 +104,40 @@ public partial class SettingsView : UserControl
         SecurePage.Visibility = tag == "Secure" ? Visibility.Visible : Visibility.Collapsed;
         JobPage.Visibility = tag == "Job" ? Visibility.Visible : Visibility.Collapsed;
     }
+
+    private void Threads_Changed(object sender, EventArgs e)
+    {
+        if (_loading)
+            return;
+        var snapped = Snap((int)Threads.Value);
+        if (snapped != (int)Threads.Value)
+        {
+            Threads.Value = snapped;
+            return;
+        }
+        ThreadLine.Text = ThreadText(snapped);
+        Save(settings => settings.MaxThreads = snapped);
+    }
+
+    private static int Snap(int requested)
+    {
+        var allowed = new[] { 1, 4, 8, 16, 24, 32, 45, 64, 96, 128 };
+        var best = allowed[0];
+        var distance = int.MaxValue;
+        foreach (var count in allowed)
+        {
+            var gap = Math.Abs(count - requested);
+            if (gap < distance)
+            {
+                best = count;
+                distance = gap;
+            }
+        }
+        return best;
+    }
+
+    private static string ThreadText(int count)
+        => count + " threads. Tiny 70%, Small 10%, Medium 10%, Large 5%, Huge 5%.";
 
     private void Secure_Changed(object sender, SelectionChangedEventArgs e)
     {
