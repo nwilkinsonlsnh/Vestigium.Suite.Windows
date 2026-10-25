@@ -42,6 +42,7 @@ public sealed class JobWindow : Window
     private readonly DispatcherTimer _pulse;
     private bool _queued;
     private DateTimeOffset _lastPaint = DateTimeOffset.MinValue;
+    private readonly DateTimeOffset _started = DateTimeOffset.UtcNow;
 
     public JobWindow(string title, FileIoJob job, string source, string? destination)
     {
@@ -760,6 +761,21 @@ public sealed class JobWindow : Window
         System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(_logPath) { UseShellExecute = true });
     }
 
+    private static string Elapsed(TimeSpan span)
+    {
+        var parts = new List<string>();
+        if (span.Days > 0)
+            parts.Add(span.Days + "d");
+        if (span.Hours > 0)
+            parts.Add(span.Hours + "h");
+        if (span.Minutes > 0)
+            parts.Add(span.Minutes + "m");
+        if (span.Seconds > 0 || parts.Count == 0)
+            parts.Add(span.Seconds + "s");
+        parts.Add(span.Milliseconds + "ms");
+        return string.Join(" ", parts);
+    }
+
     private void Done()
     {
         _pause.Visibility = Visibility.Collapsed;
@@ -792,10 +808,11 @@ public sealed class JobWindow : Window
         var fraction = active is null ? 0 : active.BytesDone / (double)active.Size;
         Set(_bar, Math.Min(100, (progress.FilesDone + fraction) * 100d / found), 100);
         var rate = progress.RateBytesPerSec > 0 ? Size(progress.RateBytesPerSec) + "/s" : "—";
-        var eta = progress.EtaUtc is { } when ? when.ToLocalTime().ToString("HH:mm:ss", CultureInfo.InvariantCulture) : "—";
+        var done = progress.Phase == "Done";
+        var tail = done ? "elapsed " + Elapsed(DateTimeOffset.UtcNow - _started) : "eta " + (progress.EtaUtc is { } when ? when.ToLocalTime().ToString("HH:mm:ss", CultureInfo.InvariantCulture) : "—");
         _rate.Text = progress.FilesDone + " / " + progress.FilesFound
             + "   " + Size(progress.BytesDone) + " / " + Size(progress.BytesFound)
-            + "   " + rate + "   eta " + eta;
+            + "   " + rate + "   " + tail;
 
         for (var i = 0; i < progress.Buckets.Length && i < 5; i++)
         {
