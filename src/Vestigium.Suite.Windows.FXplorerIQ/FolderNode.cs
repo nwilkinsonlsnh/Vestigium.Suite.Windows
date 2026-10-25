@@ -3,7 +3,6 @@ using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Windows.Media;
-using Vestigium.Suite.Windows.FXplorerIQ.Icons;
 
 namespace Vestigium.Suite.Windows.FXplorerIQ;
 
@@ -21,22 +20,14 @@ public sealed class FolderNode : INotifyPropertyChanged
 
     public string FullPath { get; }
 
-    public DriveType Drive { get; init; } = DriveType.NoRootDirectory;
-
-    public bool Hidden { get; init; }
-
-    public IconKind? Kind { get; init; }
+    public bool ThisPC { get; init; }
 
     public ObservableCollection<FolderNode> Children { get; } = [];
 
     public bool Loaded { get; set; }
 
     public ImageSource? Icon
-        => Kind is { } kind
-            ? IconArt.For(kind)
-            : FullPath.Length == 0
-                ? null
-                : IconArt.For(IconCatalog.For(FullPath, IsExpanded, Hidden, Drive));
+        => ThisPC ? ShellIcons.Computer() : ShellIcons.For(FullPath, true);
 
     public bool IsExpanded
     {
@@ -47,7 +38,6 @@ public sealed class FolderNode : INotifyPropertyChanged
                 return;
             _isExpanded = value;
             OnPropertyChanged();
-            OnPropertyChanged(nameof(Icon));
         }
     }
 
