@@ -12,5 +12,14 @@ public enum IconKind
     SystemFolder,
     SystemFolderOpen,
     Users,
-    UsersOpen
+    UsersOpen,
+    ThisPC,
+    Desktop,
+    Documents,
+    Downloads,
+    Favorites,
+    Pictures,
+    Contacts,
+    Music,
+    Videos
 }
