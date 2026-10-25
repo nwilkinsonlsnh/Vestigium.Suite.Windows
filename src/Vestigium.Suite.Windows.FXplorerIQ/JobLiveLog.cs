@@ -92,9 +92,12 @@ public sealed class JobLiveLog
         Write(Line(new { type = "phase", phase = "verification", state = "began", utc = phase }));
         Report("Verification phase began");
         foreach (var path in _seen.Keys)
-            if (_seen.TryRemove(path, out _))
-                _done.Enqueue(path);
+        {
+            if (!_seen.TryRemove(path, out _))
+                continue;
+            _done.Enqueue(path);
             Interlocked.Increment(ref _taken);
+        }
         var idle = 0;
         var until = DateTimeOffset.UtcNow.AddSeconds(90);
         while (!_done.IsEmpty && DateTimeOffset.UtcNow < until && idle < 600)
