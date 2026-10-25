@@ -120,10 +120,22 @@ public sealed class JobLiveLog
     {
         var left = Path.Combine(_source, relative);
         var right = Path.Combine(_destination, relative);
-        var compared = FileIoHelper.CompareFiles(left, right, _algorithm);
+        try
+        {
+            var compared = FileIoHelper.CompareFiles(left, right, _algorithm);
+            WriteRow(relative, left, right, compared.Equal, compared.LeftDigest, compared.RightDigest);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            WriteRow(relative, left, right, false, "", "");
+        }
+    }
+
+    private void WriteRow(string relative, string left, string right, bool equal, string? sourceHash, string? destinationHash)
+    {
         var leftInfo = Info(left);
         var rightInfo = Info(right);
-        if (compared.Equal)
+        if (equal)
             Interlocked.Increment(ref _matched);
         else
             Interlocked.Increment(ref _failed);
@@ -131,9 +143,9 @@ public sealed class JobLiveLog
             _rows.Add(new PdfRow
             {
                 Relative = relative,
-                Equal = compared.Equal,
-                SourceDigest = compared.LeftDigest,
-                DestinationDigest = compared.RightDigest
+                Equal = equal,
+                SourceDigest = sourceHash,
+                DestinationDigest = destinationHash
             });
         Write(Line(new
         {
@@ -146,9 +158,9 @@ public sealed class JobLiveLog
             destinationFileName = Path.GetFileName(right),
             destinationExtension = Path.GetExtension(right),
             destinationSize = rightInfo,
-            hashMatch = compared.Equal,
-            sourceHash = compared.LeftDigest,
-            destinationHash = compared.RightDigest
+            hashMatch = equal,
+            sourceHash,
+            destinationHash
         }));
     }
 
