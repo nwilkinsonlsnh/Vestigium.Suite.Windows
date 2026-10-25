@@ -1,14 +1,16 @@
 using System.IO;
-using System.Linq;
 using System.Text.Json;
 using Vestigium.Helpers.FileIo;
 using Vestigium.Helpers.Hashing;
+using Vestigium.Helpers.Pdf;
 
 namespace Vestigium.Suite.Windows.FXplorerIQ;
 
 public sealed class VerifyResult
 {
     public string Path { get; init; } = "";
+
+    public string Pdf { get; init; } = "";
 
     public int Matched { get; init; }
 
@@ -25,19 +27,18 @@ public static class JobVerify
         "FXplorerIQ",
         "Operations");
 
-    public static VerifyResult Run(string jobId, string source, string destination, HashingAlgorithm algorithm, IProgress<(int Done, int Total, string Name)>? progress = null, int expected = 0)
+    public static VerifyResult Run(string jobId, string source, string destination, HashingAlgorithm algorithm, IProgress<(int Done, int Total, string Name)>? progress = null, int expected = 0, string verb = "Verify")
     {
         Directory.CreateDirectory(Root);
         var file = Path.Combine(Root, jobId + ".jsonl");
         var matched = 0;
         var failed = 0;
+        var done = 0;
         var sourceIsFile = File.Exists(source);
         IEnumerable<string> files = sourceIsFile
             ? new[] { source }
             : Directory.EnumerateFiles(source, "*", SearchOption.AllDirectories);
-        var matched = 0;
-        var failed = 0;
-        var done = 0;
+        var rows = new List<PdfRow>();
 
         foreach (var left in files)
         {
@@ -50,6 +51,13 @@ public static class JobVerify
             else
                 failed++;
 
+            rows.Add(new PdfRow
+            {
+                Relative = relative,
+                Equal = compared.Equal,
+                SourceDigest = compared.LeftDigest,
+                DestinationDigest = compared.RightDigest
+            });
             var line = JsonSerializer.Serialize(new
             {
                 jobId,
@@ -67,6 +75,20 @@ public static class JobVerify
         }
 
         progress?.Report((done, done, ""));
-        return new VerifyResult { Path = file, Matched = matched, Failed = failed };
+        var pdf = Path.Combine(Root, jobId + ".pdf");
+        var bytes = PdfEvidence.Build(new PdfReport
+        {
+            JobId = jobId,
+            Verb = verb,
+            Source = source,
+            Destination = destination,
+            Algorithm = algorithm.ToString(),
+            Matched = matched,
+            Failed = failed,
+            Rows = rows,
+            Identity = PdfIdentity.Capture()
+        });
+        File.WriteAllBytes(pdf, bytes);
+        return new VerifyResult { Path = file, Pdf = pdf, Matched = matched, Failed = failed };
     }
 }
