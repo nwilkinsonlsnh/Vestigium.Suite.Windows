@@ -740,7 +740,8 @@ public sealed class ExplorerHost : DockPanel
             IncludeEmptyDirectories = settings.IncludeEmptyDirectories,
             CopyTimestampsAndAttributes = settings.CopyTimestamps,
             RetryCount = settings.RetryCount,
-            RetryWait = TimeSpan.FromSeconds(settings.RetryWaitSeconds)
+            RetryWait = TimeSpan.FromSeconds(settings.RetryWaitSeconds),
+            MaxThreads = settings.MaxThreads
         };
 
     private static string[] Split(string masks)
