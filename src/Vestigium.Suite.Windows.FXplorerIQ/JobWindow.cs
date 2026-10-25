@@ -27,7 +27,9 @@ public sealed class JobWindow : Window
     private readonly Button _cancel;
     private readonly Button _close;
     private readonly Button _openLog;
+    private readonly Button _saveEvidence;
     private string? _logPath;
+    private string? _evidencePath;
     private readonly ContentControl _page = new();
     private readonly StackPanel _charts = new() { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 8) };
     private readonly ContentControl _stage = new();
@@ -96,6 +98,9 @@ public sealed class JobWindow : Window
         _close.IsEnabled = false;
         _openLog = Button("Open Log File", "Button.Secondary", OpenLog);
         _openLog.Visibility = Visibility.Collapsed;
+        _saveEvidence = Button("Save Evidence", "Button.Secondary", SaveEvidence);
+        _saveEvidence.Visibility = Visibility.Collapsed;
+        _saveEvidence.Margin = new Thickness(8, 0, 0, 0);
         _verifyBar.Height = 10;
         _verifyBar.Minimum = 0;
         _verifyBar.Maximum = 100;
@@ -127,6 +132,7 @@ public sealed class JobWindow : Window
             Margin = new Thickness(0, 8, 0, 0)
         };
         logRow.Children.Add(_openLog);
+        logRow.Children.Add(_saveEvidence);
 
         var body = new StackPanel();
         body.Children.Add(_phase);
@@ -668,6 +674,32 @@ public sealed class JobWindow : Window
         _logPath = path;
         _openLog.Visibility = Visibility.Visible;
         _openLog.IsEnabled = true;
+    }
+
+    public void OfferEvidence(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            return;
+        _evidencePath = path;
+        _saveEvidence.Visibility = Visibility.Visible;
+        _saveEvidence.IsEnabled = true;
+    }
+
+    private void SaveEvidence()
+    {
+        if (string.IsNullOrWhiteSpace(_evidencePath) || !File.Exists(_evidencePath))
+            return;
+        var dialog = new Microsoft.Win32.SaveFileDialog
+        {
+            Title = "Save Evidence",
+            FileName = System.IO.Path.GetFileName(_evidencePath),
+            Filter = "PDF (*.pdf)|*.pdf",
+            DefaultExt = ".pdf",
+            AddExtension = true
+        };
+        if (dialog.ShowDialog(this) != true)
+            return;
+        File.Copy(_evidencePath, dialog.FileName, true);
     }
 
     public void VerifyProgress(int done, int total, string name)
