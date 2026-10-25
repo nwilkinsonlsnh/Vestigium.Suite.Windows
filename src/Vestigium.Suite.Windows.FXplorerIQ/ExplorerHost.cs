@@ -566,16 +566,22 @@ public sealed class ExplorerHost : DockPanel
 
             var window = _openJob;
             var jobId = result.JobId;
-            window?.OfferLog(JobLog.File(jobId));
+            window?.OfferLog(live?.LogPath ?? JobLog.File(jobId));
             window?.ShowEvidence();
-            await Task.Run(() => live?.Drain());
-            var rows = live?.Rows ?? Array.Empty<PdfRow>();
-            var matched = rows.Count(row => row.Equal);
-            var failed = rows.Count - matched;
-            var pdf = WriteEvidence(jobId, "Copy (Verify)", source, destination, settings.Verify(), rows);
-            window?.OfferEvidence(pdf);
-            window?.VerifyDone(matched, failed);
-            _status("Copy (Verify) " + result.Status + ". " + matched + " matched, " + failed + " failed. Source kept.");
+            _ = Task.Run(() =>
+            {
+                live?.Drain();
+                var rows = live?.Rows ?? Array.Empty<PdfRow>();
+                var matched = rows.Count(row => row.Equal);
+                var failed = rows.Count - matched;
+                var pdf = WriteEvidence(jobId, "Copy (Verify)", source, destination, settings.Verify(), rows);
+                Dispatcher.Invoke(() =>
+                {
+                    window?.OfferEvidence(pdf);
+                    window?.VerifyDone(matched, failed);
+                    _status("Copy (Verify) " + result.Status + ". " + matched + " matched, " + failed + " failed. Source kept.");
+                });
+            });
         }
         catch (Exception ex)
         {
