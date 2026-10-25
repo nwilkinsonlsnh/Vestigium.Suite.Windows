@@ -682,6 +682,17 @@ public sealed class JobWindow : Window
             _verifyLine.Text = "Verified  " + done + " / " + total;
     }
 
+    public void VerifyDone(int matched, int failed)
+    {
+        var total = matched + failed;
+        var passed = failed == 0;
+        _verifyLine.Text = "Verified  " + matched + " / " + total + (passed ? "  (Passed)" : "  (Failed)");
+        _verifyLine.Visibility = Visibility.Visible;
+        _verifyBar.Visibility = Visibility.Visible;
+        _verifyBar.Value = _verifyBar.Maximum;
+        _verifyBar.Foreground = new SolidColorBrush(passed ? Color.FromRgb(80, 170, 110) : Color.FromRgb(200, 70, 70));
+    }
+
     private void OpenLog()
     {
         if (string.IsNullOrWhiteSpace(_logPath))
