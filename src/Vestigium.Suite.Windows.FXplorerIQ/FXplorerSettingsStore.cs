@@ -81,6 +81,8 @@ public sealed class FXplorerSettings
 
     public int SecurePasses { get; set; } = 3;
 
+    public int MaxThreads { get; set; } = 32;
+
     public int RetryCount { get; set; } = 3;
 
     public int RetryWaitSeconds { get; set; } = 2;
