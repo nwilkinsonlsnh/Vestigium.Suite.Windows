@@ -21,15 +21,22 @@ public sealed class JobLiveLog
     private readonly CancellationTokenSource _stop = new();
     private readonly Task _reader;
 
+    private readonly string _logPath;
+
     public JobLiveLog(FileIoJob job, string source, string destination, HashingAlgorithm algorithm)
     {
         _source = source;
         _destination = destination;
         _algorithm = algorithm;
         _jobId = job.JobId;
+        Directory.CreateDirectory(JobVerify.Root);
+        _logPath = Path.Combine(JobVerify.Root, job.JobId + ".jsonl");
+        File.WriteAllText(_logPath, "");
         job.ProgressChanged += (_, progress) => Note(progress);
         _reader = Task.Run(Read);
     }
+
+    public string LogPath => _logPath;
 
     public IReadOnlyList<PdfRow> Rows
     {
@@ -83,6 +90,7 @@ public sealed class JobLiveLog
         };
         lock (_rowsGate)
             _rows.Add(row);
+        File.AppendAllText(_logPath, relative + "\t" + compared.Equal + "\t" + compared.LeftDigest + "\t" + compared.RightDigest + Environment.NewLine);
         HostLog.Information(
             FXplorerCatalog.JobCompleted,
             "File",
