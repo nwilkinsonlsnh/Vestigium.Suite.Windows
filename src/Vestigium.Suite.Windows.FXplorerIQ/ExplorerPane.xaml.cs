@@ -9,6 +9,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using Vestigium.Helpers.FileSystemPaths;
 using Vestigium.Helpers.Hashing;
+using Vestigium.Suite.Windows.FXplorerIQ.Icons;
 
 namespace Vestigium.Suite.Windows.FXplorerIQ;
 
