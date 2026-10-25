@@ -24,6 +24,8 @@ public static class ShellIcons
     {
         if (path.Length == 0)
             return null;
+        if (folder && KnownFolder(path) is { } known)
+            return Cache.GetOrAdd(known, _ => Load(known, folder: true, attributes: false));
         var key = folder ? path : Extension(path);
         return Cache.GetOrAdd(key, _ => Load(folder ? path : "file" + key, folder, attributes: !folder));
     }
