@@ -109,31 +109,34 @@ public partial class SettingsView : UserControl
     {
         if (_loading)
             return;
-        var snapped = Snap((int)Threads.Value);
-        if (snapped != (int)Threads.Value)
+        var requested = (int)Threads.Value;
+        var current = App.Settings.Load().MaxThreads;
+        var next = requested == current
+            ? current
+            : requested > current ? Next(current, 1) : Next(current, -1);
+        if (next != requested)
         {
-            Threads.Value = snapped;
+            Threads.Value = next;
             return;
         }
-        ThreadLine.Text = ThreadText(snapped);
-        Save(settings => settings.MaxThreads = snapped);
+        ThreadLine.Text = ThreadText(next);
+        Save(settings => settings.MaxThreads = next);
     }
 
-    private static int Snap(int requested)
+    private static int Next(int current, int direction)
     {
         var allowed = new[] { 1, 4, 8, 16, 24, 32, 45, 64, 96, 128 };
-        var best = allowed[0];
-        var distance = int.MaxValue;
-        foreach (var count in allowed)
+        if (direction > 0)
         {
-            var gap = Math.Abs(count - requested);
-            if (gap < distance)
-            {
-                best = count;
-                distance = gap;
-            }
+            foreach (var count in allowed)
+                if (count > current)
+                    return count;
+            return allowed[^1];
         }
-        return best;
+        for (var i = allowed.Length - 1; i >= 0; i--)
+            if (allowed[i] < current)
+                return allowed[i];
+        return allowed[0];
     }
 
     private static string ThreadText(int count)
