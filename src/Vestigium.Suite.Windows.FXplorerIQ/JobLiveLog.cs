@@ -88,7 +88,7 @@ public sealed class JobLiveLog
     public void Drain()
     {
         var phase = DateTimeOffset.UtcNow;
-        Write(Line(new { type = "phase", phase = "verification", event = "began", utc = phase }));
+        Write(Line(new { type = "phase", phase = "verification", state = "began", utc = phase }));
         Report("Verification phase began");
         foreach (var path in _seen.Keys)
             if (_seen.TryRemove(path, out _))
@@ -118,7 +118,7 @@ public sealed class JobLiveLog
         {
             type = "phase",
             phase = "verification",
-            event = "ended",
+            state = "ended",
             elapsed = (ended - phase).ToString(),
             utc = ended
         }));
