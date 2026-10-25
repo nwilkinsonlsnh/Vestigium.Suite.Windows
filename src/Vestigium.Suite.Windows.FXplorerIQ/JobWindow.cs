@@ -194,6 +194,12 @@ public sealed class JobWindow : Window
 
     private void ShowChart()
     {
+        if (_report == "errors")
+        {
+            _stage.Content = Errors();
+            _story.Text = _errors.Count + " failed.";
+            return;
+        }
         if (_result?.Stats is not { } stats)
         {
             _stage.Content = null;
