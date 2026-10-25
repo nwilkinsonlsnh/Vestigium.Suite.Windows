@@ -128,6 +128,7 @@ public sealed class JobWindow : Window
         sub.Children.Add(Radio("Shape", "report", false, () => Pick("shape", "types")));
         sub.Children.Add(Radio("Throughput", "report", false, () => Pick("rate", "rate")));
         sub.Children.Add(Radio("Time", "report", false, () => Pick("time", "share")));
+        sub.Children.Add(Radio("Errors", "report", false, () => Pick("errors", "list")));
         var head = new StackPanel();
         head.Children.Add(sub);
         head.Children.Add(_charts);
@@ -185,6 +186,8 @@ public sealed class JobWindow : Window
             "time" => new[] { ("share", "Share"), ("duration", "Duration"), ("curve", "Curve") },
             _ => Array.Empty<(string, string)>()
         };
+        if (_report == "errors")
+            return;
         foreach (var (key, label) in items)
             _charts.Children.Add(Radio(label, "chart", key == _chart, () => { _chart = key; ShowChart(); }));
     }
@@ -229,6 +232,7 @@ public sealed class JobWindow : Window
             ("time", "duration") => (Duration(stats), "Median time per bucket, in milliseconds."),
             ("time", "curve") => (Curve(stats), "How long files took, smallest to largest."),
             ("time", _) => (Share(stats), "Which bucket held the clock."),
+            ("errors", _) => (Errors(), _errors.Count + " failed."),
             _ => (Overview(stats), Sentence(stats))
         };
 
@@ -668,18 +672,46 @@ public sealed class JobWindow : Window
             _cards[i].Opacity = closed ? 0.45 : 1;
         }
 
+        Collect(progress);
         _files.Children.Clear();
         if (_result is not null)
             return;
         var shown = 0;
         foreach (var file in progress.Active
-            .Where(file => file.Status is not ("Done" or "Skipped"))
+            .Where(file => file.Status is "Active")
             .OrderByDescending(file => file.Bucket switch { "Huge" => 2, "Large" => 1, _ => 0 }))
         {
             if (shown++ >= 30)
                 break;
             _files.Children.Add(Row(file));
         }
+    }
+
+    private readonly List<FileIoFileProgress> _errors = new();
+
+    private void Collect(FileIoProgress progress)
+    {
+        foreach (var file in progress.Active)
+        {
+            if (file.Status != "Failed")
+                continue;
+            if (_errors.Any(row => string.Equals(row.RelativePath, file.RelativePath, StringComparison.OrdinalIgnoreCase)))
+                continue;
+            _errors.Add(file);
+        }
+    }
+
+    private FrameworkElement Errors()
+    {
+        var list = new StackPanel();
+        if (_errors.Count == 0)
+        {
+            list.Children.Add(new TextBlock { Text = "No failed files.", Style = TryStyle("TextBlock.Caption") });
+            return list;
+        }
+        foreach (var file in _errors)
+            list.Children.Add(Row(file));
+        return new ScrollViewer { Content = list, VerticalScrollBarVisibility = ScrollBarVisibility.Auto };
     }
 
     private static Grid Row(FileIoFileProgress file)
