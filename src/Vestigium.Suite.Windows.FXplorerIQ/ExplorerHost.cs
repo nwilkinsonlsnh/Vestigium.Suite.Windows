@@ -563,7 +563,7 @@ public sealed class ExplorerHost : DockPanel
             window?.OfferLog(JobLog.File(jobId));
             var progress = new Progress<(int Done, int Total, string Name)>(step => window?.VerifyProgress(step.Done, step.Total, step.Name));
             var expected = result.Copied + result.Skipped + result.Failed;
-            _ = Task.Run(() => JobVerify.Run(jobId, source, destination, settings.Verify(), progress, expected))
+            _ = Task.Run(() => JobVerify.Run(jobId, source, destination, settings.Verify(), progress, expected, "Copy (Verify)"))
                 .ContinueWith(done =>
                 {
                     if (done.IsFaulted)
@@ -571,7 +571,7 @@ public sealed class ExplorerHost : DockPanel
                     var verified = done.Result;
                     Dispatcher.Invoke(() =>
                     {
-                        window?.OfferLog(verified.Path);
+                        window?.OfferLog(verified.Pdf);
                         window?.VerifyDone(verified.Matched, verified.Failed);
                         _status("Copy (Verify) " + result.Status + ". " + verified.Matched + " matched, " + verified.Failed + " failed. Source kept.");
                     });
@@ -615,8 +615,8 @@ public sealed class ExplorerHost : DockPanel
                 return;
             }
             destPane.Open(destination);
-            var verified = await Task.Run(() => JobVerify.Run(copied.JobId, source, destination, settings.Verify())).ConfigureAwait(true);
-            _openJob?.OfferLog(verified.Path);
+            var verified = await Task.Run(() => JobVerify.Run(copied.JobId, source, destination, settings.Verify(), verb: "Move (Verify)")).ConfigureAwait(true);
+            _openJob?.OfferLog(verified.Pdf);
             if (verified.Failed > 0)
             {
                 HostLog.Information(
@@ -624,7 +624,7 @@ public sealed class ExplorerHost : DockPanel
                     "Lifecycle",
                     "Move verify " + copied.JobId + " matched=" + verified.Matched + " failed=" + verified.Failed + " source kept log=" + verified.Path);
                 _status("Move (Verify) failed. " + verified.Failed + " did not match. Source kept.");
-                _openJob?.OfferLog(verified.Path);
+                _openJob?.OfferLog(verified.Pdf);
                 return;
             }
 
@@ -635,7 +635,7 @@ public sealed class ExplorerHost : DockPanel
                 "Lifecycle",
                 "Move verify " + copied.JobId + " matched=" + verified.Matched + " source removed log=" + verified.Path);
             _status("Move (Verify) matched. " + verified.Matched + " verified. Source removed.");
-            _openJob?.OfferLog(verified.Path);
+            _openJob?.OfferLog(verified.Pdf);
         }
         catch (Exception ex)
         {
@@ -763,13 +763,13 @@ public sealed class ExplorerHost : DockPanel
             if (!string.IsNullOrWhiteSpace(parent))
                 RefreshShowing(parent);
             destPane.Open(destination);
-            var verified = await Task.Run(() => JobVerify.Run(result.JobId, source, destination, settings.Verify())).ConfigureAwait(true);
+            var verified = await Task.Run(() => JobVerify.Run(result.JobId, source, destination, settings.Verify(), verb: "Mirror (Verify)")).ConfigureAwait(true);
             HostLog.Information(
                 FXplorerCatalog.VerifyCompleted,
                 "Lifecycle",
                 "Mirror verify " + result.JobId + " matched=" + verified.Matched + " failed=" + verified.Failed + " log=" + verified.Path);
             _status("Mirror (Verify) " + result.Status + ". " + verified.Matched + " matched, " + verified.Failed + " failed.");
-            _openJob?.OfferLog(verified.Path);
+            _openJob?.OfferLog(verified.Pdf);
         }
         catch (Exception ex)
         {
