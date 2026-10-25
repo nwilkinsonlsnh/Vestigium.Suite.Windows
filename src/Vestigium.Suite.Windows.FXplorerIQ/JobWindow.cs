@@ -743,8 +743,9 @@ public sealed class JobWindow : Window
         _verifyBar.Visibility = Visibility.Visible;
         _verifyBar.Maximum = max;
         _verifyBar.Value = Math.Min(done, max);
-        if (done >= total && total > 0)
-            _verifyLine.Text = "Verified  " + done + " / " + total;
+        _verifyBar.Maximum = max;
+        if (done < total)
+            _verifyLine.Text = "Verification  " + done + " / " + total + "   " + name;
     }
 
     public void VerifyDone(int matched, int failed)
