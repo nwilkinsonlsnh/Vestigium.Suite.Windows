@@ -163,6 +163,8 @@ public sealed class JobWindow : Window
 
     public FileIoJobResult? Result => _result;
 
+    public event EventHandler? Finished;
+
     public bool AutoClose { get; set; }
 
     private void Pick(string report, string chart)
@@ -603,6 +605,7 @@ public sealed class JobWindow : Window
             _files.Children.Clear();
             Show(_job.Progress);
             ShowChart();
+            Finished?.Invoke(this, EventArgs.Empty);
             if (AutoClose)
                 Close();
         }
