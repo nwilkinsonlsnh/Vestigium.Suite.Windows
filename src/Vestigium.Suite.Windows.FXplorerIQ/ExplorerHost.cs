@@ -547,7 +547,7 @@ public sealed class ExplorerHost : DockPanel
             var job = FileIoHelper.Copy(source, destination, Options(settings, collision, pattern));
             JobLiveLog? live = null;
             if (verify)
-                live = new JobLiveLog(job, source, destination, settings.Verify());
+                live = new JobLiveLog(job, source, destination, settings.Verify(), "Copy (Verify)");
             var result = await ShowJob(label, job, source, destination);
             if (result is null)
             {
