@@ -74,6 +74,7 @@ public partial class SettingsView : UserControl
         VerifyBox.SelectedValue = settings.Verify().ToString();
         VerifyRetries.Value = settings.VerifyReadRetries;
         VerifyWait.Value = settings.VerifyReadWaitMs;
+        VerifyParallel.Value = settings.VerifyRetryParallel;
         FileMasks.Text = settings.ExcludeFileMasks;
         DirectoryMasks.Text = settings.ExcludeDirectoryMasks;
         MinSize.Text = settings.MinSizeBytes?.ToString() ?? "";
@@ -241,6 +242,7 @@ public partial class SettingsView : UserControl
         {
             settings.VerifyReadRetries = (int)VerifyRetries.Value;
             settings.VerifyReadWaitMs = (int)VerifyWait.Value;
+            settings.VerifyRetryParallel = (int)VerifyParallel.Value;
         });
     }
 
