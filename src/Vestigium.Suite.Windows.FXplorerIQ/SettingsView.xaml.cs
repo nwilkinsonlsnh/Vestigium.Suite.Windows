@@ -92,7 +92,7 @@ public partial class SettingsView : UserControl
 
     private void Page_Checked(object sender, RoutedEventArgs e)
     {
-        if (ThemesPage is null || ColumnsPage is null || HashPage is null || ViewPage is null || CollisionPage is null || JobPage is null || SecurePage is null)
+        if (ThemesPage is null || ColumnsPage is null || HashPage is null || ViewPage is null || CollisionPage is null || JobPage is null || SecurePage is null || ThreadsPage is null)
             return;
         var tag = sender is RadioButton button ? button.Tag as string : "Themes";
         ThemesPage.Visibility = tag == "Themes" ? Visibility.Visible : Visibility.Collapsed;
@@ -102,7 +102,7 @@ public partial class SettingsView : UserControl
         CollisionPage.Visibility = tag == "Collision" ? Visibility.Visible : Visibility.Collapsed;
         JobPage.Visibility = tag == "Job" ? Visibility.Visible : Visibility.Collapsed;
         SecurePage.Visibility = tag == "Secure" ? Visibility.Visible : Visibility.Collapsed;
-        JobPage.Visibility = tag == "Job" ? Visibility.Visible : Visibility.Collapsed;
+        ThreadsPage.Visibility = tag == "Threads" ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void Threads_Changed(object sender, EventArgs e)
