@@ -729,7 +729,7 @@ public sealed class JobWindow : Window
 
     public void BeginVerify()
     {
-        _verifyLine.Text = "Verifying";
+        _verifyLine.Text = "Verification phase began";
         _verifyLine.Visibility = Visibility.Visible;
         _verifyBar.Visibility = Visibility.Visible;
         _verifyBar.Value = 0;
@@ -738,7 +738,7 @@ public sealed class JobWindow : Window
     public void VerifyProgress(int done, int total, string name)
     {
         var max = Math.Max(total, 1);
-        _verifyLine.Text = "Verifying  " + done + " / " + total + "   " + name;
+        _verifyLine.Text = "Verification  " + done + " / " + total + "   " + name;
         _verifyLine.Visibility = Visibility.Visible;
         _verifyBar.Visibility = Visibility.Visible;
         _verifyBar.Maximum = max;
