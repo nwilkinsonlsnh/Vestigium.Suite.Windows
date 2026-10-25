@@ -24,9 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Vestigium.Suite.Windows.FXplorerIQ.Icons\Vestigium.Suite.Windows.FXplorerIQ.Icons.csproj" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Remove="Helpers\**" />
     <None Remove="Helpers\**" />
     <EmbeddedResource Remove="Helpers\**" />
