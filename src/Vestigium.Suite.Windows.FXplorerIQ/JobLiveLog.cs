@@ -223,7 +223,10 @@ public sealed class JobLiveLog
     }
 
     private void Report(string text)
-        => _progress?.Invoke(_doneCount, Math.Max(_expected, _doneCount), text);
+    {
+        var total = _expected > 0 ? _expected : Math.Max(_doneCount, 1);
+        _progress?.Invoke(Math.Min(_doneCount, total), total, text);
+    }
 
     private void WriteRow(string relative, string left, string right, bool equal, string? sourceHash, string? destinationHash, int attempts, string? reason)
     {
