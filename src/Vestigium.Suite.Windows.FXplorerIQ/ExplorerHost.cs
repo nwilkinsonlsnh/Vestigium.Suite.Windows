@@ -18,9 +18,9 @@ public sealed class ExplorerHost : DockPanel
     private readonly StackPanel _jobBar;
     private readonly TextBlock _sourceText;
     private readonly TextBlock _destinationText;
-    private readonly MenuItem _splitItem;
-    private readonly MenuItem _verticalItem;
-    private readonly MenuItem _horizontalItem;
+    private MenuItem _splitItem = null!;
+    private MenuItem _verticalItem = null!;
+    private MenuItem _horizontalItem = null!;
     private readonly Action<string> _status;
     private ScrollViewer? _viewport;
     private bool _applying;
