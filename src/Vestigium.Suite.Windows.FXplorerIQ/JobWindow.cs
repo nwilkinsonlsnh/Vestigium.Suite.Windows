@@ -632,8 +632,11 @@ public sealed class JobWindow : Window
             + heavy.Name + " is " + weightShare + "% of the bytes.";
     }
 
+    private FileIoProgress? _latest;
+
     private void Queue(FileIoProgress progress)
     {
+        _latest = progress;
         if (_queued)
             return;
         _queued = true;
@@ -641,7 +644,7 @@ public sealed class JobWindow : Window
         {
             _queued = false;
             _lastPaint = DateTimeOffset.UtcNow;
-            Show(progress);
+            Show(_latest ?? progress);
         }, DispatcherPriority.Render);
     }
 
