@@ -228,6 +228,9 @@
       <Label Style="{StaticResource Label.Standard}" Content="Verify read wait (ms)" />
       <nud:VestigiumNumericUpDown x:Name="VerifyWait" SignMode="Unsigned" Minimum="10" Maximum="1000" Increment="5" DecimalPlaces="0" Width="220" HorizontalAlignment="Left" Margin="0,0,0,12" ValueChanged="VerifyRetry_Changed" />
 
+      <Label Style="{StaticResource Label.Standard}" Content="Verify retry parallelism" />
+      <nud:VestigiumNumericUpDown x:Name="VerifyParallel" SignMode="Unsigned" Minimum="1" Maximum="32" Increment="1" DecimalPlaces="0" Width="220" HorizontalAlignment="Left" Margin="0,0,0,12" ValueChanged="VerifyRetry_Changed" />
+
       <Label Style="{StaticResource Label.Standard}" Content="Verify algorithm" />
       <ComboBox x:Name="VerifyBox"
                 Style="{StaticResource ComboBox.Standard}"
