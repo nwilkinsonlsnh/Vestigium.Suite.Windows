@@ -21,7 +21,7 @@ public sealed class JobLiveLog
     private readonly ConcurrentQueue<string> _done = new();
     private readonly List<PdfRow> _rows = new();
     private readonly object _gate = new();
-    private readonly object _write = new();
+    private readonly StreamWriter _writer;
     private readonly CancellationTokenSource _stop = new();
     private readonly Task[] _readers;
     private readonly string _logPath;
@@ -38,7 +38,7 @@ public sealed class JobLiveLog
         _jobId = job.JobId;
         Directory.CreateDirectory(JobVerify.Root);
         _logPath = Path.Combine(JobVerify.Root, job.JobId + ".jsonl");
-        File.WriteAllText(_logPath, "");
+        _writer = new StreamWriter(new FileStream(_logPath, FileMode.Create, FileAccess.Write, FileShare.Read)) { AutoFlush = false };
         Write(Line(new
         {
             type = "start",
@@ -50,7 +50,7 @@ public sealed class JobLiveLog
             startedUtc = DateTimeOffset.UtcNow
         }));
         job.ProgressChanged += (_, progress) => Note(progress);
-        _readers = Enumerable.Range(0, 4).Select(_ => Task.Run(Read)).ToArray();
+        _readers = Enumerable.Range(0, 16).Select(_ => Task.Run(Read)).ToArray();
     }
 
     public string LogPath => _logPath;
@@ -79,6 +79,12 @@ public sealed class JobLiveLog
             elapsed = (DateTimeOffset.UtcNow - _started).ToString(),
             endedUtc = DateTimeOffset.UtcNow
         }));
+        lock (_gate)
+        {
+            _writer.Flush();
+            _writer.Dispose();
+        }
+    }
     }
 
     private void Read()
@@ -151,7 +157,11 @@ public sealed class JobLiveLog
 
     private void Write(string line)
     {
-        lock (_write)
-            File.AppendAllText(_logPath, line + Environment.NewLine);
+        lock (_gate)
+        {
+            _writer.WriteLine(line);
+            if (_rows.Count % 50 == 0)
+                _writer.Flush();
+        }
     }
 }
