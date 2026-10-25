@@ -28,6 +28,7 @@ public sealed class JobWindow : Window
     private readonly Button _close;
     private readonly Button _openLog;
     private readonly Button _saveEvidence;
+    private readonly Button _saveOpenEvidence;
     private string? _logPath;
     private string? _evidencePath;
     private readonly ContentControl _page = new();
@@ -101,6 +102,9 @@ public sealed class JobWindow : Window
         _saveEvidence = Button("Save Evidence", "Button.Secondary", SaveEvidence);
         _saveEvidence.Visibility = Visibility.Collapsed;
         _saveEvidence.Margin = new Thickness(8, 0, 0, 0);
+        _saveOpenEvidence = Button("Save && Open Evidence", "Button.Secondary", SaveAndOpen);
+        _saveOpenEvidence.Visibility = Visibility.Collapsed;
+        _saveOpenEvidence.Margin = new Thickness(8, 0, 0, 0);
         _verifyBar.Height = 10;
         _verifyBar.Minimum = 0;
         _verifyBar.Maximum = 100;
@@ -133,6 +137,7 @@ public sealed class JobWindow : Window
         };
         logRow.Children.Add(_openLog);
         logRow.Children.Add(_saveEvidence);
+        logRow.Children.Add(_saveOpenEvidence);
 
         var body = new StackPanel();
         body.Children.Add(_phase);
@@ -680,6 +685,8 @@ public sealed class JobWindow : Window
     {
         _saveEvidence.Visibility = Visibility.Visible;
         _saveEvidence.IsEnabled = false;
+        _saveOpenEvidence.Visibility = Visibility.Visible;
+        _saveOpenEvidence.IsEnabled = false;
     }
 
     public void OfferEvidence(string path)
@@ -689,9 +696,15 @@ public sealed class JobWindow : Window
         _evidencePath = path;
         _saveEvidence.Visibility = Visibility.Visible;
         _saveEvidence.IsEnabled = true;
+        _saveOpenEvidence.Visibility = Visibility.Visible;
+        _saveOpenEvidence.IsEnabled = true;
     }
 
-    private void SaveEvidence()
+    private void SaveEvidence() => SaveTo(false);
+
+    private void SaveAndOpen() => SaveTo(true);
+
+    private void SaveTo(bool open)
     {
         if (string.IsNullOrWhiteSpace(_evidencePath) || !File.Exists(_evidencePath))
             return;
@@ -713,6 +726,8 @@ public sealed class JobWindow : Window
         if (dialog.ShowDialog(this) != true)
             return;
         File.Copy(_evidencePath, dialog.FileName, true);
+        if (open)
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(dialog.FileName) { UseShellExecute = true });
     }
 
     public void VerifyProgress(int done, int total, string name)
@@ -740,12 +755,9 @@ public sealed class JobWindow : Window
 
     private void OpenLog()
     {
-        if (string.IsNullOrWhiteSpace(_logPath))
+        if (string.IsNullOrWhiteSpace(_logPath) || !File.Exists(_logPath))
             return;
-        var target = File.Exists(_logPath) ? _logPath : System.IO.Path.GetDirectoryName(_logPath);
-        if (string.IsNullOrWhiteSpace(target))
-            return;
-        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(target) { UseShellExecute = true });
+        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(_logPath) { UseShellExecute = true });
     }
 
     private void Done()
