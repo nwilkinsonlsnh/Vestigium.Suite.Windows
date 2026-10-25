@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <RootNamespace>Vestigium.Suite.Windows.FXplorerIQ.Icons</RootNamespace>
+    <AssemblyName>Vestigium.Suite.Windows.FXplorerIQ.Icons</AssemblyName>
+    <UseWPF>true</UseWPF>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Version>1.0.0</Version>
+    <Description>Tree icons for FXplorerIQ.</Description>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+</Project>
