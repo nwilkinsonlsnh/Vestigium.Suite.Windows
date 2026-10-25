@@ -22,4 +22,7 @@
     <PackageReference Include="Vestigium.Controls.NumericUpDown" Version="$(VestigiumNumericUpDownVersion)" />
     <PackageReference Include="Vestigium.Controls.UnderConstruction" Version="$(VestigiumUnderConstructionVersion)" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="Helpers\Vestigium.Suite.Windows.FXplorerIQ.Icons\Vestigium.Suite.Windows.FXplorerIQ.Icons.csproj" />
+  </ItemGroup>
 </Project>
