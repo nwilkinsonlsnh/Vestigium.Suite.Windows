@@ -6,6 +6,8 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using Vestigium.Helpers.FileIo;
+using Vestigium.Helpers.Hashing;
+using Vestigium.Helpers.Pdf;
 
 namespace Vestigium.Suite.Windows.FXplorerIQ;
 
@@ -542,7 +544,11 @@ public sealed class ExplorerHost : DockPanel
         try
         {
             var label = verify ? "Copy (Verify)" : "Copy";
-            var result = await ShowJob(label, FileIoHelper.Copy(source, destination, Options(settings, collision, pattern)), source, destination);
+            var job = FileIoHelper.Copy(source, destination, Options(settings, collision, pattern));
+            JobLiveLog? live = null;
+            if (verify)
+                live = new JobLiveLog(job, source, destination, settings.Verify());
+            var result = await ShowJob(label, job, source, destination);
             if (result is null)
             {
                 _status(label + " failed.");
@@ -561,21 +567,14 @@ public sealed class ExplorerHost : DockPanel
             var window = _openJob;
             var jobId = result.JobId;
             window?.OfferLog(JobLog.File(jobId));
-            var progress = new Progress<(int Done, int Total, string Name)>(step => window?.VerifyProgress(step.Done, step.Total, step.Name));
-            var expected = result.Copied + result.Skipped + result.Failed;
-            _ = Task.Run(() => JobVerify.Run(jobId, source, destination, settings.Verify(), progress, expected, "Copy (Verify)"))
-                .ContinueWith(done =>
-                {
-                    if (done.IsFaulted)
-                        return;
-                    var verified = done.Result;
-                    Dispatcher.Invoke(() =>
-                    {
-                        window?.OfferEvidence(verified.Pdf);
-                        window?.VerifyDone(verified.Matched, verified.Failed);
-                        _status("Copy (Verify) " + result.Status + ". " + verified.Matched + " matched, " + verified.Failed + " failed. Source kept.");
-                    });
-                });
+            await Task.Run(() => live?.Drain());
+            var rows = live?.Rows ?? Array.Empty<PdfRow>();
+            var matched = rows.Count(row => row.Equal);
+            var failed = rows.Count - matched;
+            var pdf = WriteEvidence(jobId, "Copy (Verify)", source, destination, settings.Verify(), rows);
+            window?.OfferEvidence(pdf);
+            window?.VerifyDone(matched, failed);
+            _status("Copy (Verify) " + result.Status + ". " + matched + " matched, " + failed + " failed. Source kept.");
         }
         catch (Exception ex)
         {
@@ -585,6 +584,27 @@ public sealed class ExplorerHost : DockPanel
         {
             _busy = false;
         }
+    }
+
+    private static string WriteEvidence(string jobId, string verb, string source, string destination, HashingAlgorithm algorithm, IReadOnlyList<PdfRow> rows)
+    {
+        var folder = Path.Combine(JobVerify.Root);
+        Directory.CreateDirectory(folder);
+        var pdf = Path.Combine(folder, jobId + ".pdf");
+        var bytes = PdfEvidence.Build(new PdfReport
+        {
+            JobId = jobId,
+            Verb = verb,
+            Source = source,
+            Destination = destination,
+            Algorithm = algorithm.ToString(),
+            Matched = rows.Count(row => row.Equal),
+            Failed = rows.Count(row => !row.Equal),
+            Rows = rows,
+            Identity = PdfIdentity.Capture()
+        });
+        File.WriteAllBytes(pdf, bytes);
+        return pdf;
     }
 
     private async Task Move(string source, string destination, ExplorerPane sourcePane, ExplorerPane destPane, bool verify, FileIoCollision collision, string pattern)
