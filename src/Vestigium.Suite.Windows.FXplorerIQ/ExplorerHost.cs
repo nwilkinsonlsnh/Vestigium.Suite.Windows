@@ -601,27 +601,18 @@ public sealed class ExplorerHost : DockPanel
         var folder = Path.Combine(JobVerify.Root);
         Directory.CreateDirectory(folder);
         var pdf = Path.Combine(folder, jobId + ".pdf");
-        var matched = rows.Where(row => row.Equal).Select(row => new[] { row.Relative, "Match", Short(row.SourceDigest) }).ToArray();
-        var failed = rows.Where(row => !row.Equal).Select(row => new[] { row.Relative, "Fail", Short(row.SourceDigest) }).ToArray();
-        var document = new PdfDocument
+        var bytes = PdfEvidence.Build(new PdfReport
         {
-            Title = "Vestigium (FXplorerIQ)",
-            Subtitle = "Summary",
-            Seal = true
-        };
-        document.AddFields("Summary",
-            new PdfField { Name = "Job", Value = jobId },
-            new PdfField { Name = "Verb", Value = verb },
-            new PdfField { Name = "Source", Value = source },
-            new PdfField { Name = "Destination", Value = destination },
-            new PdfField { Name = "Algorithm", Value = algorithm.ToString() },
-            new PdfField { Name = "Matched", Value = matched.Length.ToString() },
-            new PdfField { Name = "Failed", Value = failed.Length.ToString() },
-            new PdfField { Name = "Result", Value = failed.Length == 0 ? "Passed" : "Failed" });
-        if (failed.Length > 0)
-            document.AddTable("Failures  (" + failed.Length + ")", ["File", "Result", "Source digest"], failed);
-        document.AddTable("Matches  (" + matched.Length + ")", ["File", "Result", "Source digest"], matched);
-        var bytes = PdfEvidence.Build(document);
+            JobId = jobId,
+            Verb = verb,
+            Source = source,
+            Destination = destination,
+            Algorithm = algorithm.ToString(),
+            Matched = rows.Count(row => row.Equal),
+            Failed = rows.Count(row => !row.Equal),
+            Rows = rows,
+            Identity = PdfIdentity.Capture()
+        });
         File.WriteAllBytes(pdf, bytes);
         return pdf;
     }
