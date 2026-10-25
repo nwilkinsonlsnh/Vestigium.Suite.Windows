@@ -749,9 +749,6 @@ public sealed class JobWindow : Window
     private static Brush Tint(string key, Color fallback)
         => TryBrush(key) ?? new SolidColorBrush(fallback);
 
-    private static Brush? TryBrush(string key)
-        => Application.Current?.TryFindResource(key) as Brush;
-
     private static void Set(ProgressBar bar, double value, double max)
     {
         if (double.IsNaN(value) || double.IsInfinity(value))
