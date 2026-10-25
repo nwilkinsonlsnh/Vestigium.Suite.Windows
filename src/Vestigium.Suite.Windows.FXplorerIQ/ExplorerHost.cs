@@ -45,6 +45,7 @@ public sealed class ExplorerHost : DockPanel
         menu.Items.Add(Files());
         menu.Items.Add(new Separator());
         menu.Items.Add(Clipboard());
+        menu.Items.Add(Paste());
         menu.Items.Add(new Separator());
         menu.Items.Add(Item("Open in Command Prompt", () => Prompt("cmd.exe")));
         menu.Items.Add(Item("Open in PowerShell", () => Prompt("powershell.exe")));
@@ -189,6 +190,8 @@ public sealed class ExplorerHost : DockPanel
     private MenuItem Clipboard()
     {
         var item = new MenuItem { Header = "Clipboard" };
+        item.Items.Add(Item("Copy", Remember));
+        item.Items.Add(new Separator());
         item.Items.Add(Item("Copy Name", () => CopyText(Path.GetFileName(Target()))));
         item.Items.Add(Item("Copy Directory Path", () => CopyText(DirectoryOf(Target()))));
         item.Items.Add(Item("Copy Full Path", () => CopyText(string.Join(Environment.NewLine, Targets()))));
@@ -233,6 +236,31 @@ public sealed class ExplorerHost : DockPanel
     private static string DirectoryOf(string path)
         => Directory.Exists(path) ? path : Path.GetDirectoryName(path) ?? path;
 
+    private string? _copied;
+
+    private MenuItem _paste = null!;
+
+    private MenuItem Paste()
+    {
+        _paste = new MenuItem { Header = "Paste" };
+        _paste.Items.Add(Item("Copy", () => Drop(JobVerb.Copy)));
+        _paste.Items.Add(Item("Move", () => Drop(JobVerb.Move)));
+        return _paste;
+    }
+
+    private void Remember()
+    {
+        _copied = Target();
+        _status("Copied " + Path.GetFileName(_copied) + ".");
+    }
+
+    private void Drop(JobVerb verb)
+    {
+        if (string.IsNullOrWhiteSpace(_copied))
+            return;
+        Verb(verb, false, _copied, DirectoryOf(Target()));
+    }
+
     private void CopyText(string text)
     {
         if (text.Length == 0)
@@ -267,15 +295,15 @@ public sealed class ExplorerHost : DockPanel
         e.Handled = true;
     }
 
-    private void Verb(JobVerb verb, bool verify)
+    private void Verb(JobVerb verb, bool verify, string? sourceOverride = null, string? destinationOverride = null)
     {
         var sourcePane = SourceIsFirst ? First : Second;
         var destPane = SourceIsFirst ? Second : First;
         var paths = sourcePane.SelectedPaths();
-        var source = paths.Count == 0 ? sourcePane.Folder : paths[0];
-        string? destination = null;
+        var source = sourceOverride ?? (paths.Count == 0 ? sourcePane.Folder : paths[0]);
+        string? destination = destinationOverride;
 
-        if (verb != JobVerb.Delete)
+        if (verb != JobVerb.Delete && destination is null)
         {
             var suggested = IsSplit && !string.IsNullOrWhiteSpace(destPane.Folder) ? destPane.Folder : null;
             var picked = JobConfirm.Ask(Window.GetWindow(this), Label(verb, verify), source, suggested);
@@ -981,6 +1009,7 @@ public sealed class ExplorerHost : DockPanel
     private void RefreshMenu()
     {
         _splitItem.IsChecked = !IsSplit;
+        _paste.IsEnabled = !string.IsNullOrWhiteSpace(_copied);
         _verticalItem.IsEnabled = true;
         _horizontalItem.IsEnabled = true;
         _verticalItem.IsChecked = IsSplit && Vertical;
