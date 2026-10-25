@@ -742,9 +742,11 @@ public sealed class JobWindow : Window
         return new ScrollViewer { Content = list, VerticalScrollBarVisibility = ScrollBarVisibility.Auto };
     }
 
-    private static int Workers(int bucket)
+    private int Workers(int bucket)
     {
-        var total = 32;
+        var total = Math.Max(1, _job.Options.MaxThreads);
+        if (total < 5)
+            return bucket == 0 ? total : 0;
         var raw = new[] { total * 0.70, total * 0.10, total * 0.10, total * 0.05, total * 0.05 };
         var shares = raw.Select(value => Math.Max(1, (int)Math.Round(value, MidpointRounding.AwayFromZero))).ToArray();
         shares[0] += total - shares.Sum();
