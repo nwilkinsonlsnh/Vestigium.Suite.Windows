@@ -25,7 +25,7 @@ public static class ShellIcons
         if (path.Length == 0)
             return null;
         var key = folder ? path : Extension(path);
-        return Cache.GetOrAdd(key, _ => Load(folder ? path : "file" + key, folder));
+        return Cache.GetOrAdd(key, _ => Load(folder ? path : "file" + key, folder, attributes: !folder));
     }
 
     public static ImageSource? Computer()
@@ -37,10 +37,10 @@ public static class ShellIcons
         return ext.Length == 0 ? path : ext;
     }
 
-    private static ImageSource Load(string path, bool folder)
+    private static ImageSource Load(string path, bool folder, bool attributes)
     {
         var info = new ShFileInfo();
-        var flags = Icon | Small | UseAttributes;
+        var flags = Icon | Small | (attributes ? UseAttributes : 0);
         var attr = folder ? Directory : 0u;
         SHGetFileInfo(path, attr, ref info, (uint)Marshal.SizeOf<ShFileInfo>(), flags);
         if (info.Icon == IntPtr.Zero)
