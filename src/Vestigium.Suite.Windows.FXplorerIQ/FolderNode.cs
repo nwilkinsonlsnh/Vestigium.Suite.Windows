@@ -25,14 +25,18 @@ public sealed class FolderNode : INotifyPropertyChanged
 
     public bool Hidden { get; init; }
 
+    public IconKind? Kind { get; init; }
+
     public ObservableCollection<FolderNode> Children { get; } = [];
 
     public bool Loaded { get; set; }
 
     public ImageSource? Icon
-        => FullPath.Length == 0
-            ? null
-            : IconArt.For(IconCatalog.For(FullPath, IsExpanded, Hidden, Drive));
+        => Kind is { } kind
+            ? IconArt.For(kind)
+            : FullPath.Length == 0
+                ? null
+                : IconArt.For(IconCatalog.For(FullPath, IsExpanded, Hidden, Drive));
 
     public bool IsExpanded
     {
