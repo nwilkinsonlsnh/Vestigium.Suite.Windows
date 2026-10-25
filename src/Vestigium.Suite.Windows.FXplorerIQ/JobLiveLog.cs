@@ -85,7 +85,6 @@ public sealed class JobLiveLog
             _writer.Dispose();
         }
     }
-    }
 
     private void Read()
     {
