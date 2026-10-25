@@ -53,6 +53,12 @@ public sealed class JobLiveLog
         _readers = Enumerable.Range(0, 16).Select(_ => Task.Run(Read)).ToArray();
     }
 
+    public static string ExportRoot => Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+        "Vestigium",
+        "Exports",
+        "FXplorerIQ");
+
     public string LogPath => _logPath;
 
     public IReadOnlyList<PdfRow> Rows
