@@ -18,11 +18,32 @@ public static class IconCatalog
             return Drive(drive);
         if (Is(path, @"C:\Users"))
             return expanded ? IconKind.UsersOpen : IconKind.Users;
+        if (Profile(path) is { } special)
+            return special;
         if (SystemFolders.Any(folder => Is(path, folder)))
             return expanded ? IconKind.SystemFolderOpen : IconKind.SystemFolder;
         if (hidden)
             return expanded ? IconKind.HiddenFolderOpen : IconKind.HiddenFolder;
         return expanded ? IconKind.FolderOpen : IconKind.Folder;
+    }
+
+    private static IconKind? Profile(string path)
+    {
+        var parts = path.TrimEnd('\\').Split('\\');
+        if (parts.Length != 4 || !parts[1].Equals("Users", StringComparison.OrdinalIgnoreCase))
+            return null;
+        return parts[3].ToLowerInvariant() switch
+        {
+            "desktop" => IconKind.Desktop,
+            "documents" => IconKind.Documents,
+            "downloads" => IconKind.Downloads,
+            "favorites" => IconKind.Favorites,
+            "pictures" => IconKind.Pictures,
+            "contacts" => IconKind.Contacts,
+            "music" => IconKind.Music,
+            "videos" => IconKind.Videos,
+            _ => null
+        };
     }
 
     private static bool IsDrive(string path)
