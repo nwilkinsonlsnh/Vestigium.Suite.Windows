@@ -68,10 +68,20 @@ public sealed class JobLiveLog
 
     public void Drain()
     {
-        while (!_done.IsEmpty || !_seen.IsEmpty)
-            Thread.Sleep(10);
+        foreach (var path in _seen.Keys)
+            if (_seen.TryRemove(path, out _))
+                _done.Enqueue(path);
+        var idle = 0;
+        while (!_done.IsEmpty && idle < 600)
+        {
+            Thread.Sleep(50);
+            idle = _readers.All(reader => reader.IsCompleted) ? idle + 1 : 0;
+        }
         _stop.Cancel();
-        Task.WaitAll(_readers);
+        try { Task.WaitAll(_readers); }
+        catch (Exception) { /* a hasher faulted; the trailer still closes the file */ }
+        while (_done.TryDequeue(out var relative))
+            Record(relative);
         var matched = _matched;
         var failed = _failed;
         Write(Line(new
@@ -125,7 +135,7 @@ public sealed class JobLiveLog
             var compared = FileIoHelper.CompareFiles(left, right, _algorithm);
             WriteRow(relative, left, right, compared.Equal, compared.LeftDigest, compared.RightDigest);
         }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        catch (Exception)
         {
             WriteRow(relative, left, right, false, "", "");
         }
