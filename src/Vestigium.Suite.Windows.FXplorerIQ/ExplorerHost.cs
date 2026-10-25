@@ -291,6 +291,12 @@ public sealed class ExplorerHost : DockPanel
 
     private bool Busy()
     {
+        if (_openJob is { IsVisible: false })
+        {
+            _busy = false;
+            _running = null;
+            _openJob = null;
+        }
         if (_running is { IsCompleted: true })
         {
             _busy = false;
