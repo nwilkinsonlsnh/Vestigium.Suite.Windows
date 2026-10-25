@@ -48,7 +48,10 @@
           </TreeView.ItemContainerStyle>
           <TreeView.ItemTemplate>
             <HierarchicalDataTemplate ItemsSource="{Binding Children}">
-              <TextBlock Text="{Binding Name}" />
+              <StackPanel Orientation="Horizontal">
+                <Image Width="16" Height="16" Margin="0,0,6,0" Source="{Binding Icon}" />
+                <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
+              </StackPanel>
             </HierarchicalDataTemplate>
           </TreeView.ItemTemplate>
         </TreeView>
