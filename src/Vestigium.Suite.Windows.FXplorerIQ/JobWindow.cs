@@ -675,10 +675,10 @@ public sealed class JobWindow : Window
         if (_result is not null)
             return;
         var shown = 0;
-        foreach (var file in progress.Active)
+        foreach (var file in progress.Active
+            .Where(file => file.Status is not ("Done" or "Skipped"))
+            .OrderByDescending(file => file.Bucket switch { "Huge" => 2, "Large" => 1, _ => 0 }))
         {
-            if (file.Status is "Done" or "Skipped")
-                continue;
             if (shown++ >= 30)
                 break;
             _files.Children.Add(Row(file));
@@ -687,7 +687,7 @@ public sealed class JobWindow : Window
 
     private static Grid Row(FileIoFileProgress file)
     {
-        var grid = new Grid { Margin = new Thickness(0, 2, 0, 2) };
+        var grid = new Grid { Margin = new Thickness(0, 2, 0, 2), Background = RowBrush(file.Bucket) };
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(2, GridUnitType.Star) });
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(70) });
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(70) });
@@ -701,7 +701,14 @@ public sealed class JobWindow : Window
             TextTrimming = TextTrimming.CharacterEllipsis,
             VerticalAlignment = VerticalAlignment.Center
         };
-        var bucket = new TextBlock { Text = file.Bucket, Style = TryStyle("TextBlock.Caption"), VerticalAlignment = VerticalAlignment.Center };
+        var bucket = new TextBlock
+        {
+            Text = file.Bucket,
+            Style = TryStyle("TextBlock.Caption"),
+            Foreground = BucketBrush(file.Bucket),
+            FontWeight = file.Bucket is "Large" or "Huge" ? FontWeights.SemiBold : FontWeights.Normal,
+            VerticalAlignment = VerticalAlignment.Center
+        };
         var size = new TextBlock { Text = Size(file.Size), Style = TryStyle("TextBlock.Caption"), VerticalAlignment = VerticalAlignment.Center };
         var max = Math.Max(file.Size, 1);
         var bar = new ProgressBar { Height = 10, Minimum = 0, Maximum = max, VerticalAlignment = VerticalAlignment.Center };
@@ -722,6 +729,28 @@ public sealed class JobWindow : Window
         grid.Children.Add(status);
         return grid;
     }
+
+    private static Brush RowBrush(string bucket)
+        => bucket switch
+        {
+            "Huge" => Tint("Vestigium.Brushes.Status.Error", Color.FromRgb(120, 48, 48)),
+            "Large" => Tint("Vestigium.Brushes.Status.Warning", Color.FromRgb(120, 84, 32)),
+            _ => Brushes.Transparent
+        };
+
+    private static Brush BucketBrush(string bucket)
+        => bucket switch
+        {
+            "Huge" => Tint("Vestigium.Brushes.Status.Error", Color.FromRgb(255, 140, 140)),
+            "Large" => Tint("Vestigium.Brushes.Status.Warning", Color.FromRgb(255, 196, 120)),
+            _ => TryBrush("Vestigium.Brushes.Text.Primary") ?? SystemColors.ControlTextBrush
+        };
+
+    private static Brush Tint(string key, Color fallback)
+        => TryBrush(key) ?? new SolidColorBrush(fallback);
+
+    private static Brush? TryBrush(string key)
+        => Application.Current?.TryFindResource(key) as Brush;
 
     private static void Set(ProgressBar bar, double value, double max)
     {
