@@ -1,54 +1,80 @@
 using System.Collections.Concurrent;
 using System.IO;
+using System.Text.Json;
 using Vestigium.Helpers.FileIo;
 using Vestigium.Helpers.Hashing;
 using Vestigium.Helpers.Pdf;
 
 namespace Vestigium.Suite.Windows.FXplorerIQ;
 
-/// <summary>Writes a log line when a file finishes, through the logging buffer. One reader, not a thread per file.</summary>
+/// <summary>Writes the evidence log as files finish. A small pool hashes. Not a thread per file, and not a pass after.</summary>
 public sealed class JobLiveLog
 {
+    private static readonly JsonSerializerOptions Json = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+
     private readonly string _source;
     private readonly string _destination;
     private readonly HashingAlgorithm _algorithm;
     private readonly string _jobId;
+    private readonly string _verb;
     private readonly ConcurrentDictionary<string, byte> _seen = new();
     private readonly ConcurrentQueue<string> _done = new();
     private readonly List<PdfRow> _rows = new();
-    private readonly object _rowsGate = new();
-
+    private readonly object _gate = new();
     private readonly CancellationTokenSource _stop = new();
-    private readonly Task _reader;
-
+    private readonly Task[] _readers;
     private readonly string _logPath;
+    private int _matched;
+    private int _failed;
 
-    public JobLiveLog(FileIoJob job, string source, string destination, HashingAlgorithm algorithm)
+    public JobLiveLog(FileIoJob job, string source, string destination, HashingAlgorithm algorithm, string verb)
     {
         _source = source;
         _destination = destination;
         _algorithm = algorithm;
+        _verb = verb;
         _jobId = job.JobId;
         Directory.CreateDirectory(JobVerify.Root);
         _logPath = Path.Combine(JobVerify.Root, job.JobId + ".jsonl");
-        File.WriteAllText(_logPath, "");
+        File.WriteAllText(_logPath, Line(new
+        {
+            type = "start",
+            correlationId = _jobId,
+            verb,
+            source,
+            destination,
+            algorithm = algorithm.ToString(),
+            startedUtc = DateTimeOffset.UtcNow
+        }) + Environment.NewLine);
         job.ProgressChanged += (_, progress) => Note(progress);
-        _reader = Task.Run(Read);
+        _readers = Enumerable.Range(0, 4).Select(_ => Task.Run(Read)).ToArray();
     }
 
     public string LogPath => _logPath;
 
     public IReadOnlyList<PdfRow> Rows
     {
-        get { lock (_rowsGate) return _rows.ToArray(); }
+        get { lock (_gate) return _rows.ToArray(); }
     }
 
     public void Drain()
     {
         _stop.Cancel();
-        _reader.Wait();
+        Task.WaitAll(_readers);
         while (_done.TryDequeue(out var relative))
             Record(relative);
+        var matched = _matched;
+        var failed = _failed;
+        File.AppendAllText(_logPath, Line(new
+        {
+            type = "end",
+            correlationId = _jobId,
+            files = matched + failed,
+            matched,
+            failed,
+            result = failed == 0 ? "Passed" : "Failed",
+            endedUtc = DateTimeOffset.UtcNow
+        }) + Environment.NewLine);
     }
 
     private void Read()
@@ -69,10 +95,9 @@ public sealed class JobLiveLog
         var still = new HashSet<string>(progress.Active.Select(file => file.RelativePath));
         foreach (var path in _seen.Keys)
         {
-            if (still.Contains(path))
+            if (still.Contains(path) || !_seen.TryRemove(path, out _))
                 continue;
-            if (_seen.TryRemove(path, out _))
-                _done.Enqueue(path);
+            _done.Enqueue(path);
         }
     }
 
@@ -81,19 +106,42 @@ public sealed class JobLiveLog
         var left = Path.Combine(_source, relative);
         var right = Path.Combine(_destination, relative);
         var compared = FileIoHelper.CompareFiles(left, right, _algorithm);
-        var row = new PdfRow
+        var leftInfo = Info(left);
+        var rightInfo = Info(right);
+        if (compared.Equal)
+            Interlocked.Increment(ref _matched);
+        else
+            Interlocked.Increment(ref _failed);
+        lock (_gate)
+            _rows.Add(new PdfRow
+            {
+                Relative = relative,
+                Equal = compared.Equal,
+                SourceDigest = compared.LeftDigest,
+                DestinationDigest = compared.RightDigest
+            });
+        File.AppendAllText(_logPath, Line(new
         {
-            Relative = relative,
-            Equal = compared.Equal,
-            SourceDigest = compared.LeftDigest,
-            DestinationDigest = compared.RightDigest
-        };
-        lock (_rowsGate)
-            _rows.Add(row);
-        File.AppendAllText(_logPath, relative + "\t" + compared.Equal + "\t" + compared.LeftDigest + "\t" + compared.RightDigest + Environment.NewLine);
-        HostLog.Information(
-            FXplorerCatalog.JobCompleted,
-            "File",
-            "id=" + _jobId + " file=" + relative + " equal=" + compared.Equal + " source=" + compared.LeftDigest + " dest=" + compared.RightDigest);
+            type = "file",
+            sourceDirectory = Path.GetDirectoryName(left) ?? "",
+            sourceFileName = Path.GetFileName(left),
+            sourceExtension = Path.GetExtension(left),
+            sourceSize = leftInfo,
+            destinationDirectory = Path.GetDirectoryName(right) ?? "",
+            destinationFileName = Path.GetFileName(right),
+            destinationExtension = Path.GetExtension(right),
+            destinationSize = rightInfo,
+            hashMatch = compared.Equal,
+            sourceHash = compared.LeftDigest,
+            destinationHash = compared.RightDigest
+        }) + Environment.NewLine);
     }
+
+    private static long Info(string path)
+    {
+        try { return new FileInfo(path).Length; }
+        catch (Exception) { return 0; }
+    }
+
+    private static string Line(object value) => JsonSerializer.Serialize(value, Json);
 }
