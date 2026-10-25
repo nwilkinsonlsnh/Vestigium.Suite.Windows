@@ -31,6 +31,8 @@ public sealed class FXplorerSettings
 
     public int VerifyReadWaitMs { get; set; } = 25;
 
+    public int VerifyRetryParallel { get; set; } = 10;
+
     public bool HideEmptyDrives { get; set; }
 
     public bool ShowAllFolders { get; set; }
