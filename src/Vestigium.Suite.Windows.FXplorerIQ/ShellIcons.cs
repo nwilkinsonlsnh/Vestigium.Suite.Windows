@@ -18,6 +18,13 @@ public static class ShellIcons
     private const uint Directory = 0x10;
     private const string ThisPC = "::{20D04FE0-3AEA-1069-A2D8-08002B30309D}";
 
+    private static readonly Dictionary<string, string> Known = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["Contacts"] = "::{56784854-C6CB-462B-8169-88E350ACB882}",
+        ["Favorites"] = "::{1777F761-68AD-4D8A-87BD-30B759FA33DD}",
+        ["OneDrive"] = "::{A52BBA46-E9E1-435F-B3D9-28DAA648C0F6}"
+    };
+
     private static readonly ConcurrentDictionary<string, ImageSource> Cache = new(StringComparer.OrdinalIgnoreCase);
 
     public static ImageSource? For(string path, bool folder)
@@ -32,6 +39,12 @@ public static class ShellIcons
 
     public static ImageSource? Computer()
         => Cache.GetOrAdd("thispc", _ => Load(ThisPC, folder: true, attributes: false));
+
+    private static string? KnownFolder(string path)
+    {
+        var name = Path.GetFileName(path.TrimEnd('\\'));
+        return Known.TryGetValue(name, out var id) ? id : null;
+    }
 
     private static string Extension(string path)
     {
