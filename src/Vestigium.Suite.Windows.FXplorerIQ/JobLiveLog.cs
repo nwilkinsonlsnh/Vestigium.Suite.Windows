@@ -29,10 +29,15 @@ public sealed class JobLiveLog
     private int _matched;
     private int _failed;
 
+    private readonly ConcurrentQueue<string> _retry = new();
     private readonly int _retries;
     private readonly int _waitMs;
+    private readonly int _parallel;
+    private int _doneCount;
+    private int _expected;
+    private Action<int, int, string>? _progress;
 
-    public JobLiveLog(FileIoJob job, string source, string destination, HashingAlgorithm algorithm, string verb, int retries, int waitMs)
+    public JobLiveLog(FileIoJob job, string source, string destination, HashingAlgorithm algorithm, string verb, int retries, int waitMs, int parallel)
     {
         _source = source;
         _destination = destination;
@@ -40,6 +45,7 @@ public sealed class JobLiveLog
         _verb = verb;
         _retries = Math.Clamp(retries, 1, 100);
         _waitMs = Math.Clamp(waitMs, 10, 1000);
+        _parallel = Math.Clamp(parallel, 1, 32);
         _jobId = job.JobId;
         Directory.CreateDirectory(JobVerify.Root);
         _logPath = Path.Combine(JobVerify.Root, job.JobId + ".jsonl");
@@ -71,6 +77,12 @@ public sealed class JobLiveLog
         get { lock (_gate) return _rows.ToArray(); }
     }
 
+    public void Watch(int expected, Action<int, int, string> progress)
+    {
+        _expected = expected;
+        _progress = progress;
+    }
+
     public void Drain()
     {
         foreach (var path in _seen.Keys)
@@ -86,8 +98,12 @@ public sealed class JobLiveLog
         _stop.Cancel();
         try { Task.WaitAll(_readers); }
         catch (Exception) { /* a hasher faulted; the trailer still closes the file */ }
-        while (_done.TryDequeue(out var relative))
-            Record(relative);
+        var retrying = Enumerable.Range(0, _parallel).Select(_ => Task.Run(Retry)).ToArray();
+        while (!_retry.IsEmpty)
+            Thread.Sleep(20);
+        Task.WaitAll(retrying);
+        while (_retry.TryDequeue(out var relative))
+            Finish(relative, _retries, "unread");
         var matched = _matched;
         var failed = _failed;
         Write(Line(new
@@ -136,24 +152,61 @@ public sealed class JobLiveLog
     {
         var left = Path.Combine(_source, relative);
         var right = Path.Combine(_destination, relative);
-        string? reason = null;
-        for (var attempt = 1; attempt <= _retries; attempt++)
+        try
         {
-            try
-            {
-                var compared = FileIoHelper.CompareFiles(left, right, _algorithm);
-                WriteRow(relative, left, right, compared.Equal, compared.LeftDigest, compared.RightDigest, attempt, null);
-                return;
-            }
-            catch (Exception ex)
-            {
-                reason = ex.Message;
-                if (attempt < _retries)
-                    Thread.Sleep(_waitMs);
-            }
+            var compared = FileIoHelper.CompareFiles(left, right, _algorithm);
+            WriteRow(relative, left, right, compared.Equal, compared.LeftDigest, compared.RightDigest, 1, null);
         }
-        WriteRow(relative, left, right, false, "", "", _retries, reason);
+        catch (Exception)
+        {
+            _retry.Enqueue(relative);
+            Report("Retrying  " + relative);
+        }
     }
+
+    private void Retry()
+    {
+        while (!_stop.IsCancellationRequested || !_retry.IsEmpty)
+        {
+            if (!_retry.TryDequeue(out var relative))
+            {
+                Thread.Sleep(20);
+                continue;
+            }
+            var left = Path.Combine(_source, relative);
+            var right = Path.Combine(_destination, relative);
+            string? reason = null;
+            var opened = false;
+            for (var attempt = 2; attempt <= _retries; attempt++)
+            {
+                Thread.Sleep(_waitMs);
+                Report("Retrying  " + relative + "  (" + attempt + " / " + _retries + ")");
+                try
+                {
+                    var compared = FileIoHelper.CompareFiles(left, right, _algorithm);
+                    WriteRow(relative, left, right, compared.Equal, compared.LeftDigest, compared.RightDigest, attempt, null);
+                    opened = true;
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    reason = ex.Message;
+                }
+            }
+            if (!opened)
+                Finish(relative, _retries, reason);
+        }
+    }
+
+    private void Finish(string relative, int attempts, string? reason)
+    {
+        var left = Path.Combine(_source, relative);
+        var right = Path.Combine(_destination, relative);
+        WriteRow(relative, left, right, false, "", "", attempts, reason);
+    }
+
+    private void Report(string text)
+        => _progress?.Invoke(_doneCount, Math.Max(_expected, _doneCount), text);
 
     private void WriteRow(string relative, string left, string right, bool equal, string? sourceHash, string? destinationHash, int attempts, string? reason)
     {
@@ -188,6 +241,8 @@ public sealed class JobLiveLog
             sourceHash,
             destinationHash
         }));
+        var done = Interlocked.Increment(ref _doneCount);
+        Report(Path.GetFileName(left));
     }
 
     private static long Info(string path)
