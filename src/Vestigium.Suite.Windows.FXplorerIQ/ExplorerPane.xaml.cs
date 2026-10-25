@@ -9,7 +9,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using Vestigium.Helpers.FileSystemPaths;
 using Vestigium.Helpers.Hashing;
-using Vestigium.Suite.Windows.FXplorerIQ.Icons;
 
 namespace Vestigium.Suite.Windows.FXplorerIQ;
 
@@ -349,7 +348,7 @@ public partial class ExplorerPane : UserControl
     {
         _roots.Clear();
         var settings = App.Settings.Load();
-        var pc = Group("This PC", IconKind.ThisPC);
+        var pc = Group("This PC", thisPC: true);
         pc.IsExpanded = true;
 
         var devices = Group("Devices & Drives");
@@ -392,16 +391,16 @@ public partial class ExplorerPane : UserControl
         }
     }
 
-    private static FolderNode Group(string name, IconKind? kind = null)
+    private static FolderNode Group(string name, bool thisPC = false)
     {
-        var node = new FolderNode(name, "") { Kind = kind };
+        var node = new FolderNode(name, "") { ThisPC = thisPC };
         node.Loaded = true;
         return node;
     }
 
     private static FolderNode DriveNode(DriveInfo drive)
     {
-        var node = new FolderNode(DriveLabel(drive), drive.RootDirectory.FullName) { Drive = drive.DriveType };
+        var node = new FolderNode(DriveLabel(drive), drive.RootDirectory.FullName);
         node.Children.Add(new FolderNode("", ""));
         return node;
     }
@@ -469,10 +468,7 @@ public partial class ExplorerPane : UserControl
                 if (!ShowFolder(dir, settings))
                     continue;
                 var info = new DirectoryInfo(dir);
-                var child = new FolderNode(info.Name, info.FullName)
-                {
-                    Hidden = info.Attributes.HasFlag(FileAttributes.Hidden)
-                };
+                var child = new FolderNode(info.Name, info.FullName);
                 if (HasSubfolder(info.FullName))
                     child.Children.Add(new FolderNode("", ""));
                 node.Children.Add(child);
