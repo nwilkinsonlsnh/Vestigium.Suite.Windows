@@ -62,10 +62,10 @@ public sealed class JobLiveLog
 
     public void Drain()
     {
+        while (!_done.IsEmpty || !_seen.IsEmpty)
+            Thread.Sleep(10);
         _stop.Cancel();
         Task.WaitAll(_readers);
-        while (_done.TryDequeue(out var relative))
-            Record(relative);
         var matched = _matched;
         var failed = _failed;
         Write(Line(new
