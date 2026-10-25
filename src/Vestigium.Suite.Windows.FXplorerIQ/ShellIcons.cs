@@ -29,7 +29,7 @@ public static class ShellIcons
     }
 
     public static ImageSource? Computer()
-        => Cache.GetOrAdd("thispc", _ => Load(ThisPC, true));
+        => Cache.GetOrAdd("thispc", _ => Load(ThisPC, folder: true, attributes: false));
 
     private static string Extension(string path)
     {
