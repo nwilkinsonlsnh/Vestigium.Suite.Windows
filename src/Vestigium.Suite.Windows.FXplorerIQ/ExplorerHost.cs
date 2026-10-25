@@ -359,11 +359,12 @@ public sealed class ExplorerHost : DockPanel
         JobLog.Start(title, job.JobId, source, destination);
         var done = new TaskCompletionSource<FileIoJobResult?>();
         var window = new JobWindow(title, job, source, destination) { Owner = Window.GetWindow(this), AutoClose = autoClose };
-        window.Closed += (_, _) =>
+        window.Finished += (_, _) =>
         {
             JobLog.End(title, job.JobId, source, destination, window.Result?.Status ?? "Failed");
             done.TrySetResult(window.Result);
         };
+        window.Closed += (_, _) => done.TrySetResult(window.Result);
         window.Show();
         return done.Task;
     }
