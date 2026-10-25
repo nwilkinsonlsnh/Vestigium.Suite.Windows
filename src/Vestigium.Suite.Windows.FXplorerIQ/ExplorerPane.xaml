@@ -142,6 +142,13 @@
             <DataGridTextColumn Header="File Hash" Binding="{Binding Hash}" Width="280" MinWidth="40" />
             <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="100" MinWidth="40" />
             <DataGridTextColumn Header="Tag" Binding="{Binding Tag}" Width="*" MinWidth="40" />
+            <DataGridTemplateColumn Header="" Width="36" MinWidth="36">
+              <DataGridTemplateColumn.CellTemplate>
+                <DataTemplate>
+                  <Image Width="16" Height="16" HorizontalAlignment="Center" Source="{Binding Icon}" />
+                </DataTemplate>
+              </DataGridTemplateColumn.CellTemplate>
+            </DataGridTemplateColumn>
           </DataGrid.Columns>
         </DataGrid>
         <Border x:Name="BusyOverlay"
