@@ -16,6 +16,8 @@ public sealed class JobWindow : Window
     private readonly FileIoJob _job;
     private readonly TextBlock _phase = new();
     private readonly ProgressBar _bar = new();
+    private readonly ProgressBar _verifyBar = new();
+    private readonly TextBlock _verifyLine = new();
     private readonly TextBlock _rate = new();
     private readonly TextBlock[] _bins = new TextBlock[5];
     private readonly Border[] _cards = new Border[5];
@@ -94,6 +96,19 @@ public sealed class JobWindow : Window
         _close.IsEnabled = false;
         _openLog = Button("Open Log File", "Button.Secondary", OpenLog);
         _openLog.Visibility = Visibility.Collapsed;
+        _verifyBar.Height = 10;
+        _verifyBar.Minimum = 0;
+        _verifyBar.Maximum = 100;
+        _verifyBar.Margin = new Thickness(0, 4, 0, 0);
+        _verifyBar.Visibility = Visibility.Collapsed;
+        if (TryStyle("ProgressBar.Standard") is { } verifyStyle)
+            _verifyBar.Style = verifyStyle;
+        _verifyLine.Style = TryStyle("TextBlock.Caption");
+        _verifyLine.TextTrimming = TextTrimming.CharacterEllipsis;
+        _verifyLine.Visibility = Visibility.Collapsed;
+        var verify = new StackPanel { Margin = new Thickness(0, 8, 0, 0) };
+        verify.Children.Add(_verifyLine);
+        verify.Children.Add(_verifyBar);
         var actions = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -121,6 +136,7 @@ public sealed class JobWindow : Window
         body.Children.Add(_bar);
         body.Children.Add(_rate);
         body.Children.Add(bins);
+        body.Children.Add(verify);
         body.Children.Add(logRow);
 
         var action = new DockPanel { Background = _surface };
@@ -652,6 +668,18 @@ public sealed class JobWindow : Window
         _logPath = path;
         _openLog.Visibility = Visibility.Visible;
         _openLog.IsEnabled = true;
+    }
+
+    public void VerifyProgress(int done, int total, string name)
+    {
+        var max = Math.Max(total, 1);
+        _verifyLine.Text = "Verifying  " + done + " / " + total + "   " + name;
+        _verifyLine.Visibility = Visibility.Visible;
+        _verifyBar.Visibility = Visibility.Visible;
+        _verifyBar.Maximum = max;
+        _verifyBar.Value = Math.Min(done, max);
+        if (done >= total && total > 0)
+            _verifyLine.Text = "Verified  " + done + " / " + total;
     }
 
     private void OpenLog()
