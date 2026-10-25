@@ -29,12 +29,17 @@ public sealed class JobLiveLog
     private int _matched;
     private int _failed;
 
-    public JobLiveLog(FileIoJob job, string source, string destination, HashingAlgorithm algorithm, string verb)
+    private readonly int _retries;
+    private readonly int _waitMs;
+
+    public JobLiveLog(FileIoJob job, string source, string destination, HashingAlgorithm algorithm, string verb, int retries, int waitMs)
     {
         _source = source;
         _destination = destination;
         _algorithm = algorithm;
         _verb = verb;
+        _retries = Math.Clamp(retries, 1, 100);
+        _waitMs = Math.Clamp(waitMs, 10, 1000);
         _jobId = job.JobId;
         Directory.CreateDirectory(JobVerify.Root);
         _logPath = Path.Combine(JobVerify.Root, job.JobId + ".jsonl");
@@ -131,18 +136,26 @@ public sealed class JobLiveLog
     {
         var left = Path.Combine(_source, relative);
         var right = Path.Combine(_destination, relative);
-        try
+        string? reason = null;
+        for (var attempt = 1; attempt <= _retries; attempt++)
         {
-            var compared = FileIoHelper.CompareFiles(left, right, _algorithm);
-            WriteRow(relative, left, right, compared.Equal, compared.LeftDigest, compared.RightDigest);
+            try
+            {
+                var compared = FileIoHelper.CompareFiles(left, right, _algorithm);
+                WriteRow(relative, left, right, compared.Equal, compared.LeftDigest, compared.RightDigest, attempt, null);
+                return;
+            }
+            catch (Exception ex)
+            {
+                reason = ex.Message;
+                if (attempt < _retries)
+                    Thread.Sleep(_waitMs);
+            }
         }
-        catch (Exception)
-        {
-            WriteRow(relative, left, right, false, "", "");
-        }
+        WriteRow(relative, left, right, false, "", "", _retries, reason);
     }
 
-    private void WriteRow(string relative, string left, string right, bool equal, string? sourceHash, string? destinationHash)
+    private void WriteRow(string relative, string left, string right, bool equal, string? sourceHash, string? destinationHash, int attempts, string? reason)
     {
         var leftInfo = Info(left);
         var rightInfo = Info(right);
@@ -170,6 +183,8 @@ public sealed class JobLiveLog
             destinationExtension = Path.GetExtension(right),
             destinationSize = rightInfo,
             hashMatch = equal,
+            attempts,
+            reason,
             sourceHash,
             destinationHash
         }));
