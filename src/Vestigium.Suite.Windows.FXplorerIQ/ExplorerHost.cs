@@ -21,7 +21,6 @@ public sealed class ExplorerHost : DockPanel
     private readonly MenuItem _splitItem;
     private readonly MenuItem _verticalItem;
     private readonly MenuItem _horizontalItem;
-    private readonly MenuItem _swapItem;
     private readonly Action<string> _status;
     private ScrollViewer? _viewport;
     private bool _applying;
@@ -42,26 +41,15 @@ public sealed class ExplorerHost : DockPanel
         Loaded += (_, _) => BindViewport();
         SizeChanged += (_, _) => Fit();
 
-        _splitItem = Item("Split", Split_Click);
-        _verticalItem = Item("Vertical", () => SetVertical(true));
-        _horizontalItem = Item("Horizontal", () => SetVertical(false));
-        _swapItem = Item("Swap source and destination", Swap_Click);
         var menu = new ContextMenu();
-        menu.Items.Add(Item("Copy", () => Verb(JobVerb.Copy, false)));
-        menu.Items.Add(Item("Copy (Verify)", () => Verb(JobVerb.Copy, true)));
-        menu.Items.Add(Item("Move", () => Verb(JobVerb.Move, false)));
-        menu.Items.Add(Item("Move (Verify)", () => Verb(JobVerb.Move, true)));
-        menu.Items.Add(Item("Delete", () => Verb(JobVerb.Delete, false)));
-        menu.Items.Add(Item("Delete (Secure)", () => Verb(JobVerb.Delete, true)));
-        menu.Items.Add(Item("Mirror (Verify)", () => Verb(JobVerb.Mirror, true)));
-        menu.Items.Add(Item("Audit", Audit_Click));
+        menu.Items.Add(Files());
         menu.Items.Add(new Separator());
-        menu.Items.Add(_splitItem);
+        menu.Items.Add(Clipboard());
         menu.Items.Add(new Separator());
-        menu.Items.Add(_verticalItem);
-        menu.Items.Add(_horizontalItem);
+        menu.Items.Add(Item("Open in Command Prompt", () => Prompt("cmd.exe")));
+        menu.Items.Add(Item("Open in PowerShell", () => Prompt("powershell.exe")));
         menu.Items.Add(new Separator());
-        menu.Items.Add(_swapItem);
+        menu.Items.Add(Split());
         menu.Opened += (_, _) => RefreshMenu();
         ContextMenu = menu;
         PreviewMouseRightButtonUp += OpenMenu;
@@ -176,6 +164,97 @@ public sealed class ExplorerHost : DockPanel
         }
 
         return null;
+    }
+
+    private MenuItem Files()
+    {
+        var item = new MenuItem { Header = "File System Management" };
+        item.Items.Add(Item("Audit", Audit_Click));
+        item.Items.Add(new Separator());
+        item.Items.Add(Item("Copy", () => Verb(JobVerb.Copy, false)));
+        item.Items.Add(Item("Move", () => Verb(JobVerb.Move, false)));
+        item.Items.Add(Item("Mirror", () => Verb(JobVerb.Mirror, false)));
+        item.Items.Add(new Separator());
+        var validation = new MenuItem { Header = "Validation" };
+        validation.Items.Add(Item("Copy", () => Verb(JobVerb.Copy, true)));
+        validation.Items.Add(Item("Move", () => Verb(JobVerb.Move, true)));
+        validation.Items.Add(Item("Mirror", () => Verb(JobVerb.Mirror, true)));
+        item.Items.Add(validation);
+        item.Items.Add(new Separator());
+        item.Items.Add(Item("Delete", () => Verb(JobVerb.Delete, false)));
+        item.Items.Add(Item("Delete (Secure)", () => Verb(JobVerb.Delete, true)));
+        return item;
+    }
+
+    private MenuItem Clipboard()
+    {
+        var item = new MenuItem { Header = "Clipboard" };
+        item.Items.Add(Item("Copy Name", () => CopyText(Path.GetFileName(Target()))));
+        item.Items.Add(Item("Copy Directory Path", () => CopyText(DirectoryOf(Target()))));
+        item.Items.Add(Item("Copy Full Path", () => CopyText(string.Join(Environment.NewLine, Targets()))));
+        return item;
+    }
+
+    private MenuItem Split()
+    {
+        _splitItem = Item("None", () => CloseSplit());
+        _verticalItem = Item("Vertical", () => Orient(true));
+        _horizontalItem = Item("Horizontal", () => Orient(false));
+        var item = new MenuItem { Header = "Split" };
+        item.Items.Add(_splitItem);
+        item.Items.Add(_verticalItem);
+        item.Items.Add(_horizontalItem);
+        return item;
+    }
+
+    private void CloseSplit()
+    {
+        if (!IsSplit)
+            return;
+        Split_Click();
+    }
+
+    private void Orient(bool vertical)
+    {
+        if (!IsSplit)
+            Split_Click();
+        SetVertical(vertical);
+    }
+
+    private IReadOnlyList<string> Targets()
+    {
+        var pane = SourceIsFirst ? First : Second;
+        var paths = pane.SelectedPaths();
+        return paths.Count == 0 ? [pane.Folder] : paths;
+    }
+
+    private string Target() => Targets()[0];
+
+    private static string DirectoryOf(string path)
+        => Directory.Exists(path) ? path : Path.GetDirectoryName(path) ?? path;
+
+    private void CopyText(string text)
+    {
+        if (text.Length == 0)
+            return;
+        System.Windows.Clipboard.SetText(text);
+        _status("Copied to the clipboard.");
+    }
+
+    private void Prompt(string shell)
+    {
+        var folder = DirectoryOf(Target());
+        if (folder.Length == 0 || !Directory.Exists(folder))
+        {
+            _status("No folder to open.");
+            return;
+        }
+        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+        {
+            FileName = shell,
+            WorkingDirectory = folder,
+            UseShellExecute = true
+        });
     }
 
     private void OpenMenu(object sender, MouseButtonEventArgs e)
@@ -901,10 +980,9 @@ public sealed class ExplorerHost : DockPanel
 
     private void RefreshMenu()
     {
-        _splitItem.Header = IsSplit ? "Close split" : "Split";
-        _verticalItem.IsEnabled = IsSplit;
-        _horizontalItem.IsEnabled = IsSplit;
-        _swapItem.IsEnabled = IsSplit;
+        _splitItem.IsChecked = !IsSplit;
+        _verticalItem.IsEnabled = true;
+        _horizontalItem.IsEnabled = true;
         _verticalItem.IsChecked = IsSplit && Vertical;
         _horizontalItem.IsChecked = IsSplit && !Vertical;
     }
