@@ -27,6 +27,10 @@ public sealed class FXplorerSettings
 
     public string VerifyAlgorithm { get; set; } = Vestigium.Helpers.Hashing.HashingAlgorithm.Sha256.ToString();
 
+    public int VerifyReadRetries { get; set; } = 5;
+
+    public int VerifyReadWaitMs { get; set; } = 25;
+
     public bool HideEmptyDrives { get; set; }
 
     public bool ShowAllFolders { get; set; }
