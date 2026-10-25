@@ -23,6 +23,8 @@ public sealed class JobWindow : Window
     private readonly Button _resume;
     private readonly Button _cancel;
     private readonly Button _close;
+    private readonly Button _openLog;
+    private string? _logPath;
     private readonly ContentControl _page = new();
     private readonly StackPanel _charts = new() { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 8) };
     private readonly ContentControl _stage = new();
@@ -89,6 +91,8 @@ public sealed class JobWindow : Window
         });
         _close = Button("Close", "Button.Primary", Close);
         _close.IsEnabled = false;
+        _openLog = Button("Open Log File", "Button.Secondary", OpenLog);
+        _openLog.Visibility = Visibility.Collapsed;
         var actions = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -98,6 +102,7 @@ public sealed class JobWindow : Window
         actions.Children.Add(_pause);
         actions.Children.Add(_resume);
         actions.Children.Add(_cancel);
+        actions.Children.Add(_openLog);
         actions.Children.Add(_close);
 
         var body = new StackPanel();
@@ -629,6 +634,22 @@ public sealed class JobWindow : Window
             _pulse.Stop();
             Finished?.Invoke(this, EventArgs.Empty);
         }
+    }
+
+    public void OfferLog(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            return;
+        _logPath = path;
+        _openLog.Visibility = Visibility.Visible;
+        _openLog.IsEnabled = true;
+    }
+
+    private void OpenLog()
+    {
+        if (string.IsNullOrWhiteSpace(_logPath) || !File.Exists(_logPath))
+            return;
+        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(_logPath) { UseShellExecute = true });
     }
 
     private void Done()
