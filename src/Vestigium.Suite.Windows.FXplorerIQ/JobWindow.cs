@@ -619,7 +619,8 @@ public sealed class JobWindow : Window
 
             _phase.Text = "Failed";
             _rate.Text = ex.Message;
-            _close.IsEnabled = true;
+            Done();
+            Finished?.Invoke(this, EventArgs.Empty);
         }
         finally
         {
