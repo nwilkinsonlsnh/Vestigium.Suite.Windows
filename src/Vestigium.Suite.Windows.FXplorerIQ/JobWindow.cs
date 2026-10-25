@@ -709,11 +709,7 @@ public sealed class JobWindow : Window
     {
         if (string.IsNullOrWhiteSpace(_evidencePath) || !File.Exists(_evidencePath))
             return;
-        var folder = System.IO.Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
-            "Vestigium",
-            "Exports",
-            "FXplorerIQ");
+        var folder = JobLiveLog.ExportRoot;
         Directory.CreateDirectory(folder);
         var dialog = new Microsoft.Win32.SaveFileDialog
         {
