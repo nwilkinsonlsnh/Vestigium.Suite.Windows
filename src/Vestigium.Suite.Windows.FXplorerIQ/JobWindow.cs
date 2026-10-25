@@ -698,6 +698,7 @@ public sealed class JobWindow : Window
         {
             Text = file.RelativePath,
             Style = TryStyle("TextBlock.Caption"),
+            Foreground = TextBrush(),
             TextTrimming = TextTrimming.CharacterEllipsis,
             VerticalAlignment = VerticalAlignment.Center
         };
@@ -709,13 +710,13 @@ public sealed class JobWindow : Window
             FontWeight = file.Bucket is "Large" or "Huge" ? FontWeights.SemiBold : FontWeights.Normal,
             VerticalAlignment = VerticalAlignment.Center
         };
-        var size = new TextBlock { Text = Size(file.Size), Style = TryStyle("TextBlock.Caption"), VerticalAlignment = VerticalAlignment.Center };
+        var size = new TextBlock { Text = Size(file.Size), Style = TryStyle("TextBlock.Caption"), Foreground = TextBrush(), VerticalAlignment = VerticalAlignment.Center };
         var max = Math.Max(file.Size, 1);
         var bar = new ProgressBar { Height = 10, Minimum = 0, Maximum = max, VerticalAlignment = VerticalAlignment.Center };
         Set(bar, file.BytesDone, max);
         if (TryStyle("ProgressBar.Standard") is { } style)
             bar.Style = style;
-        var status = new TextBlock { Text = file.Reason ?? file.Status, Style = TryStyle("TextBlock.Caption"), VerticalAlignment = VerticalAlignment.Center };
+        var status = new TextBlock { Text = file.Reason ?? file.Status, Style = TryStyle("TextBlock.Caption"), Foreground = TextBrush(), VerticalAlignment = VerticalAlignment.Center };
 
         Grid.SetColumn(name, 0);
         Grid.SetColumn(bucket, 1);
@@ -733,21 +734,21 @@ public sealed class JobWindow : Window
     private static Brush RowBrush(string bucket)
         => bucket switch
         {
-            "Huge" => Tint("Vestigium.Brushes.Status.Error", Color.FromRgb(120, 48, 48)),
-            "Large" => Tint("Vestigium.Brushes.Status.Warning", Color.FromRgb(120, 84, 32)),
+            "Huge" => new SolidColorBrush(Color.FromArgb(90, 160, 48, 48)),
+            "Large" => new SolidColorBrush(Color.FromArgb(90, 160, 110, 32)),
             _ => Brushes.Transparent
         };
 
     private static Brush BucketBrush(string bucket)
         => bucket switch
         {
-            "Huge" => Tint("Vestigium.Brushes.Status.Error", Color.FromRgb(255, 140, 140)),
-            "Large" => Tint("Vestigium.Brushes.Status.Warning", Color.FromRgb(255, 196, 120)),
-            _ => TryBrush("Vestigium.Brushes.Text.Primary") ?? SystemColors.ControlTextBrush
+            "Huge" => new SolidColorBrush(Color.FromRgb(255, 150, 150)),
+            "Large" => new SolidColorBrush(Color.FromRgb(255, 205, 130)),
+            _ => TextBrush()
         };
 
-    private static Brush Tint(string key, Color fallback)
-        => TryBrush(key) ?? new SolidColorBrush(fallback);
+    private static Brush TextBrush()
+        => TryBrush("Vestigium.Brushes.Text.Primary") ?? SystemColors.ControlTextBrush;
 
     private static void Set(ProgressBar bar, double value, double max)
     {
