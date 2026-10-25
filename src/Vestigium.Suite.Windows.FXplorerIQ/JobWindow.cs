@@ -730,6 +730,8 @@ public sealed class JobWindow : Window
             System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(dialog.FileName) { UseShellExecute = true });
     }
 
+    public void SetPhase(string text) => _phase.Text = text;
+
     public void BeginVerify()
     {
         _verifyLine.Text = "Verification phase began";
