@@ -1,3 +1,5 @@
+using System.IO;
+
 namespace Vestigium.Suite.Windows.FXplorerIQ.Icons;
 
 /// <summary>Picks the tree icon for a path. System and Users match the folder itself, not its children.</summary>
