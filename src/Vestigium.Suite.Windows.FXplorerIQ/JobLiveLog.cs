@@ -24,6 +24,7 @@ public sealed class JobLiveLog
     private readonly CancellationTokenSource _stop = new();
     private readonly Task[] _readers;
     private readonly string _logPath;
+    private readonly DateTimeOffset _started = DateTimeOffset.UtcNow;
     private int _matched;
     private int _failed;
 
@@ -73,6 +74,7 @@ public sealed class JobLiveLog
             matched,
             failed,
             result = failed == 0 ? "Passed" : "Failed",
+            elapsed = (DateTimeOffset.UtcNow - _started).ToString(),
             endedUtc = DateTimeOffset.UtcNow
         }) + Environment.NewLine);
     }
