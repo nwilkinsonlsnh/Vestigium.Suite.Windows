@@ -638,7 +638,6 @@ public sealed class ExplorerHost : DockPanel
                 return;
             }
 
-            var settings = App.Settings.Load();
             var options = Options(settings, collision, pattern);
             JobLiveLog? live = null;
             var job = FileIoHelper.Copy(source, destination, options);
