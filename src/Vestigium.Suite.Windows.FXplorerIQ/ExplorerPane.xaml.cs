@@ -400,7 +400,7 @@ public partial class ExplorerPane : UserControl
 
     private static FolderNode DriveNode(DriveInfo drive)
     {
-        var node = new FolderNode(DriveLabel(drive), drive.RootDirectory.FullName);
+        var node = new FolderNode(DriveLabel(drive), drive.RootDirectory.FullName) { Drive = drive.DriveType };
         node.Children.Add(new FolderNode("", ""));
         return node;
     }
@@ -468,7 +468,10 @@ public partial class ExplorerPane : UserControl
                 if (!ShowFolder(dir, settings))
                     continue;
                 var info = new DirectoryInfo(dir);
-                var child = new FolderNode(info.Name, info.FullName);
+                var child = new FolderNode(info.Name, info.FullName)
+                {
+                    Hidden = info.Attributes.HasFlag(FileAttributes.Hidden)
+                };
                 if (HasSubfolder(info.FullName))
                     child.Children.Add(new FolderNode("", ""));
                 node.Children.Add(child);
